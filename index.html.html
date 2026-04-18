@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#060d1a">
+<title>CGO MESSAGE</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+:root{
+  --bg:#060d1a;--bg2:#0a1628;--bg3:#0f1e35;
+  --gold:#d4a843;--gold2:rgba(212,168,67,.5);
+  --green:#34d399;--red:#f87171;--blue:#38bdf8;
+  --text:#f0ece0;--text2:rgba(240,236,224,.6);--text3:rgba(240,236,224,.3);
+  --border:rgba(255,255,255,.08);--border2:rgba(212,168,67,.2);
+  --safe:rgba(52,211,153,.8);--secret:rgba(251,191,36,.8);
+  --high:rgba(248,113,113,.8);--max:rgba(167,139,250,.8);
+  --radius:16px;--font:'Noto Sans KR',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font);}
+
+/* ── 화면 전환 ── */
+.screen{display:none;flex-direction:column;height:100%;position:fixed;inset:0;background:var(--bg);}
+.screen.active{display:flex;}
+
+/* ════════════════════════════
+   SCREEN 1: 닉네임 설정
+════════════════════════════ */
+#scrNick{align-items:center;justify-content:center;padding:32px 24px;background:radial-gradient(ellipse at 50% 0%,rgba(212,168,67,.08),transparent 60%);}
+.nick-logo{font-size:48px;margin-bottom:8px;}
+.nick-title{font-size:22px;font-weight:900;color:var(--gold);margin-bottom:4px;}
+.nick-sub{font-size:12px;color:var(--text2);margin-bottom:32px;}
+.nick-field{width:100%;padding:14px 18px;background:rgba(255,255,255,.06);border:1.5px solid var(--border2);border-radius:14px;color:var(--text);font-size:16px;font-family:var(--font);outline:none;margin-bottom:12px;}
+.nick-field::placeholder{color:var(--text3);}
+.nick-field:focus{border-color:var(--gold);}
+.nick-colors{display:flex;gap:10px;justify-content:center;margin-bottom:24px;}
+.nick-color{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s;}
+.nick-color.sel{border-color:white;transform:scale(1.15);}
+.btn-start{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:14px;color:#060d1a;font-size:16px;font-weight:900;cursor:pointer;font-family:var(--font);}
+.nick-change{margin-top:16px;font-size:11px;color:var(--text3);text-align:center;}
+
+/* ════════════════════════════
+   SCREEN 2: 채팅 목록
+════════════════════════════ */
+#scrList{flex-direction:column;}
+.topbar{display:flex;align-items:center;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
+.topbar-title{flex:1;font-size:17px;font-weight:900;color:var(--gold);}
+.topbar-me{font-size:11px;color:var(--text2);flex:1;}
+.btn-icon{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;}
+.btn-icon:hover{color:var(--gold);}
+.list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.list-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px;}
+.list-empty div:first-child{font-size:40px;}
+.list-empty div:last-child{font-size:13px;color:var(--text3);}
+.room-item{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:.15s;}
+.room-item:hover{background:rgba(212,168,67,.04);}
+.room-avatar{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;flex-shrink:0;border:2px solid rgba(255,255,255,.1);}
+.room-info{flex:1;min-width:0;}
+.room-nick{font-size:14px;font-weight:700;color:var(--text);}
+.room-last{font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
+.room-meta{text-align:right;flex-shrink:0;}
+.room-time{font-size:10px;color:var(--text3);}
+.room-badge{display:inline-block;background:var(--gold);color:#060d1a;font-size:10px;font-weight:900;border-radius:10px;padding:1px 7px;margin-top:4px;}
+
+/* ════════════════════════════
+   SCREEN 3: 채팅방
+════════════════════════════ */
+#scrRoom{flex-direction:column;}
+.room-topbar{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
+.room-topbar .back-btn{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0 4px;}
+.room-topbar .r-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
+.room-topbar .r-name{flex:1;font-size:15px;font-weight:800;color:var(--text);}
+.room-topbar .r-btns{display:flex;gap:6px;}
+.r-btn{padding:5px 10px;border:1px solid var(--border);border-radius:20px;background:none;color:var(--text2);font-size:11px;cursor:pointer;font-family:var(--font);}
+.r-btn.on{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green);}
+
+/* 보안 패널 */
+.sec-panel{display:none;background:rgba(6,13,26,.97);border-bottom:1px solid var(--border);padding:14px;flex-shrink:0;}
+.sec-panel.open{display:block;}
+.sec-presets{display:flex;gap:6px;margin-bottom:12px;}
+.sec-btn{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.2s;}
+.sec-btn.safe.on{background:rgba(52,211,153,.15);border-color:var(--safe);color:var(--safe);}
+.sec-btn.secret.on{background:rgba(251,191,36,.1);border-color:var(--secret);color:var(--secret);}
+.sec-btn.high.on{background:rgba(248,113,113,.1);border-color:var(--high);color:var(--high);}
+.sec-btn.max.on{background:rgba(167,139,250,.1);border-color:var(--max);color:var(--max);}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.slider-lbl{font-size:10px;color:var(--text2);width:90px;flex-shrink:0;}
+.slider-val{font-size:11px;font-weight:700;color:var(--gold);width:38px;text-align:right;flex-shrink:0;}
+.slider-row input[type=range]{flex:1;height:4px;accent-color:var(--gold);}
+.tilt-row{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.tilt-lbl{font-size:11px;color:var(--text2);}
+.tilt-btn{padding:5px 14px;border:1.5px solid rgba(56,189,248,.4);border-radius:20px;background:rgba(56,189,248,.08);color:rgba(56,189,248,.6);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.tilt-btn.on{background:rgba(56,189,248,.2);border-color:var(--blue);color:var(--blue);}
+
+/* 메세지 영역 */
+.msg-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px;display:flex;flex-direction:column;gap:8px;}
+.msg-wrap{display:flex;flex-direction:column;max-width:72%;}
+.msg-wrap.me{align-self:flex-end;align-items:flex-end;}
+.msg-wrap.you{align-self:flex-start;align-items:flex-start;}
+.msg-sender{font-size:10px;color:var(--text3);margin-bottom:2px;}
+.msg-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word;position:relative;}
+.msg-wrap.me .msg-bubble{background:linear-gradient(135deg,#d4a843,#b8922f);color:#060d1a;border-bottom-right-radius:4px;}
+.msg-wrap.you .msg-bubble{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.msg-meta{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* 보안 메세지 - 네온 스크롤 */
+.msg-secure{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;}
+.msg-secure-inner{display:inline-block;white-space:nowrap;animation:secScroll linear infinite;}
+@keyframes secScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+.msg-char{display:inline;color:var(--gold);animation:neonBlink 2.2s ease-in-out infinite;}
+@keyframes neonBlink{0%,100%{opacity:.4;text-shadow:none;}50%{opacity:1;text-shadow:0 0 8px var(--gold),0 0 16px var(--gold);}}
+.msg-blast{animation:blast .4s ease-in forwards;}
+@keyframes blast{0%{opacity:1;transform:scale(1);}40%{opacity:.8;transform:scale(1.04);}100%{opacity:0;transform:scale(.92);}}
+
+/* 기울기 블러 */
+.tilt-lock .msg-bubble{filter:blur(10px);transition:filter .2s;}
+.tilt-ok .msg-bubble{filter:none;}
+
+/* 입력창 */
+.input-bar{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.4);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
+.input-bar textarea{flex:1;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;resize:none;font-family:var(--font);outline:none;max-height:80px;line-height:1.4;}
+.input-bar textarea:focus{border-color:var(--gold2);}
+.send-btn{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:50%;color:#060d1a;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.patent-bar{text-align:center;padding:4px;background:rgba(0,0,0,.4);font-size:9px;color:rgba(212,168,67,.2);letter-spacing:.1em;flex-shrink:0;}
+
+/* ════════════════════════════
+   MODAL: 친구 추가
+════════════════════════════ */
+.modal-bg{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:24px;width:100%;max-width:360px;}
+.modal-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:16px;text-align:center;}
+.modal-field{width:100%;padding:12px 16px;background:rgba(255,255,255,.06);border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-size:14px;font-family:var(--font);outline:none;margin-bottom:12px;}
+.modal-field:focus{border-color:var(--gold);}
+.modal-btns{display:flex;gap:8px;}
+.modal-btn{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.modal-btn.cancel{background:rgba(255,255,255,.08);color:var(--text2);}
+.modal-btn.confirm{background:linear-gradient(135deg,var(--gold),#b8922f);color:#060d1a;}
+
+/* 토스트 */
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(52,211,153,.9);color:#060d1a;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:99999;pointer-events:none;opacity:0;transition:opacity .3s;}
+.toast.show{opacity:1;}
+
+/* 초대 팝업 */
+.invite-modal{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}
+.invite-modal.open{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- ══ SCREEN 1: 닉네임 설정 ══ -->
+<div class="screen active" id="scrNick">
+  <div class="nick-logo">💬</div>
+  <div class="nick-title">CGO MESSAGE</div>
+  <div class="nick-sub">특허 10-2026-0060113 · 보안 메신저</div>
+  <input class="nick-field" id="nickInput" placeholder="닉네임을 입력하세요" maxlength="12">
+  <div class="nick-colors" id="colorPicker">
+    <div class="nick-color sel" data-color="#d4a843" style="background:#d4a843" onclick="pickColor(this)"></div>
+    <div class="nick-color" data-color="#34d399" style="background:#34d399" onclick="pickColor(this)"></div>
+    <div class="nick-color" data-color="#38bdf8" style="background:#38bdf8" onclick="pickColor(this)"></div>
+    <div class="nick-color" data-color="#f87171" style="background:#f87171" onclick="pickColor(this)"></div>
+    <div class="nick-color" data-color="#a78bfa" style="background:#a78bfa" onclick="pickColor(this)"></div>
+    <div class="nick-color" data-color="#fb923c" style="background:#fb923c" onclick="pickColor(this)"></div>
+  </div>
+  <button class="btn-start" onclick="startApp()">💬 시작하기</button>
+  <div class="nick-change">닉네임은 설정에서 언제든 변경 가능합니다</div>
+</div>
+
+<!-- ══ SCREEN 2: 채팅 목록 ══ -->
+<div class="screen" id="scrList">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">CGO MESSAGE</div>
+      <div class="topbar-me" id="myNickBar"></div>
+    </div>
+    <button class="btn-icon" onclick="openInvite()" title="친구 초대">🔗</button>
+    <button class="btn-icon" onclick="openAddModal()" title="친구 추가">➕</button>
+    <button class="btn-icon" onclick="openSettings()" title="설정">⚙️</button>
+  </div>
+  <div class="list-scroll" id="roomList">
+    <div class="list-empty">
+      <div>💬</div>
+      <div>아직 대화가 없어요<br>+ 버튼으로 친구를 추가하세요</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 3: 채팅방 ══ -->
+<div class="screen" id="scrRoom">
+  <!-- 헤더 -->
+  <div class="room-topbar">
+    <button class="back-btn" onclick="goBack()">‹</button>
+    <div class="r-avatar" id="rAvatar"></div>
+    <div class="r-name" id="rName">상대방</div>
+    <div class="r-btns">
+      <button class="r-btn" id="gearBtn" onclick="toggleSecPanel()">⚙️ 보안</button>
+      <button class="r-btn" id="tiltTopBtn" onclick="toggleTilt()">📐</button>
+    </div>
+  </div>
+
+  <!-- 보안 패널 -->
+  <div class="sec-panel" id="secPanel">
+    <!-- 프리셋 -->
+    <div class="sec-presets">
+      <button class="sec-btn safe" onclick="setLevel('safe')">🟡 보안</button>
+      <button class="sec-btn high" onclick="setLevel('high')">🔴 기밀</button>
+      <button class="sec-btn max" onclick="setLevel('max')">🛡️ 최강</button>
+    </div>
+    <!-- 슬라이더들 -->
+    <div class="slider-row">
+      <span class="slider-lbl">📏 스크롤 글자수</span>
+      <input type="range" id="slScroll" min="4" max="15" value="8" oninput="onSliderChange()">
+      <span class="slider-val" id="valScroll">8자</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-lbl">⏱️ 자동 삭제</span>
+      <input type="range" id="slTime" min="3" max="30" value="7" oninput="onSliderChange()">
+      <span class="slider-val" id="valTime">7초</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-lbl">⚡ 글자 속도</span>
+      <input type="range" id="slSpeed" min="1" max="5" value="3" oninput="onSliderChange()">
+      <span class="slider-val" id="valSpeed">0.3초</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-lbl">🌫️ 글자 투명도</span>
+      <input type="range" id="slOpacity" min="0" max="80" value="0" oninput="onSliderChange()">
+      <span class="slider-val" id="valOpacity">0%</span>
+    </div>
+    <!-- 기울기 -->
+    <div class="tilt-row">
+      <span class="tilt-lbl">📐 기울기 보안 — 45도 기울일 때만 내용 표시</span>
+      <button class="tilt-btn" id="tiltBtn" onclick="toggleTilt()">OFF</button>
+    </div>
+  </div>
+
+  <!-- 메세지 영역 -->
+  <div class="msg-area" id="msgArea"></div>
+
+  <!-- 입력창 -->
+  <div class="input-bar">
+    <textarea id="msgInput" placeholder="메시지 입력..." rows="1"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+    <button class="send-btn" onclick="sendMsg()">↑</button>
+  </div>
+  <div class="patent-bar">특허 10-2026-0060113 · CGO-FULI SECURE MESSENGER</div>
+</div>
+
+<!-- ══ 친구 추가 모달 ══ -->
+<div class="modal-bg" id="addModal">
+  <div class="modal">
+    <div class="modal-title">👤 친구 추가</div>
+    <input class="modal-field" id="addNickInput" placeholder="상대방 닉네임 입력">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeAddModal()">취소</button>
+      <button class="modal-btn confirm" onclick="addFriend()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 초대 링크 모달 ══ -->
+<div class="modal-bg" id="inviteModal">
+  <div class="modal">
+    <div class="modal-title">🔗 친구 초대</div>
+    <div style="font-size:11px;color:rgba(240,230,200,.5);margin-bottom:12px;text-align:center;">
+      링크를 복사해서 카카오톡으로 보내세요!
+    </div>
+    <div id="inviteLinkBox" style="background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:10px;color:var(--gold);word-break:break-all;margin-bottom:12px;"></div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="document.getElementById('inviteModal').classList.remove('open')">닫기</button>
+      <button class="modal-btn confirm" onclick="copyInviteLink()">📋 복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 설정 모달 ══ -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ 설정</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">내 닉네임 변경</div>
+    <input class="modal-field" id="changeNickInput" placeholder="새 닉네임">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="document.getElementById('settingsModal').classList.remove('open')">닫기</button>
+      <button class="modal-btn confirm" onclick="changeNick()">변경</button>
+    </div>
+  </div>
+</div>
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+'use strict';
+
+// ══ Firebase 설정 ══
+const FB_CFG = {
+  apiKey:"AIzaSyBwT8Dz1C07J-UK3V6Y1oj4-XJvxr6CXMg",
+  authDomain:"cgo-life.firebaseapp.com",
+  databaseURL:"https://cgo-life-default-rtdb.firebaseio.com",
+  projectId:"cgo-life",storageBucket:"cgo-life.appspot.com",
+  messagingSenderId:"108625180491",appId:"1:108625180491:web:c6e96ada2c1f3d0f0e6d25"
+};
+firebase.initializeApp(FB_CFG);
+const db = firebase.database();
+
+// ══ 앱 상태 ══
+let _myCode = '';
+let _myNick = '';
+let _myColor = '#d4a843';
+let _rooms = {};
+let _currentRoom = null;
+let _secOn = false;
+let _tiltOn = false;
+let _tiltOk = false;
+let _tiltHandler = null;
+let _msgListener = null;
+let _cleanTimer = null;
+
+// 보안 설정값
+let _secSettings = { scroll:8, time:7, speed:300, opacity:0 };
+
+// ══ 초기화 ══
+window.addEventListener('load', () => {
+  // localStorage에서 복원
+  _myNick  = localStorage.getItem('cgm2_nick') || '';
+  _myCode  = localStorage.getItem('cgm2_code') || '';
+  _myColor = localStorage.getItem('cgm2_color') || '#d4a843';
+  const roomsStr = localStorage.getItem('cgm2_rooms');
+  if(roomsStr) try{ _rooms = JSON.parse(roomsStr); }catch(e){}
+
+  if(_myNick && _myCode){
+    goScreen('scrList');
+    renderRoomList();
+    registerToFirebase();
+    listenInvites();
+    // 닉네임 표시
+    document.getElementById('myNickBar').textContent = _myNick + ' · ' + _myCode;
+    // 초대 링크 파라미터 체크
+    const p = new URLSearchParams(location.search);
+    const inv = p.get('invite');
+    if(inv) setTimeout(()=>handleInviteParam(inv), 1000);
+  } else {
+    goScreen('scrNick');
+  }
+  // 컬러 선택
+  document.querySelectorAll('.nick-color').forEach(el=>{
+    if(el.dataset.color===_myColor) el.classList.add('sel');
+    else el.classList.remove('sel');
+  });
+});
+
+// ══ 화면 전환 ══
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{
+    s.classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+}
+
+// ══ 닉네임 시작 ══
+function pickColor(el){
+  document.querySelectorAll('.nick-color').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  _myColor = el.dataset.color;
+}
+
+function startApp(){
+  const nick = document.getElementById('nickInput').value.trim();
+  if(!nick){ showToast('닉네임을 입력해주세요!'); return; }
+  _myNick = nick;
+  if(!_myCode) _myCode = genCode();
+  localStorage.setItem('cgm2_nick', _myNick);
+  localStorage.setItem('cgm2_code', _myCode);
+  localStorage.setItem('cgm2_color', _myColor);
+  goScreen('scrList');
+  document.getElementById('myNickBar').textContent = _myNick + ' · ' + _myCode;
+  renderRoomList();
+  registerToFirebase();
+  listenInvites();
+}
+
+function genCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6},()=>c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+// ══ Firebase 등록 ══
+function registerToFirebase(){
+  db.ref('cgm2/users/'+_myCode).set({
+    nick:_myNick, code:_myCode, color:_myColor, lastSeen:Date.now()
+  });
+}
+
+// ══ 채팅 목록 렌더링 ══
+function renderRoomList(){
+  const el = document.getElementById('roomList');
+  const codes = Object.keys(_rooms);
+  if(!codes.length){
+    el.innerHTML = '<div class="list-empty"><div>💬</div><div>아직 대화가 없어요<br>+ 버튼으로 친구를 추가하세요</div></div>';
+    return;
+  }
+  el.innerHTML = codes.sort((a,b)=>(_rooms[b].lastTime||0)-(_rooms[a].lastTime||0)).map(code=>{
+    const r = _rooms[code];
+    const badge = r.unread ? `<div class="room-badge">${r.unread}</div>` : '';
+    const time = r.lastTime ? new Date(r.lastTime).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
+    const lastMsg = r.lastMsg ? (r.lastMsg.length>20?r.lastMsg.slice(0,20)+'...':r.lastMsg) : '대화를 시작하세요';
+    return `<div class="room-item" onclick="openRoom('${code}')">
+      <div class="room-avatar" style="background:${r.color||'rgba(212,168,67,.2)'};">${(r.nick||'?')[0]}</div>
+      <div class="room-info">
+        <div class="room-nick">${escHtml(r.nick||'?')}</div>
+        <div class="room-last">${escHtml(lastMsg)}</div>
+      </div>
+      <div class="room-meta"><div class="room-time">${time}</div>${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══ 친구 추가 ══
+function openAddModal(){ document.getElementById('addModal').classList.add('open'); }
+function closeAddModal(){ document.getElementById('addModal').classList.remove('open'); }
+
+function addFriend(){
+  const nick = document.getElementById('addNickInput').value.trim();
+  if(!nick){ showToast('닉네임을 입력해주세요!'); return; }
+  // Firebase에서 닉네임으로 검색
+  db.ref('cgm2/users').orderByChild('nick').equalTo(nick).once('value').then(snap=>{
+    const data = snap.val();
+    if(!data){
+      showToast('❌ 사용자를 찾을 수 없어요');
+      return;
+    }
+    const code = Object.keys(data)[0];
+    const user = data[code];
+    if(code === _myCode){ showToast('😅 내 자신은 추가 못해요!'); return; }
+    createRoom(code, user.nick, user.color||'#d4a843');
+    closeAddModal();
+    document.getElementById('addNickInput').value = '';
+  });
+}
+
+function createRoom(code, nick, color){
+  if(!_rooms[code]){
+    _rooms[code] = { code, nick, color:color||'#d4a843', lastMsg:'', lastTime:null, unread:0, msgs:[] };
+    saveRooms();
+    renderRoomList();
+  }
+  openRoom(code);
+}
+
+// ══ 채팅방 열기 ══
+function openRoom(code){
+  const room = _rooms[code];
+  if(!room) return;
+  _currentRoom = code;
+  room.unread = 0;
+  saveRooms();
+
+  // 헤더 세팅
+  const av = document.getElementById('rAvatar');
+  av.textContent = (room.nick||'?')[0];
+  av.style.background = room.color||'rgba(212,168,67,.2)';
+  document.getElementById('rName').textContent = room.nick||'?';
+
+  renderMessages();
+  goScreen('scrRoom');
+
+  // Firebase 수신
+  if(_msgListener) _msgListener.off();
+  const roomId = [_myCode, code].sort().join('_');
+  _msgListener = db.ref('cgm2/chats/'+roomId+'/msgs');
+  _msgListener.on('child_added', snap=>{
+    const msg = snap.val();
+    if(msg.from === _myCode) return;
+    const room2 = _rooms[code];
+    if(!room2) return;
+    if(!room2.msgs) room2.msgs = [];
+    const exists = room2.msgs.some(m=>m.id===snap.key);
+    if(!exists){
+      const rId = [_myCode, code].sort().join('_');
+      msg.text = cgmDecrypt(msg.text, rId);
+      msg.id = snap.key;
+      room2.msgs.push(msg);
+      room2.lastMsg = '새 메시지';
+      room2.lastTime = msg.t||Date.now();
+      saveRooms();
+      if(_currentRoom===code) renderMessages();
+      else { room2.unread=(room2.unread||0)+1; renderRoomList(); }
+    }
+  });
+
+  // 읽음 처리
+  db.ref('cgm2/read/'+roomId+'/'+_myCode).set(Date.now());
+
+  // 자동삭제 타이머
+  if(_cleanTimer) clearInterval(_cleanTimer);
+  _cleanTimer = setInterval(()=>{ if(_currentRoom) cleanMessages(_currentRoom); }, 4000);
+
+  // 초대 신호 전송
+  db.ref('cgm2/invites/'+code+'/'+_myCode).set({
+    nick:_myNick, color:_myColor, status:'connected', t:Date.now()
+  });
+}
+
+// ══ 뒤로가기 ══
+function goBack(){
+  _currentRoom = null;
+  if(_msgListener){ _msgListener.off(); _msgListener=null; }
+  if(_cleanTimer){ clearInterval(_cleanTimer); _cleanTimer=null; }
+  if(_tiltOn) toggleTilt();
+  // 보안 패널 닫기
+  document.getElementById('secPanel').classList.remove('open');
+  _secOn = false;
+  document.getElementById('gearBtn').classList.remove('on');
+  renderRoomList();
+  goScreen('scrList');
+}
+
+// ══ 메세지 렌더링 ══
+function renderMessages(){
+  const room = _rooms[_currentRoom];
+  if(!room) return;
+  const el = document.getElementById('msgArea');
+  const msgs = room.msgs||[];
+  let html = '';
+  msgs.forEach((msg, idx)=>{
+    const isMe = msg.from===_myCode;
+    const time = msg.t ? new Date(msg.t).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
+    const bubble = _secOn ? makeSecureBubble(msg.text) : `<div class="msg-bubble">${escHtml(msg.text)}</div>`;
+    html += `<div class="msg-wrap ${isMe?'me':'you'}">
+      ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
+      ${bubble}
+      <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+  el.scrollTop = el.scrollHeight;
+
+  // 투명도 적용
+  applyOpacity();
+
+  // 기울기 상태 유지
+  if(_tiltOn && !_tiltOk) el.classList.add('tilt-lock');
+  else el.classList.remove('tilt-lock');
+}
+
+// ══ 보안 버블 (네온 스크롤) ══
+function makeSecureBubble(text){
+  const WIN = _secSettings.scroll;
+  const SPD = _secSettings.speed;
+  const chars = Array.from(text);
+  const neonChars = arr => arr.map(c=>`<span class="msg-char">${escHtml(c)}</span>`).join('');
+  if(chars.length <= WIN){
+    return `<div class="msg-bubble"><span class="msg-secure-inner">${neonChars(chars)}</span></div>`;
+  }
+  const dur = Math.max(0.5, chars.length * SPD / 1000);
+  const inner = neonChars(chars) + neonChars(chars);
+  const winEm = WIN + 'em';
+  return `<div class="msg-bubble"><span class="msg-secure" style="width:${winEm}"><span class="msg-secure-inner" style="animation-duration:${dur.toFixed(2)}s">${inner}</span></span></div>`;
+}
+
+// ══ 투명도 적용 ══
+function applyOpacity(){
+  const op = 1 - (_secSettings.opacity / 100);
+  document.querySelectorAll('.msg-bubble').forEach(b=>{
+    b.style.opacity = op;
+  });
+}
+
+// ══ 메세지 전송 ══
+function sendMsg(){
+  const inp = document.getElementById('msgInput');
+  const text = inp.value.trim();
+  if(!text || !_currentRoom) return;
+  inp.value = '';
+
+  const msg = { from:_myCode, text, t:Date.now(), read:false };
+  const room = _rooms[_currentRoom];
+  if(!room.msgs) room.msgs = [];
+  room.msgs.push(msg);
+  room.lastMsg = _secOn ? '🔒 보안 메시지' : text;
+  room.lastTime = Date.now();
+  saveRooms();
+  renderMessages();
+
+  // Firebase 전송
+  const roomId = [_myCode, _currentRoom].sort().join('_');
+  const encText = cgmEncrypt(text, roomId);
+  db.ref('cgm2/chats/'+roomId+'/msgs').push({
+    from:_myCode, text:encText, t:Date.now(), read:false
+  });
+  db.ref('cgm2/users/'+_myCode).update({ nick:_myNick, color:_myColor });
+}
+
+// ══ 자동 삭제 ══
+function cleanMessages(code){
+  if(!_secOn) return; // 일반 모드면 삭제 안 함!
+  const room = _rooms[code];
+  if(!room||!room.msgs) return;
+  const now = Date.now();
+  const expMs = _secSettings.time * 1000;
+  const before = room.msgs.length;
+  room.msgs = room.msgs.filter(m => !m.t || (now - m.t) < expMs);
+  if(room.msgs.length !== before){
+    saveRooms();
+    if(_currentRoom===code) renderMessages();
+  }
+}
+
+// ══ 보안 패널 ══
+function toggleSecPanel(){
+  const panel = document.getElementById('secPanel');
+  const btn = document.getElementById('gearBtn');
+  panel.classList.toggle('open');
+  _secOn = panel.classList.contains('open');
+  btn.classList.toggle('on', _secOn);
+  if(_currentRoom) renderMessages();
+}
+
+function setLevel(level){
+  document.querySelectorAll('.sec-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelector(`.sec-btn.${level}`).classList.add('on');
+  if(level==='safe'){
+    document.getElementById('slScroll').value=12;
+    document.getElementById('slTime').value=15;
+    document.getElementById('slSpeed').value=2;
+    document.getElementById('slOpacity').value=15;
+  } else if(level==='high'){
+    document.getElementById('slScroll').value=6;
+    document.getElementById('slTime').value=7;
+    document.getElementById('slSpeed').value=3;
+    document.getElementById('slOpacity').value=45;
+  } else if(level==='max'){
+    document.getElementById('slScroll').value=4;
+    document.getElementById('slTime').value=3;
+    document.getElementById('slSpeed').value=5;
+    document.getElementById('slOpacity').value=70;
+  }
+  onSliderChange();
+}
+
+function onSliderChange(){
+  const scroll = +document.getElementById('slScroll').value;
+  const time   = +document.getElementById('slTime').value;
+  const speed  = +document.getElementById('slSpeed').value;
+  const opacity= +document.getElementById('slOpacity').value;
+  _secSettings = {
+    scroll, time,
+    speed: [100,200,300,400,500][speed-1],
+    opacity
+  };
+  document.getElementById('valScroll').textContent = scroll+'자';
+  document.getElementById('valTime').textContent   = time+'초';
+  document.getElementById('valSpeed').textContent  = (speed*0.1).toFixed(1)+'초';
+  document.getElementById('valOpacity').textContent= opacity+'%';
+  if(_currentRoom) renderMessages();
+}
+
+// ══ 기울기 보안 ══
+function toggleTilt(){
+  _tiltOn = !_tiltOn;
+  const btn  = document.getElementById('tiltBtn');
+  const topBtn = document.getElementById('tiltTopBtn');
+  const msgs = document.getElementById('msgArea');
+
+  if(_tiltOn){
+    btn.textContent='ON'; btn.classList.add('on');
+    topBtn.classList.add('on');
+    showToast('📐 기울기 보안 ON — 45도 기울일 때만 표시!');
+    // 초기 잠금
+    msgs.classList.add('tilt-lock'); msgs.classList.remove('tilt-ok');
+    _tiltOk = false;
+    // 이벤트 등록
+    _tiltHandler = e=>{
+      const beta = e.beta != null ? e.beta : 0;
+      const inRange = beta>=35 && beta<=65;
+      if(inRange !== _tiltOk){
+        _tiltOk = inRange;
+        if(inRange){ msgs.classList.remove('tilt-lock'); msgs.classList.add('tilt-ok'); }
+        else { msgs.classList.add('tilt-lock'); msgs.classList.remove('tilt-ok'); }
+      }
+    };
+    window.addEventListener('deviceorientation', _tiltHandler, true);
+  } else {
+    btn.textContent='OFF'; btn.classList.remove('on');
+    topBtn.classList.remove('on');
+    showToast('📐 기울기 보안 해제');
+    if(_tiltHandler){ window.removeEventListener('deviceorientation', _tiltHandler, true); _tiltHandler=null; }
+    msgs.classList.remove('tilt-lock','tilt-ok');
+  }
+}
+
+// ══ 친구 초대 링크 ══
+function openInvite(){
+  const url = location.origin + location.pathname + '?invite=' + encodeURIComponent(_myNick);
+  document.getElementById('inviteLinkBox').textContent = url;
+  document.getElementById('inviteModal').classList.add('open');
+  if(navigator.share) navigator.share({title:'CGO MESSAGE 초대',url}).catch(()=>{});
+}
+
+function copyInviteLink(){
+  const url = document.getElementById('inviteLinkBox').textContent;
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('✅ 링크 복사 완료!');
+  }).catch(()=>{
+    const t = document.createElement('textarea');
+    t.value = url; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+    showToast('✅ 링크 복사 완료!');
+  });
+  document.getElementById('inviteModal').classList.remove('open');
+}
+
+// 초대 파라미터 처리
+function handleInviteParam(inviterNick){
+  db.ref('cgm2/users').orderByChild('nick').equalTo(inviterNick).once('value').then(snap=>{
+    const data = snap.val();
+    if(!data) return;
+    const code = Object.keys(data)[0];
+    const user = data[code];
+    if(code !== _myCode) createRoom(code, user.nick, user.color||'#d4a843');
+  });
+}
+
+// 초대 수신 감지
+function listenInvites(){
+  db.ref('cgm2/invites/'+_myCode).on('child_added', snap=>{
+    const inv = snap.val();
+    if(!inv) return;
+    const code = snap.key;
+    if(!_rooms[code]){
+      _rooms[code] = { code, nick:inv.nick, color:inv.color||'#d4a843', lastMsg:'', lastTime:Date.now(), unread:1, msgs:[] };
+      saveRooms();
+      renderRoomList();
+      showToast('💬 '+inv.nick+'님이 대화를 시작했어요!');
+    }
+  });
+}
+
+// ══ 설정 ══
+function openSettings(){
+  document.getElementById('changeNickInput').value = _myNick;
+  document.getElementById('settingsModal').classList.add('open');
+}
+
+function changeNick(){
+  const nick = document.getElementById('changeNickInput').value.trim();
+  if(!nick){ showToast('닉네임을 입력해주세요!'); return; }
+  _myNick = nick;
+  localStorage.setItem('cgm2_nick', _myNick);
+  registerToFirebase();
+  document.getElementById('myNickBar').textContent = _myNick + ' · ' + _myCode;
+  document.getElementById('settingsModal').classList.remove('open');
+  showToast('✅ 닉네임이 변경됐어요!');
+}
+
+// ══ 암호화/복호화 ══
+function cgmEncrypt(text, key){
+  try{
+    let r='';
+    for(let i=0;i<text.length;i++) r+=String.fromCharCode(text.charCodeAt(i)^key.charCodeAt(i%key.length));
+    return btoa(unescape(encodeURIComponent(r)));
+  }catch(e){ return btoa(text); }
+}
+function cgmDecrypt(enc, key){
+  try{
+    const r=decodeURIComponent(escape(atob(enc)));
+    let out='';
+    for(let i=0;i<r.length;i++) out+=String.fromCharCode(r.charCodeAt(i)^key.charCodeAt(i%key.length));
+    return out;
+  }catch(e){ return enc; }
+}
+
+// ══ 유틸 ══
+function saveRooms(){ localStorage.setItem('cgm2_rooms', JSON.stringify(_rooms)); }
+function escHtml(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+let _toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
