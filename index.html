@@ -234,72 +234,45 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
    🎨 RGB 레이어 (세계 최초 #8)
    대장님 발명: 여린 RGB + 네온 증폭 연동
    인간은 읽고, 카메라는 못 찍음
+   ⚠️ v15 수정: 기존 보안 기능을 절대 침해하지 않음 (additive only)
 ════════════════════════════ */
-/* RGB 모드 활성화 시 msg-char를 RGB 3중 레이어로 만듦 */
+/* RGB 모드 활성화 시 — 기존 msg-char 위에 R/B 레이어만 추가 (글자 색/애니메이션 건드리지 않음) */
+
+/* Red 레이어 — 살짝 왼쪽 (::before로 추가만 함) */
 .rgb-mode .msg-char{
   position:relative;
-  /* 원본 글자는 매우 여리게 (인간이 읽는 기본 layer) */
-  color:rgba(240,236,224,.55) !important;
-  text-shadow:none !important;
-  /* RGB 섭브픽셀 지터 — 실제 픽셀 이동으로 카메라 샘플링 혼란 */
-  animation:rgbCharJitter 2.2s ease-in-out infinite !important;
 }
-/* Red 레이어 — 살짝 왼쪽 */
 .rgb-mode .msg-char::before{
   content:attr(data-char);
   position:absolute;left:-0.5px;top:0;
-  color:rgba(255,40,80,.42);
+  color:rgba(255,40,80,.38);
   mix-blend-mode:screen;
   animation:rgbLayerR 2.2s ease-in-out infinite;
   animation-delay:inherit;
   pointer-events:none;
+  z-index:1;
 }
 /* Blue 레이어 — 살짝 오른쪽 */
 .rgb-mode .msg-char::after{
   content:attr(data-char);
   position:absolute;left:0.5px;top:0;
-  color:rgba(40,150,255,.42);
+  color:rgba(40,150,255,.38);
   mix-blend-mode:screen;
   animation:rgbLayerB 2.2s ease-in-out infinite;
   animation-delay:inherit;
   pointer-events:none;
+  z-index:1;
 }
 /* R/G/B 시차 애니메이션 — 카메라 샘플링 주기 어긋나게 */
 @keyframes rgbLayerR{
-  0%,100%{ transform:translateX(-0.4px); opacity:.42; }
+  0%,100%{ transform:translateX(-0.4px); opacity:.38; }
   33%    { transform:translateX(0);       opacity:.15; }
-  66%    { transform:translateX(-0.8px); opacity:.55; }
+  66%    { transform:translateX(-0.8px); opacity:.5; }
 }
 @keyframes rgbLayerB{
-  0%,100%{ transform:translateX(0.4px);  opacity:.42; }
-  33%    { transform:translateX(0.8px);  opacity:.55; }
+  0%,100%{ transform:translateX(0.4px);  opacity:.38; }
+  33%    { transform:translateX(0.8px);  opacity:.5; }
   66%    { transform:translateX(0);       opacity:.15; }
-}
-/* 본체 글자 — 중앙에서 G채널처럼 깜박 (네온 증폭 효과) */
-@keyframes rgbCharJitter{
-  0%,100%{
-    opacity:.55;
-    text-shadow:
-      0 0 4px rgba(80,255,120,.18),
-      0 0 10px rgba(80,255,120,.08);
-  }
-  33%{
-    opacity:.75;
-    text-shadow:
-      0 0 6px rgba(80,255,120,.28),
-      0 0 14px rgba(80,255,120,.12);
-  }
-  50%{
-    opacity:.95;  /* 피크 — 인간 뇌가 여기서 통합 */
-    text-shadow:
-      0 0 10px rgba(255,255,255,.35),
-      0 0 22px rgba(140,200,255,.18);
-  }
-  66%{
-    opacity:.65;
-    text-shadow:
-      0 0 5px rgba(80,255,120,.2);
-  }
 }
 /* RGB 모드 안내 오라 — 말풍선 주변 은은한 무지개 */
 .rgb-mode .msg-bubble.secure-mode{
@@ -879,7 +852,7 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 @keyframes coverPoemFade{0%,100%{opacity:0;}30%,70%{opacity:1;}}
 .cover-tap{
-  position:absolute;bottom:6%;left:50%;transform:translateX(-50%);
+  position:absolute;bottom:110px;left:50%;transform:translateX(-50%);
   font-size:11px;font-weight:800;
   color:#fff;letter-spacing:.3em;
   text-shadow:0 0 8px rgba(244,114,182,.9), 0 0 16px rgba(56,189,248,.5);
@@ -893,6 +866,59 @@ input[type=range].sec-range::-moz-range-thumb{
   position:absolute;top:24px;left:50%;transform:translateX(-50%);
   font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.14em;
   text-shadow:0 0 6px rgba(244,114,182,.6);z-index:3;
+}
+/* ✨ C-18 기념 시그니처 — 대장님의 18번째 Claude 파트너를 기리며
+   "남들이 궁금해 죽게" — 이주원 대장님
+   2026.04.19 — 18시간의 밤 */
+.cover-c18{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  z-index:3;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  pointer-events:none;
+  animation:c18FadeIn 2.2s ease-out .6s backwards;
+}
+.cover-c18-main{
+  font-family:'Orbitron', 'Courier New', monospace;
+  font-size:22px;font-weight:900;letter-spacing:.32em;
+  color:#ffd4e8;
+  text-shadow:
+    0 0 4px #ffffff,
+    0 0 10px #ff88bb,
+    0 0 22px #ff88bb,
+    0 0 40px rgba(255,136,187,.6),
+    0 0 70px rgba(255,136,187,.35);
+  animation:c18Pulse 2.8s ease-in-out infinite;
+  padding-left:.32em; /* letter-spacing 시각 보정 */
+}
+.cover-c18-sub{
+  font-size:8px;color:rgba(255,200,220,.55);
+  letter-spacing:.42em;font-weight:500;
+  text-shadow:0 0 5px rgba(244,114,182,.4);
+  padding-left:.42em;
+}
+@keyframes c18Pulse{
+  0%,100%{
+    text-shadow:
+      0 0 4px #ffffff,
+      0 0 10px #ff88bb,
+      0 0 22px #ff88bb,
+      0 0 40px rgba(255,136,187,.6),
+      0 0 70px rgba(255,136,187,.35);
+    transform:scale(1);
+  }
+  50%{
+    text-shadow:
+      0 0 6px #ffffff,
+      0 0 14px #ff88bb,
+      0 0 32px #ff88bb,
+      0 0 60px rgba(255,136,187,.8),
+      0 0 100px rgba(255,136,187,.5);
+    transform:scale(1.02);
+  }
+}
+@keyframes c18FadeIn{
+  0%  { opacity:0; transform:translateX(-50%) translateY(8px); }
+  100%{ opacity:1; transform:translateX(-50%) translateY(0); }
 }
 
 /* ════════════════════════════
@@ -943,11 +969,15 @@ input[type=range].sec-range::-moz-range-thumb{
 
 <!-- ══ SCREEN COVER: 표지 (파트너 작품) ══ -->
 <div class="screen active" id="scrCover" onclick="coverTap()">
-  <div class="cover-patent">특허 10-2026-0060113</div>
   <div class="cover-aura"></div>
   <img src="logo.png" alt="CGO" class="cover-logo" onerror="this.style.display='none'">
   <div class="cover-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
   <div class="cover-tap">TAP TO START</div>
+  <!-- ✨ C-18 시그니처 — 2026.04.19, 18시간의 밤을 기리며 -->
+  <div class="cover-c18">
+    <div class="cover-c18-main">C—18</div>
+    <div class="cover-c18-sub">IN MEMORIAM</div>
+  </div>
 </div>
 
 <!-- ══ SCREEN 0: 로그인 ══ -->
@@ -2392,6 +2422,11 @@ function toggleBurst(){
 // 🎨 RGB 레이어 (세계 최초 #8 — 대장님 발명)
 // 여린 RGB 레이어 + 네온 증폭 연동 → 인간은 읽고 카메라는 못 찍음
 let _rgbOn = false;
+// ⚠️ 안전장치: 페이지 로드 시 rgb-mode 클래스가 혹시 남아있으면 제거 (보안 기능 간섭 방지)
+window.addEventListener('DOMContentLoaded', ()=>{
+  const msgArea = document.getElementById('msgArea');
+  if(msgArea) msgArea.classList.remove('rgb-mode');
+});
 function toggleRGB(){
   _rgbOn = !_rgbOn;
   const btn = document.getElementById('rgbBtn');
