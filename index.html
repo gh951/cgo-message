@@ -358,6 +358,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   border-color:rgba(255,136,187,.45);color:#ff88bb;
   text-shadow:0 0 6px rgba(255,136,187,.5);
 }
+/* ✨ Xy ON 활성화 상태 — 더 강한 핑크 네온 */
+.xy-act-btn.xy-ai.active{
+  background:linear-gradient(135deg,rgba(255,136,187,.5),rgba(56,189,248,.25));
+  border-color:#ff88bb;color:#fff;
+  text-shadow:0 0 10px #ff88bb,0 0 20px rgba(255,136,187,.6);
+  box-shadow:0 0 12px rgba(255,136,187,.5);
+  animation:xyActivePulse 2s ease-in-out infinite;
+}
+@keyframes xyActivePulse{
+  0%,100%{ box-shadow:0 0 8px rgba(255,136,187,.5); }
+  50%{ box-shadow:0 0 18px rgba(255,136,187,.8); }
+}
 .xy-act-btn.shield-on{
   background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.08));
   border-color:rgba(52,211,153,.5);color:#34d399;
@@ -1191,7 +1203,7 @@ input[type=range].sec-range::-moz-range-thumb{
 
   <!-- ✨ 상단 액션 바 (세계 최초 기능들) -->
   <div class="xy-actionbar">
-    <button class="xy-act-btn xy-ai" onclick="callXy()">✨ Xy</button>
+    <button class="xy-act-btn xy-ai" id="xyToggleBtn" onclick="toggleXyActive()">✨ Xy OFF</button>
     <button class="xy-act-btn" id="gearBtn" onclick="toggleSecPanel()">⚙️</button>
     <button class="xy-act-btn shield-on" id="secBtn" onclick="toggleSec()">🛡️ OFF</button>
     <button class="xy-act-btn burst-btn" id="burstBtn" onclick="toggleBurst()">💥</button>
@@ -1935,8 +1947,8 @@ function sendMsg(){
   });
   dbRef('cgm2/users/'+_myCode).update({ nick:_myNick, color:_myColor });
 
-  // ✨ Xy wake word 감지 — "자이" 또는 "Xy" 언급 시 AI 소환
-  if(text.indexOf('자이')!==-1 || /\bxy\b/i.test(text)){
+  // ✨ Xy wake word 감지 — "✨ Xy ON" 상태 + wake word 모두 있어야 소환
+  if(_xyActive && (text.indexOf('자이')!==-1 || /\bxy\b/i.test(text))){
     xyReply(text);
   }
 }
@@ -2008,12 +2020,10 @@ function ensureXyPracticeRoom(){
 
 // ══ Xy 인사말 시퀀스 — 단계별 자동 메시지 ══
 function xyWelcomeSequence(){
+  // ✨ Xy는 조용히 있어요. 유저가 부를 때만 등장.
+  // 딱 한 개 인사만 (처음 방 만들 때)
   const messages = [
-    '안녕하세요! 저는 ✨ Xy예요 🌸',
-    '이 방은 연습방이에요. 여기서 이 메신저의 특별한 기능을 마음껏 시험해보실 수 있어요.',
-    '먼저 알려드릴 것: 이 방은 **삭제되지 않아요**. 언제든 돌아와서 연습하실 수 있어요 💫',
-    '오른쪽 위 버튼들을 한번 눌러보세요. 보안 모드, 기울기 잠금, 투명도, 폭파… 모두 시험 가능해요!',
-    '그리고 메시지에 "자이야" 또는 "Xy"를 넣으시면 제가 등장합니다. 무엇이든 물어보세요 😊'
+    '안녕하세요! 저는 ✨ Xy예요 🌸 위 "✨ Xy OFF" 버튼을 켜고 "자이야" 라고 불러주세요.'
   ];
   sendXyMessageSequence(messages);
 }
@@ -2304,15 +2314,14 @@ function playVoice(msgId, dataUrl){
   });
 }
 
-// ══ Xy 음성 응답 (연습방 전용 축하) ══
+// ══ Xy 음성 응답 (연습방 전용 축하) — _xyActive 일 때만 ══
 function xyVoiceReply(duration){
+  if(!_xyActive) return; // Xy OFF면 조용
   const room = _rooms[XY_PRACTICE_CODE];
   if(!room) return;
-  // 짧은 축하 메시지
+  // 짧은 축하 메시지 (1개만)
   const messages = [
-    '와! '+duration+'초 음성 메시지를 잘 보내셨어요! 🎉',
-    '이렇게 음성으로 대화할 수 있어요. 글자 몰라도 괜찮아요 😊',
-    '자이를 음성으로 부르고 싶으시면 이따 🎤 길게 누르고 "자이야" 라고 말해보세요!'
+    '와! '+duration+'초 음성 메시지 잘 보내셨어요! 🎉'
   ];
   sendXyMessageSequence(messages, 500);
 }
@@ -2491,21 +2500,28 @@ function toggleRGB(){
     btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
     if(msgArea) msgArea.classList.add('rgb-mode');
     showToast('🎨 RGB 레이어 ON — 카메라 방어 강화!');
-    // 연습방이면 자이가 설명
-    if(_currentRoom === XY_PRACTICE_CODE){
-      setTimeout(()=>{
-        sendXyMessageSequence([
-          '🎨 RGB 레이어가 켜졌어요!',
-          '글자에 여린 빨강-초록-파랑이 살짝 겹쳐 보이죠? 인간 눈은 자연스럽게 합쳐서 읽어요.',
-          '하지만 카메라로 찍으면 색이 분리되어 읽기 힘들어집니다. 대장님이 만드신 세계 최초 기술이에요! 💎'
-        ], 500);
-      }, 400);
-    }
   } else {
     btn.classList.remove('active');
     btn.style.boxShadow = '';
     if(msgArea) msgArea.classList.remove('rgb-mode');
     showToast('🎨 RGB 레이어 OFF');
+  }
+}
+
+// ✨ Xy 활성화 상태 (ON 일 때만 대화에 끼어듦)
+let _xyActive = false;
+function toggleXyActive(){
+  _xyActive = !_xyActive;
+  const btn = document.getElementById('xyToggleBtn');
+  if(!btn) return;
+  if(_xyActive){
+    btn.textContent = '✨ Xy ON';
+    btn.classList.add('active');
+    showToast('✨ Xy 대화 참여 ON — "자이야" 라고 불러보세요!');
+  } else {
+    btn.textContent = '✨ Xy OFF';
+    btn.classList.remove('active');
+    showToast('✨ Xy 대화 참여 OFF — 자이가 조용히 있어요');
   }
 }
 
