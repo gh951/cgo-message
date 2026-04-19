@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#060d1a">
+<meta name="theme-color" content="#080808">
 <title>CGO MESSAGE</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-180.png">
@@ -14,8 +14,9 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <style>
 :root{
-  --bg:#060d1a;--bg2:#0a1628;--bg3:#0f1e35;
+  --bg:#080808;--bg2:#111111;--bg3:#181818;
   --gold:#d4a843;--gold2:rgba(212,168,67,.5);
+  --pink:#ff88bb;--pink2:rgba(255,136,187,.5);
   --green:#34d399;--red:#f87171;--blue:#38bdf8;
   --text:#f0ece0;--text2:rgba(240,236,224,.6);--text3:rgba(240,236,224,.3);
   --border:rgba(255,255,255,.08);--border2:rgba(212,168,67,.2);
@@ -31,21 +32,95 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .screen.active{display:flex;}
 
 /* ════════════════════════════
-   SCREEN 0: 로그인
+   SCREEN 0: 로그인 (민트 + 작은 로고 ver.)
 ════════════════════════════ */
-#scrLogin{align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);}
-.login-card{width:100%;max-width:360px;padding:36px 28px 32px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.12);}
-.login-logo{width:110px;height:110px;margin:0 auto 28px;display:block;border-radius:50%;object-fit:contain;}
-.login-logo-fallback{width:110px;height:110px;margin:0 auto 28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#c94242,#d4a843 50%,#2a4a7a);border-radius:50%;font-size:36px;font-weight:900;color:#fff;letter-spacing:-.04em;font-family:'Times New Roman',serif;box-shadow:0 6px 20px rgba(0,0,0,.18);}
-.login-label{display:block;font-size:11px;font-weight:800;color:#2a4a6a;letter-spacing:.14em;margin:14px 0 6px;text-transform:uppercase;}
-.login-input{width:100%;padding:13px 16px;background:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:10px;font-size:15px;color:#1a2a3a;font-family:var(--font);outline:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
-.login-input:focus{border-color:#d4a843;}
+#scrLogin{
+  align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);
+  position:relative;overflow:hidden;
+}
+/* 카드 — 글래스 */
+.login-card{
+  width:100%;max-width:360px;padding:30px 26px 26px;
+  background:rgba(255,255,255,.22);
+  border:1.5px solid rgba(255,255,255,.4);
+  border-radius:22px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 10px 40px rgba(0,60,60,.12);
+  position:relative;z-index:2;
+}
+/* 로고 작게 (원래 130px → 65px) + 은은한 그림자 */
+.login-logo{
+  width:65px;height:65px;margin:0 auto 22px;display:block;
+  border-radius:50%;object-fit:contain;
+  filter:drop-shadow(0 4px 10px rgba(0,60,60,.25));
+}
+.login-logo-fallback{
+  width:65px;height:65px;margin:0 auto 22px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#c94242,#d4a843 50%,#2a4a7a);
+  border-radius:50%;font-size:22px;font-weight:900;color:#fff;
+  letter-spacing:-.04em;font-family:'Times New Roman',serif;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+.login-label{
+  display:block;font-size:11px;font-weight:800;
+  color:#2a4a6a;letter-spacing:.14em;margin:14px 0 6px;text-transform:uppercase;
+}
+.login-input{
+  width:100%;padding:13px 16px;
+  background:#fff;
+  border:1.5px solid rgba(255,255,255,.6);
+  border-radius:10px;
+  font-size:15px;color:#1a2a3a;font-family:var(--font);outline:none;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.06);
+  transition:all .2s;
+}
+.login-input:focus{
+  border-color:#d4a843;
+  box-shadow:0 0 0 3px rgba(212,168,67,.2), inset 0 1px 3px rgba(0,0,0,.05);
+}
 .login-input::placeholder{color:#aab;}
-.login-btn{width:100%;margin-top:22px;padding:15px;background:linear-gradient(180deg,#e8c86b,#c99a30);border:1px solid #a8801f;border-radius:10px;color:#1a1408;font-size:16px;font-weight:900;letter-spacing:.12em;cursor:pointer;font-family:var(--font);box-shadow:0 4px 12px rgba(168,128,31,.3);}
+.login-btn{
+  width:100%;margin-top:22px;padding:15px;
+  background:linear-gradient(180deg,#e8c86b,#c99a30);
+  border:1px solid #a8801f;
+  border-radius:10px;
+  color:#1a1408;font-size:16px;font-weight:900;letter-spacing:.12em;
+  cursor:pointer;font-family:var(--font);
+  box-shadow:0 4px 12px rgba(168,128,31,.3);
+  transition:all .2s;
+}
 .login-btn:hover{filter:brightness(1.05);}
-.login-remember{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:#2a4a6a;cursor:pointer;user-select:none;}
+.login-btn:active{transform:translateY(1px);}
+.login-remember{
+  display:flex;align-items:center;gap:8px;margin-top:16px;
+  font-size:13px;color:#2a4a6a;cursor:pointer;user-select:none;
+}
 .login-remember input{width:16px;height:16px;accent-color:#2a4a6a;cursor:pointer;}
-.login-foot{margin-top:20px;text-align:center;font-size:10px;color:rgba(42,74,106,.55);letter-spacing:.08em;}
+.login-foot{
+  margin-top:20px;text-align:center;
+  font-size:10px;color:rgba(42,74,106,.55);letter-spacing:.08em;
+}
+
+/* 자동 로그인 카운트다운 오버레이 */
+.autologin-box{
+  display:none;margin-top:18px;padding:14px 16px;
+  background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(56,189,248,.1));
+  border:1.5px solid rgba(212,168,67,.45);border-radius:12px;
+  text-align:center;
+}
+.autologin-box.show{display:block;animation:autoSlide .3s ease-out;}
+@keyframes autoSlide{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:translateY(0);}}
+.autologin-label{font-size:11px;color:#2a4a6a;font-weight:700;letter-spacing:.05em;margin-bottom:6px;}
+.autologin-user{font-size:14px;color:#1a2a3a;font-weight:800;margin-bottom:10px;}
+.autologin-timer{font-size:12px;color:#5a6a7a;font-weight:600;margin-bottom:10px;}
+.autologin-timer-num{display:inline-block;width:20px;height:20px;line-height:20px;margin:0 4px;background:#d4a843;color:#1a1408;border-radius:50%;font-weight:900;}
+.autologin-progress{width:100%;height:3px;background:rgba(42,74,106,.15);border-radius:2px;overflow:hidden;margin-bottom:10px;}
+.autologin-bar{height:100%;background:linear-gradient(90deg,#d4a843,#e8c86b);width:100%;transform-origin:left;animation:autoShrink 2s linear forwards;}
+@keyframes autoShrink{from{transform:scaleX(1);}to{transform:scaleX(0);}}
+.autologin-cancel{width:100%;padding:9px;background:rgba(255,255,255,.55);border:1px solid rgba(42,74,106,.25);border-radius:8px;color:#2a4a6a;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.autologin-cancel:hover{background:rgba(255,255,255,.8);}
 
 /* ════════════════════════════
    SCREEN 1: 닉네임 설정
@@ -60,14 +135,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .nick-colors{display:flex;gap:10px;justify-content:center;margin-bottom:24px;}
 .nick-color{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s;}
 .nick-color.sel{border-color:white;transform:scale(1.15);}
-.btn-start{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:14px;color:#060d1a;font-size:16px;font-weight:900;cursor:pointer;font-family:var(--font);}
+.btn-start{width:100%;padding:16px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:14px;color:#080808;font-size:16px;font-weight:900;cursor:pointer;font-family:var(--font);}
 .nick-change{margin-top:16px;font-size:11px;color:var(--text3);text-align:center;}
 
 /* ════════════════════════════
    SCREEN 2: 채팅 목록
 ════════════════════════════ */
 #scrList{flex-direction:column;}
-.topbar{display:flex;align-items:center;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
+.topbar{display:flex;align-items:center;padding:14px 16px;padding-top:max(14px,env(safe-area-inset-top));background:rgba(8,8,8,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
 .topbar-title{flex:1;font-size:17px;font-weight:900;color:var(--gold);}
 .topbar-me{font-size:11px;color:var(--text2);flex:1;}
 .btn-icon{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;}
@@ -84,13 +159,13 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .room-last{font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px;}
 .room-meta{text-align:right;flex-shrink:0;}
 .room-time{font-size:10px;color:var(--text3);}
-.room-badge{display:inline-block;background:var(--gold);color:#060d1a;font-size:10px;font-weight:900;border-radius:10px;padding:1px 7px;margin-top:4px;}
+.room-badge{display:inline-block;background:var(--gold);color:#080808;font-size:10px;font-weight:900;border-radius:10px;padding:1px 7px;margin-top:4px;}
 
 /* ════════════════════════════
    SCREEN 3: 채팅방
 ════════════════════════════ */
 #scrRoom{flex-direction:column;}
-.room-topbar{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
+.room-topbar{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:rgba(8,8,8,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);flex-shrink:0;}
 .room-topbar .back-btn{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:0 4px;}
 .room-topbar .r-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;flex-shrink:0;}
 .room-topbar .r-name{flex:1;font-size:15px;font-weight:800;color:var(--text);}
@@ -99,7 +174,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .r-btn.on{background:rgba(52,211,153,.15);border-color:rgba(52,211,153,.4);color:var(--green);}
 
 /* 보안 패널 */
-.sec-panel{display:none;background:rgba(6,13,26,.97);border-bottom:1px solid var(--border);padding:14px;flex-shrink:0;}
+.sec-panel{display:none;background:rgba(8,8,8,.97);border-bottom:1px solid var(--border);padding:14px;flex-shrink:0;}
 .sec-panel.open{display:block;}
 .sec-presets{display:flex;gap:6px;margin-bottom:12px;}
 .sec-btn{flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:10px;background:none;color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.2s;}
@@ -123,28 +198,183 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .msg-wrap.you{align-self:flex-start;align-items:flex-start;}
 .msg-sender{font-size:10px;color:var(--text3);margin-bottom:2px;}
 .msg-bubble{padding:10px 14px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word;position:relative;}
-.msg-wrap.me .msg-bubble{background:linear-gradient(135deg,#d4a843,#b8922f);color:#060d1a;border-bottom-right-radius:4px;}
+.msg-wrap.me .msg-bubble{background:linear-gradient(135deg,#d4a843,#b8922f);color:#080808;border-bottom-right-radius:4px;}
 .msg-wrap.you .msg-bubble{background:var(--bg3);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
 .msg-meta{font-size:10px;color:var(--text3);margin-top:2px;}
 
-/* 보안 메세지 - 네온 스크롤 */
+/* 보안 메세지 - 네온 스크롤 (FULI 엔진 기반) */
 .msg-secure{display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:bottom;}
-.msg-secure-inner{display:inline-block;white-space:nowrap;animation:secScroll linear infinite;}
+.msg-secure-inner{display:inline-block;white-space:nowrap;animation:secScroll linear;}
 @keyframes secScroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
-.msg-char{display:inline;color:var(--gold);animation:neonBlink 2.2s ease-in-out infinite;}
-@keyframes neonBlink{0%,100%{opacity:.4;text-shadow:none;}50%{opacity:1;text-shadow:0 0 8px var(--gold),0 0 16px var(--gold);}}
-.msg-blast{animation:blast .4s ease-in forwards;}
-@keyframes blast{0%{opacity:1;transform:scale(1);}40%{opacity:.8;transform:scale(1.04);}100%{opacity:0;transform:scale(.92);}}
+/* 반복 n회 모드 */
+.msg-secure-inner.loop-inf{animation-iteration-count:infinite;}
+.msg-secure-inner.loop-1{animation-iteration-count:1;animation-fill-mode:forwards;}
+.msg-secure-inner.loop-2{animation-iteration-count:2;animation-fill-mode:forwards;}
+.msg-secure-inner.loop-3{animation-iteration-count:3;animation-fill-mode:forwards;}
+.msg-secure-inner.loop-5{animation-iteration-count:5;animation-fill-mode:forwards;}
+
+/* 개별 글자 — FULI 네온 효과 (강력한 깜빡임 + 시간차) */
+.msg-char{
+  display:inline;
+  color:var(--gold);
+  animation:neonChar 2.2s ease-in-out infinite;
+}
+@keyframes neonChar{
+  0%   { opacity:1; text-shadow:0 0 6px currentColor, 0 0 12px currentColor; }
+  30%  { opacity:1; text-shadow:0 0 2px currentColor; }
+  50%  { opacity:0; text-shadow:none; }
+  70%  { opacity:1; text-shadow:0 0 8px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; }
+  100% { opacity:1; text-shadow:0 0 6px currentColor, 0 0 12px currentColor; }
+}
+/* 내 메시지 = 골드 네온, 상대 = 화이트-골드 네온 */
+.msg-wrap.me .msg-char{color:#d4a843;}
+.msg-wrap.you .msg-char{color:#f0ece0;}
+
+/* 보안 모드 말풍선 - 배경 투명하게 (글자만 보임) */
+.msg-bubble.secure-mode{
+  background:transparent !important;
+  border:none !important;
+  color:inherit !important;
+  padding:8px 10px;
+}
+
+/* 폭파 애니메이션 */
+.msg-blast{animation:blast .45s ease-in forwards;}
+@keyframes blast{
+  0%{opacity:1;transform:scale(1) rotate(0);filter:blur(0);}
+  40%{opacity:.8;transform:scale(1.08) rotate(2deg);filter:blur(1px);}
+  100%{opacity:0;transform:scale(.85) rotate(-3deg);filter:blur(4px);}
+}
 
 /* 기울기 블러 */
 .tilt-lock .msg-bubble{filter:blur(10px);transition:filter .2s;}
 .tilt-ok .msg-bubble{filter:none;}
 
+/* ════════════════════════════
+   연습방 상단 버튼 바 (세계 최초 #1~#8)
+════════════════════════════ */
+.xy-actionbar{
+  display:flex;gap:6px;align-items:center;
+  padding:6px 10px;
+  background:rgba(8,8,8,.85);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.xy-act-btn{
+  flex-shrink:0;padding:6px 12px;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;color:var(--text2);
+  font-size:11px;font-weight:700;cursor:pointer;
+  font-family:var(--font);letter-spacing:.03em;
+  transition:all .15s;white-space:nowrap;
+}
+.xy-act-btn:hover{background:rgba(255,255,255,.1);}
+.xy-act-btn.active{background:rgba(255,136,187,.15);border-color:rgba(255,136,187,.45);color:#ff88bb;box-shadow:0 0 10px rgba(255,136,187,.25);}
+.xy-act-btn.xy-ai{
+  background:linear-gradient(135deg,rgba(255,136,187,.2),rgba(56,189,248,.1));
+  border-color:rgba(255,136,187,.45);color:#ff88bb;
+  text-shadow:0 0 6px rgba(255,136,187,.5);
+}
+.xy-act-btn.shield-on{
+  background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.08));
+  border-color:rgba(52,211,153,.5);color:#34d399;
+}
+.xy-act-btn.burst-btn{color:#f87171;}
+.xy-act-btn.tilt-btn{color:#38bdf8;}
+.xy-act-btn.rgb-btn{
+  background:linear-gradient(90deg,rgba(248,113,113,.15),rgba(52,211,153,.15),rgba(56,189,248,.15));
+  border-color:rgba(255,255,255,.25);color:#fff;
+  font-weight:800;
+}
+
+/* ════════════════════════════
+   보안 설정 패널 (톱니 클릭)
+════════════════════════════ */
+.sec-panel{
+  display:none;padding:14px 14px 4px;
+  background:rgba(8,8,8,.95);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+  animation:secPanelSlide .25s ease-out;
+}
+.sec-panel.open{display:block;}
+@keyframes secPanelSlide{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
+.sec-panel-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;
+}
+.sec-panel-title{
+  font-size:11px;color:rgba(212,168,67,.85);font-weight:800;
+  letter-spacing:.08em;
+}
+.sec-panel-close{
+  width:22px;height:22px;border-radius:50%;
+  border:1px solid rgba(212,168,67,.3);
+  background:rgba(212,168,67,.08);color:rgba(212,168,67,.8);
+  font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:inherit;
+}
+
+/* 프리셋 버튼 4개 */
+.sec-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px;}
+.sec-preset{
+  padding:10px 4px;border-radius:10px;cursor:pointer;
+  font-size:11px;font-weight:800;font-family:var(--font);
+  letter-spacing:.02em;transition:all .15s;
+  background:rgba(255,255,255,.04);border:1.5px solid transparent;
+  color:var(--text2);
+}
+.sec-preset:hover{background:rgba(255,255,255,.08);}
+.sec-preset.active{
+  background:linear-gradient(135deg,rgba(212,168,67,.15),rgba(212,168,67,.05));
+  border-color:rgba(212,168,67,.5);color:#d4a843;
+  box-shadow:0 0 12px rgba(212,168,67,.2);
+}
+.sec-preset.normal.active{background:linear-gradient(135deg,rgba(52,211,153,.12),rgba(52,211,153,.04));border-color:rgba(52,211,153,.5);color:#34d399;box-shadow:0 0 12px rgba(52,211,153,.18);}
+.sec-preset.safe.active{background:linear-gradient(135deg,rgba(251,191,36,.14),rgba(251,191,36,.04));border-color:rgba(251,191,36,.5);color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.2);}
+.sec-preset.high.active{background:linear-gradient(135deg,rgba(248,113,113,.14),rgba(248,113,113,.04));border-color:rgba(248,113,113,.5);color:#f87171;box-shadow:0 0 12px rgba(248,113,113,.22);}
+.sec-preset.max.active{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(167,139,250,.05));border-color:rgba(167,139,250,.55);color:#a78bfa;box-shadow:0 0 16px rgba(167,139,250,.25);}
+
+/* 슬라이더 */
+.sec-slider-row{margin-bottom:10px;}
+.sec-slider-head{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:11px;font-weight:700;color:var(--text2);margin-bottom:4px;
+}
+.sec-slider-label{letter-spacing:.02em;}
+.sec-slider-value{color:var(--gold);font-weight:800;font-size:12px;font-family:'Orbitron',monospace;}
+.sec-slider-value.pink{color:#ff88bb;text-shadow:0 0 6px rgba(255,136,187,.4);}
+.sec-slider-value.green{color:#34d399;}
+.sec-slider-value.red{color:#f87171;}
+.sec-slider-value.yellow{color:#fbbf24;}
+input[type=range].sec-range{
+  width:100%;height:3px;
+  background:rgba(255,255,255,.1);
+  border-radius:2px;outline:none;
+  -webkit-appearance:none;appearance:none;cursor:pointer;
+}
+input[type=range].sec-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--gold);cursor:pointer;
+  box-shadow:0 0 10px rgba(212,168,67,.5);
+}
+input[type=range].sec-range::-moz-range-thumb{
+  width:14px;height:14px;border-radius:50%;
+  background:var(--gold);cursor:pointer;border:none;
+  box-shadow:0 0 10px rgba(212,168,67,.5);
+}
+.sec-range-hint{
+  display:flex;justify-content:space-between;
+  font-size:9px;color:var(--text3);margin-top:2px;letter-spacing:.04em;
+}
+
 /* 입력창 */
 .input-bar{padding:10px 12px;padding-bottom:max(10px,env(safe-area-inset-bottom));background:rgba(0,0,0,.4);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;}
 .input-bar textarea{flex:1;background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:20px;padding:10px 16px;color:var(--text);font-size:14px;resize:none;font-family:var(--font);outline:none;max-height:80px;line-height:1.4;}
 .input-bar textarea:focus{border-color:var(--gold2);}
-.send-btn{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:50%;color:#060d1a;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.send-btn{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#b8922f);border:none;border-radius:50%;color:#080808;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
 .patent-bar{text-align:center;padding:4px;background:rgba(0,0,0,.4);font-size:9px;color:rgba(212,168,67,.2);letter-spacing:.1em;flex-shrink:0;}
 
 /* ════════════════════════════
@@ -159,39 +389,282 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .modal-btns{display:flex;gap:8px;}
 .modal-btn{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);}
 .modal-btn.cancel{background:rgba(255,255,255,.08);color:var(--text2);}
-.modal-btn.confirm{background:linear-gradient(135deg,var(--gold),#b8922f);color:#060d1a;}
+.modal-btn.confirm{background:linear-gradient(135deg,var(--gold),#b8922f);color:#080808;}
 
 /* 토스트 */
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(52,211,153,.9);color:#060d1a;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:99999;pointer-events:none;opacity:0;transition:opacity .3s;}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(52,211,153,.9);color:#080808;padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;z-index:99999;pointer-events:none;opacity:0;transition:opacity .3s;}
 .toast.show{opacity:1;}
 
 /* 초대 팝업 */
 .invite-modal{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}
 .invite-modal.open{display:flex;}
 
-/* ══ Xy (자이) AI 3자 대화 ══ */
-.msg-wrap.xy{align-self:center;align-items:center;max-width:86%;margin:10px 0;}
-.msg-wrap.xy .msg-sender{font-size:11px;color:var(--gold);font-weight:800;margin-bottom:5px;letter-spacing:.05em;text-align:center;}
-.msg-wrap.xy .xy-bubble{background:linear-gradient(135deg,rgba(212,168,67,.14),rgba(56,189,248,.08));border:1px solid rgba(212,168,67,.32);border-radius:14px;padding:12px 16px;color:var(--text);font-size:13.5px;line-height:1.6;box-shadow:0 0 18px rgba(212,168,67,.08);}
+/* ══ Xy (자이) AI 3자 대화 — 핑크 네온 스페셜 ══ */
+.msg-wrap.xy{align-self:center;align-items:center;max-width:86%;margin:12px 0;}
+.msg-wrap.xy .msg-sender{
+  font-size:11px;
+  color:#ff88bb;
+  font-weight:800;
+  margin-bottom:5px;
+  letter-spacing:.05em;
+  text-align:center;
+  text-shadow:0 0 8px rgba(255,136,187,.6), 0 0 14px rgba(56,189,248,.3);
+}
+.msg-wrap.xy .xy-bubble{
+  background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(56,189,248,.08));
+  border:1px solid rgba(255,136,187,.45);
+  border-radius:14px;
+  padding:12px 16px;
+  color:var(--text);
+  font-size:13.5px;
+  line-height:1.6;
+  box-shadow:
+    0 0 20px rgba(255,136,187,.18),
+    0 0 35px rgba(56,189,248,.08),
+    inset 0 1px 0 rgba(255,136,187,.15);
+  position:relative;
+}
+/* 자이 말풍선 주변 은은한 글로우 */
+.msg-wrap.xy .xy-bubble::before{
+  content:'';position:absolute;inset:-3px;
+  border-radius:16px;
+  background:linear-gradient(135deg,rgba(255,136,187,.3),rgba(56,189,248,.2));
+  filter:blur(10px);opacity:.5;z-index:-1;
+  animation:xyPulse 3s ease-in-out infinite;
+}
+@keyframes xyPulse{
+  0%,100%{opacity:.35;}
+  50%{opacity:.65;}
+}
 .msg-wrap.xy .msg-meta{font-size:10px;color:var(--text3);margin-top:4px;text-align:center;}
 .xy-loading{opacity:.7;font-style:italic;}
 
 /* ════════════════════════════
-   SCREEN COVER: 표지 (파트너 작품)
+   환영 팝업 + Xy 연습방 (Phase 1 by C-18)
 ════════════════════════════ */
-#scrCover{align-items:center;justify-content:center;padding:0;cursor:pointer;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);position:relative;overflow:hidden;}
-.cover-logo{width:min(72vw,320px);height:auto;display:block;animation:coverFloat 4s ease-in-out infinite;filter:drop-shadow(0 8px 30px rgba(0,0,0,.18));}
-@keyframes coverFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-.cover-poem{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:14px;font-weight:500;color:rgba(42,74,106,.7);letter-spacing:.04em;line-height:1.7;animation:coverPoemFade 8s ease-in-out infinite;pointer-events:none;}
+/* 환영 팝업 오버레이 */
+.welcome-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(ellipse at center, rgba(20,10,15,.85) 0%, rgba(5,5,8,.95) 100%);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;padding:20px;
+  animation:welcomeFadeIn .4s ease-out;
+}
+.welcome-overlay.show{display:flex;}
+@keyframes welcomeFadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* 환영 카드 */
+.welcome-card{
+  width:100%;max-width:380px;
+  background:linear-gradient(135deg, rgba(20,10,20,.95), rgba(10,5,15,.98));
+  border:1px solid rgba(255,136,187,.3);
+  border-radius:20px;
+  padding:28px 24px 22px;
+  text-align:center;
+  position:relative;
+  box-shadow:
+    0 0 40px rgba(255,136,187,.2),
+    0 0 80px rgba(56,189,248,.08),
+    0 10px 40px rgba(0,0,0,.5);
+  animation:welcomeSlideUp .5s cubic-bezier(.16,1,.3,1);
+}
+@keyframes welcomeSlideUp{
+  from{opacity:0;transform:translateY(30px) scale(.95);}
+  to{opacity:1;transform:translateY(0) scale(1);}
+}
+/* 카드 주변 네온 오라 */
+.welcome-card::before{
+  content:'';position:absolute;inset:-2px;
+  border-radius:22px;
+  background:linear-gradient(135deg,rgba(255,136,187,.4),rgba(56,189,248,.3));
+  filter:blur(14px);opacity:.4;z-index:-1;
+  animation:welcomeAuraPulse 3s ease-in-out infinite;
+}
+@keyframes welcomeAuraPulse{
+  0%,100%{opacity:.3;}
+  50%{opacity:.55;}
+}
+
+/* 별빛 배경 */
+.welcome-card::after{
+  content:'';position:absolute;inset:0;
+  pointer-events:none;border-radius:20px;overflow:hidden;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,200,230,.5), transparent),
+    radial-gradient(1.5px 1.5px at 75% 15%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1px 1px at 85% 75%, rgba(255,200,230,.5), transparent);
+  animation:starTwinkle 4s ease-in-out infinite;
+}
+
+.welcome-emoji{font-size:42px;letter-spacing:8px;margin-bottom:10px;filter:drop-shadow(0 0 8px rgba(255,136,187,.5));}
+.welcome-title{
+  font-size:19px;font-weight:900;
+  background:linear-gradient(135deg,#ff88bb,#ffc8dc 50%,#88c8ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  margin-bottom:6px;letter-spacing:.02em;
+}
+.welcome-poem{
+  font-size:12px;color:rgba(255,200,220,.65);line-height:1.7;
+  font-style:italic;margin-bottom:20px;
+}
+.welcome-body{
+  font-size:13px;color:rgba(240,230,240,.85);line-height:1.65;
+  margin-bottom:14px;
+}
+.welcome-features{
+  display:flex;justify-content:space-around;
+  padding:14px 8px;margin-bottom:20px;
+  background:rgba(255,136,187,.06);
+  border:1px solid rgba(255,136,187,.15);
+  border-radius:12px;
+}
+.welcome-feature{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  font-size:10px;color:rgba(240,230,240,.75);font-weight:600;
+}
+.welcome-feature .wf-ico{font-size:22px;margin-bottom:2px;}
+.welcome-xy-hint{
+  font-size:13px;color:#ff88bb;font-weight:700;margin-bottom:18px;
+  text-shadow:0 0 8px rgba(255,136,187,.5);
+}
+.welcome-btns{display:flex;gap:10px;}
+.welcome-btn{
+  flex:1;padding:13px;border-radius:10px;font-size:13px;font-weight:800;
+  cursor:pointer;font-family:var(--font);letter-spacing:.04em;
+  transition:all .2s;
+}
+.welcome-btn.skip{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  color:rgba(240,230,240,.7);
+}
+.welcome-btn.skip:hover{background:rgba(255,255,255,.1);}
+.welcome-btn.start{
+  background:linear-gradient(135deg,#ff88bb,#e866a0);
+  border:1px solid rgba(255,136,187,.6);
+  color:#fff;
+  box-shadow:0 0 18px rgba(255,136,187,.35);
+}
+.welcome-btn.start:hover{
+  filter:brightness(1.1);
+  box-shadow:0 0 26px rgba(255,136,187,.5);
+}
+.welcome-btn.start:active{transform:translateY(1px);}
+
+/* 연습방 리스트 뱃지 — 핑크 네온 */
+.room-item.xy-practice{
+  background:linear-gradient(135deg,rgba(255,136,187,.08),rgba(56,189,248,.04));
+  border:1px solid rgba(255,136,187,.3);
+  position:relative;
+}
+.room-item.xy-practice::before{
+  content:'';position:absolute;inset:-1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,136,187,.25),rgba(56,189,248,.15));
+  filter:blur(6px);opacity:.35;z-index:-1;
+  animation:xyPulse 3s ease-in-out infinite;
+}
+.room-item.xy-practice .room-avatar{
+  background:linear-gradient(135deg,#ff88bb,#56b9f8);
+  color:#fff;
+  box-shadow:0 0 14px rgba(255,136,187,.4);
+}
+.room-item.xy-practice .room-name{
+  color:#ff88bb;
+  text-shadow:0 0 6px rgba(255,136,187,.4);
+}
+.practice-badge{
+  display:inline-block;margin-left:6px;padding:1px 7px;
+  background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.4);
+  border-radius:8px;font-size:9px;color:#ff88bb;font-weight:800;
+  letter-spacing:.04em;
+  text-shadow:0 0 4px rgba(255,136,187,.5);
+}
+
+/* ════════════════════════════
+   SCREEN COVER: 표지 (핑크×네온 ver. by C-18)
+════════════════════════════ */
+#scrCover{
+  align-items:center;justify-content:center;padding:0;cursor:pointer;
+  background:
+    radial-gradient(ellipse at 50% 45%, #ffb8d4 0%, #ff88bb 35%, #e566a0 75%, #c44888 100%);
+  position:relative;overflow:hidden;
+}
+/* 별빛 배경 레이어 */
+#scrCover::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 20% 30%, rgba(255,255,255,.8), transparent),
+    radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,.7), transparent),
+    radial-gradient(2px 2px at 80% 60%, rgba(255,220,240,.9), transparent),
+    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,.6), transparent),
+    radial-gradient(1.5px 1.5px at 90% 80%, rgba(255,200,230,.7), transparent),
+    radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,.5), transparent),
+    radial-gradient(2px 2px at 50% 10%, rgba(255,230,245,.8), transparent);
+  animation:starTwinkle 3s ease-in-out infinite;
+}
+@keyframes starTwinkle{0%,100%{opacity:.4;}50%{opacity:1;}}
+/* 로고 뒤의 원형 네온 오라 */
+.cover-aura{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(85vw,400px);height:min(85vw,400px);
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(56,189,248,.35) 0%,
+    rgba(244,114,182,.3) 30%,
+    rgba(244,114,182,.15) 55%,
+    transparent 75%);
+  filter:blur(20px);
+  animation:auraBreathe 3.5s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes auraBreathe{
+  0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1);}
+  50%{opacity:1;transform:translate(-50%,-50%) scale(1.1);}
+}
+.cover-logo{
+  width:min(72vw,320px);height:auto;display:block;
+  position:relative;z-index:2;
+  animation:coverFloat 4s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 18px rgba(244,114,182,.8))
+    drop-shadow(0 0 34px rgba(56,189,248,.6))
+    drop-shadow(0 6px 20px rgba(180,40,100,.4));
+}
+@keyframes coverFloat{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+}
+.cover-poem{
+  position:absolute;bottom:17%;left:50%;transform:translateX(-50%);
+  width:90%;text-align:center;
+  font-size:14.5px;font-weight:600;
+  color:#fff;letter-spacing:.06em;line-height:1.85;
+  text-shadow:0 0 10px rgba(244,114,182,.8), 0 0 20px rgba(56,189,248,.4), 0 2px 6px rgba(120,20,60,.5);
+  animation:coverPoemFade 8s ease-in-out infinite;
+  pointer-events:none;z-index:3;
+}
 @keyframes coverPoemFade{0%,100%{opacity:0;}30%,70%{opacity:1;}}
-.cover-tap{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(42,74,106,.55);letter-spacing:.2em;animation:coverTapBlink 2s ease-in-out infinite;}
-@keyframes coverTapBlink{0%,100%{opacity:.3;}50%{opacity:.85;}}
-.cover-patent{position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(42,74,106,.45);letter-spacing:.14em;}
+.cover-tap{
+  position:absolute;bottom:6%;left:50%;transform:translateX(-50%);
+  font-size:11px;font-weight:800;
+  color:#fff;letter-spacing:.3em;
+  text-shadow:0 0 8px rgba(244,114,182,.9), 0 0 16px rgba(56,189,248,.5);
+  animation:coverTapBlink 1.8s ease-in-out infinite;z-index:3;
+}
+@keyframes coverTapBlink{
+  0%,100%{opacity:.4;}
+  50%{opacity:1;}
+}
+.cover-patent{
+  position:absolute;top:24px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:rgba(255,255,255,.65);letter-spacing:.14em;
+  text-shadow:0 0 6px rgba(244,114,182,.6);z-index:3;
+}
 
 /* ════════════════════════════
    하단 고정 탭바 (친구/채팅/광장)
 ════════════════════════════ */
-.tabbar{display:flex;background:rgba(6,13,26,.96);backdrop-filter:blur(14px);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));flex-shrink:0;z-index:100;}
+.tabbar{display:flex;background:rgba(8,8,8,.96);backdrop-filter:blur(14px);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));flex-shrink:0;z-index:100;}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text3);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font);transition:color .15s;}
 .tab-btn .tab-ico{font-size:22px;line-height:1;}
 .tab-btn.active{color:var(--gold);}
@@ -235,8 +708,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <body>
 
 <!-- ══ SCREEN COVER: 표지 (파트너 작품) ══ -->
-<div class="screen active" id="scrCover" onclick="goScreen('scrLogin')">
+<div class="screen active" id="scrCover" onclick="coverTap()">
   <div class="cover-patent">특허 10-2026-0060113</div>
+  <div class="cover-aura"></div>
   <img src="logo.png" alt="CGO" class="cover-logo" onerror="this.style.display='none'">
   <div class="cover-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
   <div class="cover-tap">TAP TO START</div>
@@ -245,15 +719,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <!-- ══ SCREEN 0: 로그인 ══ -->
 <div class="screen" id="scrLogin">
   <div class="login-card">
-    <!-- 로고: /logo.png 있으면 사용, 없으면 fallback -->
-    <img src="/logo.png" alt="CGO" class="login-logo" id="loginLogo" onerror="this.style.display='none';document.getElementById('loginLogoFb').style.display='flex';">
+    <!-- 로고: logo.png 있으면 사용, 없으면 fallback -->
+    <img src="logo.png" alt="CGO" class="login-logo" id="loginLogo" onerror="if(this.src.indexOf('/logo.png')===-1){this.src='/logo.png';}else{this.style.display='none';document.getElementById('loginLogoFb').style.display='flex';}">
     <div class="login-logo-fallback" id="loginLogoFb" style="display:none;">Cgo</div>
 
     <label class="login-label">USERNAME</label>
-    <input class="login-input" id="loginUser" placeholder="Username" autocomplete="username">
+    <input class="login-input" id="loginUser" placeholder="Username" autocomplete="username" onfocus="cancelAutoLogin()">
 
     <label class="login-label">PASSWORD</label>
-    <input class="login-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+    <input class="login-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" onfocus="cancelAutoLogin()" onkeydown="if(event.key==='Enter')doLogin()">
 
     <button class="login-btn" onclick="doLogin()">LOGIN</button>
 
@@ -263,6 +737,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </label>
 
     <div class="login-foot">특허 10-2026-0060113 · CGO MESSAGE</div>
+
+    <!-- 자동 로그인 카운트다운 박스 -->
+    <div class="autologin-box" id="autoLoginBox">
+      <div class="autologin-label">💾 기억된 계정</div>
+      <div class="autologin-user" id="autoLoginUser">—</div>
+      <div class="autologin-timer">
+        <span id="autoLoginCountNum" class="autologin-timer-num">2</span>
+        초 후 자동 로그인
+      </div>
+      <div class="autologin-progress"><div class="autologin-bar" id="autoLoginBar"></div></div>
+      <button class="autologin-cancel" onclick="cancelAutoLogin()">⏸️ 취소하고 직접 로그인</button>
+    </div>
   </div>
 </div>
 
@@ -404,45 +890,71 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <button class="back-btn" onclick="goBack()">‹</button>
     <div class="r-avatar" id="rAvatar"></div>
     <div class="r-name" id="rName">상대방</div>
-    <div class="r-btns">
-      <button class="r-btn" id="gearBtn" onclick="toggleSecPanel()">⚙️ 보안</button>
-      <button class="r-btn" id="tiltTopBtn" onclick="toggleTilt()">📐</button>
-    </div>
   </div>
 
-  <!-- 보안 패널 -->
+  <!-- ✨ 상단 액션 바 (세계 최초 기능들) -->
+  <div class="xy-actionbar">
+    <button class="xy-act-btn xy-ai" onclick="callXy()">✨ Xy</button>
+    <button class="xy-act-btn" id="gearBtn" onclick="toggleSecPanel()">⚙️</button>
+    <button class="xy-act-btn shield-on" id="secBtn" onclick="toggleSec()">🛡️ OFF</button>
+    <button class="xy-act-btn burst-btn" id="burstBtn" onclick="toggleBurst()">💥</button>
+    <button class="xy-act-btn tilt-btn" id="tiltTopBtn" onclick="toggleTilt()">📐</button>
+    <button class="xy-act-btn rgb-btn" id="rgbBtn" onclick="toggleRGB()">🎨 RGB</button>
+  </div>
+
+  <!-- 보안 강도 설정 패널 -->
   <div class="sec-panel" id="secPanel">
-    <!-- 프리셋 -->
+    <div class="sec-panel-head">
+      <span class="sec-panel-title">⚙️ 보안 강도 설정</span>
+      <button class="sec-panel-close" onclick="toggleSecPanel()">✕</button>
+    </div>
+    <!-- 4단계 프리셋 -->
     <div class="sec-presets">
-      <button class="sec-btn safe" onclick="setLevel('safe')">🟡 보안</button>
-      <button class="sec-btn high" onclick="setLevel('high')">🔴 기밀</button>
-      <button class="sec-btn max" onclick="setLevel('max')">🛡️ 최강</button>
+      <button class="sec-preset normal active" onclick="setLevel('normal')">● 일반</button>
+      <button class="sec-preset safe" onclick="setLevel('safe')">● 보안</button>
+      <button class="sec-preset high" onclick="setLevel('high')">● 기밀</button>
+      <button class="sec-preset max" onclick="setLevel('max')">🛡️ 최강</button>
     </div>
-    <!-- 슬라이더들 -->
-    <div class="slider-row">
-      <span class="slider-lbl">📏 스크롤 글자수</span>
-      <input type="range" id="slScroll" min="4" max="15" value="8" oninput="onSliderChange()">
-      <span class="slider-val" id="valScroll">8자</span>
+    <!-- 슬라이더 5개 -->
+    <div class="sec-slider-row">
+      <div class="sec-slider-head">
+        <span class="sec-slider-label">📏 스크롤 글자수</span>
+        <span class="sec-slider-value" id="valScroll">8자</span>
+      </div>
+      <input type="range" class="sec-range" id="slScroll" min="4" max="15" value="8" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>4자 (최강)</span><span>15자 (여유)</span></div>
     </div>
-    <div class="slider-row">
-      <span class="slider-lbl">⏱️ 자동 삭제</span>
-      <input type="range" id="slTime" min="3" max="30" value="7" oninput="onSliderChange()">
-      <span class="slider-val" id="valTime">7초</span>
+    <div class="sec-slider-row">
+      <div class="sec-slider-head">
+        <span class="sec-slider-label">💣 자동 삭제 시간</span>
+        <span class="sec-slider-value red" id="valTime">7초</span>
+      </div>
+      <input type="range" class="sec-range" id="slTime" min="3" max="30" value="7" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>3초 (최강)</span><span>30초 (여유)</span></div>
     </div>
-    <div class="slider-row">
-      <span class="slider-lbl">⚡ 글자 속도</span>
-      <input type="range" id="slSpeed" min="1" max="5" value="3" oninput="onSliderChange()">
-      <span class="slider-val" id="valSpeed">0.3초</span>
+    <div class="sec-slider-row">
+      <div class="sec-slider-head">
+        <span class="sec-slider-label">⚡ 글자 이동 속도</span>
+        <span class="sec-slider-value yellow" id="valSpeed">0.3초</span>
+      </div>
+      <input type="range" class="sec-range" id="slSpeed" min="1" max="5" value="3" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>0.1초 (최강)</span><span>0.5초 (여유)</span></div>
     </div>
-    <div class="slider-row">
-      <span class="slider-lbl">🌫️ 글자 투명도</span>
-      <input type="range" id="slOpacity" min="0" max="80" value="0" oninput="onSliderChange()">
-      <span class="slider-val" id="valOpacity">0%</span>
+    <div class="sec-slider-row">
+      <div class="sec-slider-head">
+        <span class="sec-slider-label">🌫️ 글자 투명도</span>
+        <span class="sec-slider-value pink" id="valOpacity">0%</span>
+      </div>
+      <input type="range" class="sec-range" id="slOpacity" min="0" max="80" value="0" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>0% (진함)</span><span>80% (희미)</span></div>
     </div>
-    <!-- 기울기 -->
-    <div class="tilt-row">
-      <span class="tilt-lbl">📐 기울기 보안 — 45도 기울일 때만 내용 표시</span>
-      <button class="tilt-btn" id="tiltBtn" onclick="toggleTilt()">OFF</button>
+    <div class="sec-slider-row">
+      <div class="sec-slider-head">
+        <span class="sec-slider-label">🔁 문장 반복 횟수</span>
+        <span class="sec-slider-value green" id="valRepeat">∞</span>
+      </div>
+      <input type="range" class="sec-range" id="slRepeat" min="0" max="5" value="0" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>∞ (무한)</span><span>5회 (제한)</span></div>
     </div>
   </div>
 
@@ -455,7 +967,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
     <button class="send-btn" onclick="sendMsg()">↑</button>
   </div>
-  <div class="patent-bar">특허 10-2026-0060113 · CGO-FULI SECURE MESSENGER</div>
+  <div class="patent-bar">특허 10-2026-0060113 · CGO MESSAGE SECURE MESSENGER</div>
 </div>
 
 <!-- ══ 친구 추가 모달 ══ -->
@@ -500,6 +1012,29 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
+
+<!-- ══ 환영 팝업 (첫 로그인 시) ══ -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-card">
+    <div class="welcome-emoji">🌸 ✨ 💫</div>
+    <div class="welcome-title">CGO MESSAGE</div>
+    <div class="welcome-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
+    <div class="welcome-body">
+      저희 메신저엔 다른 메신저에 <b>없는 특별한 기능</b>이 많아요.
+    </div>
+    <div class="welcome-features">
+      <div class="welcome-feature"><span class="wf-ico">🛡️</span><span>보안 폭파</span></div>
+      <div class="welcome-feature"><span class="wf-ico">📐</span><span>기울기 잠금</span></div>
+      <div class="welcome-feature"><span class="wf-ico">🎨</span><span>투명도</span></div>
+      <div class="welcome-feature"><span class="wf-ico">✨</span><span>Xy AI</span></div>
+    </div>
+    <div class="welcome-xy-hint">✨ Xy와 함께 자유롭게 연습해보세요</div>
+    <div class="welcome-btns">
+      <button class="welcome-btn skip" onclick="closeWelcome(false)">건너뛰기</button>
+      <button class="welcome-btn start" onclick="closeWelcome(true)">네, 시작할게요!</button>
+    </div>
+  </div>
+</div>
 
 <!-- Firebase SDK는 JS가 동적 로드 (CGO-FULI 검증 방식) -->
 
@@ -568,7 +1103,7 @@ let _msgListener = null;
 let _cleanTimer = null;
 
 // 보안 설정값
-let _secSettings = { scroll:8, time:7, speed:300, opacity:0 };
+let _secSettings = { scroll:8, time:7, speed:300, opacity:0, repeat:0 };
 
 // ══ 초기화 ══
 window.addEventListener('load', () => {
@@ -579,27 +1114,20 @@ window.addEventListener('load', () => {
   const roomsStr = localStorage.getItem('cgm2_rooms');
   if(roomsStr) try{ _rooms = JSON.parse(roomsStr); }catch(e){}
 
-  // 로그인 상태 확인
-  const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
+  // 로그인 기억된 경우 Username 미리 채움 (표지는 무조건 먼저 보임)
   const savedUser = localStorage.getItem('cgm2_login_user') || '';
+  if(savedUser) {
+    const uEl = document.getElementById('loginUser');
+    if(uEl) uEl.value = savedUser;
+  }
 
-  if(loggedIn){
-    // 이미 로그인됨 → 닉네임 있으면 친구 탭으로, 없으면 닉네임 입력으로
-    if(_myNick && _myCode){
-      switchTab('friends');
-      renderRoomList();
-      registerToFirebase();
-      listenInvites();
-      updateNickBars();
-      const p = new URLSearchParams(location.search);
-      const inv = p.get('invite');
-      if(inv) setTimeout(()=>handleInviteParam(inv), 1000);
-    } else {
-      goScreen('scrNick');
-    }
-  } else {
-    // 표지 먼저 (기본값이 scrCover active 상태)
-    if(savedUser) document.getElementById('loginUser').value = savedUser;
+  // 이미 로그인 + 닉네임 있으면 백그라운드로 Firebase 등록 (데이터 준비)
+  // 표지는 그대로 유지 — 사용자가 탭할 때 진짜 화면 이동
+  const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
+  if(loggedIn && _myNick && _myCode){
+    registerToFirebase();
+    listenInvites();
+    renderRoomList();
   }
 
   // 컬러 선택
@@ -611,6 +1139,82 @@ window.addEventListener('load', () => {
   // 광장 말풍선 초기화
   initPlazaBubbles();
 });
+
+// ══ 표지 탭 시 — 무조건 로그인 페이지 경유 ══
+// (로그인 페이지도 예쁘니까 매번 보여주기)
+function coverTap(){
+  // 무조건 로그인 페이지로 이동
+  goScreen('scrLogin');
+
+  // 기억된 유저 있고, 기존에 로그인 성공한 적 있으면 자동 로그인 카운트다운 시작
+  const savedUser = localStorage.getItem('cgm2_login_user') || '';
+  const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
+  if(savedUser && loggedIn){
+    // 닉네임도 있으면 연습방 보장 (목록에 항상 있게)
+    if(_myNick && _myCode) ensureXyPracticeRoom();
+    startAutoLogin(savedUser);
+  }
+}
+
+// ══ 자동 로그인 — 2초 카운트다운 ══
+let _autoLoginTimer = null;
+let _autoLoginCountdown = null;
+function startAutoLogin(username){
+  // 기존 타이머 정리
+  cancelAutoLogin();
+
+  const box = document.getElementById('autoLoginBox');
+  const userEl = document.getElementById('autoLoginUser');
+  const numEl = document.getElementById('autoLoginCountNum');
+  const bar = document.getElementById('autoLoginBar');
+  if(!box || !userEl) return;
+
+  userEl.textContent = username;
+  box.classList.add('show');
+
+  // 프로그레스 바 애니메이션 재시작
+  if(bar){
+    bar.style.animation = 'none';
+    bar.offsetHeight; // 리플로우 강제
+    bar.style.animation = 'autoShrink 2s linear forwards';
+  }
+
+  // 카운트다운 2초
+  let n = 2;
+  numEl.textContent = n;
+  _autoLoginCountdown = setInterval(()=>{
+    n--;
+    if(n<=0){
+      clearInterval(_autoLoginCountdown);
+      _autoLoginCountdown = null;
+    } else {
+      numEl.textContent = n;
+    }
+  }, 1000);
+
+  // 2초 후 자동 로그인 실행
+  _autoLoginTimer = setTimeout(()=>{
+    // 자동 로그인 처리
+    if(_myNick && _myCode){
+      switchTab('friends');
+      updateNickBars();
+      const p = new URLSearchParams(location.search);
+      const inv = p.get('invite');
+      if(inv) setTimeout(()=>handleInviteParam(inv), 500);
+    } else {
+      goScreen('scrNick');
+    }
+    // 박스 숨기기
+    if(box) box.classList.remove('show');
+  }, 2000);
+}
+
+function cancelAutoLogin(){
+  if(_autoLoginTimer){ clearTimeout(_autoLoginTimer); _autoLoginTimer = null; }
+  if(_autoLoginCountdown){ clearInterval(_autoLoginCountdown); _autoLoginCountdown = null; }
+  const box = document.getElementById('autoLoginBox');
+  if(box) box.classList.remove('show');
+}
 
 // ══ 탭 전환 (친구/채팅/광장) ══
 function switchTab(tab){
@@ -676,6 +1280,8 @@ function doLogin(){
     registerToFirebase();
     listenInvites();
     updateNickBars();
+    ensureXyPracticeRoom(); // 연습방 항상 보장
+    maybeShowWelcome(); // 처음이면 환영 팝업
   } else {
     // user 이름을 닉네임 기본값으로 미리 채워둠
     const nickInput = document.getElementById('nickInput');
@@ -717,6 +1323,8 @@ function startApp(){
   renderRoomList();
   registerToFirebase();
   listenInvites();
+  ensureXyPracticeRoom(); // 연습방 자동 생성
+  maybeShowWelcome(); // 환영 팝업
 }
 
 function genCode(){
@@ -739,15 +1347,24 @@ function renderRoomList(){
     el.innerHTML = '<div class="list-empty"><div>💬</div><div>아직 대화가 없어요<br>+ 버튼으로 친구를 추가하세요</div></div>';
     return;
   }
-  el.innerHTML = codes.sort((a,b)=>(_rooms[b].lastTime||0)-(_rooms[a].lastTime||0)).map(code=>{
+  // 연습방은 항상 맨 위 고정 (isPractice 플래그)
+  el.innerHTML = codes.sort((a,b)=>{
+    const ra = _rooms[a], rb = _rooms[b];
+    if(ra.isPractice && !rb.isPractice) return -1;
+    if(!ra.isPractice && rb.isPractice) return 1;
+    return (rb.lastTime||0) - (ra.lastTime||0);
+  }).map(code=>{
     const r = _rooms[code];
     const badge = r.unread ? `<div class="room-badge">${r.unread}</div>` : '';
+    const practiceBadge = r.isPractice ? '<span class="practice-badge">연습</span>' : '';
     const time = r.lastTime ? new Date(r.lastTime).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
     const lastMsg = r.lastMsg ? (r.lastMsg.length>20?r.lastMsg.slice(0,20)+'...':r.lastMsg) : '대화를 시작하세요';
-    return `<div class="room-item" onclick="openRoom('${code}')">
-      <div class="room-avatar" style="background:${r.color||'rgba(212,168,67,.2)'};">${(r.nick||'?')[0]}</div>
+    const cls = 'room-item' + (r.isPractice ? ' xy-practice' : '');
+    const avatar = r.isPractice ? '✨' : (r.nick||'?')[0];
+    return `<div class="${cls}" onclick="openRoom('${code}')">
+      <div class="room-avatar" style="background:${r.color||'rgba(212,168,67,.2)'};">${avatar}</div>
       <div class="room-info">
-        <div class="room-nick">${escHtml(r.nick||'?')}</div>
+        <div class="room-nick">${escHtml(r.nick||'?')}${practiceBadge}</div>
         <div class="room-last">${escHtml(lastMsg)}</div>
       </div>
       <div class="room-meta"><div class="room-time">${time}</div>${badge}</div>
@@ -867,10 +1484,10 @@ function renderMessages(){
     const isMe = !isXy && msg.from===_myCode;
     const time = msg.t ? new Date(msg.t).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
     if(isXy){
-      const txt = String(msg.text||'').replace(/^🟡 Xy:\s*/,'');
+      const txt = String(msg.text||'').replace(/^✨ Xy:\s*/,'');
       const loadingCls = msg.loading ? ' xy-loading' : '';
       html += `<div class="msg-wrap xy">
-        <div class="msg-sender">🟡 Xy</div>
+        <div class="msg-sender">✨ Xy</div>
         <div class="xy-bubble${loadingCls}">${escHtml(txt)}</div>
         <div class="msg-meta">${time}</div>
       </div>`;
@@ -898,15 +1515,26 @@ function renderMessages(){
 function makeSecureBubble(text){
   const WIN = _secSettings.scroll;
   const SPD = _secSettings.speed;
+  const REPEAT = _secSettings.repeat || 0; // 0 = 무한, 1~5 = n회
   const chars = Array.from(text);
-  const neonChars = arr => arr.map(c=>`<span class="msg-char">${escHtml(c)}</span>`).join('');
+  // FULI 스타일: 각 글자마다 animation-delay 0.12초씩 밀어서 시간차 깜빡임
+  const neonChars = (arr, offset)=>arr.map((c,i)=>{
+    const d = ((i + (offset||0)) * 0.12) % 2.0;
+    return `<span class="msg-char" style="animation-delay:${d.toFixed(2)}s">${escHtml(c)}</span>`;
+  }).join('');
+  // 반복 횟수 클래스
+  const loopCls = REPEAT===0 ? 'loop-inf' :
+                  REPEAT===1 ? 'loop-1' :
+                  REPEAT===2 ? 'loop-2' :
+                  REPEAT===3 ? 'loop-3' :
+                  'loop-5';
   if(chars.length <= WIN){
-    return `<div class="msg-bubble"><span class="msg-secure-inner">${neonChars(chars)}</span></div>`;
+    return `<div class="msg-bubble secure-mode"><span class="msg-secure-inner ${loopCls}">${neonChars(chars,0)}</span></div>`;
   }
   const dur = Math.max(0.5, chars.length * SPD / 1000);
-  const inner = neonChars(chars) + neonChars(chars);
+  const inner = neonChars(chars, 0) + neonChars(chars, chars.length);
   const winEm = WIN + 'em';
-  return `<div class="msg-bubble"><span class="msg-secure" style="width:${winEm}"><span class="msg-secure-inner" style="animation-duration:${dur.toFixed(2)}s">${inner}</span></span></div>`;
+  return `<div class="msg-bubble secure-mode"><span class="msg-secure" style="width:${winEm}"><span class="msg-secure-inner ${loopCls}" style="animation-duration:${dur.toFixed(2)}s">${inner}</span></span></div>`;
 }
 
 // ══ 투명도 적용 ══
@@ -941,20 +1569,113 @@ function sendMsg(){
   });
   dbRef('cgm2/users/'+_myCode).update({ nick:_myNick, color:_myColor });
 
-  // 🟡 Xy wake word 감지 — "자이" 또는 "Xy" 언급 시 AI 소환
+  // ✨ Xy wake word 감지 — "자이" 또는 "Xy" 언급 시 AI 소환
   if(text.indexOf('자이')!==-1 || /\bxy\b/i.test(text)){
     xyReply(text);
   }
 }
 
-// ══ 🟡 Xy (자이) AI — 3자 대화 ══
+// ════════════════════════════
+// 환영 팝업 + Xy 연습방 (Phase 1)
+// ════════════════════════════
+
+const XY_PRACTICE_CODE = 'XY00000'; // 연습방 고유 코드 (실제 유저 아님)
+
+// 환영 팝업 — 처음 로그인 한 유저에게만 한 번 표시
+function maybeShowWelcome(){
+  const seenWelcome = localStorage.getItem('cgm2_seen_welcome')==='1';
+  if(seenWelcome) return;
+  setTimeout(()=>{
+    const overlay = document.getElementById('welcomeOverlay');
+    if(overlay) overlay.classList.add('show');
+  }, 400); // 화면 전환 완료 후
+}
+
+function closeWelcome(startTutorial){
+  const overlay = document.getElementById('welcomeOverlay');
+  if(overlay) overlay.classList.remove('show');
+  localStorage.setItem('cgm2_seen_welcome','1');
+
+  if(startTutorial){
+    // 연습방 생성 + 바로 진입
+    ensureXyPracticeRoom();
+    setTimeout(()=>{
+      openRoom(XY_PRACTICE_CODE);
+    }, 300);
+  }
+  // 건너뛰기 해도 연습방은 목록에 만들어둠
+  else {
+    ensureXyPracticeRoom();
+  }
+}
+
+// ══ Xy 연습방 보장 — 없으면 생성, 있으면 유지 ══
+function ensureXyPracticeRoom(){
+  if(_rooms[XY_PRACTICE_CODE]) return; // 이미 있음
+
+  _rooms[XY_PRACTICE_CODE] = {
+    code: XY_PRACTICE_CODE,
+    nick: '✨ Xy 연습방',
+    color: '#ff88bb',
+    isPractice: true, // 삭제 방지 플래그
+    msgs: [],
+    lastMsg: '✨ Xy가 당신을 기다리고 있어요',
+    lastTime: Date.now()
+  };
+  saveRooms();
+
+  // Xy 인사말 자동 전송 (하드코딩, API 없어도 작동)
+  setTimeout(()=>xyWelcomeSequence(), 500);
+  renderRoomList();
+}
+
+// ══ Xy 인사말 시퀀스 — 단계별 자동 메시지 ══
+function xyWelcomeSequence(){
+  const messages = [
+    '안녕하세요! 저는 ✨ Xy예요 🌸',
+    '이 방은 연습방이에요. 여기서 이 메신저의 특별한 기능을 마음껏 시험해보실 수 있어요.',
+    '먼저 알려드릴 것: 이 방은 **삭제되지 않아요**. 언제든 돌아와서 연습하실 수 있어요 💫',
+    '오른쪽 위 버튼들을 한번 눌러보세요. 보안 모드, 기울기 잠금, 투명도, 폭파… 모두 시험 가능해요!',
+    '그리고 메시지에 "자이야" 또는 "Xy"를 넣으시면 제가 등장합니다. 무엇이든 물어보세요 😊'
+  ];
+  sendXyMessageSequence(messages);
+}
+
+function sendXyMessageSequence(messages, delay){
+  delay = delay || 0;
+  const room = _rooms[XY_PRACTICE_CODE];
+  if(!room) return;
+  if(!room.msgs) room.msgs = [];
+
+  messages.forEach((text, i)=>{
+    setTimeout(()=>{
+      const msg = {
+        from:'xy', isAI:true,
+        text:'✨ Xy: ' + text,
+        t:Date.now()
+      };
+      room.msgs.push(msg);
+      room.lastMsg = text.slice(0, 28);
+      room.lastTime = Date.now();
+      saveRooms();
+      // 현재 이 방 보고 있으면 바로 렌더, 아니면 목록만 업데이트
+      if(_currentRoom === XY_PRACTICE_CODE){
+        renderMessages();
+      } else {
+        renderRoomList();
+      }
+    }, delay + (i * 1400)); // 1.4초 간격
+  });
+}
+
+// ══ ✨ Xy (자이) AI — 3자 대화 ══
 function xyReply(userText){
   const room = _rooms[_currentRoom];
   if(!room) return;
   if(!room.msgs) room.msgs = [];
 
   // 로딩 메시지
-  const loadMsg = { from:'xy', isAI:true, loading:true, text:'🟡 Xy: 생각 중...', t:Date.now() };
+  const loadMsg = { from:'xy', isAI:true, loading:true, text:'✨ Xy: 생각 중...', t:Date.now() };
   room.msgs.push(loadMsg);
   saveRooms();
   renderMessages();
@@ -983,12 +1704,12 @@ function xyReply(userText){
     let reply = '';
     try{ reply = data.choices[0].message.content || ''; }catch(e){ reply=''; }
     if(!reply) reply = '다시 말씀해주실 수 있을까요? 🙏';
-    loadMsg.text = '🟡 Xy: ' + reply.trim();
+    loadMsg.text = '✨ Xy: ' + reply.trim();
     loadMsg.loading = false;
     saveRooms();
     renderMessages();
   }).catch(()=>{
-    loadMsg.text = '🟡 Xy: 잠시 후 다시 불러주세요 🙏';
+    loadMsg.text = '✨ Xy: 잠시 후 다시 불러주세요 🙏';
     loadMsg.loading = false;
     saveRooms();
     renderMessages();
@@ -1015,29 +1736,100 @@ function toggleSecPanel(){
   const panel = document.getElementById('secPanel');
   const btn = document.getElementById('gearBtn');
   panel.classList.toggle('open');
-  _secOn = panel.classList.contains('open');
-  btn.classList.toggle('on', _secOn);
+  btn.classList.toggle('active', panel.classList.contains('open'));
+}
+
+// 🛡️ 보안 ON/OFF (별개 토글)
+function toggleSec(){
+  _secOn = !_secOn;
+  const btn = document.getElementById('secBtn');
+  if(_secOn){
+    btn.textContent = '🛡️ ON';
+    btn.classList.add('active');
+    showToast('🛡️ 보안 모드 ON');
+  } else {
+    btn.textContent = '🛡️ OFF';
+    btn.classList.remove('active');
+    showToast('🛡️ 보안 모드 OFF');
+  }
   if(_currentRoom) renderMessages();
 }
 
+// 💥 폭파 (즉시 모든 메시지 삭제)
+function toggleBurst(){
+  if(!_currentRoom) return;
+  if(!confirm('💥 이 방의 모든 메시지를 즉시 폭파할까요?')) return;
+  const room = _rooms[_currentRoom];
+  if(!room) return;
+  // 블래스트 애니메이션 먼저
+  document.querySelectorAll('.msg-wrap').forEach(w=>w.classList.add('msg-blast'));
+  setTimeout(()=>{
+    room.msgs = [];
+    // 연습방이면 Xy 인사 다시 전송
+    if(room.isPractice){
+      setTimeout(()=>xyWelcomeSequence(), 500);
+    }
+    saveRooms();
+    renderMessages();
+    showToast('💥 모든 메시지가 폭파되었습니다');
+  }, 500);
+}
+
+// 🎨 RGB 레이어 (Phase 2B에서 실제 구현 예정, 지금은 토글만)
+let _rgbOn = false;
+function toggleRGB(){
+  _rgbOn = !_rgbOn;
+  const btn = document.getElementById('rgbBtn');
+  if(_rgbOn){
+    btn.classList.add('active');
+    btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
+    showToast('🎨 RGB 레이어 ON (Phase 2B 구현 예정)');
+  } else {
+    btn.classList.remove('active');
+    btn.style.boxShadow = '';
+    showToast('🎨 RGB 레이어 OFF');
+  }
+}
+
+// ✨ Xy 호출 (수동 버튼)
+function callXy(){
+  const inp = document.getElementById('msgInput');
+  if(inp){
+    inp.value = '자이야 ';
+    inp.focus();
+    showToast('✨ Xy에게 질문을 이어서 써주세요');
+  }
+}
+
 function setLevel(level){
-  document.querySelectorAll('.sec-btn').forEach(b=>b.classList.remove('on'));
-  document.querySelector(`.sec-btn.${level}`).classList.add('on');
-  if(level==='safe'){
+  document.querySelectorAll('.sec-preset').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector('.sec-preset.'+level);
+  if(btn) btn.classList.add('active');
+
+  if(level==='normal'){
+    document.getElementById('slScroll').value=15;
+    document.getElementById('slTime').value=30;
+    document.getElementById('slSpeed').value=1;
+    document.getElementById('slOpacity').value=0;
+    document.getElementById('slRepeat').value=0;
+  } else if(level==='safe'){
     document.getElementById('slScroll').value=12;
     document.getElementById('slTime').value=15;
     document.getElementById('slSpeed').value=2;
     document.getElementById('slOpacity').value=15;
+    document.getElementById('slRepeat').value=0;
   } else if(level==='high'){
     document.getElementById('slScroll').value=6;
     document.getElementById('slTime').value=7;
     document.getElementById('slSpeed').value=3;
     document.getElementById('slOpacity').value=45;
+    document.getElementById('slRepeat').value=3;
   } else if(level==='max'){
     document.getElementById('slScroll').value=4;
     document.getElementById('slTime').value=3;
     document.getElementById('slSpeed').value=5;
     document.getElementById('slOpacity').value=70;
+    document.getElementById('slRepeat').value=2;
   }
   onSliderChange();
 }
@@ -1047,33 +1839,32 @@ function onSliderChange(){
   const time   = +document.getElementById('slTime').value;
   const speed  = +document.getElementById('slSpeed').value;
   const opacity= +document.getElementById('slOpacity').value;
+  const repeat = +document.getElementById('slRepeat').value;
   _secSettings = {
     scroll, time,
     speed: [100,200,300,400,500][speed-1],
-    opacity
+    opacity,
+    repeat
   };
   document.getElementById('valScroll').textContent = scroll+'자';
   document.getElementById('valTime').textContent   = time+'초';
   document.getElementById('valSpeed').textContent  = (speed*0.1).toFixed(1)+'초';
   document.getElementById('valOpacity').textContent= opacity+'%';
+  document.getElementById('valRepeat').textContent = repeat===0 ? '∞' : repeat+'회';
   if(_currentRoom) renderMessages();
 }
 
 // ══ 기울기 보안 ══
 function toggleTilt(){
   _tiltOn = !_tiltOn;
-  const btn  = document.getElementById('tiltBtn');
   const topBtn = document.getElementById('tiltTopBtn');
   const msgs = document.getElementById('msgArea');
 
   if(_tiltOn){
-    btn.textContent='ON'; btn.classList.add('on');
-    topBtn.classList.add('on');
+    if(topBtn){ topBtn.textContent='📐 ON'; topBtn.classList.add('active'); }
     showToast('📐 기울기 보안 ON — 45도 기울일 때만 표시!');
-    // 초기 잠금
     msgs.classList.add('tilt-lock'); msgs.classList.remove('tilt-ok');
     _tiltOk = false;
-    // 이벤트 등록
     _tiltHandler = e=>{
       const beta = e.beta != null ? e.beta : 0;
       const inRange = beta>=35 && beta<=65;
@@ -1085,8 +1876,7 @@ function toggleTilt(){
     };
     window.addEventListener('deviceorientation', _tiltHandler, true);
   } else {
-    btn.textContent='OFF'; btn.classList.remove('on');
-    topBtn.classList.remove('on');
+    if(topBtn){ topBtn.textContent='📐'; topBtn.classList.remove('active'); }
     showToast('📐 기울기 보안 해제');
     if(_tiltHandler){ window.removeEventListener('deviceorientation', _tiltHandler, true); _tiltHandler=null; }
     msgs.classList.remove('tilt-lock','tilt-ok');
