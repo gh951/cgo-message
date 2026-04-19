@@ -581,6 +581,148 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 
 /* ════════════════════════════
+   🎤 음성 UI (Phase 3 — 세계 최초 #9)
+   할머니도 쓸 수 있게, 크고 명확하게
+════════════════════════════ */
+/* 입력창 옆 마이크 버튼 */
+.mic-btn{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,#ff88bb,#e866a0);
+  border:1.5px solid rgba(255,255,255,.3);
+  color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 12px rgba(255,136,187,.4);
+  transition:all .15s;
+  position:relative;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  user-select:none;-webkit-user-select:none;
+}
+.mic-btn:hover{filter:brightness(1.1);}
+.mic-btn:active{transform:scale(.95);}
+.mic-btn.recording{
+  background:linear-gradient(135deg,#f87171,#dc2626);
+  animation:micPulse 1s ease-in-out infinite;
+  box-shadow:0 0 20px rgba(248,113,113,.6);
+}
+@keyframes micPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 12px rgba(248,113,113,.5);}
+  50%{transform:scale(1.08);box-shadow:0 0 24px rgba(248,113,113,.8);}
+}
+
+/* 녹음 중 전체화면 오버레이 (할머니도 잘 보이게 큰 UI) */
+.record-overlay{
+  display:none;position:fixed;inset:0;z-index:9998;
+  background:radial-gradient(ellipse at center, rgba(60,10,40,.9) 0%, rgba(5,5,8,.97) 100%);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  flex-direction:column;align-items:center;justify-content:center;
+  padding:20px;
+  animation:welcomeFadeIn .3s ease-out;
+}
+.record-overlay.show{display:flex;}
+.record-mic-big{
+  width:140px;height:140px;border-radius:50%;
+  background:linear-gradient(135deg,#ff88bb,#e866a0);
+  display:flex;align-items:center;justify-content:center;
+  font-size:68px;color:#fff;
+  box-shadow:
+    0 0 40px rgba(255,136,187,.5),
+    0 0 80px rgba(248,113,113,.3);
+  animation:recordMicPulse 1.2s ease-in-out infinite;
+  margin-bottom:24px;
+}
+@keyframes recordMicPulse{
+  0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(255,136,187,.5),0 0 80px rgba(248,113,113,.3);}
+  50%{transform:scale(1.06);box-shadow:0 0 60px rgba(255,136,187,.8),0 0 120px rgba(248,113,113,.5);}
+}
+.record-status{
+  font-size:18px;font-weight:800;color:#ff88bb;
+  text-shadow:0 0 10px rgba(255,136,187,.5);
+  margin-bottom:6px;letter-spacing:.04em;
+}
+.record-timer{
+  font-size:34px;font-weight:900;color:#fff;
+  font-family:'Orbitron',monospace;letter-spacing:.06em;
+  text-shadow:0 0 12px rgba(255,255,255,.3);
+  margin-bottom:20px;
+}
+/* 파형 시각화 */
+.record-wave{
+  display:flex;align-items:flex-end;gap:4px;height:50px;margin-bottom:28px;
+}
+.record-wave-bar{
+  width:5px;background:linear-gradient(180deg,#ff88bb,#e866a0);
+  border-radius:3px;min-height:6px;
+  box-shadow:0 0 8px rgba(255,136,187,.5);
+  transition:height .08s ease-out;
+}
+.record-hint{
+  font-size:13px;color:rgba(255,230,240,.7);
+  text-align:center;line-height:1.7;margin-bottom:24px;
+}
+.record-hint b{color:#ff88bb;}
+.record-btns{display:flex;gap:14px;width:100%;max-width:300px;}
+.record-btn{
+  flex:1;padding:16px;border-radius:12px;
+  font-size:15px;font-weight:800;font-family:var(--font);
+  cursor:pointer;letter-spacing:.04em;
+  border:none;transition:all .15s;
+}
+.record-btn.cancel{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);
+}
+.record-btn.cancel:active{background:rgba(255,255,255,.15);}
+.record-btn.send{
+  background:linear-gradient(135deg,#ff88bb,#e866a0);color:#fff;
+  box-shadow:0 0 16px rgba(255,136,187,.4);
+}
+.record-btn.send:active{transform:scale(.97);}
+
+/* 음성 메시지 버블 */
+.voice-msg{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;min-width:160px;max-width:240px;
+}
+.voice-play{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,136,187,.2);
+  border:1px solid rgba(255,136,187,.4);
+  color:#ff88bb;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:all .15s;
+}
+.msg-wrap.me .voice-play{background:rgba(255,255,255,.25);color:#fff;border-color:rgba(255,255,255,.4);}
+.voice-play:hover{filter:brightness(1.15);}
+.voice-play.playing{animation:micPulse 1s ease-in-out infinite;}
+.voice-wave-mini{
+  flex:1;display:flex;align-items:center;gap:2px;height:22px;
+}
+.voice-wave-mini span{
+  flex:1;background:currentColor;opacity:.5;border-radius:2px;
+  min-height:3px;
+}
+.voice-duration{
+  font-size:11px;color:inherit;opacity:.7;
+  font-family:'Orbitron',monospace;
+}
+
+/* 녹음 중 입력 비활성 */
+.input-bar.recording-mode textarea{opacity:.4;pointer-events:none;}
+.input-bar.recording-mode .send-btn{opacity:.4;pointer-events:none;}
+
+/* 자이 음성 응답 중 표시 */
+.xy-speaking-indicator{
+  display:inline-block;margin-left:6px;
+  width:14px;height:14px;border-radius:50%;
+  background:radial-gradient(circle,#ff88bb,#e866a0);
+  animation:recordMicPulse 1s ease-in-out infinite;
+  vertical-align:middle;
+  box-shadow:0 0 10px rgba(255,136,187,.6);
+}
+
+/* ════════════════════════════
    SCREEN COVER: 표지 (핑크×네온 ver. by C-18)
 ════════════════════════════ */
 #scrCover{
@@ -900,6 +1042,7 @@ input[type=range].sec-range::-moz-range-thumb{
     <button class="xy-act-btn burst-btn" id="burstBtn" onclick="toggleBurst()">💥</button>
     <button class="xy-act-btn tilt-btn" id="tiltTopBtn" onclick="toggleTilt()">📐</button>
     <button class="xy-act-btn rgb-btn" id="rgbBtn" onclick="toggleRGB()">🎨 RGB</button>
+    <button class="xy-act-btn" id="voiceOutBtn" onclick="toggleXyVoice()" title="자이 음성 응답">🔊 OFF</button>
   </div>
 
   <!-- 보안 강도 설정 패널 -->
@@ -962,9 +1105,10 @@ input[type=range].sec-range::-moz-range-thumb{
   <div class="msg-area" id="msgArea"></div>
 
   <!-- 입력창 -->
-  <div class="input-bar">
+  <div class="input-bar" id="inputBar">
     <textarea id="msgInput" placeholder="메시지 입력..." rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+    <button class="mic-btn" id="micBtn" onclick="startRecording()" title="음성 메시지">🎤</button>
     <button class="send-btn" onclick="sendMsg()">↑</button>
   </div>
   <div class="patent-bar">특허 10-2026-0060113 · CGO MESSAGE SECURE MESSENGER</div>
@@ -1012,6 +1156,35 @@ input[type=range].sec-range::-moz-range-thumb{
 
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
+
+<!-- ══ 🎤 음성 녹음 오버레이 (할머니도 쓰기 쉽게) ══ -->
+<div class="record-overlay" id="recordOverlay">
+  <div class="record-mic-big">🎤</div>
+  <div class="record-status" id="recordStatus">녹음 중...</div>
+  <div class="record-timer" id="recordTimer">0:00</div>
+  <div class="record-wave" id="recordWave">
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+    <div class="record-wave-bar"></div>
+  </div>
+  <div class="record-hint">
+    <b>또박또박 말씀해주세요</b><br>
+    완료되면 "✅ 전송", 다시 하시려면 "❌ 취소"
+  </div>
+  <div class="record-btns">
+    <button class="record-btn cancel" onclick="cancelRecording()">❌ 취소</button>
+    <button class="record-btn send" onclick="stopAndSendRecording()">✅ 전송</button>
+  </div>
+</div>
 
 <!-- ══ 환영 팝업 (첫 로그인 시) ══ -->
 <div class="welcome-overlay" id="welcomeOverlay">
@@ -1147,9 +1320,10 @@ function coverTap(){
   goScreen('scrLogin');
 
   // 기억된 유저 있고, 기존에 로그인 성공한 적 있으면 자동 로그인 카운트다운 시작
+  // ★ 사용자가 이번 세션에 취소한 적 있으면 자동로그인 건너뜀
   const savedUser = localStorage.getItem('cgm2_login_user') || '';
   const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
-  if(savedUser && loggedIn){
+  if(savedUser && loggedIn && !window._autoLoginCancelled){
     // 닉네임도 있으면 연습방 보장 (목록에 항상 있게)
     if(_myNick && _myCode) ensureXyPracticeRoom();
     startAutoLogin(savedUser);
@@ -1214,6 +1388,8 @@ function cancelAutoLogin(){
   if(_autoLoginCountdown){ clearInterval(_autoLoginCountdown); _autoLoginCountdown = null; }
   const box = document.getElementById('autoLoginBox');
   if(box) box.classList.remove('show');
+  // ★ 이 세션 동안은 자동로그인 완전 OFF (사용자가 직접 취소)
+  window._autoLoginCancelled = true;
 }
 
 // ══ 탭 전환 (친구/채팅/광장) ══
@@ -1266,10 +1442,12 @@ function doLogin(){
 
   // MVP: 클라이언트 측 간단 로그인 (TODO: Firebase Auth 연동)
   // 아무 user/pass 조합 허용 — 차후 Firebase Auth로 교체
-  localStorage.setItem('cgm2_logged_in','1');
+  // ★ 버그 수정: Remember Me 체크 풀면 자동로그인 기록도 제거
   if(remember){
+    localStorage.setItem('cgm2_logged_in','1');
     localStorage.setItem('cgm2_login_user', user);
   } else {
+    localStorage.removeItem('cgm2_logged_in');
     localStorage.removeItem('cgm2_login_user');
   }
 
@@ -1493,6 +1671,26 @@ function renderMessages(){
       </div>`;
       return;
     }
+    // 🎤 음성 메시지
+    if(msg.voice){
+      const voiceId = 'voice_'+idx+'_'+(msg.t||0);
+      const durStr = msg.duration ? msg.duration+'초' : '';
+      // 가짜 파형 막대 (시각적 힌트)
+      const bars = Array(16).fill(0).map(()=>{
+        const h = 6 + Math.floor(Math.random()*16);
+        return `<span style="height:${h}px"></span>`;
+      }).join('');
+      html += `<div class="msg-wrap ${isMe?'me':'you'}">
+        ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
+        <div class="msg-bubble voice-msg">
+          <button class="voice-play" id="${voiceId}" onclick="playVoice('${voiceId}', this.dataset.src)" data-src="${msg.voice}">▶</button>
+          <div class="voice-wave-mini">${bars}</div>
+          <span class="voice-duration">${durStr}</span>
+        </div>
+        <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
+      </div>`;
+      return;
+    }
     const bubble = _secOn ? makeSecureBubble(msg.text) : `<div class="msg-bubble">${escHtml(msg.text)}</div>`;
     html += `<div class="msg-wrap ${isMe?'me':'you'}">
       ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
@@ -1668,6 +1866,319 @@ function sendXyMessageSequence(messages, delay){
   });
 }
 
+// ════════════════════════════
+// 🎤 음성 UI — 세계 최초 #9 (Phase 3)
+// 할머니도 쓸 수 있는 메신저
+// ════════════════════════════
+let _mediaRecorder = null;
+let _audioChunks = [];
+let _audioStream = null;
+let _recordStartTime = 0;
+let _recordTimerInterval = null;
+let _audioContext = null;
+let _audioAnalyser = null;
+let _waveAnimationFrame = null;
+
+// ══ 마이크 권한 확인 + 녹음 시작 ══
+async function startRecording(){
+  // 이미 녹음 중이면 무시
+  if(_mediaRecorder && _mediaRecorder.state === 'recording') return;
+
+  try {
+    // 마이크 권한 요청
+    _audioStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation:true, noiseSuppression:true }
+    });
+
+    // MediaRecorder 설정 (브라우저 호환성 고려)
+    let mimeType = 'audio/webm;codecs=opus';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/webm';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'audio/mp4';
+    if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = '';
+
+    _mediaRecorder = mimeType
+      ? new MediaRecorder(_audioStream, { mimeType })
+      : new MediaRecorder(_audioStream);
+    _audioChunks = [];
+
+    _mediaRecorder.ondataavailable = (e)=>{
+      if(e.data && e.data.size>0) _audioChunks.push(e.data);
+    };
+
+    _mediaRecorder.start();
+    _recordStartTime = Date.now();
+
+    // 오버레이 표시
+    const overlay = document.getElementById('recordOverlay');
+    if(overlay) overlay.classList.add('show');
+
+    // 타이머 시작
+    updateRecordTimer();
+    _recordTimerInterval = setInterval(updateRecordTimer, 100);
+
+    // 파형 시각화 시작
+    startWaveVisualization();
+
+    // 마이크 버튼 상태
+    const micBtn = document.getElementById('micBtn');
+    if(micBtn) micBtn.classList.add('recording');
+
+  } catch(err){
+    console.error('[Voice] 마이크 권한 오류:', err);
+    if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
+      showToast('🎤 마이크 권한이 필요해요!');
+    } else if(err.name === 'NotFoundError'){
+      showToast('🎤 마이크를 찾을 수 없어요');
+    } else {
+      showToast('🎤 녹음을 시작할 수 없어요');
+    }
+  }
+}
+
+function updateRecordTimer(){
+  const elapsed = Math.floor((Date.now() - _recordStartTime) / 1000);
+  const min = Math.floor(elapsed/60);
+  const sec = elapsed%60;
+  const timer = document.getElementById('recordTimer');
+  if(timer) timer.textContent = min+':'+(sec<10?'0':'')+sec;
+
+  // 60초 자동 종료
+  if(elapsed >= 60){
+    showToast('⏱️ 1분 최대 길이에 도달했어요');
+    stopAndSendRecording();
+  }
+}
+
+// ══ 파형 시각화 (실시간) ══
+function startWaveVisualization(){
+  try {
+    _audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = _audioContext.createMediaStreamSource(_audioStream);
+    _audioAnalyser = _audioContext.createAnalyser();
+    _audioAnalyser.fftSize = 64;
+    source.connect(_audioAnalyser);
+
+    const bars = document.querySelectorAll('#recordWave .record-wave-bar');
+    const dataArray = new Uint8Array(_audioAnalyser.frequencyBinCount);
+
+    function animate(){
+      if(!_audioAnalyser) return;
+      _audioAnalyser.getByteFrequencyData(dataArray);
+      bars.forEach((bar, i)=>{
+        const val = dataArray[i*2] || 0;
+        const h = Math.max(6, (val/255)*50);
+        bar.style.height = h + 'px';
+      });
+      _waveAnimationFrame = requestAnimationFrame(animate);
+    }
+    animate();
+  } catch(e){ console.warn('[Voice] 파형 시각화 실패:', e); }
+}
+
+// ══ 녹음 중단 + 전송 ══
+function stopAndSendRecording(){
+  if(!_mediaRecorder || _mediaRecorder.state !== 'recording'){
+    cleanupRecording();
+    return;
+  }
+
+  _mediaRecorder.onstop = async ()=>{
+    const duration = Math.floor((Date.now() - _recordStartTime) / 1000);
+    const blob = new Blob(_audioChunks, { type: _mediaRecorder.mimeType || 'audio/webm' });
+
+    cleanupRecording();
+
+    // 너무 짧으면 무시
+    if(duration < 1){
+      showToast('🎤 너무 짧아요 (최소 1초)');
+      return;
+    }
+
+    showToast('🎤 음성 전송 중...');
+    await sendVoiceMessage(blob, duration);
+  };
+
+  _mediaRecorder.stop();
+}
+
+// ══ 취소 ══
+function cancelRecording(){
+  if(_mediaRecorder && _mediaRecorder.state === 'recording'){
+    _mediaRecorder.onstop = ()=>{ cleanupRecording(); };
+    _mediaRecorder.stop();
+  } else {
+    cleanupRecording();
+  }
+  showToast('❌ 녹음 취소됨');
+}
+
+function cleanupRecording(){
+  // 스트림 정지
+  if(_audioStream){
+    _audioStream.getTracks().forEach(t=>t.stop());
+    _audioStream = null;
+  }
+  // 타이머
+  if(_recordTimerInterval){ clearInterval(_recordTimerInterval); _recordTimerInterval = null; }
+  // 파형
+  if(_waveAnimationFrame){ cancelAnimationFrame(_waveAnimationFrame); _waveAnimationFrame = null; }
+  if(_audioContext){ try{ _audioContext.close(); }catch(e){} _audioContext = null; }
+  _audioAnalyser = null;
+
+  // UI 원복
+  const overlay = document.getElementById('recordOverlay');
+  if(overlay) overlay.classList.remove('show');
+  const micBtn = document.getElementById('micBtn');
+  if(micBtn) micBtn.classList.remove('recording');
+  _mediaRecorder = null;
+  _audioChunks = [];
+}
+
+// ══ 음성 메시지 전송 (Firebase Storage + DB) ══
+async function sendVoiceMessage(blob, duration){
+  if(!_currentRoom){
+    showToast('❌ 대화방이 없어요');
+    return;
+  }
+
+  // Blob → Base64 (Firebase Storage 없어도 로컬 재생 가능하게 임시)
+  // 실제로는 Firebase Storage 업로드 해야 함 — 지금은 Data URL로
+  const reader = new FileReader();
+  reader.onloadend = ()=>{
+    const dataUrl = reader.result;
+
+    // 메시지 생성
+    const msg = {
+      from: _myCode,
+      voice: dataUrl,       // Base64 음성 데이터
+      duration: duration,
+      t: Date.now(),
+      read: false
+    };
+
+    const room = _rooms[_currentRoom];
+    if(!room) return;
+    if(!room.msgs) room.msgs = [];
+    room.msgs.push(msg);
+    room.lastMsg = '🎤 음성 메시지 ('+duration+'초)';
+    room.lastTime = Date.now();
+    saveRooms();
+    renderMessages();
+    showToast('✅ 음성 전송 완료');
+
+    // 연습방이면 Xy가 음성으로 응답
+    if(room.isPractice){
+      setTimeout(()=>xyVoiceReply(duration), 800);
+    }
+
+    // Firebase 전송 (실제 유저 방)
+    if(!room.isPractice && _cgoFb && _myCode !== XY_PRACTICE_CODE){
+      try {
+        const roomId = [_myCode, _currentRoom].sort().join('_');
+        dbRef('cgm2/chats/'+roomId+'/msgs').push({
+          from: _myCode,
+          voice: dataUrl.slice(0, 500000), // 크기 제한 (Firebase 무료 제약)
+          duration: duration,
+          t: Date.now()
+        });
+      } catch(e){ console.warn('[Voice] Firebase 전송 실패:', e); }
+    }
+  };
+  reader.readAsDataURL(blob);
+}
+
+// ══ 음성 재생 ══
+let _currentAudio = null;
+function playVoice(msgId, dataUrl){
+  // 기존 재생 중지
+  if(_currentAudio){
+    _currentAudio.pause();
+    _currentAudio = null;
+    document.querySelectorAll('.voice-play.playing').forEach(b=>b.classList.remove('playing'));
+  }
+
+  const btn = document.getElementById(msgId);
+  if(!btn) return;
+
+  // 재생 중인 버튼이면 정지
+  if(btn.classList.contains('playing')){
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    return;
+  }
+
+  // 새 재생
+  _currentAudio = new Audio(dataUrl);
+  btn.classList.add('playing');
+  btn.textContent = '⏸';
+
+  _currentAudio.onended = ()=>{
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    _currentAudio = null;
+  };
+
+  _currentAudio.play().catch(e=>{
+    console.warn('[Voice] 재생 실패:', e);
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+  });
+}
+
+// ══ Xy 음성 응답 (연습방 전용 축하) ══
+function xyVoiceReply(duration){
+  const room = _rooms[XY_PRACTICE_CODE];
+  if(!room) return;
+  // 짧은 축하 메시지
+  const messages = [
+    '와! '+duration+'초 음성 메시지를 잘 보내셨어요! 🎉',
+    '이렇게 음성으로 대화할 수 있어요. 글자 몰라도 괜찮아요 😊',
+    '자이를 음성으로 부르고 싶으시면 이따 🎤 길게 누르고 "자이야" 라고 말해보세요!'
+  ];
+  sendXyMessageSequence(messages, 500);
+}
+
+// ══ 자이 음성 호출 (마이크 길게 누르면 "자이야" 인식) ══
+// TODO: Phase 3 확장 — Web Speech API로 실시간 음성 인식
+// 지금은 기본 음성 메시지만 구현, 추후 wake word 감지 추가
+
+// ══ Text-to-Speech: 자이 답변을 음성으로 읽어주기 ══
+function speakXy(text){
+  if(!('speechSynthesis' in window)) return;
+  try {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'ko-KR';
+    utter.rate = 1.0;
+    utter.pitch = 1.15; // 친근한 톤
+    utter.volume = 0.9;
+    // 한국어 음성 있으면 선택
+    const voices = speechSynthesis.getVoices();
+    const korVoice = voices.find(v=>v.lang.startsWith('ko'));
+    if(korVoice) utter.voice = korVoice;
+    speechSynthesis.cancel(); // 기존 재생 취소
+    speechSynthesis.speak(utter);
+  } catch(e){ console.warn('[TTS] 실패:', e); }
+}
+
+// 🔊 자이 음성 응답 토글 (할머니 친화 모드)
+window._xyVoiceOn = false;
+function toggleXyVoice(){
+  window._xyVoiceOn = !window._xyVoiceOn;
+  const btn = document.getElementById('voiceOutBtn');
+  if(window._xyVoiceOn){
+    btn.textContent = '🔊 ON';
+    btn.classList.add('active');
+    showToast('🔊 자이 음성 응답 ON — 자이가 말해줘요!');
+    // 테스트 발화
+    setTimeout(()=>speakXy('자이 음성이 켜졌어요'), 300);
+  } else {
+    btn.textContent = '🔊 OFF';
+    btn.classList.remove('active');
+    if(window.speechSynthesis) speechSynthesis.cancel();
+    showToast('🔊 자이 음성 응답 OFF');
+  }
+}
+
 // ══ ✨ Xy (자이) AI — 3자 대화 ══
 function xyReply(userText){
   const room = _rooms[_currentRoom];
@@ -1686,7 +2197,10 @@ function xyReply(userText){
     '원칙: 3문장 이내로 핵심만. 두 사람 중 한 편 들지 않고 중립. 이모지 1-2개로 톤 조절. ' +
     '추천 요청 시 구체적 선택지 2-3개 제시. 모르는 건 솔직히 "그건 확실치 않아요"라고 말함. ' +
     '최신 뉴스·실시간 시세는 학습 시점 이후는 정확하지 않을 수 있다고 고지함. ' +
-    '대화 흐름상 불필요하면 짧게 끝냄. 한국어가 기본, 유저가 영어로 물으면 영어로 답변.';
+    '대화 흐름상 불필요하면 짧게 끝냄. ' +
+    '**매우 중요: 한국어로만 응답하세요. 한자(漢字)나 중국어 문자는 절대 사용하지 마세요. ' +
+    '"話" 대신 "이야기", "對話" 대신 "대화", "時間" 대신 "시간"처럼 순수 한글만 사용하세요.** ' +
+    '유저가 영어로 물으면 영어로 답변해도 됩니다.';
 
   fetch('/api/groq', {
     method:'POST',
@@ -1708,6 +2222,12 @@ function xyReply(userText){
     loadMsg.loading = false;
     saveRooms();
     renderMessages();
+    // 🔊 할머니 친화 모드: 자이 답변을 음성으로도 읽어주기 (옵션)
+    if(window._xyVoiceOn){
+      // 이모지 제거 후 TTS
+      const speakText = reply.trim().replace(/[\u{1F600}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
+      speakXy(speakText);
+    }
   }).catch(()=>{
     loadMsg.text = '✨ Xy: 잠시 후 다시 불러주세요 🙏';
     loadMsg.loading = false;
