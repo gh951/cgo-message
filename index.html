@@ -254,82 +254,93 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
    카메라: 무지개 간섭으로 글자 가려짐
    ⚠️ 성능: GPU 가속만 사용, 렉 없음
 ════════════════════════════ */
-/* RGB 모드(= 홀로그램 비닐) 활성화 시 — 모든 말풍선 위에 투명 비닐 */
+/* ════════════════════════════
+   🎨 기만 패턴 + 역광 방어 (세계 최초 #8 v3)
+   대장님 발명: 
+   - 여린 글자 (인간만 읽음)
+   - 가짜 글자 덧씌움 (카메라/OCR 오인)
+   - 역광 (카메라 노출 혼란)
+   학술명: Adversarial Perturbation Defense
+════════════════════════════ */
+/* RGB 모드 = 기만+역광 ON */
 .rgb-mode .msg-bubble,
 .rgb-mode .xy-bubble{
   position:relative;
-  overflow:hidden; /* 비닐이 밖으로 나오지 않게 */
+  overflow:hidden;
+  /* 흰 종이 느낌 배경 */
+  background:linear-gradient(135deg,#fffef8 0%,#fff9e6 100%) !important;
+  border-color:rgba(200,180,100,.3) !important;
 }
 
-/* ✨ 편광 필름 레이어 (::before) — 홀로그램 비닐 아래 깔림
-   실제 편광 필름의 줄무늬 간섭 패턴 시뮬레이션
-   인간 눈: 살짝 반짝이는 질감
-   카메라: 줄무늬 + 모아레 간섭 → 글자 판독 방해 */
+/* 진짜 글자 — 여린 회색으로, 인간만 눈치챌 수 있게 */
+.rgb-mode .msg-char{
+  color:rgba(120,120,120,.75) !important;
+  /* ✨ 역광 효과 — 글자 주변에 강한 흰빛 */
+  text-shadow:
+    0 0 4px #fff,
+    0 0 8px #fff,
+    0 0 14px rgba(255,255,230,.9),
+    0 0 24px rgba(255,255,200,.7) !important;
+  animation:backlightPulse 2.4s ease-in-out infinite !important;
+  position:relative;
+  z-index:2;
+}
+/* 역광 깜빡임 — 카메라 자동노출 혼란 유도 */
+@keyframes backlightPulse{
+  0%,100%{
+    text-shadow:
+      0 0 4px #fff,
+      0 0 8px #fff,
+      0 0 14px rgba(255,255,230,.9),
+      0 0 24px rgba(255,255,200,.7);
+  }
+  50%{
+    text-shadow:
+      0 0 6px #fff,
+      0 0 14px #fff,
+      0 0 22px rgba(255,255,230,1),
+      0 0 40px rgba(255,255,200,.9),
+      0 0 60px rgba(255,255,180,.6);
+  }
+}
+
+/* 🎭 기만 패턴 레이어 — 가짜 자음/모음이 말풍선 뒤에 깔림
+   인간 뇌: "배경 장식" 무시하고 진짜 글자만 읽음
+   AI/OCR: 가짜 글자까지 인식 → 판독 실패
+   카메라: 과다 노출로 가짜/진짜 구분 불가 */
 .rgb-mode .msg-bubble::before,
 .rgb-mode .xy-bubble::before{
-  content:'';
+  content:'가나다라마바사아자차카타파하거너더러머버서어저처커터퍼허고노도로모보소오조초코토포호구누두루무부수우주추쿠투푸후그느드르므브스으즈츠크트프흐기니디리미비시이지치키티피히';
   position:absolute;
   inset:0;
   pointer-events:none;
   z-index:1;
-  /* 편광 줄무늬 패턴 — 45도 대각선 미세 선 */
-  background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255,255,255,.08) 0px,
-      rgba(255,255,255,.08) 0.5px,
-      transparent 0.5px,
-      transparent 2px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(0,200,255,.06) 0px,
-      rgba(0,200,255,.06) 0.5px,
-      transparent 0.5px,
-      transparent 3px
-    );
-  mix-blend-mode:overlay;
-  /* 편광 각도 미세 회전 — 카메라 셔터 타이밍과 어긋나게 */
-  animation:polarizationShift 5s ease-in-out infinite;
-  opacity:.9;
+  /* 여린 가짜 글자 — OCR이 걸릴 만큼 보이되, 인간은 배경 취급 */
+  color:rgba(150,150,150,.28);
+  font-size:11px;
+  letter-spacing:2px;
+  line-height:1.5;
+  font-weight:400;
+  padding:6px;
+  overflow:hidden;
+  word-break:break-all;
+  transform:rotate(-3deg);
+  filter:blur(.3px);
+  animation:decoyDrift 6s ease-in-out infinite;
 }
-@keyframes polarizationShift{
-  0%,100%{ transform:translateX(0) skewX(0deg); opacity:.8; }
-  50%    { transform:translateX(1px) skewX(.5deg); opacity:1; }
+/* 가짜 글자 미세 이동 — 카메라 찍을 때마다 다른 글자로 혼란 */
+@keyframes decoyDrift{
+  0%,100%{ transform:rotate(-3deg) translateX(0); }
+  50%    { transform:rotate(-3deg) translateX(3px); }
 }
 
-/* ✨ 홀로그램 비닐 — 말풍선 전체 덮는 투명 필름 */
-.rgb-mode .msg-bubble::after,
-.rgb-mode .xy-bubble::after{
-  content:'';
-  position:absolute;
-  inset:0;
-  pointer-events:none; /* 비닐 아래 글자 선택/클릭 가능 */
-  z-index:2;
-  /* 무지개 홀로그램 패턴 (진짜 홀로그램 카드 느낌) */
-  background:
-    linear-gradient(
-      110deg,
-      rgba(255,0,128,.22) 0%,
-      rgba(255,180,0,.22) 15%,
-      rgba(180,255,0,.22) 30%,
-      rgba(0,255,200,.22) 45%,
-      rgba(0,150,255,.22) 60%,
-      rgba(180,0,255,.22) 75%,
-      rgba(255,0,128,.22) 90%,
-      rgba(255,180,0,.22) 100%
-    );
-  background-size:400% 100%;
-  animation:hologramShift 4s linear infinite;
-  mix-blend-mode:overlay; /* 글자와 섞이면서 반짝 효과 */
-  opacity:.85;
+/* Xy 보안 모드일 때도 기만 패턴 유지하되 Xy 분홍 톤 유지 */
+.rgb-mode .msg-wrap.xy .xy-bubble,
+.rgb-mode .msg-wrap.xy.xy-secure .msg-bubble.secure-mode{
+  background:linear-gradient(135deg,#fffef8 0%,#ffe8f0 100%) !important;
 }
-/* 홀로그램 움직임 — 지폐 홀로그램처럼 기울이면 색이 흘러가는 효과 */
-@keyframes hologramShift{
-  0%{ background-position:0% 50%; }
-  100%{ background-position:400% 50%; }
-}
-/* RGB 버튼 활성화 시각 효과 (변경 없음 — 기존 버튼 빛 유지) */
+
+
 
 /* 보안 모드 말풍선 - 배경 투명하게 (글자만 보임) */
 .msg-bubble.secure-mode{
@@ -2518,12 +2529,12 @@ function toggleRGB(){
     btn.classList.add('active');
     btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
     if(msgArea) msgArea.classList.add('rgb-mode');
-    showToast('🌈 홀로그램 + 편광 필름 ON!');
+    showToast('📄 기만 패턴 + 역광 방어 ON!');
   } else {
     btn.classList.remove('active');
     btn.style.boxShadow = '';
     if(msgArea) msgArea.classList.remove('rgb-mode');
-    showToast('🌈 필름 OFF');
+    showToast('📄 방어 OFF');
   }
 }
 
