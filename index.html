@@ -521,6 +521,18 @@ input[type=range].sec-range::-moz-range-thumb{
 .msg-wrap.xy .msg-meta{font-size:10px;color:var(--text3);margin-top:4px;text-align:center;}
 .xy-loading{opacity:.7;font-style:italic;}
 
+/* ⚠ C-19 v16 핀셋 CSS: 보안 모드에서 Xy 이중 박스 + 4곳 반복 동시 해결 */
+/* xy-bubble이 핑크 박스 역할, 내부 msg-bubble은 투명 껍데기만 (이중 박스 제거) */
+/* overflow:hidden으로 네온 스크롤 반복본이 옆으로 새는 것도 클립 (4곳 반복 해결) */
+.msg-wrap.xy .xy-bubble > .msg-bubble.secure-mode{
+  background:none;
+  border:none;
+  padding:0;
+  border-radius:0;
+  box-shadow:none;
+  overflow:hidden;
+}
+
 /* ════════════════════════════
    환영 팝업 + Xy 연습방 (Phase 1 by C-18)
 ════════════════════════════ */
@@ -1804,13 +1816,13 @@ function renderMessages(){
       const txt = String(msg.text||'').replace(/^✨ Xy:\s*/,'');
       const loadingCls = msg.loading ? ' xy-loading' : '';
       // 🛡️ 보안 모드 ON + 로딩중 아닐 때: Xy 메시지도 네온 스크롤 적용 (대장님 피드백 반영)
-      // ⚠ C-19 핀셋 수정: xy-bubble 래퍼 제거 (이중 박스 버그 해결, v15)
-      //   이전: <div class="xy-bubble">${makeSecureBubble(txt)}</div> → 핑크박스+msg-bubble 이중겹침
-      //   현재: makeSecureBubble 결과를 바로 삽입 → 일반 메시지와 동일한 네온 스크롤 흐름
+      // ⚠ C-19 v16 핀셋: xy-bubble 래퍼 **복구** (v15에서 제거했던 걸 되돌림)
+      //   v15 문제: 래퍼 제거하니 overflow 클립 풀려서 네온 스크롤 반복본이 4곳에서 떠 보였음
+      //   v16 해결: 래퍼는 복구 + CSS로 내부 msg-bubble만 투명화 (아래 .msg-wrap.xy .xy-bubble > .msg-bubble.secure-mode)
       if(_secOn && !msg.loading){
         html += `<div class="msg-wrap xy">
           <div class="msg-sender">✨ Xy</div>
-          ${makeSecureBubble(txt)}
+          <div class="xy-bubble">${makeSecureBubble(txt)}</div>
           <div class="msg-meta">${time}</div>
         </div>`;
       } else {
