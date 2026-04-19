@@ -1804,10 +1804,13 @@ function renderMessages(){
       const txt = String(msg.text||'').replace(/^✨ Xy:\s*/,'');
       const loadingCls = msg.loading ? ' xy-loading' : '';
       // 🛡️ 보안 모드 ON + 로딩중 아닐 때: Xy 메시지도 네온 스크롤 적용 (대장님 피드백 반영)
+      // ⚠ C-19 핀셋 수정: xy-bubble 래퍼 제거 (이중 박스 버그 해결, v15)
+      //   이전: <div class="xy-bubble">${makeSecureBubble(txt)}</div> → 핑크박스+msg-bubble 이중겹침
+      //   현재: makeSecureBubble 결과를 바로 삽입 → 일반 메시지와 동일한 네온 스크롤 흐름
       if(_secOn && !msg.loading){
         html += `<div class="msg-wrap xy">
           <div class="msg-sender">✨ Xy</div>
-          <div class="xy-bubble">${makeSecureBubble(txt)}</div>
+          ${makeSecureBubble(txt)}
           <div class="msg-meta">${time}</div>
         </div>`;
       } else {
