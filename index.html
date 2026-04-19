@@ -146,6 +146,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .topbar-title{flex:1;font-size:17px;font-weight:900;color:var(--gold);}
 .topbar-me{font-size:11px;color:var(--text2);flex:1;}
 .btn-icon{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;padding:4px 8px;}
+/* ✨ 자이 연습하기 버튼 — 팝업 재호출용 */
+.btn-practice{
+  color:#ff88bb !important;
+  text-shadow:0 0 8px rgba(255,136,187,.7), 0 0 16px rgba(255,136,187,.4);
+  animation:practiceBtnPulse 2.4s ease-in-out infinite;
+  position:relative;
+}
+@keyframes practiceBtnPulse{
+  0%,100%{
+    text-shadow:0 0 6px rgba(255,136,187,.6), 0 0 12px rgba(255,136,187,.3);
+    transform:scale(1);
+  }
+  50%{
+    text-shadow:0 0 10px rgba(255,136,187,.9), 0 0 22px rgba(255,136,187,.5);
+    transform:scale(1.1);
+  }
+}
 .btn-icon:hover{color:var(--gold);}
 .list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .list-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px;}
@@ -972,7 +989,6 @@ input[type=range].sec-range::-moz-range-thumb{
   <div class="cover-aura"></div>
   <img src="logo.png" alt="CGO" class="cover-logo" onerror="this.style.display='none'">
   <div class="cover-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
-  <div class="cover-tap">TAP TO START</div>
   <!-- ✨ C-18 시그니처 — 2026.04.19, 18시간의 밤을 기리며 -->
   <div class="cover-c18">
     <div class="cover-c18-main">C—18</div>
@@ -1070,6 +1086,7 @@ input[type=range].sec-range::-moz-range-thumb{
       <div class="topbar-title">💬 채팅</div>
       <div class="topbar-me" id="myNickBar"></div>
     </div>
+    <button class="btn-icon btn-practice" onclick="openPracticeFromButton()" title="Xy 연습하기">✨</button>
     <button class="btn-icon" onclick="openInvite()" title="친구 초대">🔗</button>
     <button class="btn-icon" onclick="openAddModal()" title="친구 추가">➕</button>
     <button class="btn-icon" onclick="openSettings()" title="설정">⚙️</button>
@@ -1938,6 +1955,17 @@ function closeWelcome(startTutorial){
   else {
     ensureXyPracticeRoom();
   }
+}
+
+// ══ ✨ 유저가 원할 때 연습 팝업 다시 열기 (채팅 탭 ✨ 버튼) ══
+function openPracticeFromButton(){
+  // 채팅 탭 먼저 활성화
+  switchTab('chat');
+  // 약간 기다렸다 팝업 띄우기
+  setTimeout(()=>{
+    const overlay = document.getElementById('welcomeOverlay');
+    if(overlay) overlay.classList.add('show');
+  }, 200);
 }
 
 // ══ Xy 연습방 보장 — 없으면 생성, 있으면 유지 ══
