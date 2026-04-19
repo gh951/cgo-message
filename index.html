@@ -1786,11 +1786,20 @@ function renderMessages(){
     if(isXy){
       const txt = String(msg.text||'').replace(/^✨ Xy:\s*/,'');
       const loadingCls = msg.loading ? ' xy-loading' : '';
-      html += `<div class="msg-wrap xy">
-        <div class="msg-sender">✨ Xy</div>
-        <div class="xy-bubble${loadingCls}">${escHtml(txt)}</div>
-        <div class="msg-meta">${time}</div>
-      </div>`;
+      // 🛡️ 보안 모드 ON + 로딩중 아닐 때: Xy 메시지도 네온 스크롤 적용 (대장님 피드백 반영)
+      if(_secOn && !msg.loading){
+        html += `<div class="msg-wrap xy">
+          <div class="msg-sender">✨ Xy</div>
+          <div class="xy-bubble">${makeSecureBubble(txt)}</div>
+          <div class="msg-meta">${time}</div>
+        </div>`;
+      } else {
+        html += `<div class="msg-wrap xy">
+          <div class="msg-sender">✨ Xy</div>
+          <div class="xy-bubble${loadingCls}">${escHtml(txt)}</div>
+          <div class="msg-meta">${time}</div>
+        </div>`;
+      }
       return;
     }
     // 🎤 음성 메시지
