@@ -260,6 +260,44 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   position:relative;
   overflow:hidden; /* 비닐이 밖으로 나오지 않게 */
 }
+
+/* ✨ 편광 필름 레이어 (::before) — 홀로그램 비닐 아래 깔림
+   실제 편광 필름의 줄무늬 간섭 패턴 시뮬레이션
+   인간 눈: 살짝 반짝이는 질감
+   카메라: 줄무늬 + 모아레 간섭 → 글자 판독 방해 */
+.rgb-mode .msg-bubble::before,
+.rgb-mode .xy-bubble::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+  /* 편광 줄무늬 패턴 — 45도 대각선 미세 선 */
+  background:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,.08) 0px,
+      rgba(255,255,255,.08) 0.5px,
+      transparent 0.5px,
+      transparent 2px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(0,200,255,.06) 0px,
+      rgba(0,200,255,.06) 0.5px,
+      transparent 0.5px,
+      transparent 3px
+    );
+  mix-blend-mode:overlay;
+  /* 편광 각도 미세 회전 — 카메라 셔터 타이밍과 어긋나게 */
+  animation:polarizationShift 5s ease-in-out infinite;
+  opacity:.9;
+}
+@keyframes polarizationShift{
+  0%,100%{ transform:translateX(0) skewX(0deg); opacity:.8; }
+  50%    { transform:translateX(1px) skewX(.5deg); opacity:1; }
+}
+
 /* ✨ 홀로그램 비닐 — 말풍선 전체 덮는 투명 필름 */
 .rgb-mode .msg-bubble::after,
 .rgb-mode .xy-bubble::after{
@@ -2480,12 +2518,12 @@ function toggleRGB(){
     btn.classList.add('active');
     btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
     if(msgArea) msgArea.classList.add('rgb-mode');
-    showToast('🌈 홀로그램 비닐 ON — 카메라 방어!');
+    showToast('🌈 홀로그램 + 편광 필름 ON!');
   } else {
     btn.classList.remove('active');
     btn.style.boxShadow = '';
     if(msgArea) msgArea.classList.remove('rgb-mode');
-    showToast('🌈 홀로그램 비닐 OFF');
+    showToast('🌈 필름 OFF');
   }
 }
 
