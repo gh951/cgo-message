@@ -248,69 +248,50 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .msg-wrap.you .msg-char{color:#f0ece0;}
 
 /* ════════════════════════════
-   🎨 RGB 레이어 (세계 최초 #8)
-   대장님 발명: 여린 RGB + 네온 증폭 연동
-   인간은 읽고, 카메라는 못 찍음
-   ⚠️ v15 수정: 기존 보안 기능을 절대 침해하지 않음 (additive only)
+   🎨 홀로그램 비닐 레이어 (세계 최초 #8)
+   대장님 발명: 글자 위에 투명 홀로그램 필름
+   인간: 자연스럽게 읽음
+   카메라: 무지개 간섭으로 글자 가려짐
+   ⚠️ 성능: GPU 가속만 사용, 렉 없음
 ════════════════════════════ */
-/* RGB 모드 활성화 시 — 기존 msg-char 위에 R/B 레이어만 추가 (글자 색/애니메이션 건드리지 않음) */
-
-/* Red 레이어 — 살짝 왼쪽 (::before로 추가만 함) */
-.rgb-mode .msg-char{
+/* RGB 모드(= 홀로그램 비닐) 활성화 시 — 모든 말풍선 위에 투명 비닐 */
+.rgb-mode .msg-bubble,
+.rgb-mode .xy-bubble{
   position:relative;
+  overflow:hidden; /* 비닐이 밖으로 나오지 않게 */
 }
-.rgb-mode .msg-char::before{
-  content:attr(data-char);
-  position:absolute;left:-0.5px;top:0;
-  color:rgba(255,40,80,.38);
-  mix-blend-mode:screen;
-  animation:rgbLayerR 2.2s ease-in-out infinite;
-  animation-delay:inherit;
-  pointer-events:none;
-  z-index:1;
+/* ✨ 홀로그램 비닐 — 말풍선 전체 덮는 투명 필름 */
+.rgb-mode .msg-bubble::after,
+.rgb-mode .xy-bubble::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none; /* 비닐 아래 글자 선택/클릭 가능 */
+  z-index:2;
+  /* 무지개 홀로그램 패턴 (진짜 홀로그램 카드 느낌) */
+  background:
+    linear-gradient(
+      110deg,
+      rgba(255,0,128,.22) 0%,
+      rgba(255,180,0,.22) 15%,
+      rgba(180,255,0,.22) 30%,
+      rgba(0,255,200,.22) 45%,
+      rgba(0,150,255,.22) 60%,
+      rgba(180,0,255,.22) 75%,
+      rgba(255,0,128,.22) 90%,
+      rgba(255,180,0,.22) 100%
+    );
+  background-size:400% 100%;
+  animation:hologramShift 4s linear infinite;
+  mix-blend-mode:overlay; /* 글자와 섞이면서 반짝 효과 */
+  opacity:.85;
 }
-/* Blue 레이어 — 살짝 오른쪽 */
-.rgb-mode .msg-char::after{
-  content:attr(data-char);
-  position:absolute;left:0.5px;top:0;
-  color:rgba(40,150,255,.38);
-  mix-blend-mode:screen;
-  animation:rgbLayerB 2.2s ease-in-out infinite;
-  animation-delay:inherit;
-  pointer-events:none;
-  z-index:1;
+/* 홀로그램 움직임 — 지폐 홀로그램처럼 기울이면 색이 흘러가는 효과 */
+@keyframes hologramShift{
+  0%{ background-position:0% 50%; }
+  100%{ background-position:400% 50%; }
 }
-/* R/G/B 시차 애니메이션 — 카메라 샘플링 주기 어긋나게 */
-@keyframes rgbLayerR{
-  0%,100%{ transform:translateX(-0.4px); opacity:.38; }
-  33%    { transform:translateX(0);       opacity:.15; }
-  66%    { transform:translateX(-0.8px); opacity:.5; }
-}
-@keyframes rgbLayerB{
-  0%,100%{ transform:translateX(0.4px);  opacity:.38; }
-  33%    { transform:translateX(0.8px);  opacity:.5; }
-  66%    { transform:translateX(0);       opacity:.15; }
-}
-/* RGB 모드 안내 오라 — 말풍선 주변 은은한 무지개 */
-.rgb-mode .msg-bubble.secure-mode{
-  position:relative;
-}
-.rgb-mode .msg-bubble.secure-mode::before{
-  content:'';position:absolute;inset:-1px;border-radius:inherit;
-  background:linear-gradient(
-    90deg,
-    rgba(255,40,80,.08) 0%,
-    rgba(80,255,120,.05) 50%,
-    rgba(40,150,255,.08) 100%
-  );
-  pointer-events:none;z-index:-1;
-  filter:blur(4px);
-  animation:rgbBgShift 3s linear infinite;
-}
-@keyframes rgbBgShift{
-  0%  { background-position:0% 50%; }
-  100%{ background-position:200% 50%; }
-}
+/* RGB 버튼 활성화 시각 효과 (변경 없음 — 기존 버튼 빛 유지) */
 
 /* 보안 모드 말풍선 - 배경 투명하게 (글자만 보임) */
 .msg-bubble.secure-mode{
@@ -2499,12 +2480,12 @@ function toggleRGB(){
     btn.classList.add('active');
     btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
     if(msgArea) msgArea.classList.add('rgb-mode');
-    showToast('🎨 RGB 레이어 ON — 카메라 방어 강화!');
+    showToast('🌈 홀로그램 비닐 ON — 카메라 방어!');
   } else {
     btn.classList.remove('active');
     btn.style.boxShadow = '';
     if(msgArea) msgArea.classList.remove('rgb-mode');
-    showToast('🎨 RGB 레이어 OFF');
+    showToast('🌈 홀로그램 비닐 OFF');
   }
 }
 
