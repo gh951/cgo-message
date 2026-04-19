@@ -272,16 +272,46 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   border-color:rgba(200,180,100,.3) !important;
 }
 
-/* 진짜 글자 — 인간이 편하게 읽되 카메라는 방해 */
+/* 진짜 글자 — 인간이 편하게 읽되 카메라는 방해 
+   대장님 설계: 한 글자씩 순차적으로 반짝 (파도처럼)
+   - 기본: 글자 보임 (opacity 1)
+   - 자기 차례: 짧게 과노출 (밝은 섬광)
+   - 인간: 9/10 글자는 항상 보임 → 읽기 OK
+   - 카메라: 찍는 순간 1글자는 과노출 → 글자 1개 판독 불가 */
 .rgb-mode .msg-char{
   color:#333 !important;
   font-weight:600 !important;
-  /* ✨ 은은한 역광 (카메라 노출 혼란용, 인간은 읽기 편함) */
-  text-shadow:
-    0 0 2px rgba(255,255,255,1),
-    0 0 5px rgba(255,255,220,.5) !important;
   position:relative;
   z-index:2;
+  display:inline-block;
+  /* 순차 반짝 — 대부분 보이고, 자기 순서에만 짧게 섬광 */
+  animation:sweepFlash 1.5s linear infinite !important;
+}
+/* 핵심: 대부분 보이다가 자기 순간에만 화이트아웃 */
+@keyframes sweepFlash{
+  /* 0~90%: 평소 모습 (검은 글자 + 살짝 배경광) */
+  0%, 90% {
+    color:#333;
+    text-shadow:
+      0 0 2px rgba(255,255,255,.9),
+      0 0 4px rgba(255,255,220,.4);
+  }
+  /* 92~95%: 섬광 순간 (글자 주변이 번쩍 밝아짐 — 카메라 과노출 유도) */
+  92%, 95% {
+    color:#fff;
+    text-shadow:
+      0 0 4px #fff,
+      0 0 12px #fff,
+      0 0 24px rgba(255,255,200,1),
+      0 0 40px rgba(255,255,180,.8);
+  }
+  /* 97~100%: 빠르게 복귀 */
+  97%, 100% {
+    color:#333;
+    text-shadow:
+      0 0 2px rgba(255,255,255,.9),
+      0 0 4px rgba(255,255,220,.4);
+  }
 }
 
 /* 🎭 기만 패턴 레이어 — 가짜 자음/모음이 말풍선 뒤에 깔림
@@ -1849,6 +1879,18 @@ function renderMessages(){
           ${makeSecureBubble(txt)}
           <div class="msg-meta">${time}</div>
         </div>`;
+      } else if(_rgbOn && !msg.loading){
+        // 💡 RGB 순차 반짝 모드에서 Xy 메시지도 글자별 span 적용
+        const chars = Array.from(txt);
+        const blinkHtml = chars.map((c,i)=>{
+          const d = (i * 0.1).toFixed(2);
+          return `<span class="msg-char" style="animation-delay:${d}s">${escHtml(c)}</span>`;
+        }).join('');
+        html += `<div class="msg-wrap xy">
+          <div class="msg-sender">✨ Xy</div>
+          <div class="xy-bubble">${blinkHtml}</div>
+          <div class="msg-meta">${time}</div>
+        </div>`;
       } else {
         html += `<div class="msg-wrap xy">
           <div class="msg-sender">✨ Xy</div>
@@ -1878,7 +1920,21 @@ function renderMessages(){
       </div>`;
       return;
     }
-    const bubble = _secOn ? makeSecureBubble(msg.text) : `<div class="msg-bubble">${escHtml(msg.text)}</div>`;
+    // 💡 RGB(순차 반짝 방어) ON: 보안 OFF여도 글자별 span으로 감싸서 순차 반짝 적용
+    let bubble;
+    if(_secOn){
+      bubble = makeSecureBubble(msg.text);
+    } else if(_rgbOn){
+      const chars = Array.from(String(msg.text||''));
+      const blinkHtml = chars.map((c,i)=>{
+        // 각 글자마다 0.1초씩 밀어서 순차 반짝 (10글자면 1초 주기로 한 바퀴)
+        const d = (i * 0.1).toFixed(2);
+        return `<span class="msg-char" style="animation-delay:${d}s">${escHtml(c)}</span>`;
+      }).join('');
+      bubble = `<div class="msg-bubble">${blinkHtml}</div>`;
+    } else {
+      bubble = `<div class="msg-bubble">${escHtml(msg.text)}</div>`;
+    }
     html += `<div class="msg-wrap ${isMe?'me':'you'}">
       ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
       ${bubble}
@@ -2508,13 +2564,15 @@ function toggleRGB(){
     btn.classList.add('active');
     btn.style.boxShadow = '0 0 14px rgba(255,255,255,.5)';
     if(msgArea) msgArea.classList.add('rgb-mode');
-    showToast('📄 카메라 방어 ON!');
+    showToast('⚡ 순차 반짝 방어 ON!');
   } else {
     btn.classList.remove('active');
     btn.style.boxShadow = '';
     if(msgArea) msgArea.classList.remove('rgb-mode');
-    showToast('📄 카메라 방어 OFF');
+    showToast('⚡ 순차 반짝 방어 OFF');
   }
+  // 💡 메시지 재렌더링 (글자별 span 재생성/제거)
+  if(_currentRoom) renderMessages();
 }
 
 // ✨ Xy 활성화 상태 (ON 일 때만 대화에 끼어듦)
