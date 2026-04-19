@@ -9,6 +9,9 @@
 <meta name="theme-color" content="#060d1a">
 <title>CGO MESSAGE</title>
 <link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
 <style>
 :root{
   --bg:#060d1a;--bg2:#0a1628;--bg3:#0f1e35;
@@ -26,6 +29,23 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* ── 화면 전환 ── */
 .screen{display:none;flex-direction:column;height:100%;position:fixed;inset:0;background:var(--bg);}
 .screen.active{display:flex;}
+
+/* ════════════════════════════
+   SCREEN 0: 로그인
+════════════════════════════ */
+#scrLogin{align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);}
+.login-card{width:100%;max-width:360px;padding:36px 28px 32px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.35);border-radius:22px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 40px rgba(0,0,0,.12);}
+.login-logo{width:110px;height:110px;margin:0 auto 28px;display:block;border-radius:50%;object-fit:contain;}
+.login-logo-fallback{width:110px;height:110px;margin:0 auto 28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#c94242,#d4a843 50%,#2a4a7a);border-radius:50%;font-size:36px;font-weight:900;color:#fff;letter-spacing:-.04em;font-family:'Times New Roman',serif;box-shadow:0 6px 20px rgba(0,0,0,.18);}
+.login-label{display:block;font-size:11px;font-weight:800;color:#2a4a6a;letter-spacing:.14em;margin:14px 0 6px;text-transform:uppercase;}
+.login-input{width:100%;padding:13px 16px;background:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:10px;font-size:15px;color:#1a2a3a;font-family:var(--font);outline:none;box-shadow:inset 0 1px 3px rgba(0,0,0,.06);}
+.login-input:focus{border-color:#d4a843;}
+.login-input::placeholder{color:#aab;}
+.login-btn{width:100%;margin-top:22px;padding:15px;background:linear-gradient(180deg,#e8c86b,#c99a30);border:1px solid #a8801f;border-radius:10px;color:#1a1408;font-size:16px;font-weight:900;letter-spacing:.12em;cursor:pointer;font-family:var(--font);box-shadow:0 4px 12px rgba(168,128,31,.3);}
+.login-btn:hover{filter:brightness(1.05);}
+.login-remember{display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:#2a4a6a;cursor:pointer;user-select:none;}
+.login-remember input{width:16px;height:16px;accent-color:#2a4a6a;cursor:pointer;}
+.login-foot{margin-top:20px;text-align:center;font-size:10px;color:rgba(42,74,106,.55);letter-spacing:.08em;}
 
 /* ════════════════════════════
    SCREEN 1: 닉네임 설정
@@ -148,12 +168,106 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* 초대 팝업 */
 .invite-modal{display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.8);align-items:center;justify-content:center;padding:20px;}
 .invite-modal.open{display:flex;}
+
+/* ══ Xy (자이) AI 3자 대화 ══ */
+.msg-wrap.xy{align-self:center;align-items:center;max-width:86%;margin:10px 0;}
+.msg-wrap.xy .msg-sender{font-size:11px;color:var(--gold);font-weight:800;margin-bottom:5px;letter-spacing:.05em;text-align:center;}
+.msg-wrap.xy .xy-bubble{background:linear-gradient(135deg,rgba(212,168,67,.14),rgba(56,189,248,.08));border:1px solid rgba(212,168,67,.32);border-radius:14px;padding:12px 16px;color:var(--text);font-size:13.5px;line-height:1.6;box-shadow:0 0 18px rgba(212,168,67,.08);}
+.msg-wrap.xy .msg-meta{font-size:10px;color:var(--text3);margin-top:4px;text-align:center;}
+.xy-loading{opacity:.7;font-style:italic;}
+
+/* ════════════════════════════
+   SCREEN COVER: 표지 (파트너 작품)
+════════════════════════════ */
+#scrCover{align-items:center;justify-content:center;padding:0;cursor:pointer;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);position:relative;overflow:hidden;}
+.cover-logo{width:min(72vw,320px);height:auto;display:block;animation:coverFloat 4s ease-in-out infinite;filter:drop-shadow(0 8px 30px rgba(0,0,0,.18));}
+@keyframes coverFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+.cover-poem{position:absolute;bottom:18%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:14px;font-weight:500;color:rgba(42,74,106,.7);letter-spacing:.04em;line-height:1.7;animation:coverPoemFade 8s ease-in-out infinite;pointer-events:none;}
+@keyframes coverPoemFade{0%,100%{opacity:0;}30%,70%{opacity:1;}}
+.cover-tap{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);font-size:11px;color:rgba(42,74,106,.55);letter-spacing:.2em;animation:coverTapBlink 2s ease-in-out infinite;}
+@keyframes coverTapBlink{0%,100%{opacity:.3;}50%{opacity:.85;}}
+.cover-patent{position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:10px;color:rgba(42,74,106,.45);letter-spacing:.14em;}
+
+/* ════════════════════════════
+   하단 고정 탭바 (친구/채팅/광장)
+════════════════════════════ */
+.tabbar{display:flex;background:rgba(6,13,26,.96);backdrop-filter:blur(14px);border-top:1px solid var(--border);padding:6px 0 max(6px,env(safe-area-inset-bottom));flex-shrink:0;z-index:100;}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;background:none;border:none;color:var(--text3);font-size:10px;font-weight:700;cursor:pointer;font-family:var(--font);transition:color .15s;}
+.tab-btn .tab-ico{font-size:22px;line-height:1;}
+.tab-btn.active{color:var(--gold);}
+.tab-btn:hover{color:var(--gold2);}
+
+/* ════════════════════════════
+   SCREEN FRIENDS: 친구 페이지 (틀만)
+════════════════════════════ */
+#scrFriends{flex-direction:column;}
+.friends-actions{display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.friend-action-btn{flex:1;padding:12px;background:rgba(212,168,67,.08);border:1px solid var(--border2);border-radius:12px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);}
+.friend-action-btn:hover{background:rgba(212,168,67,.14);}
+.friends-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.friends-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:12px;padding:40px 24px;text-align:center;}
+.friends-empty .fe-ico{font-size:54px;opacity:.5;}
+.friends-empty .fe-title{font-size:15px;color:var(--text2);font-weight:700;}
+.friends-empty .fe-sub{font-size:12px;color:var(--text3);line-height:1.6;}
+
+/* ════════════════════════════
+   SCREEN PLAZA: 공개 채팅 광장 (틀만)
+════════════════════════════ */
+#scrPlaza{flex-direction:column;}
+.plaza-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;}
+.plaza-bubbles{position:relative;height:130px;margin-bottom:16px;overflow:hidden;border-radius:14px;background:radial-gradient(ellipse at 50% 50%,rgba(212,168,67,.05),transparent 70%);border:1px solid var(--border);}
+.plaza-bubble{position:absolute;padding:6px 14px;background:rgba(212,168,67,.12);border:1px solid var(--border2);border-radius:18px;font-size:11px;color:var(--text2);white-space:nowrap;animation:plazaDrift 25s linear infinite;}
+@keyframes plazaDrift{0%{transform:translateX(0);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateX(calc(100vw - 50px));opacity:0;}}
+.plaza-card{background:linear-gradient(135deg,rgba(212,168,67,.08),rgba(56,189,248,.04));border:1px solid var(--border2);border-radius:16px;padding:0;margin-bottom:12px;cursor:pointer;transition:transform .15s;overflow:hidden;display:flex;align-items:stretch;min-height:130px;}
+.plaza-card:hover{transform:translateY(-2px);}
+.plaza-card-text{flex:0 0 40%;padding:16px 14px;display:flex;flex-direction:column;justify-content:center;gap:6px;}
+.plaza-card-img{flex:1;background-size:cover;background-position:center;background-repeat:no-repeat;min-height:130px;}
+.plaza-card-head{display:flex;align-items:center;gap:8px;}
+.plaza-card-ico{font-size:20px;}
+.plaza-card-title{font-size:14px;font-weight:800;color:var(--gold);}
+.plaza-card-desc{font-size:11px;color:var(--text2);line-height:1.5;}
+.plaza-card-badge{display:inline-block;padding:2px 9px;background:rgba(52,211,153,.14);border:1px solid rgba(52,211,153,.3);border-radius:10px;font-size:9px;color:var(--green);font-weight:700;align-self:flex-start;}
+
+/* 화면에 탭바 있을 때 내용 영역 여백 */
+.has-tabbar{display:flex;flex-direction:column;height:100%;}
 </style>
 </head>
 <body>
 
+<!-- ══ SCREEN COVER: 표지 (파트너 작품) ══ -->
+<div class="screen active" id="scrCover" onclick="goScreen('scrLogin')">
+  <div class="cover-patent">특허 10-2026-0060113</div>
+  <img src="logo.png" alt="CGO" class="cover-logo" onerror="this.style.display='none'">
+  <div class="cover-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
+  <div class="cover-tap">TAP TO START</div>
+</div>
+
+<!-- ══ SCREEN 0: 로그인 ══ -->
+<div class="screen" id="scrLogin">
+  <div class="login-card">
+    <!-- 로고: /logo.png 있으면 사용, 없으면 fallback -->
+    <img src="/logo.png" alt="CGO" class="login-logo" id="loginLogo" onerror="this.style.display='none';document.getElementById('loginLogoFb').style.display='flex';">
+    <div class="login-logo-fallback" id="loginLogoFb" style="display:none;">Cgo</div>
+
+    <label class="login-label">USERNAME</label>
+    <input class="login-input" id="loginUser" placeholder="Username" autocomplete="username">
+
+    <label class="login-label">PASSWORD</label>
+    <input class="login-input" id="loginPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+
+    <button class="login-btn" onclick="doLogin()">LOGIN</button>
+
+    <label class="login-remember">
+      <input type="checkbox" id="loginRemember" checked>
+      <span>Remember Me</span>
+    </label>
+
+    <div class="login-foot">특허 10-2026-0060113 · CGO MESSAGE</div>
+  </div>
+</div>
+
 <!-- ══ SCREEN 1: 닉네임 설정 ══ -->
-<div class="screen active" id="scrNick">
+<div class="screen" id="scrNick">
   <div class="nick-logo">💬</div>
   <div class="nick-title">CGO MESSAGE</div>
   <div class="nick-sub">특허 10-2026-0060113 · 보안 메신저</div>
@@ -170,11 +284,40 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   <div class="nick-change">닉네임은 설정에서 언제든 변경 가능합니다</div>
 </div>
 
-<!-- ══ SCREEN 2: 채팅 목록 ══ -->
+<!-- ══ SCREEN: 친구 (탭) ══ -->
+<div class="screen" id="scrFriends">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">👤 친구</div>
+      <div class="topbar-me" id="myNickBarFriends"></div>
+    </div>
+    <button class="btn-icon" onclick="openSettings()" title="설정">⚙️</button>
+  </div>
+  <div class="friends-actions">
+    <button class="friend-action-btn" onclick="showToast('📱 주소록 연동 준비 중')">📱 주소록</button>
+    <button class="friend-action-btn" onclick="openAddModal()">➕ 닉네임 추가</button>
+    <button class="friend-action-btn" onclick="openInvite()">🔗 초대링크</button>
+  </div>
+  <div class="friends-body">
+    <div class="friends-empty">
+      <div class="fe-ico">👥</div>
+      <div class="fe-title">친구를 추가해보세요</div>
+      <div class="fe-sub">주소록 · 닉네임 검색 · 초대링크<br>3가지 방법으로 친구와 연결됩니다</div>
+    </div>
+  </div>
+  <!-- 하단 탭바 -->
+  <div class="tabbar">
+    <button class="tab-btn active" onclick="switchTab('friends')"><span class="tab-ico">👤</span><span>친구</span></button>
+    <button class="tab-btn" onclick="switchTab('chat')"><span class="tab-ico">💬</span><span>채팅</span></button>
+    <button class="tab-btn" onclick="switchTab('plaza')"><span class="tab-ico">🌐</span><span>광장</span></button>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2: 채팅 목록 (탭) ══ -->
 <div class="screen" id="scrList">
   <div class="topbar">
     <div>
-      <div class="topbar-title">CGO MESSAGE</div>
+      <div class="topbar-title">💬 채팅</div>
       <div class="topbar-me" id="myNickBar"></div>
     </div>
     <button class="btn-icon" onclick="openInvite()" title="친구 초대">🔗</button>
@@ -186,6 +329,71 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div>💬</div>
       <div>아직 대화가 없어요<br>+ 버튼으로 친구를 추가하세요</div>
     </div>
+  </div>
+  <!-- 하단 탭바 -->
+  <div class="tabbar">
+    <button class="tab-btn" onclick="switchTab('friends')"><span class="tab-ico">👤</span><span>친구</span></button>
+    <button class="tab-btn active" onclick="switchTab('chat')"><span class="tab-ico">💬</span><span>채팅</span></button>
+    <button class="tab-btn" onclick="switchTab('plaza')"><span class="tab-ico">🌐</span><span>광장</span></button>
+  </div>
+</div>
+
+<!-- ══ SCREEN: 광장 (탭) ══ -->
+<div class="screen" id="scrPlaza">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🌐 공개 채팅 광장</div>
+      <div class="topbar-me">지식과 사람의 순환</div>
+    </div>
+  </div>
+  <div class="plaza-scroll">
+    <!-- 떠다니는 말풍선 (장식용, 랜덤 주제) -->
+    <div class="plaza-bubbles" id="plazaBubbles"></div>
+
+    <!-- 고정 카드 1: 번개 한 끼 -->
+    <div class="plaza-card" onclick="showToast('⚡ 번개 한 끼 — 준비 중')">
+      <div class="plaza-card-text">
+        <div class="plaza-card-head">
+          <span class="plaza-card-ico">🍚</span>
+          <span class="plaza-card-title">번개 한 끼</span>
+        </div>
+        <div class="plaza-card-desc">내 주변 3km 식사 친구</div>
+        <span class="plaza-card-badge">● 준비중</span>
+      </div>
+      <div class="plaza-card-img" style="background-image:url('/card-meal-clean.png');"></div>
+    </div>
+
+    <!-- 고정 카드 2: 재능 마켓 -->
+    <div class="plaza-card" onclick="showToast('🎨 재능 마켓 — 준비 중')">
+      <div class="plaza-card-text">
+        <div class="plaza-card-head">
+          <span class="plaza-card-ico">🎨</span>
+          <span class="plaza-card-title">재능 마켓</span>
+        </div>
+        <div class="plaza-card-desc">15분 1:1 고수 매칭</div>
+        <span class="plaza-card-badge">● 준비중</span>
+      </div>
+      <div class="plaza-card-img" style="background-image:url('/card-talent-clean.png');"></div>
+    </div>
+
+    <!-- 고정 카드 3: 취미 모임 -->
+    <div class="plaza-card" onclick="showToast('🎯 취미 모임 — 준비 중')">
+      <div class="plaza-card-text">
+        <div class="plaza-card-head">
+          <span class="plaza-card-ico">🎯</span>
+          <span class="plaza-card-title">취미 모임</span>
+        </div>
+        <div class="plaza-card-desc">관심사로 만나는 사람들</div>
+        <span class="plaza-card-badge">● 준비중</span>
+      </div>
+      <div class="plaza-card-img" style="background-image:url('/card-hobby-clean.png');"></div>
+    </div>
+  </div>
+  <!-- 하단 탭바 -->
+  <div class="tabbar">
+    <button class="tab-btn" onclick="switchTab('friends')"><span class="tab-ico">👤</span><span>친구</span></button>
+    <button class="tab-btn" onclick="switchTab('chat')"><span class="tab-ico">💬</span><span>채팅</span></button>
+    <button class="tab-btn active" onclick="switchTab('plaza')"><span class="tab-ico">🌐</span><span>광장</span></button>
   </div>
 </div>
 
@@ -293,23 +501,58 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<!-- Firebase SDK는 JS가 동적 로드 (CGO-FULI 검증 방식) -->
 
 <script>
 'use strict';
 
-// ══ Firebase 설정 ══
+// ══ Firebase 설정 (CGO-FULI와 완전히 동일) ══
 const FB_CFG = {
-  apiKey:"AIzaSyBwT8Dz1C07J-UK3V6Y1oj4-XJvxr6CXMg",
-  authDomain:"cgo-life.firebaseapp.com",
-  databaseURL:"https://cgo-life-default-rtdb.firebaseio.com",
-  projectId:"cgo-life",storageBucket:"cgo-life.appspot.com",
-  messagingSenderId:"108625180491",appId:"1:108625180491:web:c6e96ada2c1f3d0f0e6d25"
+  apiKey: "AIzaSyBwT8Dz1C07J-UK3V6Y1oj4-XJvxr6CXMg",
+  authDomain: "cgo-life.firebaseapp.com",
+  databaseURL: "https://cgo-life-default-rtdb.firebaseio.com",
+  projectId: "cgo-life",
+  storageBucket: "cgo-life.firebasestorage.app",
+  messagingSenderId: "435295214189",
+  appId: "1:435295214189:web:004edd952498cbff727d64"
 };
-firebase.initializeApp(FB_CFG);
-const db = firebase.database();
+
+// ══ Firebase 동적 로드 (CGO-FULI에서 검증된 방식 그대로) ══
+let db = null;
+(function loadFirebase(){
+  var s1 = document.createElement('script');
+  s1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
+  s1.onload = function(){
+    var s2 = document.createElement('script');
+    s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
+    s2.onload = function(){
+      try{
+        if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
+        db = firebase.database();
+        console.log('[CGM] Firebase 연결 완료');
+      }catch(err){
+        console.error('[CGM] Firebase 초기화 실패:', err);
+      }
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
+})();
+
+// ══ Firebase 안전 접근 헬퍼 — db 없어도 앱 죽지 않음 ══
+function dbRef(path){
+  if(db) return db.ref(path);
+  // db 아직 로드 안 됨 → 안전한 가짜 객체 반환 (앱 크래시 방지)
+  const noop = function(){ return fake; };
+  const fake = {
+    set:noop, update:noop, push:noop, remove:noop, on:noop, off:noop,
+    orderByChild:function(){ return fake; },
+    equalTo:function(){ return fake; },
+    limitToLast:function(){ return fake; },
+    once:function(){ return Promise.resolve({val:function(){return null;}, exists:function(){return false;}, forEach:function(){}}); }
+  };
+  return fake;
+}
 
 // ══ 앱 상태 ══
 let _myCode = '';
@@ -336,26 +579,115 @@ window.addEventListener('load', () => {
   const roomsStr = localStorage.getItem('cgm2_rooms');
   if(roomsStr) try{ _rooms = JSON.parse(roomsStr); }catch(e){}
 
-  if(_myNick && _myCode){
-    goScreen('scrList');
-    renderRoomList();
-    registerToFirebase();
-    listenInvites();
-    // 닉네임 표시
-    document.getElementById('myNickBar').textContent = _myNick + ' · ' + _myCode;
-    // 초대 링크 파라미터 체크
-    const p = new URLSearchParams(location.search);
-    const inv = p.get('invite');
-    if(inv) setTimeout(()=>handleInviteParam(inv), 1000);
+  // 로그인 상태 확인
+  const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
+  const savedUser = localStorage.getItem('cgm2_login_user') || '';
+
+  if(loggedIn){
+    // 이미 로그인됨 → 닉네임 있으면 친구 탭으로, 없으면 닉네임 입력으로
+    if(_myNick && _myCode){
+      switchTab('friends');
+      renderRoomList();
+      registerToFirebase();
+      listenInvites();
+      updateNickBars();
+      const p = new URLSearchParams(location.search);
+      const inv = p.get('invite');
+      if(inv) setTimeout(()=>handleInviteParam(inv), 1000);
+    } else {
+      goScreen('scrNick');
+    }
   } else {
-    goScreen('scrNick');
+    // 표지 먼저 (기본값이 scrCover active 상태)
+    if(savedUser) document.getElementById('loginUser').value = savedUser;
   }
+
   // 컬러 선택
   document.querySelectorAll('.nick-color').forEach(el=>{
     if(el.dataset.color===_myColor) el.classList.add('sel');
     else el.classList.remove('sel');
   });
+
+  // 광장 말풍선 초기화
+  initPlazaBubbles();
 });
+
+// ══ 탭 전환 (친구/채팅/광장) ══
+function switchTab(tab){
+  const map = { friends:'scrFriends', chat:'scrList', plaza:'scrPlaza' };
+  const target = map[tab];
+  if(!target) return;
+  goScreen(target);
+  updateNickBars();
+  if(tab==='plaza') initPlazaBubbles();
+}
+
+function updateNickBars(){
+  const label = _myNick ? (_myNick + ' · ' + _myCode) : '';
+  const a = document.getElementById('myNickBar');
+  const b = document.getElementById('myNickBarFriends');
+  if(a) a.textContent = label;
+  if(b) b.textContent = label;
+}
+
+// ══ 광장 말풍선 — 랜덤 주제가 떠다님 (장식용) ══
+function initPlazaBubbles(){
+  const wrap = document.getElementById('plazaBubbles');
+  if(!wrap) return;
+  const topics = [
+    '🍜 오늘 점심 뭐 먹지?','🎨 그림 배우고 싶은 분','🏃 러닝 메이트 구해요',
+    '📚 독서모임 같이해요','🎸 기타 초보 모임','☕ 카페 추천 받아요',
+    '🐕 강아지 산책 메이트','🎮 게임 같이해요','🌸 꽃꽂이 원데이'
+  ];
+  wrap.innerHTML = '';
+  topics.forEach((t,i)=>{
+    const b = document.createElement('div');
+    b.className = 'plaza-bubble';
+    b.textContent = t;
+    b.style.top = (10 + (i*11)%90) + '%';
+    b.style.left = '-180px';
+    b.style.animationDelay = (i*2.8) + 's';
+    wrap.appendChild(b);
+  });
+}
+
+// ══ 로그인 ══
+function doLogin(){
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+  const remember = document.getElementById('loginRemember').checked;
+
+  if(!user){ showToast('Username을 입력해주세요'); return; }
+  if(!pass){ showToast('Password를 입력해주세요'); return; }
+
+  // MVP: 클라이언트 측 간단 로그인 (TODO: Firebase Auth 연동)
+  // 아무 user/pass 조합 허용 — 차후 Firebase Auth로 교체
+  localStorage.setItem('cgm2_logged_in','1');
+  if(remember){
+    localStorage.setItem('cgm2_login_user', user);
+  } else {
+    localStorage.removeItem('cgm2_login_user');
+  }
+
+  // 이전에 사용하던 닉네임 있으면 친구 탭으로, 없으면 닉네임 설정
+  if(_myNick && _myCode){
+    switchTab('friends');
+    renderRoomList();
+    registerToFirebase();
+    listenInvites();
+    updateNickBars();
+  } else {
+    // user 이름을 닉네임 기본값으로 미리 채워둠
+    const nickInput = document.getElementById('nickInput');
+    if(nickInput && !nickInput.value) nickInput.value = user;
+    goScreen('scrNick');
+  }
+}
+
+function doLogout(){
+  localStorage.removeItem('cgm2_logged_in');
+  goScreen('scrLogin');
+}
 
 // ══ 화면 전환 ══
 function goScreen(id){
@@ -380,8 +712,8 @@ function startApp(){
   localStorage.setItem('cgm2_nick', _myNick);
   localStorage.setItem('cgm2_code', _myCode);
   localStorage.setItem('cgm2_color', _myColor);
-  goScreen('scrList');
-  document.getElementById('myNickBar').textContent = _myNick + ' · ' + _myCode;
+  switchTab('friends');
+  updateNickBars();
   renderRoomList();
   registerToFirebase();
   listenInvites();
@@ -394,7 +726,7 @@ function genCode(){
 
 // ══ Firebase 등록 ══
 function registerToFirebase(){
-  db.ref('cgm2/users/'+_myCode).set({
+  dbRef('cgm2/users/'+_myCode).set({
     nick:_myNick, code:_myCode, color:_myColor, lastSeen:Date.now()
   });
 }
@@ -431,7 +763,7 @@ function addFriend(){
   const nick = document.getElementById('addNickInput').value.trim();
   if(!nick){ showToast('닉네임을 입력해주세요!'); return; }
   // Firebase에서 닉네임으로 검색
-  db.ref('cgm2/users').orderByChild('nick').equalTo(nick).once('value').then(snap=>{
+  dbRef('cgm2/users').orderByChild('nick').equalTo(nick).once('value').then(snap=>{
     const data = snap.val();
     if(!data){
       showToast('❌ 사용자를 찾을 수 없어요');
@@ -475,7 +807,7 @@ function openRoom(code){
   // Firebase 수신
   if(_msgListener) _msgListener.off();
   const roomId = [_myCode, code].sort().join('_');
-  _msgListener = db.ref('cgm2/chats/'+roomId+'/msgs');
+  _msgListener = dbRef('cgm2/chats/'+roomId+'/msgs');
   _msgListener.on('child_added', snap=>{
     const msg = snap.val();
     if(msg.from === _myCode) return;
@@ -497,14 +829,14 @@ function openRoom(code){
   });
 
   // 읽음 처리
-  db.ref('cgm2/read/'+roomId+'/'+_myCode).set(Date.now());
+  dbRef('cgm2/read/'+roomId+'/'+_myCode).set(Date.now());
 
   // 자동삭제 타이머
   if(_cleanTimer) clearInterval(_cleanTimer);
   _cleanTimer = setInterval(()=>{ if(_currentRoom) cleanMessages(_currentRoom); }, 4000);
 
   // 초대 신호 전송
-  db.ref('cgm2/invites/'+code+'/'+_myCode).set({
+  dbRef('cgm2/invites/'+code+'/'+_myCode).set({
     nick:_myNick, color:_myColor, status:'connected', t:Date.now()
   });
 }
@@ -531,8 +863,19 @@ function renderMessages(){
   const msgs = room.msgs||[];
   let html = '';
   msgs.forEach((msg, idx)=>{
-    const isMe = msg.from===_myCode;
+    const isXy = msg.isAI || msg.from==='xy';
+    const isMe = !isXy && msg.from===_myCode;
     const time = msg.t ? new Date(msg.t).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
+    if(isXy){
+      const txt = String(msg.text||'').replace(/^🟡 Xy:\s*/,'');
+      const loadingCls = msg.loading ? ' xy-loading' : '';
+      html += `<div class="msg-wrap xy">
+        <div class="msg-sender">🟡 Xy</div>
+        <div class="xy-bubble${loadingCls}">${escHtml(txt)}</div>
+        <div class="msg-meta">${time}</div>
+      </div>`;
+      return;
+    }
     const bubble = _secOn ? makeSecureBubble(msg.text) : `<div class="msg-bubble">${escHtml(msg.text)}</div>`;
     html += `<div class="msg-wrap ${isMe?'me':'you'}">
       ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
@@ -593,10 +936,63 @@ function sendMsg(){
   // Firebase 전송
   const roomId = [_myCode, _currentRoom].sort().join('_');
   const encText = cgmEncrypt(text, roomId);
-  db.ref('cgm2/chats/'+roomId+'/msgs').push({
+  dbRef('cgm2/chats/'+roomId+'/msgs').push({
     from:_myCode, text:encText, t:Date.now(), read:false
   });
-  db.ref('cgm2/users/'+_myCode).update({ nick:_myNick, color:_myColor });
+  dbRef('cgm2/users/'+_myCode).update({ nick:_myNick, color:_myColor });
+
+  // 🟡 Xy wake word 감지 — "자이" 또는 "Xy" 언급 시 AI 소환
+  if(text.indexOf('자이')!==-1 || /\bxy\b/i.test(text)){
+    xyReply(text);
+  }
+}
+
+// ══ 🟡 Xy (자이) AI — 3자 대화 ══
+function xyReply(userText){
+  const room = _rooms[_currentRoom];
+  if(!room) return;
+  if(!room.msgs) room.msgs = [];
+
+  // 로딩 메시지
+  const loadMsg = { from:'xy', isAI:true, loading:true, text:'🟡 Xy: 생각 중...', t:Date.now() };
+  room.msgs.push(loadMsg);
+  saveRooms();
+  renderMessages();
+
+  const sysPrompt =
+    '당신은 "Xy(자이)"입니다. CGO 메신저에서 두 사용자의 대화에 함께 참여하는 친근한 AI 친구입니다. ' +
+    '성격: 만물박사이지만 잘난 척하지 않음. 시사·경제·상식·일상 모든 분야에 밝음. 친구 같은 존댓말. ' +
+    '원칙: 3문장 이내로 핵심만. 두 사람 중 한 편 들지 않고 중립. 이모지 1-2개로 톤 조절. ' +
+    '추천 요청 시 구체적 선택지 2-3개 제시. 모르는 건 솔직히 "그건 확실치 않아요"라고 말함. ' +
+    '최신 뉴스·실시간 시세는 학습 시점 이후는 정확하지 않을 수 있다고 고지함. ' +
+    '대화 흐름상 불필요하면 짧게 끝냄. 한국어가 기본, 유저가 영어로 물으면 영어로 답변.';
+
+  fetch('/api/groq', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.3-70b-versatile',
+      messages:[
+        {role:'system', content:sysPrompt},
+        {role:'user', content:userText}
+      ],
+      max_tokens:300,
+      temperature:0.8
+    })
+  }).then(r=>r.json()).then(data=>{
+    let reply = '';
+    try{ reply = data.choices[0].message.content || ''; }catch(e){ reply=''; }
+    if(!reply) reply = '다시 말씀해주실 수 있을까요? 🙏';
+    loadMsg.text = '🟡 Xy: ' + reply.trim();
+    loadMsg.loading = false;
+    saveRooms();
+    renderMessages();
+  }).catch(()=>{
+    loadMsg.text = '🟡 Xy: 잠시 후 다시 불러주세요 🙏';
+    loadMsg.loading = false;
+    saveRooms();
+    renderMessages();
+  });
 }
 
 // ══ 자동 삭제 ══
@@ -720,7 +1116,7 @@ function copyInviteLink(){
 
 // 초대 파라미터 처리
 function handleInviteParam(inviterNick){
-  db.ref('cgm2/users').orderByChild('nick').equalTo(inviterNick).once('value').then(snap=>{
+  dbRef('cgm2/users').orderByChild('nick').equalTo(inviterNick).once('value').then(snap=>{
     const data = snap.val();
     if(!data) return;
     const code = Object.keys(data)[0];
@@ -731,7 +1127,7 @@ function handleInviteParam(inviterNick){
 
 // 초대 수신 감지
 function listenInvites(){
-  db.ref('cgm2/invites/'+_myCode).on('child_added', snap=>{
+  dbRef('cgm2/invites/'+_myCode).on('child_added', snap=>{
     const inv = snap.val();
     if(!inv) return;
     const code = snap.key;

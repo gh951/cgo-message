@@ -1,0 +1,31 @@
+{
+  "name": "CGO MESSAGE",
+  "short_name": "CGO",
+  "description": "세계 최초 보안 메신저 · 특허 10-2026-0060113",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060d1a",
+  "theme_color": "#d4a843",
+  "orientation": "portrait",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
