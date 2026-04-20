@@ -262,42 +262,64 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
    - 역광 (카메라 노출 혼란)
    학술명: Adversarial Perturbation Defense
 ════════════════════════════ */
-/* RGB 모드 = 기만+역광 ON */
-.rgb-mode .msg-bubble,
-.rgb-mode .xy-bubble{
+/* RGB 모드 = 기만+역광 ON. 단, 보안 모드 말풍선은 투명 배경 유지 */
+.rgb-mode .msg-bubble:not(.secure-mode),
+.rgb-mode .xy-bubble:not(.secure-mode){
   position:relative;
   overflow:hidden;
   /* 흰 종이 느낌 배경 */
   background:linear-gradient(135deg,#fffef8 0%,#fff9e6 100%) !important;
   border-color:rgba(200,180,100,.3) !important;
 }
+/* 보안 모드에서는 스크롤 글자가 잘 보이도록 원래 투명 배경 유지 */
+.rgb-mode .msg-bubble.secure-mode{
+  position:relative;
+  overflow:visible; /* 스크롤 잘리지 않게 */
+}
 
 /* 진짜 글자 — 인간이 편하게 읽되 카메라는 방해 
-   대장님 설계: 한 글자씩 순차적으로 반짝 (파도처럼)
-   - 기본: 글자 보임 (opacity 1)
-   - 자기 차례: 짧게 과노출 (밝은 섬광)
-   - 인간: 9/10 글자는 항상 보임 → 읽기 OK
-   - 카메라: 찍는 순간 1글자는 과노출 → 글자 1개 판독 불가 */
+   대장님 설계: 스크롤 10자 기준 한 글자씩 순차 반짝
+   - 각 글자의 animation-delay로 시차
+   - 앞자 → 뒤자 파도처럼 섬광
+   - 섬광 순간은 매우 짧음(5%) → 카메라 과노출만 유도 */
 .rgb-mode .msg-char{
   color:#333 !important;
   font-weight:600 !important;
   position:relative;
   z-index:2;
   display:inline-block;
-  /* 순차 반짝 — 대부분 보이고, 자기 순서에만 짧게 섬광 */
+  /* 순차 반짝 — 자기 순서에만 짧게 섬광 (다른 애니메이션 override) */
   animation:sweepFlash 1.5s linear infinite !important;
 }
-/* 핵심: 대부분 보이다가 자기 순간에만 화이트아웃 */
+/* 🛡️ 보안 + RGB 동시: secure-mode 안의 글자는 네온 골드로 유지 */
+.rgb-mode .msg-bubble.secure-mode .msg-char{
+  color:#d4a843 !important;
+  font-weight:700 !important;
+  text-shadow:
+    0 0 3px rgba(212,168,67,.9),
+    0 0 8px rgba(212,168,67,.6) !important;
+}
+/* You 메시지 보안 + RGB: 화이트-골드 */
+.rgb-mode .msg-wrap.you .msg-bubble.secure-mode .msg-char{
+  color:#f0ece0 !important;
+}
+/* Xy 보안 + RGB: 핑크 네온 유지 */
+.rgb-mode .msg-wrap.xy .msg-bubble.secure-mode .msg-char{
+  color:#ffb3d1 !important;
+}
+/* 보안+RGB 동시: neonChar 스크롤 애니는 .msg-secure-inner 쪽(부모)에 있어
+   msg-char 자체 애니는 sweepFlash 로 완전히 교체됨 */
+
+/* ⚡ 핵심: 대부분 보이다가 자기 순간에만 화이트아웃
+   95% 시간 = 검은 글자, 5% 시간 = 섬광 */
 @keyframes sweepFlash{
-  /* 0~90%: 평소 모습 (검은 글자 + 살짝 배경광) */
-  0%, 90% {
+  0%, 94% {
     color:#333;
     text-shadow:
       0 0 2px rgba(255,255,255,.9),
       0 0 4px rgba(255,255,220,.4);
   }
-  /* 92~95%: 섬광 순간 (글자 주변이 번쩍 밝아짐 — 카메라 과노출 유도) */
-  92%, 95% {
+  96%, 98% {
     color:#fff;
     text-shadow:
       0 0 4px #fff,
@@ -305,8 +327,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       0 0 24px rgba(255,255,200,1),
       0 0 40px rgba(255,255,180,.8);
   }
-  /* 97~100%: 빠르게 복귀 */
-  97%, 100% {
+  100% {
     color:#333;
     text-shadow:
       0 0 2px rgba(255,255,255,.9),
@@ -2018,7 +2039,7 @@ function renderMessages(){
         // 💡 RGB 순차 반짝 모드에서 Xy 메시지도 글자별 span 적용
         const chars = Array.from(txt);
         const blinkHtml = chars.map((c,i)=>{
-          const d = (i * 0.1).toFixed(2);
+          const d = ((i * 0.2) % 1.5).toFixed(2);
           return `<span class="msg-char" style="animation-delay:${d}s">${escHtml(c)}</span>`;
         }).join('');
         html += `<div class="msg-wrap xy">
@@ -2062,8 +2083,8 @@ function renderMessages(){
     } else if(_rgbOn){
       const chars = Array.from(String(msg.text||''));
       const blinkHtml = chars.map((c,i)=>{
-        // 각 글자마다 0.1초씩 밀어서 순차 반짝 (10글자면 1초 주기로 한 바퀴)
-        const d = (i * 0.1).toFixed(2);
+        // 각 글자마다 0.2초씩 밀어서 순차 반짝 (sweepFlash 1.5초 주기와 조화)
+        const d = ((i * 0.2) % 1.5).toFixed(2);
         return `<span class="msg-char" style="animation-delay:${d}s">${escHtml(c)}</span>`;
       }).join('');
       bubble = `<div class="msg-bubble">${blinkHtml}</div>`;
@@ -2095,8 +2116,11 @@ function makeSecureBubble(text){
   const chars = Array.from(text);
   // FULI 스타일: 각 글자마다 animation-delay 0.12초씩 밀어서 시간차 깜빡임
   // data-char 속성: RGB 레이어(::before, ::after)가 글자를 읽을 수 있게
+  // RGB 모드일 때는 더 큰 간격(0.2초)로 순차 반짝이 파도처럼 흐르게
+  const delayStep = _rgbOn ? 0.20 : 0.12;
+  const delayMod = _rgbOn ? 1.5 : 2.0; // sweepFlash 주기에 맞춤
   const neonChars = (arr, offset)=>arr.map((c,i)=>{
-    const d = ((i + (offset||0)) * 0.12) % 2.0;
+    const d = ((i + (offset||0)) * delayStep) % delayMod;
     const esc = escHtml(c);
     return `<span class="msg-char" data-char="${esc}" style="animation-delay:${d.toFixed(2)}s">${esc}</span>`;
   }).join('');
