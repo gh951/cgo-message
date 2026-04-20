@@ -1532,6 +1532,62 @@ input[type=range].sec-range::-moz-range-thumb{
   </div>
 </div>
 
+<!-- 📱 PWA 설치 안내 팝업 (C-19 v21) — 기존 welcome-overlay 스타일 재활용 -->
+<div class="welcome-overlay" id="pwaInstallOverlay">
+  <div class="welcome-card">
+    <div class="welcome-emoji">📱 ✨</div>
+    <div class="welcome-title">CGO를 홈 화면에 추가하세요</div>
+    <div class="welcome-poem">
+      앱처럼 빠르게 실행할 수 있어요<br>
+      알림·보안 기능이 더 잘 작동합니다
+    </div>
+    <!-- Android/설치 가능 기기: 버튼 한 번으로 설치 -->
+    <div id="pwaAndroidBox" style="display:none;">
+      <div class="welcome-body" style="font-size:13px;line-height:1.6;color:rgba(240,230,200,.75);">
+        <b style="color:#ff88bb;">"설치"</b> 버튼 한 번만 누르면<br>
+        아이콘이 바로 생겨요
+      </div>
+      <div class="welcome-btns" style="margin-top:16px;">
+        <button class="welcome-btn skip" onclick="closePwaPrompt('later')">나중에</button>
+        <button class="welcome-btn start" onclick="triggerPwaInstall()">📥 설치하기</button>
+      </div>
+    </div>
+    <!-- iOS Safari: 수동 설치 안내 -->
+    <div id="pwaIosBox" style="display:none;">
+      <div style="margin:14px 0 10px;padding:14px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,136,187,.2);border-radius:12px;text-align:left;">
+        <div style="font-size:12px;font-weight:700;color:#ff88bb;margin-bottom:10px;">📲 아이폰에서 추가하는 방법</div>
+        <div style="font-size:13px;color:rgba(240,230,200,.85);line-height:1.9;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:rgba(255,136,187,.2);color:#ff88bb;font-weight:900;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">1</span>
+            <span>Safari 아래의 <b>공유 버튼</b> <span style="display:inline-block;padding:0 4px;border:1px solid rgba(255,255,255,.3);border-radius:4px;font-size:11px;">⬆</span> 탭</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:rgba(255,136,187,.2);color:#ff88bb;font-weight:900;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">2</span>
+            <span><b>"홈 화면에 추가"</b> 선택 <span style="opacity:.6;">➕</span></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:rgba(255,136,187,.2);color:#ff88bb;font-weight:900;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;">3</span>
+            <span><b>"추가"</b> 탭하면 끝! 🎉</span>
+          </div>
+        </div>
+      </div>
+      <div class="welcome-btns" style="margin-top:12px;">
+        <button class="welcome-btn start" onclick="closePwaPrompt('later')" style="width:100%;">알겠어요 👍</button>
+      </div>
+    </div>
+    <!-- 기타 브라우저 (데스크톱 등): 일반 안내 -->
+    <div id="pwaGenericBox" style="display:none;">
+      <div class="welcome-body" style="font-size:13px;line-height:1.7;color:rgba(240,230,200,.75);">
+        브라우저 메뉴에서<br>
+        <b style="color:#ff88bb;">"홈 화면에 추가"</b> 또는 <b style="color:#ff88bb;">"앱으로 설치"</b>를 선택해주세요
+      </div>
+      <div class="welcome-btns" style="margin-top:14px;">
+        <button class="welcome-btn start" onclick="closePwaPrompt('later')" style="width:100%;">알겠어요 👍</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Firebase SDK는 JS가 동적 로드 (CGO-FULI 검증 방식) -->
 
 <script>
@@ -1549,7 +1605,11 @@ const FB_CFG = {
 };
 
 // ══ Firebase 동적 로드 (CGO-FULI에서 검증된 방식 그대로) ══
+// 🔐 C-19 v20: Auth SDK 추가 + 익명 로그인 자동 연결
 let db = null;
+let _cgoAuth = null;       // Firebase Auth 인스턴스
+let _myAuthUid = '';       // 익명 로그인 UID (기기별 고유)
+let _authReady = false;    // Auth 초기화 완료 플래그
 (function loadFirebase(){
   var s1 = document.createElement('script');
   s1.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js';
@@ -1557,13 +1617,51 @@ let db = null;
     var s2 = document.createElement('script');
     s2.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js';
     s2.onload = function(){
-      try{
-        if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
-        db = firebase.database();
-        console.log('[CGM] Firebase 연결 완료');
-      }catch(err){
-        console.error('[CGM] Firebase 초기화 실패:', err);
-      }
+      // 🔐 Auth SDK 추가 로드 (database 로드 성공 후)
+      var s3 = document.createElement('script');
+      s3.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s3.onload = function(){
+        try{
+          if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
+          db = firebase.database();
+          _cgoAuth = firebase.auth();
+          console.log('[CGM] Firebase DB + Auth 연결 완료');
+
+          // 🔐 익명 로그인 자동 실행
+          // 기기에 이미 Auth 세션 있으면 그대로 재사용 (localStorage에 토큰 저장됨)
+          // 없으면 새로 익명 로그인
+          _cgoAuth.onAuthStateChanged(function(user){
+            if(user){
+              _myAuthUid = user.uid;
+              _authReady = true;
+              console.log('[CGM] Auth 연결됨, UID:', user.uid.slice(0,8)+'...');
+              // registerToFirebase 이미 호출된 상태면 UID도 같이 올림
+              if(_myCode && _myNick){
+                try { registerToFirebase(); } catch(_e){}
+              }
+            } else {
+              // 로그인 안 된 상태 → 익명 로그인 시도
+              _cgoAuth.signInAnonymously().catch(function(err){
+                console.warn('[CGM] 익명 로그인 실패 (앱은 정상 동작):', err.code);
+                _authReady = true; // 실패해도 앱은 계속 쓸 수 있게
+              });
+            }
+          });
+        }catch(err){
+          console.error('[CGM] Firebase 초기화 실패:', err);
+          _authReady = true;
+        }
+      };
+      s3.onerror = function(){
+        // Auth SDK 로드 실패해도 DB는 쓸 수 있게
+        try{
+          if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
+          db = firebase.database();
+          console.log('[CGM] Firebase DB만 연결 (Auth 로드 실패)');
+          _authReady = true;
+        }catch(err){ console.error('[CGM] Firebase 초기화 실패:', err); }
+      };
+      document.head.appendChild(s3);
     };
     document.head.appendChild(s2);
   };
@@ -1848,10 +1946,14 @@ function genCode(){
 }
 
 // ══ Firebase 등록 ══
+// 🔐 C-19 v20: Auth UID 같이 저장 → 나중에 DB 보안 규칙에서 "이 code의 주인은 이 UID" 검증 가능
 function registerToFirebase(){
-  dbRef('cgm2/users/'+_myCode).set({
+  const data = {
     nick:_myNick, code:_myCode, color:_myColor, lastSeen:Date.now()
-  });
+  };
+  // UID 있을 때만 추가 (Auth 준비 전이면 나중에 onAuthStateChanged에서 재등록됨)
+  if(_myAuthUid) data.authUid = _myAuthUid;
+  dbRef('cgm2/users/'+_myCode).update(data); // set → update: 기존 데이터 보존
 }
 
 // ══ 채팅 목록 렌더링 ══
@@ -2349,6 +2451,12 @@ function closeWelcome(startTutorial){
       renderRoomList();
     }
   }
+
+  // 📱 C-19 v21: welcome 팝업 닫힌 후 PWA 설치 안내 이어서 표시
+  //   - startTutorial=true면 연습방 진입 후에 띄워야 방해 안 됨 → 2초 지연
+  //   - startTutorial=false면 홈 화면이라 바로 띄워도 됨 → 0.5초
+  setTimeout(()=>{ try { maybeShowPwaPrompt(); } catch(_e){} },
+             startTutorial ? 2000 : 500);
 }
 
 // ══ ✨ 유저가 원할 때 연습 팝업 다시 열기 (채팅 탭 ✨ 버튼) ══
@@ -3282,6 +3390,126 @@ function showToast(msg){
   if(_toastTimer) clearTimeout(_toastTimer);
   _toastTimer = setTimeout(()=>t.classList.remove('show'), 2500);
 }
+
+// 📱 ═══════════════════════════════
+//    PWA 설치 안내 (C-19 v21)
+//    - Android/Chrome: beforeinstallprompt로 원클릭 설치
+//    - iOS Safari: 수동 안내 (공유 → 홈 화면에 추가)
+//    - 이미 설치된 상태: 띄우지 않음
+//    - 닉네임 설정 완료 후 1회 자동 표시, "나중에"면 3일 쿨다운
+// ═══════════════════════════════
+let _pwaDeferredPrompt = null; // Android beforeinstallprompt 이벤트 저장
+
+// 설치 가능 신호 감지 (Android/Chrome/Edge)
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault(); // 브라우저 기본 배너 억제 → 우리 팝업으로 대신 보여줌
+  _pwaDeferredPrompt = e;
+  console.log('[CGM] PWA 설치 가능 신호 감지됨');
+});
+
+// 이미 설치된 PWA인가? (standalone 모드면 홈화면 실행이라 띄울 필요 없음)
+function isPwaInstalled(){
+  try {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true; // iOS
+  } catch(_e){ return false; }
+}
+
+// iOS Safari 감지 (Android Chrome은 다른 방식)
+function isIosSafari(){
+  const ua = navigator.userAgent;
+  const iOS = /iPad|iPhone|iPod/.test(ua);
+  const webkit = /WebKit/.test(ua);
+  const notChrome = !/CriOS|FxiOS|OPiOS|EdgiOS/.test(ua);
+  return iOS && webkit && notChrome;
+}
+
+// 쿨다운 체크 — "나중에" 누르면 3일간 안 뜸
+function isPwaPromptCoolingDown(){
+  try {
+    const until = parseInt(localStorage.getItem('cgm2_pwa_snooze_until')||'0', 10);
+    return Date.now() < until;
+  } catch(_e){ return false; }
+}
+
+// 이미 설치 완료 기록 있는지 (사용자가 "설치하기" 눌러 성공한 경우)
+function isPwaAlreadyDone(){
+  try { return localStorage.getItem('cgm2_pwa_done') === '1'; } catch(_e){ return false; }
+}
+
+// 공용 표시 트리거 — 조건 체크 후 상황별 박스 보여주기
+function maybeShowPwaPrompt(){
+  if(isPwaInstalled() || isPwaAlreadyDone() || isPwaPromptCoolingDown()) return;
+
+  const overlay = document.getElementById('pwaInstallOverlay');
+  if(!overlay) return;
+
+  const androidBox = document.getElementById('pwaAndroidBox');
+  const iosBox = document.getElementById('pwaIosBox');
+  const genericBox = document.getElementById('pwaGenericBox');
+  // 3개 박스 전부 일단 숨김
+  if(androidBox) androidBox.style.display = 'none';
+  if(iosBox) iosBox.style.display = 'none';
+  if(genericBox) genericBox.style.display = 'none';
+
+  // 상황별 분기
+  if(_pwaDeferredPrompt){
+    // Android/Chrome — 원클릭 설치 가능
+    if(androidBox) androidBox.style.display = 'block';
+  } else if(isIosSafari()){
+    // iOS Safari — 수동 안내
+    if(iosBox) iosBox.style.display = 'block';
+  } else {
+    // 나머지 환경 (데스크톱, 다른 브라우저) — 이 경우는 굳이 띄우지 않음
+    // 대신 조용히 패스 (유저가 원하면 설정에서 수동 설치 가능)
+    return;
+  }
+
+  overlay.classList.add('show');
+}
+
+// Android 원클릭 설치 트리거
+async function triggerPwaInstall(){
+  if(!_pwaDeferredPrompt){
+    closePwaPrompt('later');
+    return;
+  }
+  try {
+    _pwaDeferredPrompt.prompt();
+    const result = await _pwaDeferredPrompt.userChoice;
+    if(result && result.outcome === 'accepted'){
+      try { localStorage.setItem('cgm2_pwa_done','1'); } catch(_e){}
+      showToast('✨ 홈 화면에 추가되었어요!');
+    } else {
+      // 거절 — 3일 쿨다운
+      try {
+        localStorage.setItem('cgm2_pwa_snooze_until', String(Date.now() + 3*24*60*60*1000));
+      } catch(_e){}
+    }
+  } catch(err){
+    console.warn('[CGM] PWA 설치 프롬프트 실패:', err);
+  } finally {
+    _pwaDeferredPrompt = null;
+    closePwaPrompt();
+  }
+}
+
+// 팝업 닫기 + 사유별 처리
+function closePwaPrompt(reason){
+  const overlay = document.getElementById('pwaInstallOverlay');
+  if(overlay) overlay.classList.remove('show');
+  if(reason === 'later'){
+    try {
+      localStorage.setItem('cgm2_pwa_snooze_until', String(Date.now() + 3*24*60*60*1000));
+    } catch(_e){}
+  }
+}
+
+// 실제 설치 성공 시 appinstalled 이벤트 수신 (Android)
+window.addEventListener('appinstalled', function(){
+  try { localStorage.setItem('cgm2_pwa_done','1'); } catch(_e){}
+  console.log('[CGM] PWA 설치 완료됨');
+});
 </script>
 </body>
 </html>
