@@ -1399,10 +1399,10 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="sec-slider-row">
       <div class="sec-slider-head">
         <span class="sec-slider-label">⚡ 글자 이동 속도</span>
-        <span class="sec-slider-value yellow" id="valSpeed">0.3초</span>
+        <span class="sec-slider-value yellow" id="valSpeed">0.30초</span>
       </div>
-      <input type="range" class="sec-range" id="slSpeed" min="1" max="5" value="3" oninput="onSliderChange()">
-      <div class="sec-range-hint"><span>0.1초 (최강)</span><span>0.5초 (여유)</span></div>
+      <input type="range" class="sec-range" id="slSpeed" min="1" max="10" value="6" oninput="onSliderChange()">
+      <div class="sec-range-hint"><span>0.05초 (초고속)</span><span>0.50초 (여유)</span></div>
     </div>
     <div class="sec-slider-row">
       <div class="sec-slider-head">
@@ -1646,8 +1646,7 @@ function coverTap(){
   const savedUser = localStorage.getItem('cgm2_login_user') || '';
   const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
   if(savedUser && loggedIn && !window._autoLoginCancelled){
-    // 닉네임도 있으면 연습방 보장 (목록에 항상 있게)
-    if(_myNick && _myCode) ensureXyPracticeRoom();
+    // 💡 대장님 v30: 연습방 자동 생성 제거 — 팝업에서 유저가 선택해야만 생성
     startAutoLogin(savedUser);
   }
 }
@@ -2183,12 +2182,27 @@ function sendMsg(){
 
 const XY_PRACTICE_CODE = 'XY00000'; // 연습방 고유 코드 (실제 유저 아님)
 
-// 환영 팝업 — 대장님 v28: 매 로그인마다 항상 표시 (유저가 매번 선택)
+// 환영 팝업 — 대장님 v30: 매 로그인마다 항상 표시 (유저가 매번 선택)
+// 견고한 재시도 로직으로 "3번 실패" 이슈 근절
 function maybeShowWelcome(){
-  setTimeout(()=>{
-    const overlay = document.getElementById('welcomeOverlay');
-    if(overlay) overlay.classList.add('show');
-  }, 400); // 화면 전환 완료 후
+  // 먼저 기존 팝업 닫기 (이전에 열려있었을 수도)
+  const overlay = document.getElementById('welcomeOverlay');
+  if(!overlay) return;
+  overlay.classList.remove('show');
+
+  // 약간 기다린 후 강제 표시 (화면 전환 + DOM 준비 대기)
+  let tries = 0;
+  const tryShow = ()=>{
+    const ov = document.getElementById('welcomeOverlay');
+    if(ov){
+      ov.classList.add('show');
+      // 확인: 클래스가 붙었는지
+      if(ov.classList.contains('show')) return;
+    }
+    tries++;
+    if(tries < 3) setTimeout(tryShow, 300);
+  };
+  setTimeout(tryShow, 500);
 }
 
 function closeWelcome(startTutorial){
@@ -2201,8 +2215,14 @@ function closeWelcome(startTutorial){
     setTimeout(()=>{
       openRoom(XY_PRACTICE_CODE);
     }, 300);
+  } else {
+    // 💡 대장님 v30: "건너뛰기"는 기존 연습방도 제거 (깨끗한 상태 유지)
+    if(_rooms[XY_PRACTICE_CODE]){
+      delete _rooms[XY_PRACTICE_CODE];
+      saveRooms();
+      renderRoomList();
+    }
   }
-  // 건너뛰기면 연습방 만들지 않음 (대장님 v28: 유저 선택만 반영)
 }
 
 // ══ ✨ 유저가 원할 때 연습 팝업 다시 열기 (채팅 탭 ✨ 버튼) ══
@@ -2917,25 +2937,25 @@ function setLevel(level){
   if(level==='normal'){
     document.getElementById('slScroll').value=15;
     document.getElementById('slTime').value=30;
-    document.getElementById('slSpeed').value=1;
+    document.getElementById('slSpeed').value=10; // 0.50초 (여유)
     document.getElementById('slOpacity').value=0;
     document.getElementById('slRepeat').value=0;
   } else if(level==='safe'){
     document.getElementById('slScroll').value=12;
     document.getElementById('slTime').value=15;
-    document.getElementById('slSpeed').value=2;
+    document.getElementById('slSpeed').value=6; // 0.30초
     document.getElementById('slOpacity').value=15;
     document.getElementById('slRepeat').value=0;
   } else if(level==='high'){
     document.getElementById('slScroll').value=6;
     document.getElementById('slTime').value=7;
-    document.getElementById('slSpeed').value=3;
+    document.getElementById('slSpeed').value=3; // 0.15초
     document.getElementById('slOpacity').value=45;
     document.getElementById('slRepeat').value=3;
   } else if(level==='max'){
     document.getElementById('slScroll').value=4;
     document.getElementById('slTime').value=3;
-    document.getElementById('slSpeed').value=5;
+    document.getElementById('slSpeed').value=1; // 0.05초 (초고속)
     document.getElementById('slOpacity').value=70;
     document.getElementById('slRepeat').value=2;
   }
@@ -2948,15 +2968,18 @@ function onSliderChange(){
   const speed  = +document.getElementById('slSpeed').value;
   const opacity= +document.getElementById('slOpacity').value;
   const repeat = +document.getElementById('slRepeat').value;
+  // 🎯 대장님 v31: 속도 10단계 (0.05 ~ 0.5초, 0.05초 간격)
+  // 1단계=50ms, 2=100ms, ... 10=500ms
+  const speedMs = speed * 50;
   _secSettings = {
     scroll, time,
-    speed: [100,200,300,400,500][speed-1],
+    speed: speedMs,
     opacity,
     repeat
   };
   document.getElementById('valScroll').textContent = scroll+'자';
   document.getElementById('valTime').textContent   = time+'초';
-  document.getElementById('valSpeed').textContent  = (speed*0.1).toFixed(1)+'초';
+  document.getElementById('valSpeed').textContent  = (speed*0.05).toFixed(2)+'초';
   document.getElementById('valOpacity').textContent= opacity+'%';
   document.getElementById('valRepeat').textContent = repeat===0 ? '∞' : repeat+'회';
   if(_currentRoom) renderMessages();
