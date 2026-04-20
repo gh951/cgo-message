@@ -1573,6 +1573,7 @@ let _tiltOn = false;
 let _tiltOk = false;
 let _tiltHandler = null;
 let _msgListener = null;
+let _flagsListener = null; // 🛡️🎨 강제 동기화 리스너 (v27)
 let _cleanTimer = null;
 
 // 보안 설정값
@@ -1672,6 +1673,10 @@ function startAutoLogin(username){
     if(_myNick && _myCode){
       switchTab('friends');
       updateNickBars();
+      renderRoomList();
+      registerToFirebase();
+      listenInvites();
+      maybeShowWelcome(); // 💡 대장님 v28: 자동 로그인에서도 환영 팝업
       const p = new URLSearchParams(location.search);
       const inv = p.get('invite');
       if(inv) setTimeout(()=>handleInviteParam(inv), 500);
@@ -1758,8 +1763,8 @@ function doLogin(){
     registerToFirebase();
     listenInvites();
     updateNickBars();
-    ensureXyPracticeRoom(); // 연습방 항상 보장
-    maybeShowWelcome(); // 처음이면 환영 팝업
+    // 💡 대장님 v28: 연습방 자동 생성 제거 — 유저가 "시작할게요" 눌러야만 생성
+    maybeShowWelcome(); // 매 로그인마다 환영 팝업
   } else {
     // user 이름을 닉네임 기본값으로 미리 채워둠
     const nickInput = document.getElementById('nickInput');
@@ -1801,7 +1806,7 @@ function startApp(){
   renderRoomList();
   registerToFirebase();
   listenInvites();
-  ensureXyPracticeRoom(); // 연습방 자동 생성
+  // 💡 대장님 v28: 연습방 자동 생성 제거 — 팝업에서 유저가 선택
   maybeShowWelcome(); // 환영 팝업
 }
 
@@ -1923,6 +1928,41 @@ function openRoom(code){
     }
   });
 
+  // 🛡️🎨 강제 동기화 리스너 — 대장님 v27 발명
+  // 상대가 보안/RGB 토글하면 내 화면도 무조건 적용 (동의 없음!)
+  if(_flagsListener) _flagsListener.off();
+  _flagsListener = dbRef('cgm2/flags/'+roomId);
+  _flagsListener.on('value', snap=>{
+    const flags = snap.val() || {};
+    // 자기가 보낸 신호는 무시 (무한 루프 방지)
+    if(flags.lastSetBy === _myCode) return;
+
+    // 🛡️ 보안 강제 동기화
+    if(typeof flags.security === 'boolean' && flags.security !== _secOn){
+      _secOn = flags.security;
+      const sbtn = document.getElementById('secBtn');
+      if(sbtn){
+        sbtn.textContent = _secOn ? '🛡️ ON' : '🛡️ OFF';
+        sbtn.classList.toggle('active', _secOn);
+      }
+      showToast(_secOn ? '🛡️ 상대가 보안 모드 시작' : '🛡️ 상대가 보안 모드 해제');
+      if(_currentRoom) renderMessages();
+    }
+    // 🎨 RGB 강제 동기화 (FULI 에도 없던 세계 최초 — 대장님 v27)
+    if(typeof flags.rgb === 'boolean' && flags.rgb !== _rgbOn){
+      _rgbOn = flags.rgb;
+      const rbtn = document.getElementById('rgbBtn');
+      const msgArea = document.getElementById('msgArea');
+      if(rbtn){
+        rbtn.classList.toggle('active', _rgbOn);
+        rbtn.style.boxShadow = _rgbOn ? '0 0 14px rgba(255,255,255,.5)' : '';
+      }
+      if(msgArea) msgArea.classList.toggle('rgb-mode', _rgbOn);
+      showToast(_rgbOn ? '🎨 상대가 반짝 방어 시작' : '🎨 상대가 반짝 방어 해제');
+      if(_currentRoom) renderMessages();
+    }
+  });
+
   // 읽음 처리
   dbRef('cgm2/read/'+roomId+'/'+_myCode).set(Date.now());
 
@@ -1940,6 +1980,7 @@ function openRoom(code){
 function goBack(){
   _currentRoom = null;
   if(_msgListener){ _msgListener.off(); _msgListener=null; }
+  if(_flagsListener){ _flagsListener.off(); _flagsListener=null; }
   if(_cleanTimer){ clearInterval(_cleanTimer); _cleanTimer=null; }
   if(_tiltOn) toggleTilt();
   // 보안 패널 닫기
@@ -2118,10 +2159,8 @@ function sendMsg(){
 
 const XY_PRACTICE_CODE = 'XY00000'; // 연습방 고유 코드 (실제 유저 아님)
 
-// 환영 팝업 — 처음 로그인 한 유저에게만 한 번 표시
+// 환영 팝업 — 대장님 v28: 매 로그인마다 항상 표시 (유저가 매번 선택)
 function maybeShowWelcome(){
-  const seenWelcome = localStorage.getItem('cgm2_seen_welcome')==='1';
-  if(seenWelcome) return;
   setTimeout(()=>{
     const overlay = document.getElementById('welcomeOverlay');
     if(overlay) overlay.classList.add('show');
@@ -2131,7 +2170,6 @@ function maybeShowWelcome(){
 function closeWelcome(startTutorial){
   const overlay = document.getElementById('welcomeOverlay');
   if(overlay) overlay.classList.remove('show');
-  localStorage.setItem('cgm2_seen_welcome','1');
 
   if(startTutorial){
     // 연습방 생성 + 바로 진입
@@ -2140,10 +2178,7 @@ function closeWelcome(startTutorial){
       openRoom(XY_PRACTICE_CODE);
     }, 300);
   }
-  // 건너뛰기 해도 연습방은 목록에 만들어둠
-  else {
-    ensureXyPracticeRoom();
-  }
+  // 건너뛰기면 연습방 만들지 않음 (대장님 v28: 유저 선택만 반영)
 }
 
 // ══ ✨ 유저가 원할 때 연습 팝업 다시 열기 (채팅 탭 ✨ 버튼) ══
@@ -2737,7 +2772,24 @@ function toggleSecPanel(){
   btn.classList.toggle('active', panel.classList.contains('open'));
 }
 
-// 🛡️ 보안 ON/OFF (별개 토글)
+// 🔥 강제 동기화 브로드캐스트 (대장님 v27 — 동의 없이 상대 화면에도 적용)
+function broadcastFlags(){
+  if(!_currentRoom) return;
+  // 연습방은 상대가 AI라 전송 안 함
+  const room = _rooms[_currentRoom];
+  if(!room || room.isPractice) return;
+  try {
+    const roomId = [_myCode, _currentRoom].sort().join('_');
+    dbRef('cgm2/flags/'+roomId).set({
+      security: _secOn,
+      rgb: _rgbOn,
+      lastSetBy: _myCode, // 자신에게 다시 반영되지 않게
+      t: Date.now()
+    });
+  } catch(e){ console.warn('[broadcastFlags]', e); }
+}
+
+// 🛡️ 보안 ON/OFF (별개 토글) + 🔄 강제 동기화 (v27)
 function toggleSec(){
   _secOn = !_secOn;
   const btn = document.getElementById('secBtn');
@@ -2751,6 +2803,9 @@ function toggleSec(){
     showToast('🛡️ 보안 모드 OFF');
   }
   if(_currentRoom) renderMessages();
+
+  // 🔥 상대에게 강제 동기화 신호 전송 (동의 필요 없음 — 대장님 v27)
+  broadcastFlags();
 }
 
 // 💥 폭파 (즉시 모든 메시지 삭제)
@@ -2798,6 +2853,9 @@ function toggleRGB(){
   }
   // 💡 메시지 재렌더링 (글자별 span 재생성/제거)
   if(_currentRoom) renderMessages();
+
+  // 🔥 상대에게 강제 동기화 신호 전송 (FULI에도 없던 세계 최초 — 대장님 v27)
+  broadcastFlags();
 }
 
 // ✨ Xy 활성화 상태 (ON 일 때만 대화에 끼어듦)
