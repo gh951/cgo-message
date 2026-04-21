@@ -1244,13 +1244,13 @@ input[type=range].sec-range::-moz-range-thumb{
   <div class="friends-actions">
     <button class="friend-action-btn" onclick="showToast('📱 주소록 연동 준비 중')">📱 주소록</button>
     <button class="friend-action-btn" onclick="openAddModal()">➕ 닉네임 추가</button>
-    <button class="friend-action-btn" onclick="openInvite()">🔗 초대링크</button>
+    <button class="friend-action-btn" onclick="openInvite()">🔗 새 대화방 만들기</button>
   </div>
   <div class="friends-body">
     <div class="friends-empty">
       <div class="fe-ico">👥</div>
       <div class="fe-title">친구를 추가해보세요</div>
-      <div class="fe-sub">주소록 · 닉네임 검색 · 초대링크<br>3가지 방법으로 친구와 연결됩니다</div>
+      <div class="fe-sub">주소록 · 닉네임 검색 · 새 대화방 만들기<br>3가지 방법으로 친구와 연결됩니다</div>
     </div>
   </div>
   <!-- 하단 탭바 -->
@@ -1269,7 +1269,7 @@ input[type=range].sec-range::-moz-range-thumb{
       <div class="topbar-me" id="myNickBar"></div>
     </div>
     <button class="btn-icon btn-practice" onclick="openPracticeFromButton()" title="Xy 연습하기">✨</button>
-    <button class="btn-icon" onclick="openInvite()" title="친구 초대">🔗</button>
+    <button class="btn-icon" onclick="openInvite()" title="+ 방 만들기">🔗</button>
     <button class="btn-icon" onclick="openAddModal()" title="친구 추가">➕</button>
     <button class="btn-icon" onclick="openSettings()" title="설정">⚙️</button>
   </div>
@@ -1353,6 +1353,8 @@ input[type=range].sec-range::-moz-range-thumb{
     <button class="back-btn" onclick="goBack()">‹</button>
     <div class="r-avatar" id="rAvatar"></div>
     <div class="r-name" id="rName">상대방</div>
+    <!-- 🔗 초대 버튼 (대기방일 때만 표시) -->
+    <button id="roomInviteBtn" onclick="showRoomInvitePopup()" style="display:none;margin-left:auto;padding:8px 14px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(251,191,36,.3);animation:inviteBtnPulse 2s infinite;">🔗 초대</button>
   </div>
 
   <!-- ✨ 상단 액션 바 (세계 최초 기능들) -->
@@ -1454,7 +1456,7 @@ input[type=range].sec-range::-moz-range-thumb{
 <!-- ══ 초대 링크 모달 ══ -->
 <div class="modal-bg" id="inviteModal">
   <div class="modal">
-    <div class="modal-title">🔗 친구 초대</div>
+    <div class="modal-title">🔗 새 대화방</div>
     <div style="font-size:11px;color:rgba(240,230,200,.5);margin-bottom:12px;text-align:center;">
       📷 QR 코드를 보여주거나, 링크를 공유하세요
     </div>
@@ -1996,19 +1998,28 @@ function renderRoomList(){
     const r = _rooms[code];
     const badge = r.unread ? `<div class="room-badge">${r.unread}</div>` : '';
     const practiceBadge = r.isPractice ? '<span class="practice-badge">연습</span>' : '';
+    const waitingBadge = r.isWaiting ? '<span style="margin-left:6px;padding:2px 8px;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.4);border-radius:8px;font-size:10px;color:#fbbf24;font-weight:700;animation:waitPulseB 1.5s infinite;">⏳ 대기</span>' : '';
     const time = r.lastTime ? new Date(r.lastTime).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
     const lastMsg = r.lastMsg ? (r.lastMsg.length>20?r.lastMsg.slice(0,20)+'...':r.lastMsg) : '대화를 시작하세요';
-    const cls = 'room-item' + (r.isPractice ? ' xy-practice' : '');
-    const avatar = r.isPractice ? '✨' : (r.nick||'?')[0];
-    return `<div class="${cls}" onclick="openRoom('${code}')">
+    const cls = 'room-item' + (r.isPractice ? ' xy-practice' : '') + (r.isWaiting ? ' room-waiting' : '');
+    const avatar = r.isPractice ? '✨' : (r.isWaiting ? '⏳' : (r.nick||'?')[0]);
+    return `<div class="${cls}" onclick="openRoom('${code}')" ${r.isWaiting ? 'style="border-left:3px solid #fbbf24;background:rgba(251,191,36,.05);"' : ''}>
       <div class="room-avatar" style="background:${r.color||'rgba(212,168,67,.2)'};">${avatar}</div>
       <div class="room-info">
-        <div class="room-nick">${escHtml(r.nick||'?')}${practiceBadge}</div>
+        <div class="room-nick">${escHtml(r.nick||'?')}${practiceBadge}${waitingBadge}</div>
         <div class="room-last">${escHtml(lastMsg)}</div>
       </div>
       <div class="room-meta"><div class="room-time">${time}</div>${badge}</div>
     </div>`;
   }).join('');
+  
+  // 대기방 깜빡임 CSS (한 번만)
+  if(!document.getElementById('waitPulseBCSS')){
+    const style = document.createElement('style');
+    style.id = 'waitPulseBCSS';
+    style.textContent = '@keyframes waitPulseB{0%,100%{opacity:1}50%{opacity:0.5}}';
+    document.head.appendChild(style);
+  }
 }
 
 // ══ 친구 추가 ══
@@ -2084,7 +2095,7 @@ function searchFriendsByPartialNick(keyword){
             ❌ <b style="color:rgba(255,136,187,.9);">"${escHtml(k)}"</b> 사용자를 찾을 수 없어요<br>
             <span style="font-size:11px;color:rgba(240,230,200,.4);">
               닉네임을 다시 확인하시거나<br>
-              <b style="color:rgba(212,168,67,.8);">🔗 초대링크</b>로 친구를 초대해보세요
+              <b style="color:rgba(212,168,67,.8);">🔗 새 대화방 만들기</b>로 친구를 초대해보세요
             </span>
           </div>`;
       }
@@ -2161,15 +2172,32 @@ function createRoom(code, nick, color){
 function openRoom(code){
   const room = _rooms[code];
   if(!room) return;
+  
+  // 🎯 v1.6.5: 대기방도 일반 방처럼 취급 — 모든 기능 활성화
+  //   (🎤 🌍 🛡️ 💥 📐 🎨 🔊 다 사용 가능)
+  //   방 안 [🔗 초대] 버튼으로 링크 공유만 따로 처리
+  
   _currentRoom = code;
   room.unread = 0;
   saveRooms();
 
+  // 입력창 복원 (혹시 이전에 숨겨져 있었을 경우)
+  const inputBar = document.getElementById('inputBar');
+  if(inputBar) inputBar.style.display = '';
+
   // 헤더 세팅
   const av = document.getElementById('rAvatar');
-  av.textContent = (room.nick||'?')[0];
-  av.style.background = room.color||'rgba(212,168,67,.2)';
+  if(room.isWaiting){
+    av.textContent = '⏳';
+    av.style.background = '#fbbf24';
+  } else {
+    av.textContent = (room.nick||'?')[0];
+    av.style.background = room.color||'rgba(212,168,67,.2)';
+  }
   document.getElementById('rName').textContent = room.nick||'?';
+
+  // 🎯 대기방이면 방 안에 "🔗 초대" 플로팅 버튼 표시
+  toggleRoomInviteButton(room.isWaiting);
 
   renderMessages();
   goScreen('scrRoom');
@@ -2269,6 +2297,13 @@ function renderMessages(){
   const msgs = room.msgs||[];
   let html = '';
   msgs.forEach((msg, idx)=>{
+    // 🎯 v1.6.5: 시스템 메시지 (입장/퇴장 알림 등) 가운데 정렬
+    if(msg.type === 'system'){
+      html += `<div style="text-align:center;padding:12px 16px;margin:8px 0;">
+        <div style="display:inline-block;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:14px;padding:10px 16px;font-size:12px;color:#fbbf24;line-height:1.6;white-space:pre-line;">${escHtml(msg.text||'')}</div>
+      </div>`;
+      return;
+    }
     const isXy = msg.isAI || msg.from==='xy';
     const isMe = !isXy && msg.from===_myCode;
     const time = msg.t ? new Date(msg.t).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}) : '';
@@ -3246,7 +3281,45 @@ window.addEventListener('DOMContentLoaded', ()=>{
   if(msgArea) msgArea.classList.remove('rgb-mode');
   // 🔗 C-19: 카카오톡 인앱 브라우저 감지 + 크롬 유도 배너
   detectKakaoInApp();
+  // 🚨 v1.6.3: file:// 감지 → 웹사이트로 이동 유도
+  detectLocalFile();
 });
+
+// ══ 🚨 로컬 파일로 열었을 때 감지 (file://) ══
+function detectLocalFile(){
+  if(location.protocol !== 'file:') return;
+  // 이미 배너 있으면 스킵
+  if(document.getElementById('c19_localFileBanner')) return;
+  
+  const query = location.search || '';
+  const targetUrl = 'https://www.cgo-message.com/' + query;
+  
+  const banner = document.createElement('div');
+  banner.id = 'c19_localFileBanner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100001;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:14px 16px;font-size:14px;font-weight:700;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);line-height:1.6;';
+  banner.innerHTML = [
+    '🚨 <b>잘못된 방식으로 열렸어요!</b>',
+    '<div style="font-size:12px;margin-top:6px;font-weight:500;">',
+    '  지금 이 화면은 <b>컴퓨터 파일</b>이라서<br>',
+    '  친구 초대·메시지 전송이 작동하지 않아요',
+    '</div>',
+    '<div style="font-size:11px;margin-top:8px;opacity:.9;">👇 아래 주소를 눌러주세요 👇</div>',
+    '<a href="' + targetUrl + '" style="display:inline-block;margin-top:10px;padding:14px 22px;background:#fff;color:#dc2626;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);line-height:1.3;">',
+    '  🌐 www.cgo-message.com<br>',
+    '  <span style="font-size:11px;font-weight:600;opacity:.75;">탭하여 이동하기</span>',
+    '</a>',
+    '<div style="margin-top:10px;">',
+    '  <button id="c19_localDismiss" style="padding:6px 14px;background:transparent;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.3);border-radius:8px;font-weight:600;font-size:11px;cursor:pointer;font-family:inherit;">그냥 이 화면에서 계속 (권장 X)</button>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(banner);
+  document.body.style.paddingTop = banner.offsetHeight + 'px';
+  
+  document.getElementById('c19_localDismiss').addEventListener('click', function(){
+    banner.style.display = 'none';
+    document.body.style.paddingTop = '0';
+  });
+}
 
 // ══ 🚨 카카오톡 인앱 브라우저 감지 및 크롬 유도 ══
 function detectKakaoInApp(){
@@ -3461,18 +3534,237 @@ function toggleTilt(){
   }
 }
 
-// ══ 친구 초대 링크 ══
+// ══ 새 대화방 만들기 (대장님 v1.6.5 - 연습방처럼 전체 기능 + 초대 버튼) ══
 function openInvite(){
-  // C-19 v19: 닉네임 + 코드 둘 다 실어 보내기 → 동명이인일 때도 정확히 내가 초대된 것 확인 가능
-  // 하위 호환: 예전 링크(닉네임만 있는 것)도 handleInviteParam에서 계속 처리함
-  const base = location.origin + location.pathname
-             + '?invite=' + encodeURIComponent(_myNick);
+  // 🎯 대장님 설계:
+  //   ① 방 생성 + 그 방으로 들어감
+  //   ② 방 안은 연습방처럼 모든 기능 (🎤 🌍 🛡️ 💥 등)
+  //   ③ 방 상단에 [🔗 초대] 버튼 하나만 추가
+  //   ④ 상대방 들어오면 "○○님이 입장했습니다" 메시지
+  
+  // 🎯 file:// 감지 → 항상 실제 도메인
+  let baseOrigin, basePath;
+  if(location.protocol === 'file:' || location.origin === 'null' || location.origin === 'file://'){
+    baseOrigin = 'https://www.cgo-message.com';
+    basePath = '/';
+    console.warn('[초대링크] file:// 감지됨, 실제 도메인으로 교체');
+  } else {
+    baseOrigin = location.origin;
+    basePath = location.pathname;
+  }
+  const base = baseOrigin + basePath + '?invite=' + encodeURIComponent(_myNick);
   const url = _myCode ? (base + '&c=' + encodeURIComponent(_myCode)) : base;
-  document.getElementById('inviteLinkBox').textContent = url;
-  document.getElementById('inviteModal').classList.add('open');
-  // 📷 QR 코드 생성 (Google Charts API 무료 사용)
-  generateInviteQR(url);
-  if(navigator.share) navigator.share({title:'CGO MESSAGE 초대',url}).catch(()=>{});
+  
+  // ① 방 생성 (대기 중 플래그 + 초대 링크 저장)
+  const waitingId = '__waiting_' + Date.now();
+  _rooms[waitingId] = {
+    code: waitingId,
+    nick: '⏳ 새 대화방 (대기 중)',
+    color: '#fbbf24',
+    lastMsg: '상대방 기다리는 중...',
+    lastTime: Date.now(),
+    unread: 0,
+    msgs: [{
+      id: 'sys_' + Date.now(),
+      type: 'system',
+      text: '💬 새 대화방이 만들어졌어요!\n\n상단 [🔗 초대] 버튼을 눌러\n링크를 상대방에게 공유하세요.',
+      t: Date.now()
+    }],
+    isWaiting: true,
+    inviteUrl: url
+  };
+  saveRooms();
+  renderRoomList();
+  
+  // ② 그 방으로 들어감 (일반 openRoom 통해서 — 모든 기능 활성화됨)
+  openRoom(waitingId);
+  
+  showToast('💬 방 생성! 상단 🔗 초대 버튼으로 링크 공유');
+}
+
+// ══ 방 안 [🔗 초대] 버튼 클릭 시 — 링크 표시 팝업 ══
+function showRoomInvitePopup(){
+  const room = _rooms[_currentRoom];
+  if(!room){ showToast('❌ 방 정보 없음'); return; }
+  if(!room.inviteUrl){ showToast('❌ 초대 링크 없음 (이 방은 초대 불가)'); return; }
+  
+  const url = room.inviteUrl;
+  const old = document.getElementById('roomInvitePopup');
+  if(old) old.remove();
+  
+  const ov = document.createElement('div');
+  ov.id = 'roomInvitePopup';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = [
+    '<div style="max-width:420px;width:100%;background:linear-gradient(135deg,rgba(30,25,50,.98),rgba(20,15,40,.98));border:1px solid rgba(255,136,187,.4);border-radius:22px;padding:24px 20px;box-shadow:0 0 60px rgba(255,136,187,.25);">',
+    '  <div style="text-align:center;font-size:44px;margin-bottom:8px;">🔗</div>',
+    '  <div style="text-align:center;font-size:17px;font-weight:800;color:#ff88bb;margin-bottom:6px;">친구 초대</div>',
+    '  <div style="text-align:center;font-size:11px;color:rgba(240,230,200,.55);margin-bottom:16px;">링크 복사해서 카톡/문자로 전송하세요</div>',
+    // QR 코드
+    '  <div style="text-align:center;margin-bottom:14px;">',
+    '    <div style="display:inline-block;background:#fff;padding:8px;border-radius:10px;">',
+    '      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' + encodeURIComponent(url) + '&margin=0&ecc=M" width="150" height="150" alt="QR" style="display:block;border-radius:4px;" onerror="this.style.display=\'none\'">',
+    '    </div>',
+    '    <div style="font-size:10px;color:rgba(240,230,200,.4);margin-top:4px;">📱 QR 스캔으로 바로 입장</div>',
+    '  </div>',
+    // 링크
+    '  <div style="background:rgba(0,0,0,.35);border:1px solid rgba(255,136,187,.25);border-radius:10px;padding:10px;font-size:10px;color:#ff88bb;word-break:break-all;line-height:1.5;margin-bottom:12px;max-height:80px;overflow-y:auto;">',
+    escHtml(url),
+    '  </div>',
+    // 카톡 안내
+    '  <div style="font-size:10px;color:#fbbf24;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);border-radius:8px;padding:8px;margin-bottom:14px;line-height:1.5;">',
+    '    ⚠️ 받는 분이 카톡에서 링크 누른 후<br>',
+    '    [⋮] → <b>"다른 브라우저로 열기"</b> 눌러야 음성 작동',
+    '  </div>',
+    // 버튼
+    '  <div style="display:flex;gap:8px;">',
+    '    <button onclick="document.getElementById(\'roomInvitePopup\').remove()" style="flex:0.6;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(240,230,200,.6);font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;">닫기</button>',
+    '    <button onclick="copyRoomInviteUrl()" style="flex:1;padding:12px;background:linear-gradient(135deg,#34d399,#10b981);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(52,211,153,.3);">📋 링크 복사</button>',
+    '    <button onclick="shareRoomInvite()" style="flex:1;padding:12px;background:linear-gradient(135deg,#64b4fa,#3b82f6);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(100,180,250,.3);">📤 공유</button>',
+    '  </div>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(ov);
+  window._lastInviteUrl = url;
+}
+
+function copyRoomInviteUrl(){
+  const url = window._lastInviteUrl;
+  if(!url) return;
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('✅ 링크 복사됨! 카톡으로 전송하세요');
+    document.getElementById('roomInvitePopup').remove();
+  }).catch(()=>{
+    const t = document.createElement('textarea');
+    t.value = url; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+    showToast('✅ 링크 복사됨!');
+    document.getElementById('roomInvitePopup').remove();
+  });
+}
+
+function shareRoomInvite(){
+  const url = window._lastInviteUrl;
+  if(!url) return;
+  if(navigator.share){
+    navigator.share({title:'CGO MESSAGE 초대', url}).catch(()=>{});
+  } else {
+    copyRoomInviteUrl();
+  }
+}
+
+// 🎯 대기방 여부에 따라 헤더 [🔗 초대] 버튼 표시/숨김
+function toggleRoomInviteButton(show){
+  const btn = document.getElementById('roomInviteBtn');
+  if(!btn) return;
+  btn.style.display = show ? 'inline-block' : 'none';
+  // 애니메이션 CSS (한 번만)
+  if(!document.getElementById('inviteBtnPulseCSS')){
+    const style = document.createElement('style');
+    style.id = 'inviteBtnPulseCSS';
+    style.textContent = '@keyframes inviteBtnPulse{0%,100%{box-shadow:0 2px 8px rgba(251,191,36,.3)}50%{box-shadow:0 2px 16px rgba(251,191,36,.6)}}';
+    document.head.appendChild(style);
+  }
+}
+
+// 🎯 대기방에 들어왔을 때 메시지 영역에 큰 안내 카드 표시
+function renderWaitingRoomContent(url){
+  const msgArea = document.getElementById('msgArea');
+  if(!msgArea) return;
+  msgArea.innerHTML = [
+    '<div style="padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;">',
+    '  <div style="font-size:64px;animation:waitPulse 1.5s infinite;">⏳</div>',
+    '  <div style="font-size:16px;font-weight:800;color:#fbbf24;">상대방을 기다리는 중...</div>',
+    '  <div style="font-size:12px;color:rgba(240,230,200,.6);line-height:1.6;max-width:300px;">',
+    '    아래 링크를 <b style="color:#64b4fa;">카톡·문자·메일</b>로 보내세요.<br>',
+    '    상대방이 링크 클릭하면<br>이 방에 자동으로 들어와요!',
+    '  </div>',
+    // QR 코드 영역
+    '  <div style="background:#fff;padding:8px;border-radius:12px;margin-top:4px;">',
+    '    <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(url) + '&margin=0&ecc=M" width="160" height="160" alt="QR" style="display:block;border-radius:6px;" onerror="this.style.display=\'none\'">',
+    '  </div>',
+    '  <div style="font-size:10px;color:rgba(240,230,200,.4);">📱 QR 스캔으로 바로 입장</div>',
+    // 링크 표시
+    '  <div style="width:100%;max-width:360px;background:rgba(0,0,0,.3);border:1px solid rgba(251,191,36,.3);border-radius:12px;padding:12px;font-size:11px;color:#fbbf24;word-break:break-all;line-height:1.5;text-align:left;">',
+    escHtml(url),
+    '  </div>',
+    // 버튼들
+    '  <div style="display:flex;gap:8px;width:100%;max-width:360px;">',
+    '    <button onclick="roomCopyInvite()" style="flex:1;padding:14px;background:linear-gradient(135deg,#34d399,#10b981);border:none;border-radius:14px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(52,211,153,.3);">',
+    '      📋 링크 복사',
+    '    </button>',
+    '    <button onclick="roomShareInvite()" style="flex:1;padding:14px;background:linear-gradient(135deg,#64b4fa,#3b82f6);border:none;border-radius:14px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(100,180,250,.3);">',
+    '      📤 공유',
+    '    </button>',
+    '  </div>',
+    // 카톡 안내
+    '  <div style="width:100%;max-width:360px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:10px;font-size:10px;color:#fbbf24;line-height:1.6;text-align:left;">',
+    '    ⚠️ 카톡으로 보내면 받는 분이 링크 탭 후<br>',
+    '    <b>[⋮] → "다른 브라우저로 열기"</b><br>',
+    '    눌러야 음성이 정상 작동해요!',
+    '  </div>',
+    // 취소 버튼
+    '  <button onclick="cancelCurrentWaitingRoom()" style="margin-top:10px;padding:8px 16px;background:transparent;border:1px solid rgba(248,113,113,.3);border-radius:10px;color:#f87171;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">',
+    '    ❌ 방 닫기',
+    '  </button>',
+    '</div>'
+  ].join('');
+  
+  // 애니메이션 CSS (한 번만)
+  if(!document.getElementById('waitPulseCSS')){
+    const style = document.createElement('style');
+    style.id = 'waitPulseCSS';
+    style.textContent = '@keyframes waitPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}';
+    document.head.appendChild(style);
+  }
+  
+  // 저장 (복사/공유 함수가 참조)
+  window._lastInviteUrl = url;
+  
+  // 입력창 숨기기 (대기 중엔 아직 메시지 못 보냄)
+  const inputBar = document.getElementById('inputBar');
+  if(inputBar) inputBar.style.display = 'none';
+}
+
+// 대기방 안 "📋 링크 복사" 버튼
+function roomCopyInvite(){
+  const url = window._lastInviteUrl;
+  if(!url){ showToast('❌ 링크 없음'); return; }
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('✅ 링크 복사 완료! 카톡으로 전송하세요');
+  }).catch(()=>{
+    const t = document.createElement('textarea');
+    t.value = url; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+    showToast('✅ 링크 복사 완료!');
+  });
+}
+
+// 대기방 안 "📤 공유" 버튼
+function roomShareInvite(){
+  const url = window._lastInviteUrl;
+  if(!url){ showToast('❌ 링크 없음'); return; }
+  if(navigator.share){
+    navigator.share({title:'CGO MESSAGE 초대', url}).catch(()=>{});
+  } else {
+    roomCopyInvite();
+  }
+}
+
+// 대기방 "❌ 방 닫기"
+function cancelCurrentWaitingRoom(){
+  if(!confirm('이 방을 닫으시겠어요?\n(아직 상대방이 안 들어왔으면 초대 취소됨)')) return;
+  const code = _currentRoom;
+  if(code && _rooms[code] && _rooms[code].isWaiting){
+    delete _rooms[code];
+    saveRooms();
+  }
+  _currentRoom = null;
+  // 입력창 복원
+  const inputBar = document.getElementById('inputBar');
+  if(inputBar) inputBar.style.display = '';
+  goBack();
+  showToast('❌ 방 닫음');
 }
 
 // 📷 QR 코드 생성 (외부 API 의존 최소화 — 라이브러리 없이 Google Charts 사용)
@@ -3491,13 +3783,160 @@ function copyInviteLink(){
   const url = document.getElementById('inviteLinkBox').textContent;
   navigator.clipboard.writeText(url).then(()=>{
     showToast('✅ 링크 복사 완료!');
+    createWaitingRoom();  // 🎯 대기방 즉시 생성
+    showInviteGuide();
   }).catch(()=>{
     const t = document.createElement('textarea');
     t.value = url; document.body.appendChild(t); t.select();
     document.execCommand('copy'); document.body.removeChild(t);
     showToast('✅ 링크 복사 완료!');
+    createWaitingRoom();
+    showInviteGuide();
   });
   document.getElementById('inviteModal').classList.remove('open');
+}
+
+// 🎯 대기방 탭하면 뜨는 팝업 — "기다리는 중" + 재공유 + 취소
+function showWaitingRoomPopup(room){
+  const old = document.getElementById('waitingRoomOverlay');
+  if(old) old.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'waitingRoomOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
+
+  ov.innerHTML = [
+    '<div style="max-width:420px;width:100%;background:linear-gradient(135deg,rgba(40,30,20,.98),rgba(30,20,10,.98));border:1px solid rgba(251,191,36,.4);border-radius:22px;padding:26px 22px;box-shadow:0 0 60px rgba(251,191,36,.25);">',
+    '  <div style="text-align:center;font-size:56px;margin-bottom:12px;animation:waitPulse 1.5s infinite;">⏳</div>',
+    '  <div style="text-align:center;font-size:18px;font-weight:800;color:#fbbf24;margin-bottom:10px;">상대방 기다리는 중...</div>',
+    '  <div style="text-align:center;font-size:12px;color:rgba(240,230,200,.6);margin-bottom:18px;line-height:1.6;">',
+    '    초대 링크를 아직 전송 안 하셨거나,<br>상대방이 아직 링크를 안 눌렀어요',
+    '  </div>',
+    '  <div style="background:rgba(0,0,0,.3);border:1px solid rgba(251,191,36,.2);border-radius:10px;padding:10px;margin-bottom:14px;font-size:10px;color:#fbbf24;word-break:break-all;line-height:1.5;">',
+    escHtml(room.inviteUrl || '링크 없음'),
+    '  </div>',
+    '  <div style="display:flex;gap:8px;margin-bottom:10px;">',
+    '    <button onclick="reCopyInvite()" style="flex:1;padding:12px;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.4);border-radius:12px;color:#34d399;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">📋 다시 복사</button>',
+    '    <button onclick="reShareInvite()" style="flex:1;padding:12px;background:rgba(100,180,250,.2);border:1px solid rgba(100,180,250,.4);border-radius:12px;color:#64b4fa;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;">📤 공유</button>',
+    '  </div>',
+    '  <button onclick="cancelWaitingRoom(\'' + room.code + '\')" style="width:100%;padding:12px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:12px;color:#f87171;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;margin-bottom:6px;">',
+    '    ❌ 초대 취소 (대기방 삭제)',
+    '  </button>',
+    '  <button onclick="document.getElementById(\'waitingRoomOverlay\').remove()" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(240,230,200,.6);font-size:12px;cursor:pointer;font-family:inherit;">',
+    '    계속 기다리기',
+    '  </button>',
+    '</div>'
+  ].join('');
+
+  document.body.appendChild(ov);
+
+  // 애니메이션 CSS 한 번만
+  if(!document.getElementById('waitPulseCSS')){
+    const style = document.createElement('style');
+    style.id = 'waitPulseCSS';
+    style.textContent = '@keyframes waitPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.7}}';
+    document.head.appendChild(style);
+  }
+
+  // 저장된 링크 복사용
+  window._lastInviteUrl = room.inviteUrl;
+}
+
+function reCopyInvite(){
+  const url = window._lastInviteUrl;
+  if(!url){ showToast('❌ 링크 없음'); return; }
+  navigator.clipboard.writeText(url).then(()=>{
+    showToast('✅ 다시 복사됐어요!');
+  }).catch(()=>{
+    const t = document.createElement('textarea');
+    t.value = url; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+    showToast('✅ 다시 복사됐어요!');
+  });
+}
+
+function reShareInvite(){
+  const url = window._lastInviteUrl;
+  if(!url){ showToast('❌ 링크 없음'); return; }
+  if(navigator.share){
+    navigator.share({title:'CGO MESSAGE 초대', url}).catch(()=>{});
+  } else {
+    reCopyInvite();
+  }
+}
+
+function cancelWaitingRoom(code){
+  if(!confirm('초대를 취소하시겠어요?\n(대기방이 삭제됩니다)')) return;
+  delete _rooms[code];
+  saveRooms();
+  renderRoomList();
+  document.getElementById('waitingRoomOverlay').remove();
+  showToast('❌ 초대 취소됨');
+}
+
+// 🎯 대장님이 "어디서 기다리지?" 해결:
+//    초대 링크 복사 즉시 "대기 방"을 친구 목록에 생성
+//    상대방이 링크 클릭하면 이 방이 실제 대화방으로 전환됨
+function createWaitingRoom(){
+  const waitingId = '__waiting_' + Date.now();
+  if(!_rooms[waitingId]){
+    _rooms[waitingId] = {
+      code: waitingId,
+      nick: '⏳ 초대 대기 중...',
+      color: '#fbbf24',
+      lastMsg: '링크를 상대방에게 전송하세요',
+      lastTime: Date.now(),
+      unread: 0,
+      msgs: [],
+      isWaiting: true,  // 대기 방 플래그
+      inviteUrl: document.getElementById('inviteLinkBox').textContent
+    };
+    saveRooms();
+    renderRoomList();
+  }
+}
+
+// 🎯 초대 후 안내 팝업 (대장님 UX 개선 — "어디서 기다려야 하지?" 해결)
+function showInviteGuide(){
+  // 이미 뜬 가이드 제거
+  const old = document.getElementById('inviteGuideOverlay');
+  if(old) old.remove();
+
+  const ov = document.createElement('div');
+  ov.id = 'inviteGuideOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  
+  ov.innerHTML = [
+    '<div style="max-width:400px;width:100%;background:linear-gradient(135deg,rgba(30,25,50,.98),rgba(20,15,40,.98));border:1px solid rgba(255,136,187,.4);border-radius:22px;padding:26px 22px;box-shadow:0 0 60px rgba(255,136,187,.25);">',
+    '  <div style="text-align:center;font-size:48px;margin-bottom:12px;">📨</div>',
+    '  <div style="text-align:center;font-size:18px;font-weight:800;color:#ff88bb;margin-bottom:16px;">초대 링크 복사됨!</div>',
+    '  <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px;margin-bottom:14px;line-height:1.7;font-size:13px;color:#f0ece0;">',
+    '    <div style="margin-bottom:10px;">',
+    '      <span style="color:#64b4fa;font-weight:800;">1️⃣</span> 카톡/문자로 링크 전송',
+    '    </div>',
+    '    <div style="margin-bottom:10px;">',
+    '      <span style="color:#64b4fa;font-weight:800;">2️⃣</span> 상대방이 클릭 + 닉네임 입력',
+    '    </div>',
+    '    <div>',
+    '      <span style="color:#34d399;font-weight:800;">3️⃣</span> <b style="color:#34d399;">자동으로 친구 목록에 추가!</b>',
+    '    </div>',
+    '  </div>',
+    '  <div style="font-size:12px;color:rgba(240,230,200,.6);text-align:center;line-height:1.5;margin-bottom:16px;padding:10px;background:rgba(100,180,250,.08);border:1px solid rgba(100,180,250,.2);border-radius:10px;">',
+    '    💡 상대방이 링크 클릭하면<br>',
+    '    이 화면에 <b style="color:#64b4fa;">"🔔 ○○님이 대화 시작"</b> 알림이 떠요',
+    '  </div>',
+    '  <button onclick="document.getElementById(\'inviteGuideOverlay\').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#ff88bb,#64b4fa);border:none;border-radius:14px;color:#fff;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;">',
+    '    ✅ 알겠어요 (대기 시작)',
+    '  </button>',
+    '</div>'
+  ].join('');
+  
+  document.body.appendChild(ov);
+  
+  // 배경 클릭해도 닫힘
+  ov.addEventListener('click', function(e){
+    if(e.target === ov) ov.remove();
+  });
 }
 
 // 초대 파라미터 처리 (C-19 v19 보강)
@@ -3522,8 +3961,25 @@ function handleInviteParam(inviterNick, inviterCode){
         showToast('❌ 초대한 사용자를 찾을 수 없어요 (계정 삭제?)');
         return;
       }
-      createRoom(inviterCode, user.nick || inviterNick || '?', user.color||'#d4a843');
-      showToast('💬 '+(user.nick||inviterNick||'친구')+'님과의 대화가 열렸어요!');
+      const nick = user.nick || inviterNick || '?';
+      const color = user.color || '#d4a843';
+      showToast('💬 '+nick+'님과의 대화를 여는 중...');
+      createRoom(inviterCode, nick, color);
+      
+      // 🎯 초대자 쪽에도 "내가 친구 추가됐다" 알림 → 양쪽 모두 대화방 생성
+      try {
+        dbRef('cgm2/invites/'+inviterCode+'/'+_myCode).set({
+          nick: _myNick,
+          color: _myColor || '#d4a843',
+          t: Date.now()
+        });
+      } catch(e){ console.warn('[invite signal]', e); }
+      
+      // 🎯 확실하게 대화방 전환 (Firebase 렌더 완료 대기)
+      setTimeout(()=>{
+        openRoom(inviterCode);
+        showToast('✅ '+nick+'님과의 대화가 시작되었어요!');
+      }, 300);
     }).catch(()=>{
       showToast('⚠️ 초대 확인 중 네트워크 오류');
     });
@@ -3538,20 +3994,32 @@ function handleInviteParam(inviterNick, inviterCode){
       return;
     }
     const codes = Object.keys(data);
-    // ④ 동명이인 다수 → 최신 초대링크 필요 안내
     if(codes.length > 1){
       showToast('⚠️ "'+inviterNick+'" 사용자가 여러 명이에요. 초대자에게 새 링크를 받아주세요');
       return;
     }
     const code = codes[0];
     const user = data[code];
-    // ⑤ 자기 자신
     if(code === _myCode){
       showToast('😅 본인이 만든 초대링크예요');
       return;
     }
+    showToast('💬 '+user.nick+'님과의 대화를 여는 중...');
     createRoom(code, user.nick, user.color||'#d4a843');
-    showToast('💬 '+user.nick+'님과의 대화가 열렸어요!');
+    
+    // 🎯 초대자 쪽에도 알림
+    try {
+      dbRef('cgm2/invites/'+code+'/'+_myCode).set({
+        nick: _myNick,
+        color: _myColor || '#d4a843',
+        t: Date.now()
+      });
+    } catch(e){ console.warn('[invite signal]', e); }
+    
+    setTimeout(()=>{
+      openRoom(code);
+      showToast('✅ '+user.nick+'님과의 대화가 시작되었어요!');
+    }, 300);
   }).catch(()=>{
     showToast('⚠️ 초대 확인 중 네트워크 오류');
   });
@@ -3559,16 +4027,54 @@ function handleInviteParam(inviterNick, inviterCode){
 
 // 초대 수신 감지
 function listenInvites(){
+  if(!_myCode || !dbRef){
+    console.warn('[listenInvites] _myCode 또는 dbRef 없음');
+    return;
+  }
+  console.log('[listenInvites] 구독 시작: cgm2/invites/' + _myCode);
   dbRef('cgm2/invites/'+_myCode).on('child_added', snap=>{
     const inv = snap.val();
     if(!inv) return;
     const code = snap.key;
+    console.log('[listenInvites] 새 초대 수신:', inv.nick, code);
     if(!_rooms[code]){
-      _rooms[code] = { code, nick:inv.nick, color:inv.color||'#d4a843', lastMsg:'', lastTime:Date.now(), unread:1, msgs:[] };
+      _rooms[code] = { 
+        code, nick:inv.nick, color:inv.color||'#d4a843', 
+        lastMsg: inv.nick + '님이 입장하였습니다', 
+        lastTime:Date.now(), unread:1, 
+        msgs:[{
+          id: 'sys_enter_' + Date.now(),
+          type: 'system',
+          text: '💬 ' + inv.nick + '님이 입장하였습니다',
+          t: Date.now()
+        }]
+      };
+      
+      // 🎯 대장님이 대기방 안에 있었는지 확인
+      const wasInWaitingRoom = _currentRoom && _rooms[_currentRoom] && _rooms[_currentRoom].isWaiting;
+      
+      // 대기방(__waiting_xxx) 자동 제거
+      Object.keys(_rooms).forEach(k => {
+        if(_rooms[k].isWaiting){
+          delete _rooms[k];
+        }
+      });
+      
       saveRooms();
       renderRoomList();
-      showToast('💬 '+inv.nick+'님이 대화를 시작했어요!');
+      
+      // 🎯 대장님이 대기방 안에 있었으면 → 자동으로 실제 방으로 전환
+      if(wasInWaitingRoom){
+        const inputBar = document.getElementById('inputBar');
+        if(inputBar) inputBar.style.display = '';
+        showToast('🎉 ' + inv.nick + '님이 입장하였습니다!');
+        setTimeout(() => openRoom(code), 100);
+      } else {
+        showToast('🔔 ' + inv.nick + '님이 입장하였습니다');
+      }
     }
+  }, err => {
+    console.error('[listenInvites] 구독 실패:', err);
   });
 }
 
