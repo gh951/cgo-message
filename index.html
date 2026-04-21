@@ -3762,49 +3762,141 @@ window.addEventListener('appinstalled', function(){
     alert('⚠️ ' + langName + ' 음성이 설치되어 있지 않아요.\n\n' + guide);
   }
 
+  // 대장님이 복사 버튼용 Toast — 성공 시 사용자에게 피드백
+  function _c19_copyToClipboard(text, cb){
+    try {
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){ cb && cb(true); }, function(){ cb && cb(false); });
+      } else {
+        // 구형 브라우저 폴백
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed'; ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch(_e){}
+        document.body.removeChild(ta);
+        cb && cb(ok);
+      }
+    } catch(_e){ cb && cb(false); }
+  }
+
+  // C-19 v1.4: 텍스트 큰 팝업 (음성 폴백)
+  function _c19_showBigTextFallback(text, flag, langName, bcp){
+    // 기존 팝업 있으면 제거
+    var old = document.getElementById('c19_bigTextOverlay');
+    if(old) old.parentNode.removeChild(old);
+
+    var ov = document.createElement('div');
+    ov.id = 'c19_bigTextOverlay';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,15,30,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
+
+    ov.innerHTML = [
+      '<div style="max-width:420px;width:100%;padding:26px 22px;background:linear-gradient(135deg,rgba(30,25,50,.98),rgba(20,15,40,.98));border:1px solid rgba(255,136,187,.4);border-radius:22px;box-shadow:0 0 60px rgba(255,136,187,.25);">',
+      '  <div style="text-align:center;margin-bottom:18px;">',
+      '    <div style="font-size:52px;margin-bottom:8px;">' + flag + '</div>',
+      '    <div style="font-size:13px;font-weight:900;color:#ff88bb;letter-spacing:0.5px;">' + _c19_esc(langName) + '</div>',
+      '    <div style="font-size:10px;color:rgba(240,230,200,.45);margin-top:4px;">이 기기엔 음성이 없어요. 글자로 전달해요.</div>',
+      '  </div>',
+      '  <div id="c19_bigText" style="padding:18px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:#fff;font-size:22px;font-weight:700;line-height:1.5;text-align:center;word-break:break-word;margin-bottom:16px;min-height:60px;">' + _c19_esc(text) + '</div>',
+      '  <div style="display:flex;gap:8px;">',
+      '    <button id="c19_bigTextCopy" style="flex:1;padding:12px;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.4);border-radius:12px;color:#34d399;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;">📋 복사하기</button>',
+      '    <button id="c19_bigTextTranslate" style="flex:1;padding:12px;background:rgba(100,180,250,.2);border:1px solid rgba(100,180,250,.4);border-radius:12px;color:#64b4fa;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;">🔗 번역기 열기</button>',
+      '  </div>',
+      '  <button id="c19_bigTextClose" style="width:100%;margin-top:10px;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(240,230,200,.6);font-size:12px;cursor:pointer;font-family:inherit;">닫기</button>',
+      '</div>'
+    ].join('');
+
+    document.body.appendChild(ov);
+
+    // 복사 버튼
+    document.getElementById('c19_bigTextCopy').addEventListener('click', function(){
+      _c19_copyToClipboard(text, function(ok){
+        if(ok){
+          if(typeof showToast === 'function') showToast('📋 복사됐어요!');
+          else _c19_toast('📋 복사됐어요!');
+          var btn = document.getElementById('c19_bigTextCopy');
+          if(btn){
+            btn.textContent = '✅ 복사됨!';
+            setTimeout(function(){ btn.textContent = '📋 복사하기'; }, 1500);
+          }
+        } else {
+          _c19_toast('⚠️ 복사 실패. 직접 선택해주세요.');
+        }
+      });
+    });
+
+    // 번역기 열기 (구글 번역 페이지)
+    document.getElementById('c19_bigTextTranslate').addEventListener('click', function(){
+      var src = bcp ? bcp.split('-')[0] : 'auto';
+      var url = 'https://translate.google.com/?sl=auto&tl=' + src + '&text=' + encodeURIComponent(text) + '&op=translate';
+      window.open(url, '_blank');
+    });
+
+    // 닫기
+    document.getElementById('c19_bigTextClose').addEventListener('click', function(){
+      if(ov.parentNode) ov.parentNode.removeChild(ov);
+    });
+    // 배경 클릭해도 닫힘
+    ov.addEventListener('click', function(e){
+      if(e.target === ov && ov.parentNode) ov.parentNode.removeChild(ov);
+    });
+  }
+
   function _c19_speak(text, bcp){
+    // 1단계: 브라우저 내장 TTS 시도
     if(!('speechSynthesis' in window)){
-      if(typeof showToast === 'function') showToast('⚠️ 이 브라우저는 음성 재생을 지원하지 않아요');
+      // 브라우저 자체가 TTS 미지원 → 바로 3단계(텍스트) 폴백
+      var langName1 = bcp, flag1 = '🌍';
+      if(typeof _c19_LANGS !== 'undefined'){
+        var L1 = _c19_LANGS.find(function(l){ return l.bcp === bcp; });
+        if(L1){ langName1 = L1.name; flag1 = L1.flag; }
+      }
+      _c19_showBigTextFallback(text, flag1, langName1, bcp);
       return;
     }
     try {
       window.speechSynthesis.cancel();
       var voices = window.speechSynthesis.getVoices();
 
-      // 음성 목록이 아직 로딩 안 됐으면 한번 더 시도
       if(!voices || voices.length === 0){
         setTimeout(function(){ _c19_speak(text, bcp); }, 200);
         return;
       }
 
-      // 정확한 언어 매칭 (예: zh-CN)
       var match = voices.find(function(v){ return v.lang === bcp; });
-
-      // 부분 매칭 (예: zh-TW도 허용)
       if(!match){
         var prefix = bcp.split('-')[0];
         match = voices.find(function(v){ return v.lang && v.lang.toLowerCase().startsWith(prefix.toLowerCase()); });
       }
 
-      // 여전히 없으면 → 이 기기엔 해당 언어 음성 없음
       if(!match){
-        // 언어 이름 찾기
-        var langName = bcp;
+        // 2단계 스킵 (Groq TTS는 영어/아랍어만 — 대장님이 옵션 C 선택)
+        // 바로 3단계: 텍스트 크게 + 복사 폴백
+        var langName = bcp, flag = '🌍';
         if(typeof _c19_LANGS !== 'undefined'){
           var L = _c19_LANGS.find(function(l){ return l.bcp === bcp; });
-          if(L) langName = L.flag + ' ' + L.name;
+          if(L){ langName = L.name; flag = L.flag; }
         }
-        _c19_showVoiceGuide(langName, bcp);
+        _c19_showBigTextFallback(text, flag, langName, bcp);
         return;
       }
 
       var u = new SpeechSynthesisUtterance(text);
-      u.lang = match.lang;  // 매칭된 음성의 실제 lang 사용
+      u.lang = match.lang;
       u.voice = match;
       u.rate = 0.95;
       window.speechSynthesis.speak(u);
     } catch(e){
       console.warn('[C-19 speak]', e);
+      // 에러 발생 시에도 폴백
+      var langName2 = bcp, flag2 = '🌍';
+      if(typeof _c19_LANGS !== 'undefined'){
+        var L2 = _c19_LANGS.find(function(l){ return l.bcp === bcp; });
+        if(L2){ langName2 = L2.name; flag2 = L2.flag; }
+      }
+      _c19_showBigTextFallback(text, flag2, langName2, bcp);
     }
   }
 
