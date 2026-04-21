@@ -4528,12 +4528,32 @@ let _call = {
   ringing: false
 };
 
-// STUN 서버 (P2P 연결용 — 공짜)
+// STUN + TURN 서버 (P2P 연결용)
+// TURN은 NAT/방화벽 뚫을 때 필요 — Metered 무료 계정 사용
 const _ICE_CONFIG = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
-  ]
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun.services.mozilla.com' },
+    // 🎯 OpenRelay 무료 TURN (NAT 통과 - 가장 중요!)
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+      username: 'openrelayproject',
+      credential: 'openrelayproject'
+    }
+  ],
+  iceCandidatePoolSize: 10
 };
 
 // ══ 📞 통화 시작 (대장님 → 상대방) ══
@@ -4591,19 +4611,35 @@ async function startCall(type){
       t: Date.now()
     });
     
-    // 7. Answer 수신 대기
+    // 7. Answer 수신 대기 - 🎯 ICE 큐잉으로 순서 문제 해결
+    const pendingIce = [];
     _call.signalRef.on('value', async snap => {
       const data = snap.val();
       if(!data) return;
       if(data.answer && !_call.peer.currentRemoteDescription){
-        console.log('[통화] Answer 수신');
-        await _call.peer.setRemoteDescription(new RTCSessionDescription(data.answer));
-        showToast('✅ 통화 연결됨!');
+        console.log('[통화] ✅ Answer 수신 - setRemoteDescription 시도');
+        try {
+          await _call.peer.setRemoteDescription(new RTCSessionDescription(data.answer));
+          console.log('[통화] ✅ setRemoteDescription 성공');
+          updateCallStatus('✅ 연결 협상 완료');
+          // 대기하던 ICE 후보 처리
+          while(pendingIce.length > 0){
+            const ice = pendingIce.shift();
+            await _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.warn('[pending ICE 실패]', e));
+          }
+          showToast('✅ 통화 연결됨!');
+        } catch(err) {
+          console.error('[setRemoteDescription 실패]', err);
+        }
       }
-      // ICE 후보 처리
+      // ICE 후보 처리 - remoteDescription 없으면 큐에 쌓기
       if(data.iceFromCallee){
         Object.values(data.iceFromCallee).forEach(ice => {
-          _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(()=>{});
+          if(_call.peer && _call.peer.remoteDescription){
+            _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.warn('[ICE 실패]', e));
+          } else {
+            pendingIce.push(ice);
+          }
         });
       }
       // 상대방 자막
@@ -4631,11 +4667,28 @@ async function startCall(type){
 // ══ 📞 통화 수신 (상대방으로부터 호출 받음) ══
 function listenIncomingCalls(){
   if(!_myCode || !dbRef) return;
-  // 내가 속한 모든 방의 통화 신호 구독
-  Object.keys(_rooms).forEach(otherCode => {
-    if(otherCode.startsWith('__')) return;
+  // 🎯 v1.7.9 수정: 내 코드 기준으로 전체 calls 경로 구독 (동적 방 대응)
+  //   방이 나중에 생성되어도 통화 받을 수 있음
+  //   cgm2/calls 전체를 구독하되, to === _myCode 인 것만 처리
+  
+  // 기존 리스너 정리
+  if(window._callListeners){
+    window._callListeners.forEach(l => { try{ l.off(); }catch(e){} });
+  }
+  window._callListeners = [];
+  
+  // 1. 내가 가진 모든 방의 통화 경로 구독
+  const roomsToListen = new Set();
+  Object.keys(_rooms).forEach(c => {
+    if(!c.startsWith('__')) roomsToListen.add(c);
+  });
+  // 주소록의 친구들도 추가
+  Object.keys(_contacts || {}).forEach(c => roomsToListen.add(c));
+  
+  roomsToListen.forEach(otherCode => {
     const roomId = [_myCode, otherCode].sort().join('_');
-    dbRef('cgm2/calls/' + roomId).on('value', snap => {
+    const ref = dbRef('cgm2/calls/' + roomId);
+    ref.on('value', snap => {
       const data = snap.val();
       if(!data) return;
       // 상대방이 나를 호출한 경우
@@ -4643,21 +4696,62 @@ function listenIncomingCalls(){
         showIncomingCallPopup(data, roomId, otherCode);
       }
       // 통화 중 - ICE 후보 처리 (발신자 → 수신자)
-      if(_call.active && _call.role === 'callee' && data.iceFromCaller){
+      if(_call.active && _call.role === 'callee' && _call.roomId === roomId && data.iceFromCaller){
         Object.values(data.iceFromCaller).forEach(ice => {
-          _call.peer && _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(()=>{});
+          if(_call.peer && _call.peer.remoteDescription){
+            _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.warn('[ICE add 실패]', e));
+          }
         });
       }
       // 상대방 자막 (발신자의 자막)
-      if(_call.active && _call.role === 'callee' && data.captionsFromCaller){
+      if(_call.active && _call.role === 'callee' && _call.roomId === roomId && data.captionsFromCaller){
         Object.values(data.captionsFromCaller).forEach(cap => displayCaption(cap, false));
       }
-      if(_call.active && data.ended){
+      if(_call.active && _call.roomId === roomId && data.ended){
         showToast('📞 통화 종료');
         endCall(false);
       }
     });
+    window._callListeners.push(ref);
   });
+  
+  // 2. 🎯 새로 들어오는 통화 감지 (동적 방 대응)
+  //    cgm2/calls 전체에서 내가 받는 통화만 필터링
+  const allCallsRef = dbRef('cgm2/calls');
+  allCallsRef.on('child_added', snap => {
+    const data = snap.val();
+    const roomId = snap.key;
+    if(!data) return;
+    // 이미 처리한 방은 스킵
+    if(window._callListeners.some(l => l.key === roomId)) return;
+    // 내가 수신자이고 아직 처리 안 된 통화
+    if(data.to === _myCode && data.offer && !_call.active && !data.answer){
+      // 상대방 코드 추출
+      const otherCode = data.from;
+      console.log('[통화 수신] 새 통화 감지:', otherCode, roomId);
+      showIncomingCallPopup(data, roomId, otherCode);
+      // 이 방에 대한 리스너 추가
+      const ref = dbRef('cgm2/calls/' + roomId);
+      ref.on('value', snap2 => {
+        const d = snap2.val();
+        if(!d) return;
+        if(_call.active && _call.role === 'callee' && _call.roomId === roomId && d.iceFromCaller){
+          Object.values(d.iceFromCaller).forEach(ice => {
+            if(_call.peer && _call.peer.remoteDescription){
+              _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(()=>{});
+            }
+          });
+        }
+        if(_call.active && _call.roomId === roomId && d.ended){
+          endCall(false);
+        }
+      });
+      window._callListeners.push(ref);
+    }
+  });
+  window._callListeners.push(allCallsRef);
+  
+  console.log('[통화 수신] 리스너 등록 완료:', roomsToListen.size + '개 방 + 글로벌');
 }
 
 // ══ 수신 팝업 ══
@@ -4764,27 +4858,76 @@ function createPeerConnection(){
         sdpMLineIndex: evt.candidate.sdpMLineIndex,
         sdpMid: evt.candidate.sdpMid
       });
+      console.log('[ICE] candidate 전송:', _call.role, evt.candidate.candidate.substring(0, 50));
+    } else if(!evt.candidate){
+      console.log('[ICE] 수집 완료 (null)');
     }
   };
   
   // 원격 스트림 수신
   _call.peer.ontrack = evt => {
-    console.log('[통화] 원격 트랙 수신');
+    console.log('[통화] 🎉 원격 트랙 수신!', evt.track.kind, evt.track.readyState);
+    updateCallStatus('🎥 상대방 영상 받는 중...');
     if(!_call.remoteStream){
       _call.remoteStream = new MediaStream();
       const remoteVideo = document.getElementById('callRemoteVideo');
-      if(remoteVideo) remoteVideo.srcObject = _call.remoteStream;
+      if(remoteVideo){
+        remoteVideo.srcObject = _call.remoteStream;
+        console.log('[통화] remoteVideo.srcObject 설정됨');
+      }
     }
     _call.remoteStream.addTrack(evt.track);
+    console.log('[통화] 원격 트랙 추가 완료:', _call.remoteStream.getTracks().length, '개');
+    // 짧은 지연 후 비디오 재생 시도
+    setTimeout(() => {
+      const rv = document.getElementById('callRemoteVideo');
+      if(rv){
+        rv.play().catch(e => console.warn('[video.play 실패]', e));
+      }
+    }, 300);
+  };
+  
+  // ICE 연결 상태 (가장 중요!)
+  _call.peer.oniceconnectionstatechange = () => {
+    const state = _call.peer.iceConnectionState;
+    console.log('[ICE 연결]', state);
+    if(state === 'checking'){
+      updateCallStatus('🔍 연결 경로 찾는 중...');
+    } else if(state === 'connected' || state === 'completed'){
+      updateCallStatus('✅ 연결됨!');
+    } else if(state === 'failed'){
+      updateCallStatus('❌ 연결 실패 — NAT/방화벽 차단');
+      showToast('❌ P2P 연결 실패 (NAT/방화벽 문제)');
+    } else if(state === 'disconnected'){
+      updateCallStatus('⚠️ 연결 끊김');
+    }
   };
   
   _call.peer.onconnectionstatechange = () => {
-    console.log('[통화 연결 상태]', _call.peer.connectionState);
-    if(_call.peer.connectionState === 'failed' || _call.peer.connectionState === 'disconnected'){
+    const state = _call.peer.connectionState;
+    console.log('[통화 연결 상태]', state);
+    if(state === 'connecting'){
+      updateCallStatus('⏳ 연결 중...');
+    } else if(state === 'connected'){
+      updateCallStatus('✅ 통화 연결됨!');
+    } else if(state === 'failed' || state === 'disconnected'){
+      updateCallStatus('❌ 연결 끊김');
       showToast('⚠️ 통화 연결 끊김');
       setTimeout(()=> endCall(true), 1000);
     }
   };
+  
+  _call.peer.onsignalingstatechange = () => {
+    console.log('[Signaling 상태]', _call.peer.signalingState);
+  };
+}
+
+// 🎯 통화 상태 화면에 표시 (디버그용)
+function updateCallStatus(text){
+  const el = document.getElementById('callTimer');
+  if(el){
+    el.textContent = text;
+  }
 }
 
 // ══ 통화 UI ══
