@@ -3633,6 +3633,8 @@ window.addEventListener('appinstalled', function(){
     '.c19-trans-text{font-size:13px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;}',
     '.c19-trans-ko{font-size:11px;color:rgba(240,230,200,.5);padding-top:6px;border-top:1px dashed rgba(240,230,200,.15);line-height:1.5;word-break:break-word;}',
     '.c19-trans-orig{margin-top:6px;padding:4px 10px;background:transparent;border:1px solid rgba(212,168,67,.3);border-radius:10px;color:rgba(212,168,67,.7);font-size:10px;cursor:pointer;font-family:inherit;}',
+    '#c19_micTransBtn.recording{background:rgba(248,113,113,.35)!important;border-color:rgba(248,113,113,.6)!important;color:#fff!important;animation:c19_recPulse 1.2s infinite;}',
+    '@keyframes c19_recPulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,.7)}50%{box-shadow:0 0 0 8px rgba(248,113,113,0)}}',
     '#c19_micTransBtn.pressed{background:rgba(248,113,113,.35)!important;transform:scale(0.95);box-shadow:0 0 16px rgba(248,113,113,0.5);}',
     ''
   ].join('\n');
@@ -3714,13 +3716,17 @@ window.addEventListener('appinstalled', function(){
     } catch(_e){}
   }
 
-  // ─── 녹음 시작 ───
-  function _c19_startTransRecording(){
+  // ─── 녹음 시작 (언어를 먼저 받음) ───
+  // C-19 v1.3: 새 흐름 — 언어 이미 선택된 상태에서 녹음. 녹음 끝나면 바로 번역.
+  var _c19_selectedLang = null; // 녹음 중인 언어 저장
+
+  function _c19_startTransRecording(targetLang){
     if(_c19_recording) return;
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
       _c19_toast('⚠️ 이 기기는 녹음을 지원하지 않아요');
       return;
     }
+    _c19_selectedLang = targetLang;
     navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
       _c19_recChunks = [];
       try {
@@ -3736,13 +3742,34 @@ window.addEventListener('appinstalled', function(){
         stream.getTracks().forEach(function(t){ t.stop(); });
         var duration = Math.round((Date.now() - _c19_recStart) / 1000);
         var blob = new Blob(_c19_recChunks, {type:'audio/webm'});
-        _c19_askLangAndSend(blob, duration);
+        // C-19 v1.3: 언어 이미 선택됨 → 바로 번역 (팝업 없음)
+        var L = _c19_selectedLang;
+        _c19_selectedLang = null;
+        if(!L){
+          _c19_toast('⚠️ 언어가 선택되지 않았어요');
+          return;
+        }
+        if(L.code === 'ko'){
+          _c19_sendKoreanVoice(blob, duration);
+        } else {
+          _c19_translateAndSend(blob, duration, L);
+        }
       };
       _c19_mediaRec.start();
       _c19_recording = true;
       _c19_recStart = Date.now();
+      // 녹음 중 표시 (선택된 언어 국기 같이 표시)
       var ind = document.getElementById('c19_recIndicator');
-      if(ind) ind.classList.add('show');
+      if(ind){
+        ind.innerHTML = '<div class="c19-rec-dot"></div><span id="c19_recTime">0:00</span><span style="opacity:.85;">' + targetLang.flag + ' ' + targetLang.name + ' 녹음 중… (🌍 다시 눌러 종료)</span>';
+        ind.classList.add('show');
+      }
+      // 버튼 상태 변경
+      var btn = document.getElementById('c19_micTransBtn');
+      if(btn){
+        btn.classList.add('recording');
+        btn.textContent = '⏹️';
+      }
       _c19_recTimer = setInterval(function(){
         var s = Math.round((Date.now() - _c19_recStart) / 1000);
         var mm = Math.floor(s/60), ss = s%60;
@@ -3761,11 +3788,17 @@ window.addEventListener('appinstalled', function(){
     if(_c19_recTimer){ clearInterval(_c19_recTimer); _c19_recTimer = null; }
     var ind = document.getElementById('c19_recIndicator');
     if(ind) ind.classList.remove('show');
+    // 버튼 원복
+    var btn = document.getElementById('c19_micTransBtn');
+    if(btn){
+      btn.classList.remove('recording');
+      btn.textContent = '🌍';
+    }
     try { _c19_mediaRec.stop(); } catch(_e){}
   }
 
-  // ─── 언어 선택 팝업 ───
-  function _c19_askLangAndSend(blob, duration){
+  // ─── 언어 선택 팝업 (녹음 전에 띄움) ───
+  function _c19_askLangAndRecord(){
     var items = _c19_LANGS.map(function(L, i){
       var isOrigin = (L.code === 'ko');
       return '<button class="c19-lang-btn" data-idx="' + i + '" ' +
@@ -3780,7 +3813,7 @@ window.addEventListener('appinstalled', function(){
       '  <div class="c19-lang-head">',
       '    <div class="c19-icon">🌍 ✨</div>',
       '    <div class="c19-title">어느 언어로 보낼까요?</div>',
-      '    <div class="c19-sub">Xy가 ' + duration + '초 음성을 번역해드려요</div>',
+      '    <div class="c19-sub">언어 선택 후 바로 녹음이 시작됩니다</div>',
       '  </div>',
       '  <div class="c19-lang-grid" id="c19_langGrid">' + items + '</div>',
       '  <button id="c19_langCancel">취소</button>',
@@ -3796,11 +3829,8 @@ window.addEventListener('appinstalled', function(){
         var idx = parseInt(btn.getAttribute('data-idx'), 10);
         _c19_langOverlay.classList.remove('show');
         var L = _c19_LANGS[idx];
-        if(L.code === 'ko'){
-          _c19_sendKoreanVoice(blob, duration);
-        } else {
-          _c19_translateAndSend(blob, duration, L);
-        }
+        // 언어 선택 후 즉시 녹음 시작
+        setTimeout(function(){ _c19_startTransRecording(L); }, 100);
       });
     }
     var cancel = document.getElementById('c19_langCancel');
@@ -3945,47 +3975,24 @@ window.addEventListener('appinstalled', function(){
     });
   }
 
-  // ─── 🌍 버튼 hold-to-record 바인딩 ───
+  // ─── 🌍 버튼 바인딩 (C-19 v1.3: 탭 방식) ───
+  // 첫 탭: 언어 선택 팝업 → 선택 시 녹음 시작
+  // 녹음 중 탭: 녹음 종료 → 바로 번역 전송 (팝업 없음)
   function _c19_bindTransButton(){
     var btn = document.getElementById('c19_micTransBtn');
     if(!btn || btn._c19_bound) return;
     btn._c19_bound = true;
-    var holdTimer = null;
-    var isHold = false;
-    var pressed = false;
-    function start(e){
-      if(pressed) return;
-      pressed = true;
-      isHold = false;
-      btn.classList.add('pressed');
-      holdTimer = setTimeout(function(){
-        isHold = true;
-        _c19_startTransRecording();
-      }, 400);
-    }
-    function end(e){
-      pressed = false;
-      btn.classList.remove('pressed');
-      if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
-      if(isHold){
-        if(e){ e.preventDefault && e.preventDefault(); e.stopPropagation && e.stopPropagation(); }
+    btn.addEventListener('click', function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if(_c19_recording){
+        // 녹음 중 → 종료 (onstop에서 자동 번역)
         _c19_stopTransRecording();
       } else {
-        _c19_toast('🌍 꾸욱 누르면 14개국 번역');
-      }
-    }
-    btn.addEventListener('mousedown', start);
-    btn.addEventListener('touchstart', function(e){ e.preventDefault(); start(e); }, {passive:false});
-    btn.addEventListener('mouseup', end);
-    btn.addEventListener('mouseleave', function(){
-      if(pressed && _c19_recording){
-        pressed = false;
-        btn.classList.remove('pressed');
-        _c19_stopTransRecording();
+        // 녹음 시작 전 → 언어 선택 팝업
+        _c19_askLangAndRecord();
       }
     });
-    btn.addEventListener('touchend', function(e){ e.preventDefault(); end(e); }, {passive:false});
-    btn.addEventListener('touchcancel', function(e){ end(e); });
   }
 
   // ─── 초기화 ───
