@@ -1355,6 +1355,11 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="r-name" id="rName">상대방</div>
     <!-- 🔗 초대 버튼 (대기방일 때만 표시) -->
     <button id="roomInviteBtn" onclick="showRoomInvitePopup()" style="display:none;margin-left:auto;padding:8px 14px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:10px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(251,191,36,.3);animation:inviteBtnPulse 2s infinite;">🔗 초대</button>
+    <!-- 📞 🎥 통화 버튼 (실제 대화방일 때만 표시) -->
+    <div id="roomCallBtns" style="display:none;margin-left:auto;gap:6px;">
+      <button onclick="startCall('audio')" title="음성 통화" style="padding:8px 10px;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.4);border-radius:10px;color:#34d399;font-size:16px;cursor:pointer;font-family:inherit;">📞</button>
+      <button onclick="startCall('video')" title="영상 통화" style="padding:8px 10px;background:rgba(100,180,250,.2);border:1px solid rgba(100,180,250,.4);border-radius:10px;color:#64b4fa;font-size:16px;cursor:pointer;font-family:inherit;">🎥</button>
+    </div>
   </div>
 
   <!-- ✨ 상단 액션 바 (세계 최초 기능들) -->
@@ -1768,6 +1773,7 @@ window.addEventListener('load', () => {
   if(loggedIn && _myNick && _myCode){
     registerToFirebase();
     listenInvites();
+    listenIncomingCalls();
     renderRoomList();
   }
   
@@ -1779,6 +1785,7 @@ window.addEventListener('load', () => {
       updateNickBars();
       registerToFirebase();
       listenInvites();
+      listenIncomingCalls();
       // 초대 처리 (방 자동 생성 + 입장)
       setTimeout(() => handleInviteParam(inviteFromUrl, inviteCode), 400);
     }, 200);
@@ -1855,6 +1862,7 @@ function startAutoLogin(username){
       renderRoomList();
       registerToFirebase();
       listenInvites();
+      listenIncomingCalls();
       maybeShowWelcome(); // 💡 대장님 v28: 자동 로그인에서도 환영 팝업
       // C-19 v19: invite + c(코드) 두 파라미터 모두 읽어서 전달
       const p = new URLSearchParams(location.search);
@@ -1956,6 +1964,7 @@ function doLogin(){
     renderRoomList();
     registerToFirebase();
     listenInvites();
+    listenIncomingCalls();
     updateNickBars();
     // 💡 대장님 v28: 연습방 자동 생성 제거 — 유저가 "시작할게요" 눌러야만 생성
     maybeShowWelcome(); // 매 로그인마다 환영 팝업
@@ -2008,6 +2017,7 @@ function startApp(){
   renderRoomList();
   registerToFirebase();
   listenInvites();
+  listenIncomingCalls(); // 🎯 v1.7.0 통화 수신
   // 💡 대장님 v28: 연습방 자동 생성 제거 — 팝업에서 유저가 선택
   maybeShowWelcome(); // 환영 팝업
 }
@@ -2244,8 +2254,10 @@ function openRoom(code){
   }
   document.getElementById('rName').textContent = room.nick||'?';
 
-  // 🎯 대기방이면 방 안에 "🔗 초대" 플로팅 버튼 표시
+  // 🎯 대기방이면 [🔗 초대] 버튼, 실제방이면 [📞][🎥] 버튼
   toggleRoomInviteButton(room.isWaiting);
+  const callBtns = document.getElementById('roomCallBtns');
+  if(callBtns) callBtns.style.display = room.isWaiting ? 'none' : 'flex';
 
   renderMessages();
   goScreen('scrRoom');
@@ -4147,6 +4159,568 @@ function listenInvites(){
   }, err => {
     console.error('[listenInvites] 구독 실패:', err);
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  📞🎥 C-19 v1.7.0: WebRTC 통화 시스템 (음성/영상 + 실시간 번역 + 아카이빙)
+//  
+//  파트너님 설계 원칙:
+//    - WebRTC P2P (서버 비용 0)
+//    - 크롬 내장 STT (무료)
+//    - Firebase로 Signaling만 (거의 0)
+//    - 통화 종료 시 번역본 자동으로 톡방에 저장 (특허 #41)
+//    - 20초 폭파 규칙 연계
+//    - MUFE 보안 연계 가능
+// ═══════════════════════════════════════════════════════════════════
+
+// 통화 상태
+let _call = {
+  active: false,
+  type: null,              // 'audio' | 'video'
+  role: null,              // 'caller' | 'callee'
+  peer: null,              // RTCPeerConnection
+  localStream: null,
+  remoteStream: null,
+  remoteCode: null,        // 상대방 _myCode
+  roomId: null,            // 통화 방 ID (양쪽 정렬된 코드)
+  signalRef: null,         // Firebase 시그널 참조
+  captions: [],            // 실시간 번역 자막 로그
+  recog: null,             // SpeechRecognition
+  startedAt: null,
+  ringing: false
+};
+
+// STUN 서버 (P2P 연결용 — 공짜)
+const _ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+// ══ 📞 통화 시작 (대장님 → 상대방) ══
+async function startCall(type){
+  if(_call.active){ showToast('⚠️ 이미 통화 중입니다'); return; }
+  const room = _rooms[_currentRoom];
+  if(!room || room.isWaiting){ showToast('⚠️ 대화 상대가 없습니다'); return; }
+  if(!_currentRoom){ showToast('⚠️ 방 정보 없음'); return; }
+  
+  try {
+    // 1. 미디어 권한 요청
+    showToast(type==='video' ? '🎥 카메라 + 마이크 준비 중...' : '📞 마이크 준비 중...');
+    const constraints = type==='video' 
+      ? { audio: true, video: { facingMode: 'user', width: {ideal:640}, height: {ideal:480} } }
+      : { audio: true };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    
+    // 2. 통화 상태 초기화
+    _call.active = true;
+    _call.type = type;
+    _call.role = 'caller';
+    _call.localStream = stream;
+    _call.remoteCode = _currentRoom;
+    _call.roomId = [_myCode, _currentRoom].sort().join('_');
+    _call.captions = [];
+    _call.startedAt = Date.now();
+    
+    // 3. 통화 UI 표시
+    openCallUI();
+    
+    // 4. RTCPeerConnection 생성
+    createPeerConnection();
+    
+    // 5. 로컬 스트림 추가
+    stream.getTracks().forEach(track => _call.peer.addTrack(track, stream));
+    
+    // 6. Offer 생성 + Firebase 송신
+    const offer = await _call.peer.createOffer();
+    await _call.peer.setLocalDescription(offer);
+    
+    _call.signalRef = dbRef('cgm2/calls/' + _call.roomId);
+    await _call.signalRef.set({
+      from: _myCode,
+      fromNick: _myNick,
+      to: _currentRoom,
+      type: type,
+      offer: { type: offer.type, sdp: offer.sdp },
+      t: Date.now()
+    });
+    
+    // 7. Answer 수신 대기
+    _call.signalRef.on('value', async snap => {
+      const data = snap.val();
+      if(!data) return;
+      if(data.answer && !_call.peer.currentRemoteDescription){
+        console.log('[통화] Answer 수신');
+        await _call.peer.setRemoteDescription(new RTCSessionDescription(data.answer));
+        showToast('✅ 통화 연결됨!');
+      }
+      // ICE 후보 처리
+      if(data.iceFromCallee){
+        Object.values(data.iceFromCallee).forEach(ice => {
+          _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(()=>{});
+        });
+      }
+      // 상대방 자막
+      if(data.captionsFromCallee){
+        Object.values(data.captionsFromCallee).forEach(cap => displayCaption(cap, false));
+      }
+      // 통화 종료 신호
+      if(data.ended){
+        showToast('📞 ' + (data.endedBy || '상대방') + '이 통화를 종료했습니다');
+        endCall(false);
+      }
+    });
+    
+    // 8. STT 시작
+    startSpeechRecognition();
+    
+    showToast('📞 연결 중...');
+  } catch(err){
+    console.error('[통화 시작 실패]', err);
+    showToast('❌ 마이크/카메라 권한을 허용해주세요');
+    _call.active = false;
+  }
+}
+
+// ══ 📞 통화 수신 (상대방으로부터 호출 받음) ══
+function listenIncomingCalls(){
+  if(!_myCode || !dbRef) return;
+  // 내가 속한 모든 방의 통화 신호 구독
+  Object.keys(_rooms).forEach(otherCode => {
+    if(otherCode.startsWith('__')) return;
+    const roomId = [_myCode, otherCode].sort().join('_');
+    dbRef('cgm2/calls/' + roomId).on('value', snap => {
+      const data = snap.val();
+      if(!data) return;
+      // 상대방이 나를 호출한 경우
+      if(data.to === _myCode && data.offer && !_call.active && !data.answer){
+        showIncomingCallPopup(data, roomId, otherCode);
+      }
+      // 통화 중 - ICE 후보 처리 (발신자 → 수신자)
+      if(_call.active && _call.role === 'callee' && data.iceFromCaller){
+        Object.values(data.iceFromCaller).forEach(ice => {
+          _call.peer && _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(()=>{});
+        });
+      }
+      // 상대방 자막 (발신자의 자막)
+      if(_call.active && _call.role === 'callee' && data.captionsFromCaller){
+        Object.values(data.captionsFromCaller).forEach(cap => displayCaption(cap, false));
+      }
+      if(_call.active && data.ended){
+        showToast('📞 통화 종료');
+        endCall(false);
+      }
+    });
+  });
+}
+
+// ══ 수신 팝업 ══
+function showIncomingCallPopup(data, roomId, remoteCode){
+  const old = document.getElementById('incomingCallPopup');
+  if(old) old.remove();
+  
+  // 벨소리 (비프음)
+  playRingtone();
+  
+  const ov = document.createElement('div');
+  ov.id = 'incomingCallPopup';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100002;background:rgba(0,0,0,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  const icon = data.type === 'video' ? '🎥' : '📞';
+  const typeText = data.type === 'video' ? '영상 통화' : '음성 통화';
+  
+  ov.innerHTML = [
+    '<div style="max-width:360px;width:100%;text-align:center;">',
+    '  <div style="font-size:80px;margin-bottom:16px;animation:callPulse 1.2s infinite;">' + icon + '</div>',
+    '  <div style="font-size:22px;font-weight:800;color:#fff;margin-bottom:6px;">' + escHtml(data.fromNick || '알 수 없음') + '</div>',
+    '  <div style="font-size:14px;color:rgba(255,255,255,.6);margin-bottom:40px;">' + typeText + ' 요청</div>',
+    '  <div style="display:flex;gap:20px;justify-content:center;">',
+    '    <button onclick="rejectIncomingCall(\'' + roomId + '\')" style="width:70px;height:70px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(239,68,68,.4);">❌</button>',
+    '    <button onclick="acceptIncomingCall(\'' + data.from + '\', \'' + data.type + '\', \'' + roomId + '\', \'' + remoteCode + '\')" style="width:70px;height:70px;border-radius:50%;background:#10b981;border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 8px 24px rgba(16,185,129,.4);animation:callAccept 1s infinite;">' + icon + '</button>',
+    '  </div>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(ov);
+  
+  // 애니메이션 CSS
+  if(!document.getElementById('callAnimCSS')){
+    const style = document.createElement('style');
+    style.id = 'callAnimCSS';
+    style.textContent = '@keyframes callPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}@keyframes callAccept{0%,100%{box-shadow:0 8px 24px rgba(16,185,129,.4)}50%{box-shadow:0 8px 36px rgba(16,185,129,.8)}}';
+    document.head.appendChild(style);
+  }
+}
+
+// 수신 거절
+function rejectIncomingCall(roomId){
+  stopRingtone();
+  dbRef('cgm2/calls/' + roomId).update({ ended: true, endedBy: _myNick }).catch(()=>{});
+  setTimeout(()=> dbRef('cgm2/calls/' + roomId).remove(), 2000);
+  document.getElementById('incomingCallPopup').remove();
+  showToast('📞 통화 거절');
+}
+
+// 수신 수락
+async function acceptIncomingCall(callerCode, type, roomId, remoteCode){
+  stopRingtone();
+  document.getElementById('incomingCallPopup').remove();
+  
+  try {
+    const constraints = type==='video' 
+      ? { audio: true, video: { facingMode: 'user', width: {ideal:640}, height: {ideal:480} } }
+      : { audio: true };
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    
+    _call.active = true;
+    _call.type = type;
+    _call.role = 'callee';
+    _call.localStream = stream;
+    _call.remoteCode = remoteCode;
+    _call.roomId = roomId;
+    _call.captions = [];
+    _call.startedAt = Date.now();
+    _call.signalRef = dbRef('cgm2/calls/' + roomId);
+    
+    openCallUI();
+    createPeerConnection();
+    stream.getTracks().forEach(track => _call.peer.addTrack(track, stream));
+    
+    // Offer 수신 후 Answer 생성
+    const snap = await _call.signalRef.once('value');
+    const data = snap.val();
+    if(!data || !data.offer) throw new Error('Offer 없음');
+    
+    await _call.peer.setRemoteDescription(new RTCSessionDescription(data.offer));
+    const answer = await _call.peer.createAnswer();
+    await _call.peer.setLocalDescription(answer);
+    await _call.signalRef.update({
+      answer: { type: answer.type, sdp: answer.sdp }
+    });
+    
+    startSpeechRecognition();
+    showToast('✅ 통화 수락');
+  } catch(err){
+    console.error('[수신 수락 실패]', err);
+    showToast('❌ 카메라/마이크 권한 거부됨');
+    endCall(true);
+  }
+}
+
+// ══ PeerConnection 생성 ══
+function createPeerConnection(){
+  _call.peer = new RTCPeerConnection(_ICE_CONFIG);
+  
+  // ICE 후보 송신
+  _call.peer.onicecandidate = evt => {
+    if(evt.candidate && _call.signalRef){
+      const path = _call.role === 'caller' ? 'iceFromCaller' : 'iceFromCallee';
+      _call.signalRef.child(path).push({
+        candidate: evt.candidate.candidate,
+        sdpMLineIndex: evt.candidate.sdpMLineIndex,
+        sdpMid: evt.candidate.sdpMid
+      });
+    }
+  };
+  
+  // 원격 스트림 수신
+  _call.peer.ontrack = evt => {
+    console.log('[통화] 원격 트랙 수신');
+    if(!_call.remoteStream){
+      _call.remoteStream = new MediaStream();
+      const remoteVideo = document.getElementById('callRemoteVideo');
+      if(remoteVideo) remoteVideo.srcObject = _call.remoteStream;
+    }
+    _call.remoteStream.addTrack(evt.track);
+  };
+  
+  _call.peer.onconnectionstatechange = () => {
+    console.log('[통화 연결 상태]', _call.peer.connectionState);
+    if(_call.peer.connectionState === 'failed' || _call.peer.connectionState === 'disconnected'){
+      showToast('⚠️ 통화 연결 끊김');
+      setTimeout(()=> endCall(true), 1000);
+    }
+  };
+}
+
+// ══ 통화 UI ══
+function openCallUI(){
+  const old = document.getElementById('callUI');
+  if(old) old.remove();
+  
+  const ov = document.createElement('div');
+  ov.id = 'callUI';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:#000;display:flex;flex-direction:column;';
+  ov.innerHTML = [
+    // 상단: 상대방 정보 + 타이머
+    '<div style="padding:16px;background:rgba(0,0,0,.4);color:#fff;display:flex;align-items:center;justify-content:space-between;">',
+    '  <div>',
+    '    <div id="callRemoteNick" style="font-size:16px;font-weight:700;">' + escHtml((_rooms[_call.remoteCode]||{}).nick || '상대방') + '</div>',
+    '    <div id="callTimer" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">연결 중...</div>',
+    '  </div>',
+    '  <div style="font-size:11px;color:#fbbf24;background:rgba(251,191,36,.15);padding:4px 10px;border-radius:8px;">' + (_call.type === 'video' ? '🎥 영상' : '📞 음성') + '</div>',
+    '</div>',
+    // 영상 영역
+    '<div style="flex:1;position:relative;background:#111;overflow:hidden;">',
+    (_call.type === 'video' ? '<video id="callRemoteVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video>' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:120px;opacity:.3;">📞</div>'),
+    (_call.type === 'video' ? '<video id="callLocalVideo" autoplay playsinline muted style="position:absolute;bottom:16px;right:16px;width:100px;height:140px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:#000;"></video>' : ''),
+    // 실시간 자막
+    '  <div id="callCaptions" style="position:absolute;left:10px;right:10px;bottom:20px;display:flex;flex-direction:column;gap:6px;pointer-events:none;"></div>',
+    '</div>',
+    // 하단 컨트롤
+    '<div style="padding:20px 16px;background:rgba(0,0,0,.6);display:flex;gap:12px;justify-content:center;align-items:center;">',
+    '  <button id="callMuteBtn" onclick="toggleCallMute()" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;cursor:pointer;">🎤</button>',
+    (_call.type === 'video' ? '  <button id="callCameraBtn" onclick="toggleCallCamera()" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:22px;cursor:pointer;">🎥</button>' : ''),
+    '  <button onclick="endCall(true)" style="width:66px;height:66px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.4);">📞</button>',
+    '  <button id="callCaptionBtn" onclick="toggleCallCaptions()" style="width:52px;height:52px;border-radius:50%;background:rgba(255,136,187,.25);border:1px solid rgba(255,136,187,.5);color:#ff88bb;font-size:18px;cursor:pointer;">🌍</button>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(ov);
+  
+  // 로컬 영상 연결 (영상 통화만)
+  if(_call.type === 'video' && _call.localStream){
+    const localVideo = document.getElementById('callLocalVideo');
+    if(localVideo) localVideo.srcObject = _call.localStream;
+  }
+  
+  // 타이머 시작
+  startCallTimer();
+}
+
+// 통화 타이머
+let _callTimerInterval = null;
+function startCallTimer(){
+  _callTimerInterval = setInterval(() => {
+    const el = document.getElementById('callTimer');
+    if(!el || !_call.startedAt) return;
+    const elapsed = Math.floor((Date.now() - _call.startedAt) / 1000);
+    const mm = String(Math.floor(elapsed/60)).padStart(2,'0');
+    const ss = String(elapsed%60).padStart(2,'0');
+    el.textContent = mm + ':' + ss;
+  }, 1000);
+}
+
+// 마이크 음소거
+function toggleCallMute(){
+  if(!_call.localStream) return;
+  const track = _call.localStream.getAudioTracks()[0];
+  if(track){
+    track.enabled = !track.enabled;
+    const btn = document.getElementById('callMuteBtn');
+    if(btn) btn.textContent = track.enabled ? '🎤' : '🔇';
+  }
+}
+
+// 카메라 ON/OFF
+function toggleCallCamera(){
+  if(!_call.localStream) return;
+  const track = _call.localStream.getVideoTracks()[0];
+  if(track){
+    track.enabled = !track.enabled;
+    const btn = document.getElementById('callCameraBtn');
+    if(btn) btn.textContent = track.enabled ? '🎥' : '📷';
+  }
+}
+
+// 자막 토글
+let _captionsOn = true;
+function toggleCallCaptions(){
+  _captionsOn = !_captionsOn;
+  const btn = document.getElementById('callCaptionBtn');
+  if(btn) btn.style.opacity = _captionsOn ? '1' : '0.4';
+  const box = document.getElementById('callCaptions');
+  if(box) box.style.display = _captionsOn ? 'flex' : 'none';
+}
+
+// ══ 실시간 STT + 번역 ══
+function startSpeechRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    showToast('⚠️ 이 브라우저는 실시간 번역 미지원');
+    return;
+  }
+  _call.recog = new SR();
+  _call.recog.lang = 'ko-KR'; // 한국어 우선
+  _call.recog.interimResults = false;
+  _call.recog.continuous = true;
+  
+  _call.recog.onresult = async evt => {
+    for(let i = evt.resultIndex; i < evt.results.length; i++){
+      if(!evt.results[i].isFinal) continue;
+      const text = evt.results[i][0].transcript.trim();
+      if(!text) continue;
+      
+      // 내 자막 표시
+      const caption = {
+        from: _myCode,
+        fromNick: _myNick,
+        text: text,
+        t: Date.now()
+      };
+      displayCaption(caption, true);
+      _call.captions.push(caption);
+      
+      // Firebase로 상대방에 전송
+      const path = _call.role === 'caller' ? 'captionsFromCaller' : 'captionsFromCallee';
+      if(_call.signalRef){
+        _call.signalRef.child(path).push(caption).catch(()=>{});
+      }
+    }
+  };
+  
+  _call.recog.onerror = (e) => console.warn('[STT 오류]', e.error);
+  _call.recog.onend = () => {
+    // 통화 중이면 재시작
+    if(_call.active){
+      try{ _call.recog.start(); }catch(e){}
+    }
+  };
+  
+  try{
+    _call.recog.start();
+  }catch(e){
+    console.warn('[STT 시작 실패]', e);
+  }
+}
+
+// 자막 표시
+function displayCaption(caption, isMe){
+  if(!_captionsOn) return;
+  const box = document.getElementById('callCaptions');
+  if(!box) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'background:rgba(0,0,0,.75);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;max-width:85%;align-self:' + (isMe ? 'flex-end' : 'flex-start') + ';border:1px solid ' + (isMe ? 'rgba(100,180,250,.4)' : 'rgba(255,136,187,.4)') + ';line-height:1.4;word-break:break-word;';
+  el.innerHTML = '<b style="color:' + (isMe ? '#64b4fa' : '#ff88bb') + ';font-size:11px;">' + escHtml(caption.fromNick || '?') + ':</b> ' + escHtml(caption.text);
+  box.appendChild(el);
+  // 오래된 자막은 페이드아웃
+  setTimeout(() => {
+    el.style.transition = 'opacity 0.5s';
+    el.style.opacity = '0';
+    setTimeout(() => el.remove(), 500);
+  }, 6000);
+  
+  // 상대방 자막이면 아카이빙용 배열에도 저장
+  if(!isMe){
+    _call.captions.push(caption);
+  }
+}
+
+// ══ 벨소리 ══
+let _ringtoneOsc = null;
+function playRingtone(){
+  try{
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const playBeep = () => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 800;
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    };
+    playBeep();
+    _ringtoneOsc = setInterval(playBeep, 1500);
+  }catch(e){ console.warn('[벨소리]', e); }
+}
+function stopRingtone(){
+  if(_ringtoneOsc){ clearInterval(_ringtoneOsc); _ringtoneOsc = null; }
+}
+
+// ══ 📞 통화 종료 ══
+function endCall(notifyPeer){
+  if(!_call.active) return;
+  console.log('[통화 종료] notifyPeer=', notifyPeer);
+  
+  // 1. 상대방에게 종료 알림
+  if(notifyPeer && _call.signalRef){
+    _call.signalRef.update({ ended: true, endedBy: _myNick }).catch(()=>{});
+    setTimeout(()=> _call.signalRef.remove(), 2000);
+  }
+  
+  // 2. STT 중지
+  if(_call.recog){
+    try{ _call.recog.stop(); }catch(e){}
+    _call.recog = null;
+  }
+  
+  // 3. 스트림 종료
+  if(_call.localStream){
+    _call.localStream.getTracks().forEach(t => t.stop());
+  }
+  if(_call.remoteStream){
+    _call.remoteStream.getTracks().forEach(t => t.stop());
+  }
+  
+  // 4. PeerConnection 종료
+  if(_call.peer){
+    try{ _call.peer.close(); }catch(e){}
+  }
+  
+  // 5. 타이머 중지
+  if(_callTimerInterval){ clearInterval(_callTimerInterval); _callTimerInterval = null; }
+  
+  // 6. 통화 내용 아카이빙 (특허 #41) ⭐
+  archiveCallToRoom();
+  
+  // 7. UI 제거
+  const ui = document.getElementById('callUI');
+  if(ui) ui.remove();
+  stopRingtone();
+  
+  // 8. 상태 초기화
+  const wasRoom = _call.remoteCode;
+  _call = {
+    active: false, type: null, role: null, peer: null,
+    localStream: null, remoteStream: null, remoteCode: null,
+    roomId: null, signalRef: null, captions: [], recog: null,
+    startedAt: null, ringing: false
+  };
+  
+  showToast('📞 통화 종료 — 내용이 대화방에 저장됨');
+  if(wasRoom && _rooms[wasRoom]) renderMessages();
+}
+
+// ══ ⭐ 특허 #41: 통화 내용 자동 아카이빙 ══
+function archiveCallToRoom(){
+  const room = _rooms[_call.remoteCode];
+  if(!room) return;
+  if(!room.msgs) room.msgs = [];
+  
+  const duration = _call.startedAt ? Math.floor((Date.now() - _call.startedAt) / 1000) : 0;
+  const mm = Math.floor(duration/60);
+  const ss = duration % 60;
+  const durStr = mm > 0 ? (mm + '분 ' + ss + '초') : (ss + '초');
+  const typeIcon = _call.type === 'video' ? '🎥' : '📞';
+  const typeText = _call.type === 'video' ? '영상 통화' : '음성 통화';
+  
+  // 통화 요약 시스템 메시지
+  let archiveText = typeIcon + ' ' + typeText + ' 종료 · ' + durStr;
+  
+  if(_call.captions.length > 0){
+    // 시간순 정렬
+    const sorted = _call.captions.sort((a,b) => a.t - b.t);
+    archiveText += '\n\n━━━ 통화 내용 ━━━';
+    sorted.forEach(cap => {
+      const timeStr = new Date(cap.t).toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'});
+      const who = cap.from === _myCode ? '나' : (cap.fromNick || '상대방');
+      archiveText += '\n[' + timeStr + '] ' + who + ': ' + cap.text;
+    });
+  } else {
+    archiveText += '\n(번역 내용 없음)';
+  }
+  
+  room.msgs.push({
+    id: 'call_' + Date.now(),
+    type: 'system',
+    text: archiveText,
+    t: Date.now()
+  });
+  room.lastMsg = typeIcon + ' ' + typeText + ' · ' + durStr;
+  room.lastTime = Date.now();
+  saveRooms();
+  renderRoomList();
 }
 
 // ══ 설정 ══
