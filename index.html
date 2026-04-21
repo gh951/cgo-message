@@ -1798,18 +1798,27 @@ window.addEventListener('load', () => {
     renderRoomList();
   }
   
-  // 🎯 v1.6.6: 초대 링크 손님이면 바로 방 입장 (표지/로그인 화면 건너뛰기)
+  // 🎯 v1.7.9 대장님 설계: 초대 링크 손님이면 바로 방 입장 (표지/로그인 화면 건너뛰기)
   if(hasInviteLink && _myNick && _myCode){
     setTimeout(() => {
-      // 표지 화면 건너뛰고 바로 친구 탭으로
+      console.log('[손님 자동 입장] 표지 건너뛰기 + 방 생성 시작');
+      
+      // ⭐ switchTab이 goScreen을 호출해서 scrCover active를 자동 제거
       switchTab('friends');
       updateNickBars();
       registerToFirebase();
       listenInvites();
       listenIncomingCalls();
-      // 초대 처리 (방 자동 생성 + 입장)
-      setTimeout(() => handleInviteParam(inviteFromUrl, inviteCode), 400);
-    }, 200);
+      
+      // 로딩 표시
+      showToast('💬 대화방 입장 중... 잠시만요!');
+      
+      // 초대 처리 (방 자동 생성 + 입장) — Firebase 준비 시간 더 줌
+      setTimeout(() => {
+        console.log('[손님 자동 입장] handleInviteParam 호출');
+        handleInviteParam(inviteFromUrl, inviteCode);
+      }, 800);
+    }, 100);
   }
 
   // 컬러 선택
@@ -4280,6 +4289,24 @@ function showInviteGuide(){
 //  ⑤ 자기 자신이면 안내 토스트
 function handleInviteParam(inviterNick, inviterCode){
   if(!inviterNick && !inviterCode) return;
+  
+  // 🎯 v1.7.9: Firebase DB가 아직 로드 안 됐으면 대기 후 재시도
+  if(!db){
+    console.log('[handleInvite] Firebase DB 로딩 대기 중...');
+    let retries = 0;
+    const waitInterval = setInterval(() => {
+      retries++;
+      if(db){
+        clearInterval(waitInterval);
+        console.log('[handleInvite] DB 준비됨, 재시도');
+        handleInviteParam(inviterNick, inviterCode);
+      } else if(retries > 20){ // 10초 후 포기
+        clearInterval(waitInterval);
+        showToast('⚠️ Firebase 연결 안 됨 - 새로고침 해주세요');
+      }
+    }, 500);
+    return;
+  }
 
   // ① 코드가 있으면 코드로 직접 조회 (가장 정확)
   if(inviterCode){
