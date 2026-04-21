@@ -3746,19 +3746,66 @@ window.addEventListener('appinstalled', function(){
     var bcp  = btn.getAttribute('data-bcp');
     _c19_speak(text, bcp);
   };
+
+  // 기기별 음성팩 다운로드 안내
+  function _c19_showVoiceGuide(langName, bcp){
+    var isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    var isAndroid = /Android/i.test(navigator.userAgent);
+    var guide = '';
+    if(isAndroid){
+      guide = '📱 [안드로이드 설정]\n설정 → 일반 → 언어와 입력 → 텍스트 음성 변환(TTS) → ' + langName + ' 음성 설치';
+    } else if(isIOS){
+      guide = '📱 [아이폰 설정]\n설정 → 손쉬운 사용 → 음성 콘텐츠 → 음성 → ' + langName + ' 추가';
+    } else {
+      guide = '💻 이 브라우저는 ' + langName + ' 음성을 지원하지 않아요.\nChrome / Edge 최신 버전 권장.';
+    }
+    alert('⚠️ ' + langName + ' 음성이 설치되어 있지 않아요.\n\n' + guide);
+  }
+
   function _c19_speak(text, bcp){
-    if(!('speechSynthesis' in window)) return;
+    if(!('speechSynthesis' in window)){
+      if(typeof showToast === 'function') showToast('⚠️ 이 브라우저는 음성 재생을 지원하지 않아요');
+      return;
+    }
     try {
       window.speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = bcp || 'en-US';
-      u.rate = 0.95;
       var voices = window.speechSynthesis.getVoices();
-      var match = voices.find(function(v){ return v.lang === bcp; })
-               || voices.find(function(v){ return v.lang && v.lang.startsWith(bcp.split('-')[0]); });
-      if(match) u.voice = match;
+
+      // 음성 목록이 아직 로딩 안 됐으면 한번 더 시도
+      if(!voices || voices.length === 0){
+        setTimeout(function(){ _c19_speak(text, bcp); }, 200);
+        return;
+      }
+
+      // 정확한 언어 매칭 (예: zh-CN)
+      var match = voices.find(function(v){ return v.lang === bcp; });
+
+      // 부분 매칭 (예: zh-TW도 허용)
+      if(!match){
+        var prefix = bcp.split('-')[0];
+        match = voices.find(function(v){ return v.lang && v.lang.toLowerCase().startsWith(prefix.toLowerCase()); });
+      }
+
+      // 여전히 없으면 → 이 기기엔 해당 언어 음성 없음
+      if(!match){
+        // 언어 이름 찾기
+        var langName = bcp;
+        if(typeof _c19_LANGS !== 'undefined'){
+          var L = _c19_LANGS.find(function(l){ return l.bcp === bcp; });
+          if(L) langName = L.flag + ' ' + L.name;
+        }
+        _c19_showVoiceGuide(langName, bcp);
+        return;
+      }
+
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = match.lang;  // 매칭된 음성의 실제 lang 사용
+      u.voice = match;
+      u.rate = 0.95;
       window.speechSynthesis.speak(u);
-    } catch(_e){}
+    } catch(e){
+      console.warn('[C-19 speak]', e);
+    }
   }
 
   // ─── 녹음 시작 (언어를 먼저 받음) ───
