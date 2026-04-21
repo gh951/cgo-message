@@ -2900,7 +2900,7 @@ async function sendVoiceMessage(blob, duration){
       t: now,
       read: false,
       precious: isPrecious,  // ✨ 소중한 음성 플래그 (하늘색 후광)
-      expiresAt: isPrecious ? null : (now + 10000)  // 💥 10초 폭파 (소중함은 영구)
+      expiresAt: isPrecious ? null : (now + 20000)  // 💥 20초 폭파 (🆓무료 기본 / 💎유료시 30-40초·영구)
     };
 
     const room = _rooms[_currentRoom];
@@ -4188,7 +4188,7 @@ window.addEventListener('appinstalled', function(){
               t: nowTs,
               read: false,
               precious: false,                        // 번역은 기본 폭파 (💎 아님)
-              expiresAt: nowTs + 10000,               // 💥 10초 후 폭파
+              expiresAt: nowTs + 20000,               // 💥 20초 후 폭파 (🆓무료 기본)
               c19_trans: {
                 flag: targetLang.flag,
                 name: targetLang.name,
@@ -4424,18 +4424,20 @@ window.addEventListener('appinstalled', function(){
         var exp = parseInt(el.getAttribute('data-expire'), 10);
         if(!exp) return;
         var remain = Math.max(0, Math.ceil((exp - now) / 1000));
-        // 카운트다운 텍스트 업데이트
+        // 카운트다운 텍스트 업데이트 (20초 기준)
         if(remain > 0){
-          // 10-6초: 빨강, 5-3: 주황, 2-1: 진한 빨강 깜빡임
-          if(remain <= 2){
+          // 20-11초: 빨강(안정) / 10-6초: 주황(경고) / 5-1초: 진한 빨강 깜빡임
+          if(remain <= 5){
             el.style.color = '#ff3333';
             el.style.animation = 'c19-blink 0.4s infinite';
             el.innerHTML = '💥 ' + remain + '초!';
-          } else if(remain <= 5){
+          } else if(remain <= 10){
             el.style.color = '#f97316';
+            el.style.animation = '';
             el.innerHTML = '🔥 ' + remain + '초';
           } else {
             el.style.color = '#f87171';
+            el.style.animation = '';
             el.innerHTML = '🔥 ' + remain + '초';
           }
         } else {
@@ -4505,7 +4507,7 @@ window.addEventListener('appinstalled', function(){
     setTimeout(_c19_init, 100);
   }
 
-  console.log('[C-19 v1.5] CGO MESSAGE 14개국 번역 + 10초 폭파 시스템 활성화 💥🌍');
+  console.log('[C-19 v1.5.1] CGO MESSAGE — 20초 폭파 (🆓무료) + 14개국 번역 💥🌍');
 })();
 </script>
 </body>
