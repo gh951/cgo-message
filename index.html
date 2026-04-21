@@ -3894,7 +3894,8 @@ window.addEventListener('appinstalled', function(){
       var koText = await _c19_whisperSTT(blob, 'ko');
       if(!koText){
         _c19_hideProg();
-        _c19_toast('⚠️ 음성을 인식하지 못했어요. 다시 시도해주세요.');
+        _c19_toast('⚠️ 음성 인식 실패. 원본만 전송합니다.');
+        if(typeof sendVoiceMessage === 'function') await sendVoiceMessage(blob, duration);
         return;
       }
       _c19_showProg('🌐', targetLang.flag + ' ' + targetLang.name + '(으)로 번역 중',
@@ -3902,7 +3903,8 @@ window.addEventListener('appinstalled', function(){
       var translated = await _c19_llamaTranslate(koText, targetLang);
       if(!translated){
         _c19_hideProg();
-        _c19_toast('⚠️ 번역에 실패했어요.');
+        _c19_toast('⚠️ 번역 실패. 원본만 전송합니다.');
+        if(typeof sendVoiceMessage === 'function') await sendVoiceMessage(blob, duration);
         return;
       }
       _c19_showProg(targetLang.flag, '음성 준비 중',
@@ -3912,7 +3914,9 @@ window.addEventListener('appinstalled', function(){
     } catch(err){
       _c19_hideProg();
       console.warn('[C-19 translate error]', err);
-      _c19_toast('⚠️ 번역 중 오류: ' + (err.message || err));
+      _c19_toast('⚠️ 번역 중 오류 — 원본 전송합니다: ' + (err.message || err));
+      // 에러가 나도 원본 음성은 대화창에 띄움
+      try { if(typeof sendVoiceMessage === 'function') await sendVoiceMessage(blob, duration); } catch(_e){}
     }
   }
 
