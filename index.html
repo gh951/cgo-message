@@ -3787,64 +3787,11 @@ window.addEventListener('appinstalled', function(){
 
   // C-19 v1.4: 텍스트 큰 팝업 (음성 폴백)
   function _c19_showBigTextFallback(text, flag, langName, bcp){
-    // 기존 팝업 있으면 제거
-    var old = document.getElementById('c19_bigTextOverlay');
-    if(old) old.parentNode.removeChild(old);
-
-    var ov = document.createElement('div');
-    ov.id = 'c19_bigTextOverlay';
-    ov.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(10,15,30,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
-
-    ov.innerHTML = [
-      '<div style="max-width:420px;width:100%;padding:26px 22px;background:linear-gradient(135deg,rgba(30,25,50,.98),rgba(20,15,40,.98));border:1px solid rgba(255,136,187,.4);border-radius:22px;box-shadow:0 0 60px rgba(255,136,187,.25);">',
-      '  <div style="text-align:center;margin-bottom:18px;">',
-      '    <div style="font-size:52px;margin-bottom:8px;">' + flag + '</div>',
-      '    <div style="font-size:13px;font-weight:900;color:#ff88bb;letter-spacing:0.5px;">' + _c19_esc(langName) + '</div>',
-      '    <div style="font-size:10px;color:rgba(240,230,200,.45);margin-top:4px;">이 기기엔 음성이 없어요. 글자로 전달해요.</div>',
-      '  </div>',
-      '  <div id="c19_bigText" style="padding:18px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:#fff;font-size:22px;font-weight:700;line-height:1.5;text-align:center;word-break:break-word;margin-bottom:16px;min-height:60px;">' + _c19_esc(text) + '</div>',
-      '  <div style="display:flex;gap:8px;">',
-      '    <button id="c19_bigTextCopy" style="flex:1;padding:12px;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.4);border-radius:12px;color:#34d399;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;">📋 복사하기</button>',
-      '    <button id="c19_bigTextTranslate" style="flex:1;padding:12px;background:rgba(100,180,250,.2);border:1px solid rgba(100,180,250,.4);border-radius:12px;color:#64b4fa;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;">🔗 번역기 열기</button>',
-      '  </div>',
-      '  <button id="c19_bigTextClose" style="width:100%;margin-top:10px;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:12px;color:rgba(240,230,200,.6);font-size:12px;cursor:pointer;font-family:inherit;">닫기</button>',
-      '</div>'
-    ].join('');
-
-    document.body.appendChild(ov);
-
-    // 복사 버튼
-    document.getElementById('c19_bigTextCopy').addEventListener('click', function(){
-      _c19_copyToClipboard(text, function(ok){
-        if(ok){
-          if(typeof showToast === 'function') showToast('📋 복사됐어요!');
-          else _c19_toast('📋 복사됐어요!');
-          var btn = document.getElementById('c19_bigTextCopy');
-          if(btn){
-            btn.textContent = '✅ 복사됨!';
-            setTimeout(function(){ btn.textContent = '📋 복사하기'; }, 1500);
-          }
-        } else {
-          _c19_toast('⚠️ 복사 실패. 직접 선택해주세요.');
-        }
-      });
-    });
-
-    // 번역기 열기 (구글 번역 페이지)
-    document.getElementById('c19_bigTextTranslate').addEventListener('click', function(){
-      var src = bcp ? bcp.split('-')[0] : 'auto';
-      var url = 'https://translate.google.com/?sl=auto&tl=' + src + '&text=' + encodeURIComponent(text) + '&op=translate';
-      window.open(url, '_blank');
-    });
-
-    // 닫기
-    document.getElementById('c19_bigTextClose').addEventListener('click', function(){
-      if(ov.parentNode) ov.parentNode.removeChild(ov);
-    });
-    // 배경 클릭해도 닫힘
-    ov.addEventListener('click', function(e){
-      if(e.target === ov && ov.parentNode) ov.parentNode.removeChild(ov);
-    });
+    // C-19 v1.4.3: 대장님 지시 — 복사/번역기 팝업 제거
+    // 음성 재생 실패 시 작은 토스트만 띄움
+    var msg = flag + ' ' + langName + ' 음성 재생 불가 — 텍스트는 말풍선에서 확인하세요';
+    if(typeof showToast === 'function') showToast(msg);
+    else _c19_toast(msg);
   }
 
   // C-19 v1.4.1: 강화된 TTS — 재시도 + 느슨한 매칭 + 디버그 로그
@@ -4263,8 +4210,11 @@ window.addEventListener('appinstalled', function(){
         } catch(e){
           console.warn('[C-19 speakAndPack]', e);
         }
-        // 자동 재생 (보낸 이가 확인)
-        setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 300);
+        // C-19 v1.4.2: 자동 재생 제거 (대장님 지적)
+        // 이유: 자동 재생이 스마트폰 브라우저 TTS 실패 → 폴백 팝업 뜸
+        //       사용자가 원할 때 말풍선의 🔊 재생 버튼 직접 탭하면 됨
+        // setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 300);
+        if(typeof showToast === 'function') showToast('🌍 ' + targetLang.flag + ' 번역 전송 완료');
         resolve();
       };
       reader.readAsDataURL(origBlob);
