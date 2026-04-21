@@ -2285,6 +2285,29 @@ function renderMessages(){
       }
       return;
     }
+    // 🌍 C-19 번역 메시지 (msg.c19_trans 있으면)
+    if(msg.c19_trans){
+      const T = msg.c19_trans; // {flag, name, bcp, translated, koText, voiceId, duration}
+      html += `<div class="msg-wrap ${isMe?'me':'you'}">
+        ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
+        <div class="msg-bubble" style="background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(100,180,250,.08));border:1px solid rgba(255,136,187,.3);box-shadow:0 0 14px rgba(255,136,187,.1);max-width:78%;padding:12px 14px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;color:rgba(240,230,200,.55);">
+            <span>🇰🇷 → ${T.flag}</span>
+            <span style="opacity:.5;">·</span>
+            <span>Xy 번역</span>
+          </div>
+          <button onclick="c19_playTtsOf(this)" data-text="${escHtml(T.translated).replace(/"/g,'&quot;')}" data-bcp="${T.bcp}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.35);border-radius:14px;color:#ffd0e4;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:8px;">
+            <span style="font-size:18px;">${T.flag}</span>
+            <span>🔊 재생</span>
+          </button>
+          <div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;">${escHtml(T.translated)}</div>
+          <div style="font-size:11px;color:rgba(240,230,200,.5);padding-top:6px;border-top:1px dashed rgba(240,230,200,.15);line-height:1.5;word-break:break-word;">🇰🇷 ${escHtml(T.koText)}</div>
+          ${T.voice ? `<button onclick="c19_playInlineVoice(this)" data-src="${T.voice}" style="margin-top:6px;padding:4px 10px;background:transparent;border:1px solid rgba(212,168,67,.3);border-radius:10px;color:rgba(212,168,67,.7);font-size:10px;cursor:pointer;font-family:inherit;">🎤 원본 음성 (${T.duration}초)</button>` : ''}
+        </div>
+        <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
+      </div>`;
+      return;
+    }
     // 🎤 음성 메시지
     if(msg.voice){
       const voiceId = 'voice_'+idx+'_'+(msg.t||0);
@@ -3865,26 +3888,12 @@ window.addEventListener('appinstalled', function(){
 
   // ─── 한국어 원본 음성 전송 ───
   function _c19_sendKoreanVoice(blob, duration){
-    var reader = new FileReader();
-    reader.onloadend = function(){
-      var dataUrl = reader.result;
-      var vid = 'v_' + Date.now();
-      _c19_voiceCache[vid] = dataUrl;
-      var msg = document.getElementById('messages') || document.getElementById('cgmMessages');
-      if(!msg) { _c19_toast('⚠️ 메시지 영역을 찾지 못했어요'); return; }
-      var row = document.createElement('div');
-      row.style.cssText = 'display:flex;justify-content:flex-end;margin:4px 0;';
-      row.innerHTML = [
-        '<div onclick="c19_playVoice(\'' + vid + '\')" style="display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;background:rgba(100,180,250,.15);border:1px solid rgba(100,180,250,.35);cursor:pointer;">',
-        '  <span style="font-size:20px;">🎤</span>',
-        '  <span style="font-size:12px;color:#b4dcff;font-weight:700;">' + duration + '초</span>',
-        '</div>'
-      ].join('');
-      msg.appendChild(row);
-      msg.scrollTop = msg.scrollHeight;
-      _c19_toast('🇰🇷 한국어 원본 음성 전송됨');
-    };
-    reader.readAsDataURL(blob);
+    // CGO MESSAGE 기본 sendVoiceMessage 호출 → _rooms 구조에 저장 + renderMessages
+    if(typeof sendVoiceMessage === 'function'){
+      sendVoiceMessage(blob, duration);
+    } else {
+      _c19_toast('⚠️ 음성 전송 함수를 찾지 못했어요');
+    }
   }
 
   // ─── 🌐 번역 파이프라인 ───
@@ -3964,42 +3973,79 @@ window.addEventListener('appinstalled', function(){
     });
   }
 
-  // ─── TTS + 말풍선 패킹 ───
+  // ─── TTS + 말풍선 패킹 (C-19 v1.3: _rooms 구조 사용) ───
   function _c19_speakAndPack(translated, targetLang, origBlob, duration, origKoText){
     return new Promise(function(resolve){
-      var msg = document.getElementById('messages') || document.getElementById('cgmMessages');
-      if(!msg){ resolve(); return; }
       var reader = new FileReader();
       reader.onloadend = function(){
         var origUrl = reader.result;
-        var vid = 'vt_' + Date.now();
-        _c19_voiceCache[vid] = origUrl;
-        var row = document.createElement('div');
-        row.style.cssText = 'display:flex;justify-content:flex-end;margin:6px 0;';
-        row.innerHTML = [
-          '<div class="c19-trans-bubble">',
-          '  <div class="c19-trans-head">',
-          '    <span>🇰🇷 → ' + targetLang.flag + '</span>',
-          '    <span style="opacity:.5;">·</span>',
-          '    <span>Xy 번역</span>',
-          '  </div>',
-          '  <button onclick="c19_playTtsOf(this)" class="c19-trans-play" data-text="' + _c19_esc(translated).replace(/"/g,'&quot;') + '" data-bcp="' + targetLang.bcp + '">',
-          '    <span style="font-size:18px;">' + targetLang.flag + '</span>',
-          '    <span>🔊 재생</span>',
-          '  </button>',
-          '  <div class="c19-trans-text">' + _c19_esc(translated) + '</div>',
-          '  <div class="c19-trans-ko">🇰🇷 ' + _c19_esc(origKoText) + '</div>',
-          '  <button onclick="c19_playVoice(\'' + vid + '\')" class="c19-trans-orig">🎤 원본 음성 (' + duration + '초)</button>',
-          '</div>'
-        ].join('');
-        msg.appendChild(row);
-        msg.scrollTop = msg.scrollHeight;
-        setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 200);
+        // CGO MESSAGE의 _rooms 메커니즘에 맞춰서 메시지 저장
+        try {
+          if(typeof _rooms !== 'undefined' && typeof _currentRoom !== 'undefined' && _currentRoom && _rooms[_currentRoom]){
+            var room = _rooms[_currentRoom];
+            if(!room.msgs) room.msgs = [];
+            var newMsg = {
+              from: (typeof _myCode !== 'undefined' ? _myCode : 'me'),
+              t: Date.now(),
+              read: false,
+              c19_trans: {
+                flag: targetLang.flag,
+                name: targetLang.name,
+                bcp: targetLang.bcp,
+                translated: translated,
+                koText: origKoText,
+                voice: origUrl,      // 원본 한국어 음성 (base64)
+                duration: duration
+              }
+            };
+            room.msgs.push(newMsg);
+            room.lastMsg = '🌍 ' + targetLang.flag + ' 번역 음성';
+            room.lastTime = Date.now();
+            // 저장 + 렌더
+            if(typeof saveRooms === 'function') saveRooms();
+            if(typeof renderMessages === 'function') renderMessages();
+            if(typeof showToast === 'function') showToast('🌍 ' + targetLang.flag + ' 번역 전송됨');
+
+            // Firebase 전송 (실제 유저 방)
+            try {
+              if(!room.isPractice && typeof _cgoFb !== 'undefined' && _cgoFb && typeof _myCode !== 'undefined' && typeof XY_PRACTICE_CODE !== 'undefined' && _myCode !== XY_PRACTICE_CODE){
+                var roomId = [_myCode, _currentRoom].sort().join('_');
+                if(typeof dbRef === 'function'){
+                  dbRef('cgm2/chats/'+roomId+'/msgs').push({
+                    from: _myCode,
+                    t: Date.now(),
+                    c19_trans: {
+                      flag: targetLang.flag,
+                      name: targetLang.name,
+                      bcp: targetLang.bcp,
+                      translated: translated,
+                      koText: origKoText,
+                      voice: origUrl.slice(0, 500000), // 크기 제한
+                      duration: duration
+                    }
+                  });
+                }
+              }
+            } catch(_fe){ console.warn('[C-19 trans FB]', _fe); }
+          }
+        } catch(e){
+          console.warn('[C-19 speakAndPack]', e);
+        }
+        // 자동 재생 (보낸 이가 확인)
+        setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 300);
         resolve();
       };
       reader.readAsDataURL(origBlob);
     });
   }
+
+  // 인라인 음성 재생 (renderMessages가 data-src로 음성 URL 저장)
+  window.c19_playInlineVoice = function(btn){
+    var src = btn.getAttribute('data-src');
+    if(!src) return;
+    try { var a = new Audio(src); a.play(); } catch(_e){}
+  };
+
 
   // ─── 🌍 버튼 바인딩 (C-19 v1.3: 탭 → 언어 선택 → 기존 UI 재사용) ───
   function _c19_bindTransButton(){
