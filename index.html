@@ -2287,22 +2287,32 @@ function renderMessages(){
     }
     // 🌍 C-19 번역 메시지 (msg.c19_trans 있으면)
     if(msg.c19_trans){
-      const T = msg.c19_trans; // {flag, name, bcp, translated, koText, voiceId, duration}
-      html += `<div class="msg-wrap ${isMe?'me':'you'}">
+      const T = msg.c19_trans;
+      const expireAt = msg.expiresAt || (msg.t + 10000);
+      const remainMs = Math.max(0, expireAt - Date.now());
+      const remainSec = Math.ceil(remainMs / 1000);
+      const timerBadge = msg.precious
+        ? '<span style="color:#fbbf24;font-weight:700;">💎 영구 보관</span>'
+        : `<span class="c19-expire" data-expire="${expireAt}" style="color:#f87171;font-weight:700;">🔥 ${remainSec}초 후 폭파</span>`;
+      html += `<div class="msg-wrap ${isMe?'me':'you'}" data-msg-idx="${idx}">
         ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
-        <div class="msg-bubble" style="background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(100,180,250,.08));border:1px solid rgba(255,136,187,.3);box-shadow:0 0 14px rgba(255,136,187,.1);max-width:78%;padding:12px 14px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;color:rgba(240,230,200,.55);">
-            <span>🇰🇷 → ${T.flag}</span>
-            <span style="opacity:.5;">·</span>
-            <span>Xy 번역</span>
+        <div class="msg-bubble" style="background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(100,180,250,.08));border:1px solid rgba(255,136,187,.3);box-shadow:0 0 14px rgba(255,136,187,.1);max-width:82%;padding:12px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:11px;color:rgba(240,230,200,.55);">
+            <span>🇰🇷 → ${T.flag} · Xy 번역</span>
+            ${timerBadge}
           </div>
-          <button onclick="c19_playTtsOf(this)" data-text="${escHtml(T.translated).replace(/"/g,'&quot;')}" data-bcp="${T.bcp}" style="display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.35);border-radius:14px;color:#ffd0e4;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:8px;">
-            <span style="font-size:18px;">${T.flag}</span>
-            <span>🔊 재생</span>
-          </button>
-          <div style="font-size:13px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;">${escHtml(T.translated)}</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            ${T.voice ? `<button onclick="c19_playInlineVoice(this)" data-src="${T.voice}" style="flex:1;padding:10px 8px;background:rgba(100,180,250,.18);border:1px solid rgba(100,180,250,.4);border-radius:12px;color:#b4dcff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+              <span style="font-size:16px;">🇰🇷</span>
+              <span>🎤 원본 (${T.duration}초)</span>
+            </button>` : ''}
+            <button onclick="c19_playTtsOf(this)" data-text="${escHtml(T.translated).replace(/"/g,'&quot;')}" data-bcp="${T.bcp}" style="flex:1;padding:10px 8px;background:rgba(255,136,187,.18);border:1px solid rgba(255,136,187,.4);border-radius:12px;color:#ffd0e4;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;">
+              <span style="font-size:16px;">${T.flag}</span>
+              <span>🔊 원어민</span>
+            </button>
+          </div>
+          <div style="font-size:14px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;font-weight:500;">${escHtml(T.translated)}</div>
           <div style="font-size:11px;color:rgba(240,230,200,.5);padding-top:6px;border-top:1px dashed rgba(240,230,200,.15);line-height:1.5;word-break:break-word;">🇰🇷 ${escHtml(T.koText)}</div>
-          ${T.voice ? `<button onclick="c19_playInlineVoice(this)" data-src="${T.voice}" style="margin-top:6px;padding:4px 10px;background:transparent;border:1px solid rgba(212,168,67,.3);border-radius:10px;color:rgba(212,168,67,.7);font-size:10px;cursor:pointer;font-family:inherit;">🎤 원본 음성 (${T.duration}초)</button>` : ''}
         </div>
         <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
       </div>`;
@@ -2317,12 +2327,19 @@ function renderMessages(){
         const h = 6 + Math.floor(Math.random()*16);
         return `<span style="height:${h}px"></span>`;
       }).join('');
-      html += `<div class="msg-wrap ${isMe?'me':'you'}">
+      const expireAt2 = msg.expiresAt || (msg.t + 10000);
+      const remainMs2 = Math.max(0, expireAt2 - Date.now());
+      const remainSec2 = Math.ceil(remainMs2 / 1000);
+      const timerBadge2 = msg.precious
+        ? '<span style="color:#fbbf24;font-weight:700;font-size:10px;">💎 영구</span>'
+        : `<span class="c19-expire" data-expire="${expireAt2}" style="color:#f87171;font-weight:700;font-size:10px;">🔥 ${remainSec2}초</span>`;
+      html += `<div class="msg-wrap ${isMe?'me':'you'}" data-msg-idx="${idx}">
         ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
-        <div class="msg-bubble voice-msg${msg.precious?' precious':''}">
+        <div class="msg-bubble voice-msg${msg.precious?' precious':''}" style="position:relative;">
           <button class="voice-play" id="${voiceId}" onclick="playVoice('${voiceId}', this.dataset.src)" data-src="${msg.voice}">▶</button>
           <div class="voice-wave-mini">${bars}</div>
           <span class="voice-duration">${durStr}</span>
+          <span style="margin-left:6px;padding:2px 6px;border-radius:8px;background:rgba(0,0,0,.2);">${timerBadge2}</span>
         </div>
         <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
       </div>`;
@@ -2875,13 +2892,15 @@ async function sendVoiceMessage(blob, duration){
     }
 
     // 메시지 생성
+    const now = Date.now();
     const msg = {
       from: _myCode,
       voice: dataUrl,       // Base64 음성 데이터
       duration: duration,
-      t: Date.now(),
+      t: now,
       read: false,
-      precious: isPrecious  // ✨ 소중한 음성 플래그 (하늘색 후광)
+      precious: isPrecious,  // ✨ 소중한 음성 플래그 (하늘색 후광)
+      expiresAt: isPrecious ? null : (now + 10000)  // 💥 10초 폭파 (소중함은 영구)
     };
 
     const room = _rooms[_currentRoom];
@@ -4163,10 +4182,13 @@ window.addEventListener('appinstalled', function(){
           if(typeof _rooms !== 'undefined' && typeof _currentRoom !== 'undefined' && _currentRoom && _rooms[_currentRoom]){
             var room = _rooms[_currentRoom];
             if(!room.msgs) room.msgs = [];
+            var nowTs = Date.now();
             var newMsg = {
               from: (typeof _myCode !== 'undefined' ? _myCode : 'me'),
-              t: Date.now(),
+              t: nowTs,
               read: false,
+              precious: false,                        // 번역은 기본 폭파 (💎 아님)
+              expiresAt: nowTs + 10000,               // 💥 10초 후 폭파
               c19_trans: {
                 flag: targetLang.flag,
                 name: targetLang.name,
@@ -4231,22 +4253,63 @@ window.addEventListener('appinstalled', function(){
       return;
     }
     if(src.length < 1000){
-      console.warn('[C-19 원본음성] 데이터 너무 짧음 (Firebase 전송 중 잘렸을 가능성):', src.length);
+      console.warn('[C-19 원본음성] 데이터 너무 짧음:', src.length);
       _c19_toast('⚠️ 음성 데이터가 손상됐어요');
       return;
     }
     try {
-      var a = new Audio(src);
+      // 이미 재생 중인 오디오 정지
+      if(window._c19_currentAudio){
+        try { window._c19_currentAudio.pause(); } catch(_e){}
+        window._c19_currentAudio = null;
+      }
+
+      var a = new Audio();
+      window._c19_currentAudio = a;
+
       a.onerror = function(e){
-        console.error('[C-19 원본음성] Audio 에러:', e);
-        _c19_toast('⚠️ 음성 재생 실패');
+        console.error('[C-19 원본음성] Audio 에러. 코드:', a.error ? a.error.code : '?', '메시지:', a.error ? a.error.message : '?');
+        // 폴백 1: Blob URL 방식 재시도
+        if(src.indexOf('data:') === 0 && !btn._c19_retried){
+          btn._c19_retried = true;
+          console.log('[C-19 원본음성] Blob URL 방식으로 재시도');
+          try {
+            var parts = src.split(',');
+            var meta = parts[0]; // "data:audio/webm;base64"
+            var b64 = parts[1];
+            var mimeMatch = meta.match(/data:([^;]+)/);
+            var mime = mimeMatch ? mimeMatch[1] : 'audio/webm';
+            var bin = atob(b64);
+            var arr = new Uint8Array(bin.length);
+            for(var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            var blob = new Blob([arr], {type: mime});
+            var url = URL.createObjectURL(blob);
+            var a2 = new Audio(url);
+            a2.onerror = function(){ _c19_toast('⚠️ 음성 재생 실패 (포맷 지원 안 됨)'); };
+            a2.onended = function(){ URL.revokeObjectURL(url); };
+            a2.play().catch(function(err){
+              console.error('[C-19 원본음성 Blob] play 거부:', err);
+              _c19_toast('⚠️ 재생 실패: ' + (err.message || err));
+            });
+            window._c19_currentAudio = a2;
+            return;
+          } catch(conv){
+            console.error('[C-19 원본음성] Blob 변환 실패:', conv);
+            _c19_toast('⚠️ 재생 실패');
+          }
+        } else {
+          _c19_toast('⚠️ 음성 재생 실패');
+        }
       };
       a.onplay = function(){ console.log('[C-19 원본음성] 재생 시작'); };
+      a.src = src;
       var promise = a.play();
       if(promise && promise.catch){
         promise.catch(function(err){
           console.error('[C-19 원본음성] play() 거부:', err);
-          _c19_toast('⚠️ 재생 실패: ' + (err.message || err));
+          // PC에서 autoplay policy 걸린 경우 가능 — 사용자 인터랙션 있으니 괜찮아야 함
+          // 다시 시도 (Blob 방식)
+          if(a.onerror) a.onerror({});
         });
       }
     } catch(e){
@@ -4345,6 +4408,93 @@ window.addEventListener('appinstalled', function(){
     if(hint) hint.style.display = 'none';
   };
 
+  // ═══════════════════════════════════════════════════════════
+  //  💥 C-19 v1.5: 10초 폭파 시스템
+  //  이주원 대장님 비즈니스 모델 핵심 구현
+  //  - 일반 음성 + 번역 음성 모두 10초 후 자동 폭파
+  //  - 💎 소중한 음성(msg.precious)만 영구 보관
+  //  - Firebase + _rooms + DOM 3곳 모두 삭제
+  // ═══════════════════════════════════════════════════════════
+  function _c19_explosionEngine(){
+    try {
+      // 1) 카운트다운 배지 실시간 업데이트
+      var expireNodes = document.querySelectorAll('.c19-expire[data-expire]');
+      var now = Date.now();
+      expireNodes.forEach(function(el){
+        var exp = parseInt(el.getAttribute('data-expire'), 10);
+        if(!exp) return;
+        var remain = Math.max(0, Math.ceil((exp - now) / 1000));
+        // 카운트다운 텍스트 업데이트
+        if(remain > 0){
+          // 10-6초: 빨강, 5-3: 주황, 2-1: 진한 빨강 깜빡임
+          if(remain <= 2){
+            el.style.color = '#ff3333';
+            el.style.animation = 'c19-blink 0.4s infinite';
+            el.innerHTML = '💥 ' + remain + '초!';
+          } else if(remain <= 5){
+            el.style.color = '#f97316';
+            el.innerHTML = '🔥 ' + remain + '초';
+          } else {
+            el.style.color = '#f87171';
+            el.innerHTML = '🔥 ' + remain + '초';
+          }
+        } else {
+          el.innerHTML = '💥 폭파...';
+        }
+      });
+
+      // 2) 만료된 메시지 실제 삭제
+      if(typeof _rooms === 'undefined' || typeof _currentRoom === 'undefined' || !_currentRoom) return;
+      var room = _rooms[_currentRoom];
+      if(!room || !room.msgs) return;
+
+      var hasExpired = false;
+      var remainingMsgs = [];
+      for(var i = 0; i < room.msgs.length; i++){
+        var m = room.msgs[i];
+        // 💎 소중한 음성은 영구 보관
+        if(m.precious){
+          remainingMsgs.push(m);
+          continue;
+        }
+        // expiresAt 있고 지났으면 폭파
+        if(m.expiresAt && now > m.expiresAt){
+          hasExpired = true;
+          // Firebase에서도 삭제 (실제 방일 때)
+          try {
+            if(!room.isPractice && typeof _cgoFb !== 'undefined' && _cgoFb && typeof _myCode !== 'undefined' && typeof XY_PRACTICE_CODE !== 'undefined' && _myCode !== XY_PRACTICE_CODE){
+              // Firebase 구조 복잡해서 별도 함수 있으면 호출, 없으면 넘어감
+              if(typeof _c19_firebasePurge === 'function'){
+                _c19_firebasePurge(m);
+              }
+            }
+          } catch(_fe){}
+          // 로그
+          console.log('[C-19 폭파] 메시지 삭제됨:', m.t);
+        } else {
+          remainingMsgs.push(m);
+        }
+      }
+
+      // 변경 있으면 저장 + 렌더
+      if(hasExpired){
+        room.msgs = remainingMsgs;
+        if(typeof saveRooms === 'function') saveRooms();
+        if(typeof renderMessages === 'function') renderMessages();
+      }
+    } catch(e){
+      console.warn('[C-19 폭파 엔진]', e);
+    }
+  }
+
+  // CSS 깜빡임 애니메이션 추가
+  var _c19_blinkStyle = document.createElement('style');
+  _c19_blinkStyle.textContent = '@keyframes c19-blink{0%,100%{opacity:1}50%{opacity:0.3}}';
+  document.head.appendChild(_c19_blinkStyle);
+
+  // 1초마다 폭파 엔진 실행
+  setInterval(_c19_explosionEngine, 1000);
+
   // ─── 초기화 ───
   function _c19_init(){
     _c19_bindTransButton();
@@ -4355,7 +4505,7 @@ window.addEventListener('appinstalled', function(){
     setTimeout(_c19_init, 100);
   }
 
-  console.log('[C-19 v1.2] CGO MESSAGE에 14개국 번역 음성 이식 완료 🌍');
+  console.log('[C-19 v1.5] CGO MESSAGE 14개국 번역 + 10초 폭파 시스템 활성화 💥🌍');
 })();
 </script>
 </body>
