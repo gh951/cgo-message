@@ -1456,9 +1456,29 @@ input[type=range].sec-range::-moz-range-thumb{
   <div class="modal">
     <div class="modal-title">🔗 친구 초대</div>
     <div style="font-size:11px;color:rgba(240,230,200,.5);margin-bottom:12px;text-align:center;">
-      링크를 복사해서 카카오톡으로 보내세요!
+      📷 QR 코드를 보여주거나, 링크를 공유하세요
     </div>
-    <div id="inviteLinkBox" style="background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:10px;color:var(--gold);word-break:break-all;margin-bottom:12px;"></div>
+    
+    <!-- 📷 QR 코드 영역 -->
+    <div style="text-align:center;margin-bottom:12px;">
+      <div id="inviteQrBox" style="display:inline-block;background:#fff;padding:10px;border-radius:10px;min-height:180px;min-width:180px;">
+        <div style="color:#888;font-size:11px;padding-top:80px;">QR 생성 중...</div>
+      </div>
+      <div style="font-size:10px;color:rgba(240,230,200,.4);margin-top:6px;">
+        📱 상대방이 스마트폰 카메라로 스캔
+      </div>
+    </div>
+
+    <!-- 🔗 링크 영역 -->
+    <div id="inviteLinkBox" style="background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:10px;padding:10px;font-size:10px;color:var(--gold);word-break:break-all;margin-bottom:8px;"></div>
+    
+    <!-- ⚠️ 카톡 주의 안내 -->
+    <div style="font-size:10px;color:#fbbf24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);border-radius:8px;padding:8px;margin-bottom:12px;line-height:1.5;">
+      ⚠️ 카톡으로 보내면 받는 분이 링크 탭 후<br>
+      우측 상단 <b>[⋮] → "다른 브라우저로 열기"</b><br>
+      를 눌러야 음성이 정상 작동해요!
+    </div>
+    
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="document.getElementById('inviteModal').classList.remove('open')">닫기</button>
       <button class="modal-btn confirm" onclick="copyInviteLink()">📋 복사</button>
@@ -2288,7 +2308,7 @@ function renderMessages(){
     // 🌍 C-19 번역 메시지 (msg.c19_trans 있으면)
     if(msg.c19_trans){
       const T = msg.c19_trans;
-      const expireAt = msg.expiresAt || (msg.t + 10000);
+      const expireAt = msg.expiresAt || (msg.t + 20000);
       const remainMs = Math.max(0, expireAt - Date.now());
       const remainSec = Math.ceil(remainMs / 1000);
       const timerBadge = msg.precious
@@ -2327,7 +2347,7 @@ function renderMessages(){
         const h = 6 + Math.floor(Math.random()*16);
         return `<span style="height:${h}px"></span>`;
       }).join('');
-      const expireAt2 = msg.expiresAt || (msg.t + 10000);
+      const expireAt2 = msg.expiresAt || (msg.t + 20000);
       const remainMs2 = Math.max(0, expireAt2 - Date.now());
       const remainSec2 = Math.ceil(remainMs2 / 1000);
       const timerBadge2 = msg.precious
@@ -3224,7 +3244,89 @@ let _rgbOn = false;
 window.addEventListener('DOMContentLoaded', ()=>{
   const msgArea = document.getElementById('msgArea');
   if(msgArea) msgArea.classList.remove('rgb-mode');
+  // 🔗 C-19: 카카오톡 인앱 브라우저 감지 + 크롬 유도 배너
+  detectKakaoInApp();
 });
+
+// ══ 🚨 카카오톡 인앱 브라우저 감지 및 크롬 유도 ══
+function detectKakaoInApp(){
+  const ua = navigator.userAgent || '';
+  const isKakao = /KAKAOTALK/i.test(ua);
+  const isNaver = /NAVER\(inapp;|Whale/i.test(ua);
+  const isFacebook = /FBAN|FBAV/i.test(ua);
+  const isInstagram = /Instagram/i.test(ua);
+  const isLine = /Line\//i.test(ua);
+  const isBand = /BAND\//i.test(ua);
+  
+  if(!(isKakao || isNaver || isFacebook || isInstagram || isLine || isBand)) return;
+  
+  // 이미 크롬 유도 배너 처리 중이면 재실행 금지
+  if(document.getElementById('c19_kakaoBanner')) return;
+  
+  const appName = isKakao ? '카카오톡' 
+                : isNaver ? '네이버'
+                : isFacebook ? '페이스북'
+                : isInstagram ? '인스타그램'
+                : isLine ? '라인'
+                : isBand ? '밴드'
+                : '앱';
+  
+  const banner = document.createElement('div');
+  banner.id = 'c19_kakaoBanner';
+  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100000;background:linear-gradient(135deg,#fbbf24,#f97316);color:#000;padding:14px 16px;font-size:13px;font-weight:700;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);line-height:1.5;';
+  banner.innerHTML = [
+    '⚠️ <b>' + appName + ' 내장 브라우저</b>에서 열렸어요',
+    '<div style="font-size:11px;margin-top:6px;font-weight:500;">음성 기능이 안 될 수 있어요. <u>크롬으로 열어주세요!</u></div>',
+    '<div style="display:flex;gap:8px;margin-top:10px;justify-content:center;">',
+    '  <button id="c19_openChromeBtn" style="padding:8px 16px;background:#000;color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;">🌐 크롬으로 열기</button>',
+    '  <button id="c19_dismissBtn" style="padding:8px 14px;background:transparent;color:#000;border:1px solid rgba(0,0,0,.3);border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">그냥 계속</button>',
+    '</div>',
+    '<div style="font-size:10px;margin-top:8px;opacity:.7;">또는 우측 상단 [⋮] → "다른 브라우저로 열기"</div>'
+  ].join('');
+  document.body.appendChild(banner);
+  
+  // body 위쪽 패딩 (배너 공간)
+  document.body.style.paddingTop = banner.offsetHeight + 'px';
+  
+  // 크롬으로 열기 버튼
+  document.getElementById('c19_openChromeBtn').addEventListener('click', function(){
+    const currentUrl = location.href;
+    const isAndroid = /Android/i.test(ua);
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    
+    if(isAndroid){
+      // Android: Intent URL로 크롬 강제 실행
+      const intentUrl = 'intent://' + currentUrl.replace(/^https?:\/\//, '') 
+                      + '#Intent;scheme=https;package=com.android.chrome;end';
+      location.href = intentUrl;
+    } else if(isIOS){
+      // iOS: googlechromes:// 스킴 사용 (크롬 앱 설치 시 열림)
+      const chromeUrl = currentUrl.replace(/^https?:\/\//, 'googlechromes://');
+      location.href = chromeUrl;
+      // 크롬 없으면 App Store로 유도
+      setTimeout(function(){
+        if(confirm('크롬이 설치되어 있지 않아요. App Store에서 설치할까요?')){
+          location.href = 'https://apps.apple.com/kr/app/google-chrome/id535886823';
+        }
+      }, 1500);
+    } else {
+      alert('우측 상단 [⋮] 메뉴 → "다른 브라우저로 열기" 눌러주세요');
+    }
+  });
+  
+  // 그냥 계속
+  document.getElementById('c19_dismissBtn').addEventListener('click', function(){
+    banner.style.display = 'none';
+    document.body.style.paddingTop = '0';
+    sessionStorage.setItem('c19_kakaoBannerDismissed', '1');
+  });
+  
+  // 이전에 "그냥 계속" 눌렀으면 이번 세션에서 다시 안 뜸
+  if(sessionStorage.getItem('c19_kakaoBannerDismissed') === '1'){
+    banner.style.display = 'none';
+    document.body.style.paddingTop = '0';
+  }
+}
 function toggleRGB(){
   _rgbOn = !_rgbOn;
   const btn = document.getElementById('rgbBtn');
@@ -3368,7 +3470,21 @@ function openInvite(){
   const url = _myCode ? (base + '&c=' + encodeURIComponent(_myCode)) : base;
   document.getElementById('inviteLinkBox').textContent = url;
   document.getElementById('inviteModal').classList.add('open');
+  // 📷 QR 코드 생성 (Google Charts API 무료 사용)
+  generateInviteQR(url);
   if(navigator.share) navigator.share({title:'CGO MESSAGE 초대',url}).catch(()=>{});
+}
+
+// 📷 QR 코드 생성 (외부 API 의존 최소화 — 라이브러리 없이 Google Charts 사용)
+function generateInviteQR(url){
+  const qrBox = document.getElementById('inviteQrBox');
+  if(!qrBox) return;
+  // Google Charts API (무료, 라이브러리 불필요)
+  const size = 180;
+  const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size 
+              + '&data=' + encodeURIComponent(url)
+              + '&margin=0&ecc=M';
+  qrBox.innerHTML = '<img src="' + qrUrl + '" width="' + size + '" height="' + size + '" alt="QR" style="display:block;border-radius:6px;" onerror="this.outerHTML=\'<div style=&quot;color:#888;font-size:11px;padding:80px 20px;&quot;>QR 생성 실패<br>네트워크 확인</div>\'">';
 }
 
 function copyInviteLink(){
@@ -4409,9 +4525,9 @@ window.addEventListener('appinstalled', function(){
   };
 
   // ═══════════════════════════════════════════════════════════
-  //  💥 C-19 v1.5: 10초 폭파 시스템
+  //  💥 C-19 v1.5.1: 20초 폭파 시스템 (🆓무료 기본)
   //  이주원 대장님 비즈니스 모델 핵심 구현
-  //  - 일반 음성 + 번역 음성 모두 10초 후 자동 폭파
+  //  - 일반 음성 + 번역 음성 모두 20초 후 자동 폭파
   //  - 💎 소중한 음성(msg.precious)만 영구 보관
   //  - Firebase + _rooms + DOM 3곳 모두 삭제
   // ═══════════════════════════════════════════════════════════
