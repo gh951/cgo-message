@@ -1380,6 +1380,8 @@ input[type=range].sec-range::-moz-range-thumb{
   <!-- ✨ 상단 액션 바 (세계 최초 기능들) -->
   <div class="xy-actionbar">
     <button class="xy-act-btn xy-ai" id="xyToggleBtn" onclick="toggleXyActive()">✨ Xy OFF</button>
+    <!-- 🎯 특허 #46: Xy 발화 중단 버튼 (Xy 말하는 중에만 표시) -->
+    <button id="xyStopBtn" onclick="interruptXy()" title="Xy 말 끊기" style="display:none;padding:6px 12px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:16px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(239,68,68,.4);animation:xyStopPulse 1.2s infinite;">✋ 그만</button>
     <button class="xy-act-btn" id="gearBtn" onclick="toggleSecPanel()">⚙️</button>
     <button class="xy-act-btn shield-on" id="secBtn" onclick="toggleSec()">🛡️ OFF</button>
     <button class="xy-act-btn burst-btn" id="burstBtn" onclick="toggleBurst()">💥</button>
@@ -2436,6 +2438,9 @@ function openRoom(code){
 
 // ══ 뒤로가기 ══
 function goBack(){
+  // 🎯 특허 #46: 방 나가면 Xy 발화 중단
+  if(_xySpeaking) interruptXy();
+  
   _currentRoom = null;
   if(_msgListener){ _msgListener.off(); _msgListener=null; }
   if(_flagsListener){ _flagsListener.off(); _flagsListener=null; }
@@ -3211,20 +3216,45 @@ function xyVoiceReply(duration){
 
 // ══ Text-to-Speech: 자이 답변을 음성으로 읽어주기 ══
 function speakXy(text){
-  if(!('speechSynthesis' in window)) return;
+  if(!('speechSynthesis' in window)){
+    // TTS 없으면 상태만 해제
+    _xySpeaking = false;
+    _xyCurrentLoadMsg = null;
+    _xyAbortCtrl = null;
+    updateXyStopButtonVisibility();
+    return;
+  }
   try {
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'ko-KR';
     utter.rate = 1.0;
-    utter.pitch = 1.15; // 친근한 톤
+    utter.pitch = 1.15;
     utter.volume = 0.9;
-    // 한국어 음성 있으면 선택
     const voices = speechSynthesis.getVoices();
     const korVoice = voices.find(v=>v.lang.startsWith('ko'));
     if(korVoice) utter.voice = korVoice;
-    speechSynthesis.cancel(); // 기존 재생 취소
+    
+    // 🎯 특허 #46: TTS 종료 시 Xy 발화 상태 해제
+    utter.onend = () => {
+      _xySpeaking = false;
+      _xyCurrentLoadMsg = null;
+      _xyAbortCtrl = null;
+      updateXyStopButtonVisibility();
+    };
+    utter.onerror = () => {
+      _xySpeaking = false;
+      _xyCurrentLoadMsg = null;
+      _xyAbortCtrl = null;
+      updateXyStopButtonVisibility();
+    };
+    
+    speechSynthesis.cancel();
     speechSynthesis.speak(utter);
-  } catch(e){ console.warn('[TTS] 실패:', e); }
+  } catch(e){
+    console.warn('[TTS] 실패:', e);
+    _xySpeaking = false;
+    updateXyStopButtonVisibility();
+  }
 }
 
 // 🔊 자이 음성 응답 토글 (할머니 친화 모드)
@@ -3251,10 +3281,21 @@ function xyReply(userText){
   const room = _rooms[_currentRoom];
   if(!room) return;
   if(!room.msgs) room.msgs = [];
+  
+  // 🎯 특허 #46: 이미 Xy가 말하고 있으면 이전 것 중단 (중복 발화 방지)
+  if(_xySpeaking){
+    interruptXy();
+  }
+  
+  // 🎯 특허 #46: Xy 발화 시작 상태 설정
+  _xySpeaking = true;
+  _xyAbortCtrl = new AbortController();
+  updateXyStopButtonVisibility();
 
   // 로딩 메시지
   const loadMsg = { from:'xy', isAI:true, loading:true, text:'✨ Xy: 생각 중...', t:Date.now() };
   room.msgs.push(loadMsg);
+  _xyCurrentLoadMsg = loadMsg; // 중단 시 제거용
   saveRooms();
   renderMessages();
 
@@ -3317,16 +3358,22 @@ function xyReply(userText){
   fetch('/api/groq', {
     method:'POST',
     headers:{'Content-Type':'application/json'},
+    signal: _xyAbortCtrl ? _xyAbortCtrl.signal : undefined, // 🎯 특허 #46: 중단 가능
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       messages:[
         {role:'system', content:sysPrompt},
         {role:'user', content:userText}
       ],
-      max_tokens:800,     // C-19 v22: 300→800 (자세히 모드에서 잘림 방지)
-      temperature:0.6     // C-19 v22: 0.8→0.6 (논리성·일관성 우선, 과도한 창의성 억제)
+      max_tokens:800,
+      temperature:0.6
     })
   }).then(r=>r.json()).then(data=>{
+    // 🎯 특허 #46: 중단 후 응답 도착한 경우 무시
+    if(!_xySpeaking || _xyCurrentLoadMsg !== loadMsg){
+      console.log('[Xy] 중단된 응답 무시');
+      return;
+    }
     let reply = '';
     try{ reply = data.choices[0].message.content || ''; }catch(e){ reply=''; }
     if(!reply) reply = '다시 말씀해주실 수 있을까요? 🙏';
@@ -3336,15 +3383,32 @@ function xyReply(userText){
     renderMessages();
     // 🔊 할머니 친화 모드: 자이 답변을 음성으로도 읽어주기 (옵션)
     if(window._xyVoiceOn){
-      // 이모지 제거 후 TTS
       const speakText = reply.trim().replace(/[\u{1F600}-\u{1F6FF}\u{1F300}-\u{1F5FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '');
       speakXy(speakText);
+      // TTS가 끝나거나 중단되면 Xy 상태 해제 (TTS 내부에서 처리)
+    } else {
+      // 🎯 TTS 없으면 텍스트 렌더 끝난 시점에 바로 상태 해제
+      _xySpeaking = false;
+      _xyCurrentLoadMsg = null;
+      _xyAbortCtrl = null;
+      updateXyStopButtonVisibility();
     }
-  }).catch(()=>{
-    loadMsg.text = '✨ Xy: 잠시 후 다시 불러주세요 🙏';
-    loadMsg.loading = false;
-    saveRooms();
-    renderMessages();
+  }).catch((err)=>{
+    // 🎯 AbortError면 중단된 것 (이미 처리됨)
+    if(err && err.name === 'AbortError'){
+      console.log('[Xy] fetch 중단됨');
+      return;
+    }
+    if(_xyCurrentLoadMsg === loadMsg){
+      loadMsg.text = '✨ Xy: 잠시 후 다시 불러주세요 🙏';
+      loadMsg.loading = false;
+      saveRooms();
+      renderMessages();
+    }
+    _xySpeaking = false;
+    _xyCurrentLoadMsg = null;
+    _xyAbortCtrl = null;
+    updateXyStopButtonVisibility();
   });
 }
 
@@ -3584,6 +3648,11 @@ function toggleRGB(){
 
 // ✨ Xy 활성화 상태 (ON 일 때만 대화에 끼어듦)
 let _xyActive = false;
+// 🎯 v1.7.7 대장님 설계 - 특허 #46: Xy 발화 중단 시스템
+let _xySpeaking = false;        // Xy가 현재 "말하고 있는" 상태인가 (응답 생성 중 또는 TTS 발화 중)
+let _xyAbortCtrl = null;        // 진행 중인 fetch 중단용
+let _xyCurrentLoadMsg = null;   // 중단 시 제거할 로딩 메시지 참조
+let _xyInterruptedCount = 0;    // 중단 기록 (맥락 유지용)
 function toggleXyActive(){
   _xyActive = !_xyActive;
   const btn = document.getElementById('xyToggleBtn');
@@ -3591,12 +3660,77 @@ function toggleXyActive(){
   if(_xyActive){
     btn.textContent = '✨ Xy ON';
     btn.classList.add('active');
-    showToast('✨ Xy 대화 참여 ON — "자이야" 라고 불러보세요!');
+    if(_xyInterruptedCount > 0){
+      showToast('✨ Xy 다시 ON — 이전 대화 기억해요 💭');
+    } else {
+      showToast('✨ Xy 대화 참여 ON — "자이야" 라고 불러보세요!');
+    }
   } else {
     btn.textContent = '✨ Xy OFF';
     btn.classList.remove('active');
-    showToast('✨ Xy 대화 참여 OFF — 자이가 조용히 있어요');
+    // Xy가 말하고 있으면 즉시 중단!
+    if(_xySpeaking){
+      interruptXy();
+    }
+    showToast('✨ Xy OFF — 두 분이 자유롭게 대화하세요 🤐');
   }
+}
+
+// 🎯 특허 #46: Xy 중단 버튼 표시/숨김 관리
+function updateXyStopButtonVisibility(){
+  const btn = document.getElementById('xyStopBtn');
+  if(!btn) return;
+  btn.style.display = _xySpeaking ? 'inline-block' : 'none';
+  // 애니메이션 CSS (한 번만)
+  if(!document.getElementById('xyStopPulseCSS')){
+    const style = document.createElement('style');
+    style.id = 'xyStopPulseCSS';
+    style.textContent = '@keyframes xyStopPulse{0%,100%{box-shadow:0 2px 8px rgba(239,68,68,.4)}50%{box-shadow:0 2px 18px rgba(239,68,68,.85)}}';
+    document.head.appendChild(style);
+  }
+}
+
+// 🎯 특허 #46: Xy 발화 중단 (사람 대화 방해 금지)
+function interruptXy(){
+  if(!_xySpeaking) return;
+  console.log('[Xy 중단] 사용자 요청으로 발화 중단');
+  
+  // ① TTS 음성 즉시 중단
+  if(window.speechSynthesis){
+    speechSynthesis.cancel();
+  }
+  
+  // ② 진행 중인 API 호출 중단
+  if(_xyAbortCtrl){
+    try{ _xyAbortCtrl.abort(); }catch(e){}
+    _xyAbortCtrl = null;
+  }
+  
+  // ③ 로딩 메시지 제거 (맥락 유지를 위해 중단 기록)
+  if(_xyCurrentLoadMsg){
+    const room = _rooms[_currentRoom];
+    if(room && room.msgs){
+      const idx = room.msgs.indexOf(_xyCurrentLoadMsg);
+      if(idx !== -1){
+        // 중단 기록을 작은 시스템 메시지로 대체
+        room.msgs[idx] = {
+          id: 'xy_interrupted_' + Date.now(),
+          type: 'system',
+          text: '✨ Xy가 잠시 조용히 하고 있어요 (다시 켜면 기억해요)',
+          t: Date.now()
+        };
+        saveRooms();
+        renderMessages();
+      }
+    }
+    _xyCurrentLoadMsg = null;
+  }
+  
+  _xySpeaking = false;
+  _xyInterruptedCount++;
+  
+  // 중단 버튼 UI 숨김
+  updateXyStopButtonVisibility();
 }
 
 // ✨ Xy 호출 (수동 버튼)
