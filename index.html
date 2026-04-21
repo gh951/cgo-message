@@ -2654,11 +2654,32 @@ function stopAndSendRecording(){
     // 너무 짧으면 무시
     if(duration < 1){
       showToast('🎤 너무 짧아요 (최소 1초)');
+      window._c19_transLang = null; // 번역 모드 리셋
       return;
     }
 
-    showToast('🎤 음성 전송 중...');
-    await sendVoiceMessage(blob, duration);
+    // C-19 v1.3: 번역 모드면 Whisper+번역 경로, 아니면 기본 전송
+    if(window._c19_transLang){
+      const L = window._c19_transLang;
+      window._c19_transLang = null;
+      if(L.code === 'ko'){
+        // 한국어 원본 — 기본 전송
+        showToast('🎤 음성 전송 중...');
+        await sendVoiceMessage(blob, duration);
+      } else {
+        // 외국어 — 번역 파이프라인
+        if(typeof window._c19_translateAndSendFromStop === 'function'){
+          window._c19_translateAndSendFromStop(blob, duration, L);
+        } else {
+          showToast('⚠️ 번역 모듈 로딩 실패. 원본 전송합니다.');
+          await sendVoiceMessage(blob, duration);
+        }
+      }
+    } else {
+      // 기본 일반 음성 전송
+      showToast('🎤 음성 전송 중...');
+      await sendVoiceMessage(blob, duration);
+    }
   };
 
   _mediaRecorder.stop();
@@ -2666,6 +2687,7 @@ function stopAndSendRecording(){
 
 // ══ 취소 ══
 function cancelRecording(){
+  window._c19_transLang = null; // C-19 v1.3: 번역 모드 리셋
   if(_mediaRecorder && _mediaRecorder.state === 'recording'){
     _mediaRecorder.onstop = ()=>{ cleanupRecording(); };
     _mediaRecorder.stop();
@@ -3975,9 +3997,7 @@ window.addEventListener('appinstalled', function(){
     });
   }
 
-  // ─── 🌍 버튼 바인딩 (C-19 v1.3: 탭 방식) ───
-  // 첫 탭: 언어 선택 팝업 → 선택 시 녹음 시작
-  // 녹음 중 탭: 녹음 종료 → 바로 번역 전송 (팝업 없음)
+  // ─── 🌍 버튼 바인딩 (C-19 v1.3: 탭 → 언어 선택 → 기존 UI 재사용) ───
   function _c19_bindTransButton(){
     var btn = document.getElementById('c19_micTransBtn');
     if(!btn || btn._c19_bound) return;
@@ -3985,15 +4005,86 @@ window.addEventListener('appinstalled', function(){
     btn.addEventListener('click', function(e){
       e.preventDefault();
       e.stopPropagation();
-      if(_c19_recording){
-        // 녹음 중 → 종료 (onstop에서 자동 번역)
-        _c19_stopTransRecording();
-      } else {
-        // 녹음 시작 전 → 언어 선택 팝업
-        _c19_askLangAndRecord();
+      // 이미 녹음 중이면 무시 (사용자는 오버레이의 [전송] 버튼으로 종료)
+      if(typeof _mediaRecorder !== 'undefined' && _mediaRecorder && _mediaRecorder.state === 'recording'){
+        return;
       }
+      // 언어 선택 팝업
+      _c19_showLangPicker(function(L){
+        window._c19_transLang = L; // 전역에 언어 저장
+        // 기존 일반 녹음 UI 그대로 호출 (오버레이 + 파형 + 타이머 + 전송 버튼 모두 동일)
+        if(typeof startRecording === 'function'){
+          startRecording();
+          // 오버레이에 번역 언어 힌트 추가
+          setTimeout(function(){
+            var hint = document.getElementById('c19_langHint');
+            if(!hint){
+              hint = document.createElement('div');
+              hint.id = 'c19_langHint';
+              hint.style.cssText = 'position:absolute;top:10px;left:50%;transform:translateX(-50%);padding:6px 14px;background:linear-gradient(135deg,rgba(255,136,187,.25),rgba(168,85,247,.15));border:1px solid rgba(255,136,187,.45);border-radius:14px;color:#ffd0e4;font-size:12px;font-weight:800;z-index:99;pointer-events:none;';
+              var overlay = document.getElementById('recordOverlay');
+              if(overlay) overlay.appendChild(hint);
+            }
+            hint.innerHTML = '🌍 ' + L.flag + ' ' + L.name + ' 로 번역 전송';
+            hint.style.display = 'block';
+          }, 50);
+        } else {
+          _c19_toast('⚠️ 녹음 함수를 찾을 수 없어요');
+        }
+      });
     });
   }
+
+  // 언어 선택 팝업 (callback 으로 선택 반환)
+  function _c19_showLangPicker(onPick){
+    var items = _c19_LANGS.map(function(L, i){
+      var isOrigin = (L.code === 'ko');
+      return '<button class="c19-lang-btn" data-idx="' + i + '" ' +
+             (isOrigin ? 'style="background:rgba(212,168,67,.12);border-color:rgba(212,168,67,.35);"' : '') +
+             '>' +
+             '<span class="c19-flag">' + L.flag + '</span>' +
+             '<span class="c19-name">' + L.name + '</span>' +
+             '</button>';
+    }).join('');
+    _c19_langOverlay.innerHTML = [
+      '<div class="c19-lang-card">',
+      '  <div class="c19-lang-head">',
+      '    <div class="c19-icon">🌍 ✨</div>',
+      '    <div class="c19-title">어느 언어로 보낼까요?</div>',
+      '    <div class="c19-sub">선택 후 녹음을 시작하세요</div>',
+      '  </div>',
+      '  <div class="c19-lang-grid" id="c19_langGrid">' + items + '</div>',
+      '  <button id="c19_langCancel">취소</button>',
+      '</div>'
+    ].join('');
+    _c19_langOverlay.classList.add('show');
+
+    var grid = document.getElementById('c19_langGrid');
+    if(grid){
+      grid.addEventListener('click', function(e){
+        var bt = e.target.closest('.c19-lang-btn');
+        if(!bt) return;
+        var idx = parseInt(bt.getAttribute('data-idx'), 10);
+        _c19_langOverlay.classList.remove('show');
+        var L = _c19_LANGS[idx];
+        onPick(L);
+      });
+    }
+    var cancel = document.getElementById('c19_langCancel');
+    if(cancel){
+      cancel.addEventListener('click', function(){
+        _c19_langOverlay.classList.remove('show');
+      });
+    }
+  }
+
+  // ─── 번역 파이프라인을 stopAndSendRecording에서 호출할 수 있게 전역 노출 ───
+  window._c19_translateAndSendFromStop = function(blob, duration, targetLang){
+    _c19_translateAndSend(blob, duration, targetLang);
+    // 오버레이의 언어 힌트 제거
+    var hint = document.getElementById('c19_langHint');
+    if(hint) hint.style.display = 'none';
+  };
 
   // ─── 초기화 ───
   function _c19_init(){
