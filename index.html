@@ -3744,7 +3744,10 @@ window.addEventListener('appinstalled', function(){
   window.c19_playTtsOf = function(btn){
     var text = btn.getAttribute('data-text');
     var bcp  = btn.getAttribute('data-bcp');
-    _c19_speak(text, bcp);
+    // 📱 스마트폰 크롬 TTS 첫 호출 버그 대응: 무음 unlock 먼저
+    _c19_unlockTTS();
+    // 100ms 지연 후 실제 재생 (unlock 완료 대기)
+    setTimeout(function(){ _c19_speak(text, bcp); }, 100);
   };
 
   // 기기별 음성팩 다운로드 안내
@@ -3845,6 +3848,24 @@ window.addEventListener('appinstalled', function(){
   }
 
   // C-19 v1.4.1: 강화된 TTS — 재시도 + 느슨한 매칭 + 디버그 로그
+  
+  // 📱 안드로이드 크롬 TTS unlock 트릭
+  // 첫 speechSynthesis 호출이 무시되는 버그 대응
+  var _c19_ttsUnlocked = false;
+  function _c19_unlockTTS(){
+    if(_c19_ttsUnlocked) return;
+    if(!('speechSynthesis' in window)) return;
+    try {
+      // 매우 짧은 무음 utterance 발사 → audio context 활성화
+      var u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      u.rate = 10; // 최대 속도로 즉시 끝냄
+      window.speechSynthesis.speak(u);
+      _c19_ttsUnlocked = true;
+      console.log('[C-19 TTS] audio unlock 완료');
+    } catch(_e){}
+  }
+
   function _c19_findVoice(bcp){
     var voices = window.speechSynthesis.getVoices() || [];
     if(voices.length === 0) return null;
@@ -3935,14 +3956,37 @@ window.addEventListener('appinstalled', function(){
       u.voice = match;
       u.rate = 0.95;
       u.pitch = 1;
-      u.onstart = function(){ console.log('[C-19 TTS] 재생 시작: ' + match.name); };
-      u.onerror = function(e){ 
-        console.warn('[C-19 TTS] 재생 에러:', e); 
-        // 에러 시에도 텍스트 폴백 띄움
-        _c19_showBigTextFallback(text, flag, langName, bcp);
+      
+      var started = false;
+      var fallbackTimer = null;
+      
+      u.onstart = function(){ 
+        started = true;
+        if(fallbackTimer){ clearTimeout(fallbackTimer); fallbackTimer = null; }
+        console.log('[C-19 TTS] 재생 시작: ' + match.name); 
       };
-      u.onend = function(){ console.log('[C-19 TTS] 재생 완료'); };
+      u.onerror = function(e){ 
+        if(fallbackTimer){ clearTimeout(fallbackTimer); fallbackTimer = null; }
+        console.warn('[C-19 TTS] 재생 에러:', e.error || e); 
+        if(!started){
+          _c19_showBigTextFallback(text, flag, langName, bcp);
+        }
+      };
+      u.onend = function(){ 
+        if(fallbackTimer){ clearTimeout(fallbackTimer); fallbackTimer = null; }
+        console.log('[C-19 TTS] 재생 완료'); 
+      };
+      
       window.speechSynthesis.speak(u);
+      
+      // 📱 스마트폰 크롬 대응: 2.5초 안에 onstart 안 오면 폴백
+      fallbackTimer = setTimeout(function(){
+        if(!started){
+          console.warn('[C-19 TTS] 2.5초 내 재생 시작 안 됨 (스마트폰 크롬 버그 추정) → 폴백');
+          try { window.speechSynthesis.cancel(); } catch(_e){}
+          _c19_showBigTextFallback(text, flag, langName, bcp);
+        }
+      }, 2500);
     } catch(e){
       console.warn('[C-19 speak] exception:', e);
       _c19_showBigTextFallback(text, flag, langName, bcp);
@@ -4230,8 +4274,35 @@ window.addEventListener('appinstalled', function(){
   // 인라인 음성 재생 (renderMessages가 data-src로 음성 URL 저장)
   window.c19_playInlineVoice = function(btn){
     var src = btn.getAttribute('data-src');
-    if(!src) return;
-    try { var a = new Audio(src); a.play(); } catch(_e){}
+    console.log('[C-19 원본음성] 버튼 클릭. 데이터 길이:', src ? src.length : 0);
+    if(!src){
+      console.warn('[C-19 원본음성] data-src 없음');
+      _c19_toast('⚠️ 음성 데이터 없음');
+      return;
+    }
+    if(src.length < 1000){
+      console.warn('[C-19 원본음성] 데이터 너무 짧음 (Firebase 전송 중 잘렸을 가능성):', src.length);
+      _c19_toast('⚠️ 음성 데이터가 손상됐어요');
+      return;
+    }
+    try {
+      var a = new Audio(src);
+      a.onerror = function(e){
+        console.error('[C-19 원본음성] Audio 에러:', e);
+        _c19_toast('⚠️ 음성 재생 실패');
+      };
+      a.onplay = function(){ console.log('[C-19 원본음성] 재생 시작'); };
+      var promise = a.play();
+      if(promise && promise.catch){
+        promise.catch(function(err){
+          console.error('[C-19 원본음성] play() 거부:', err);
+          _c19_toast('⚠️ 재생 실패: ' + (err.message || err));
+        });
+      }
+    } catch(e){
+      console.error('[C-19 원본음성] exception:', e);
+      _c19_toast('⚠️ 재생 예외: ' + e.message);
+    }
   };
 
 
