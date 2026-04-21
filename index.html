@@ -1430,6 +1430,8 @@ input[type=range].sec-range::-moz-range-thumb{
     <textarea id="msgInput" placeholder="메시지 입력..." rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
     <button class="mic-btn" id="micBtn" onclick="startRecording()" title="음성 메시지">🎤</button>
+    <!-- ═══ C-19 v1.2: 🌍 번역 음성 버튼 (꾹 누르기) ═══ -->
+    <button class="mic-btn" id="c19_micTransBtn" title="번역 음성 (꾹 누르기 → 언어 선택)" style="background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.4);color:#ff88bb;">🌍</button>
     <button class="send-btn" onclick="sendMsg()">↑</button>
   </div>
   <div class="patent-bar">특허 10-2026-0060113 · CGO MESSAGE SECURE MESSENGER</div>
@@ -3555,6 +3557,449 @@ window.addEventListener('appinstalled', function(){
   try { localStorage.setItem('cgm2_pwa_done','1'); } catch(_e){}
   console.log('[CGM] PWA 설치 완료됨');
 });
+
+// ═══════════════════════════════════════════════════════════
+//  C-19 Message v1.2 (2026-04-21)
+//  CGO MESSAGE에 14개국 번역 음성 기능 이식 (FULI와 동일)
+//  구현: Claude AI (C-19) · 기획: 이주원 파트너
+//  원칙: 기존 CGO MESSAGE 코드 건드리지 않음. 독립 IIFE 블록.
+//  네임스페이스: 모든 식별자 c19_ 또는 _c19_
+// ═══════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ─── 전역 상태 ───
+  var _c19_recording    = false;
+  var _c19_mediaRec     = null;
+  var _c19_recChunks    = [];
+  var _c19_recStart     = 0;
+  var _c19_recTimer     = null;
+  var _c19_voiceCache   = {};
+
+  // ─── 지원 언어 (14개) ───
+  var _c19_LANGS = [
+    { code:'ko',    name:'한국어 원본',  flag:'🇰🇷', greeting:'안녕하세요',       bcp:'ko-KR' },
+    { code:'en',    name:'English',       flag:'🇺🇸', greeting:'Hello',            bcp:'en-US' },
+    { code:'ja',    name:'日本語',        flag:'🇯🇵', greeting:'こんにちは',       bcp:'ja-JP' },
+    { code:'zh',    name:'中文',          flag:'🇨🇳', greeting:'你好',             bcp:'zh-CN' },
+    { code:'vi',    name:'Tiếng Việt',    flag:'🇻🇳', greeting:'Xin chào',         bcp:'vi-VN' },
+    { code:'es',    name:'Español',       flag:'🇪🇸', greeting:'Hola',             bcp:'es-ES' },
+    { code:'fr',    name:'Français',      flag:'🇫🇷', greeting:'Bonjour',          bcp:'fr-FR' },
+    { code:'de',    name:'Deutsch',       flag:'🇩🇪', greeting:'Hallo',            bcp:'de-DE' },
+    { code:'ar',    name:'العربية',       flag:'🇸🇦', greeting:'مرحبا',            bcp:'ar-SA' },
+    { code:'ru',    name:'Русский',       flag:'🇷🇺', greeting:'Привет',           bcp:'ru-RU' },
+    { code:'pt',    name:'Português',     flag:'🇵🇹', greeting:'Olá',              bcp:'pt-PT' },
+    { code:'it',    name:'Italiano',      flag:'🇮🇹', greeting:'Ciao',             bcp:'it-IT' },
+    { code:'id',    name:'Indonesia',     flag:'🇮🇩', greeting:'Halo',             bcp:'id-ID' },
+    { code:'th',    name:'ภาษาไทย',      flag:'🇹🇭', greeting:'สวัสดี',          bcp:'th-TH' }
+  ];
+
+  // ─── CSS 인젝션 (팝업 + 진행 상태 + 버튼 피드백) ───
+  var _c19_style = document.createElement('style');
+  _c19_style.id = 'c19-v12-style';
+  _c19_style.textContent = [
+    '#c19_langOverlay,#c19_progOverlay{display:none;position:fixed;inset:0;z-index:99999;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:16px;}',
+    '#c19_langOverlay{background:rgba(10,15,30,.88);}',
+    '#c19_progOverlay{background:rgba(10,15,30,.9);}',
+    '#c19_langOverlay.show,#c19_progOverlay.show{display:flex;}',
+    '.c19-prog-card{max-width:320px;width:100%;padding:28px 22px;background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(20,30,50,.95));border:1px solid rgba(255,136,187,.4);border-radius:20px;text-align:center;box-shadow:0 0 60px rgba(255,136,187,.25);}',
+    '.c19-prog-icon{font-size:56px;margin-bottom:14px;animation:c19_progPulse 1.2s ease-in-out infinite;}',
+    '.c19-prog-title{font-size:15px;font-weight:900;color:#ff88bb;margin-bottom:6px;}',
+    '.c19-prog-text{font-size:12px;color:rgba(240,230,200,.7);line-height:1.6;}',
+    '@keyframes c19_progPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:.8}}',
+    '@keyframes c19_dotBounce{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1.3)}}',
+    '.c19-prog-dots{margin-top:16px;display:flex;gap:4px;justify-content:center;}',
+    '.c19-prog-dots span{display:inline-block;width:6px;height:6px;border-radius:50%;background:#ff88bb;animation:c19_dotBounce 1s infinite;}',
+    '.c19-prog-dots span:nth-child(2){animation-delay:.15s}',
+    '.c19-prog-dots span:nth-child(3){animation-delay:.3s}',
+    '.c19-lang-card{max-width:360px;width:100%;padding:22px 18px;background:linear-gradient(135deg,rgba(20,25,45,.95),rgba(30,20,40,.98));border:1px solid rgba(255,136,187,.3);border-radius:20px;box-shadow:0 0 50px rgba(255,136,187,.2);}',
+    '.c19-lang-head{text-align:center;margin-bottom:14px;}',
+    '.c19-lang-head .c19-icon{font-size:34px;margin-bottom:6px;}',
+    '.c19-lang-head .c19-title{font-size:15px;font-weight:900;color:#ff88bb;margin-bottom:4px;}',
+    '.c19-lang-head .c19-sub{font-size:11px;color:rgba(240,230,200,.55);}',
+    '.c19-lang-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}',
+    '.c19-lang-btn{padding:12px 6px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;color:#f0ece0;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}',
+    '.c19-lang-btn:hover{background:rgba(255,136,187,.15);border-color:rgba(255,136,187,.4);transform:translateY(-2px);}',
+    '.c19-lang-btn .c19-flag{font-size:26px;}',
+    '.c19-lang-btn .c19-name{font-size:10px;color:rgba(240,230,200,.7);font-weight:700;}',
+    '#c19_langCancel{width:100%;margin-top:14px;padding:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(240,230,200,.5);font-size:12px;cursor:pointer;font-family:inherit;}',
+    '#c19_recIndicator{display:none;position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:99998;padding:10px 18px;background:rgba(248,113,113,.9);color:#fff;border-radius:20px;font-size:13px;font-weight:800;box-shadow:0 4px 20px rgba(248,113,113,.5);}',
+    '#c19_recIndicator.show{display:flex;align-items:center;gap:10px;}',
+    '#c19_recIndicator .c19-rec-dot{width:10px;height:10px;background:#fff;border-radius:50%;animation:c19_recDot 1s infinite;}',
+    '@keyframes c19_recDot{0%,100%{opacity:1}50%{opacity:.3}}',
+    '.c19-trans-bubble{max-width:78%;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(100,180,250,.08));border:1px solid rgba(255,136,187,.3);box-shadow:0 0 14px rgba(255,136,187,.1);}',
+    '.c19-trans-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;color:rgba(240,230,200,.55);}',
+    '.c19-trans-play{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.35);border-radius:14px;color:#ffd0e4;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:8px;}',
+    '.c19-trans-text{font-size:13px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;}',
+    '.c19-trans-ko{font-size:11px;color:rgba(240,230,200,.5);padding-top:6px;border-top:1px dashed rgba(240,230,200,.15);line-height:1.5;word-break:break-word;}',
+    '.c19-trans-orig{margin-top:6px;padding:4px 10px;background:transparent;border:1px solid rgba(212,168,67,.3);border-radius:10px;color:rgba(212,168,67,.7);font-size:10px;cursor:pointer;font-family:inherit;}',
+    '#c19_micTransBtn.pressed{background:rgba(248,113,113,.35)!important;transform:scale(0.95);box-shadow:0 0 16px rgba(248,113,113,0.5);}',
+    ''
+  ].join('\n');
+  document.head.appendChild(_c19_style);
+
+  // ─── 팝업 DOM 생성 ───
+  var _c19_langOverlay = document.createElement('div');
+  _c19_langOverlay.id = 'c19_langOverlay';
+  document.body.appendChild(_c19_langOverlay);
+
+  var _c19_progOverlay = document.createElement('div');
+  _c19_progOverlay.id = 'c19_progOverlay';
+  _c19_progOverlay.innerHTML = [
+    '<div class="c19-prog-card">',
+    '  <div id="c19_progIcon" class="c19-prog-icon">✨</div>',
+    '  <div id="c19_progTitle" class="c19-prog-title">Xy가 준비 중이에요</div>',
+    '  <div id="c19_progText" class="c19-prog-text">...</div>',
+    '  <div class="c19-prog-dots"><span></span><span></span><span></span></div>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(_c19_progOverlay);
+
+  var _c19_recInd = document.createElement('div');
+  _c19_recInd.id = 'c19_recIndicator';
+  _c19_recInd.innerHTML = '<div class="c19-rec-dot"></div><span id="c19_recTime">0:00</span><span style="opacity:.85;">번역 녹음 중…</span>';
+  document.body.appendChild(_c19_recInd);
+
+  // ─── HTML 이스케이프 ───
+  function _c19_esc(s){
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ─── 토스트 (기존 showToast 있으면 재사용) ───
+  function _c19_toast(text){
+    if(typeof showToast === 'function'){ try { showToast(text); return; } catch(_e){} }
+    var t = document.createElement('div');
+    t.style.cssText = 'position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:100000;padding:10px 18px;background:rgba(20,20,30,.92);color:#f0ece0;border-radius:20px;font-size:12px;font-weight:700;box-shadow:0 4px 16px rgba(0,0,0,.5);';
+    t.textContent = text;
+    document.body.appendChild(t);
+    setTimeout(function(){ t.style.transition='opacity .4s'; t.style.opacity='0'; }, 1800);
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 2300);
+  }
+
+  // ─── 진행 상태 표시 ───
+  function _c19_showProg(icon, title, text){
+    var iconEl  = document.getElementById('c19_progIcon');
+    var titleEl = document.getElementById('c19_progTitle');
+    var textEl  = document.getElementById('c19_progText');
+    if(iconEl)  iconEl.textContent  = icon;
+    if(titleEl) titleEl.textContent = title;
+    if(textEl)  textEl.textContent  = text;
+    _c19_progOverlay.classList.add('show');
+  }
+  function _c19_hideProg(){ _c19_progOverlay.classList.remove('show'); }
+
+  // ─── 음성 재생 (말풍선 버튼에서) ───
+  window.c19_playVoice = function(id){
+    var url = _c19_voiceCache[id];
+    if(!url) return;
+    try { var a = new Audio(url); a.play(); } catch(_e){}
+  };
+  window.c19_playTtsOf = function(btn){
+    var text = btn.getAttribute('data-text');
+    var bcp  = btn.getAttribute('data-bcp');
+    _c19_speak(text, bcp);
+  };
+  function _c19_speak(text, bcp){
+    if(!('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang = bcp || 'en-US';
+      u.rate = 0.95;
+      var voices = window.speechSynthesis.getVoices();
+      var match = voices.find(function(v){ return v.lang === bcp; })
+               || voices.find(function(v){ return v.lang && v.lang.startsWith(bcp.split('-')[0]); });
+      if(match) u.voice = match;
+      window.speechSynthesis.speak(u);
+    } catch(_e){}
+  }
+
+  // ─── 녹음 시작 ───
+  function _c19_startTransRecording(){
+    if(_c19_recording) return;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      _c19_toast('⚠️ 이 기기는 녹음을 지원하지 않아요');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+      _c19_recChunks = [];
+      try {
+        _c19_mediaRec = new MediaRecorder(stream);
+      } catch(err){
+        _c19_toast('⚠️ 녹음 시작 실패');
+        return;
+      }
+      _c19_mediaRec.ondataavailable = function(ev){
+        if(ev.data && ev.data.size > 0) _c19_recChunks.push(ev.data);
+      };
+      _c19_mediaRec.onstop = function(){
+        stream.getTracks().forEach(function(t){ t.stop(); });
+        var duration = Math.round((Date.now() - _c19_recStart) / 1000);
+        var blob = new Blob(_c19_recChunks, {type:'audio/webm'});
+        _c19_askLangAndSend(blob, duration);
+      };
+      _c19_mediaRec.start();
+      _c19_recording = true;
+      _c19_recStart = Date.now();
+      var ind = document.getElementById('c19_recIndicator');
+      if(ind) ind.classList.add('show');
+      _c19_recTimer = setInterval(function(){
+        var s = Math.round((Date.now() - _c19_recStart) / 1000);
+        var mm = Math.floor(s/60), ss = s%60;
+        var t = document.getElementById('c19_recTime');
+        if(t) t.textContent = mm + ':' + (ss<10?'0':'') + ss;
+        if(s >= 60){ _c19_stopTransRecording(); } // 최대 60초
+      }, 200);
+    }).catch(function(){
+      _c19_toast('⚠️ 마이크 권한이 필요해요');
+    });
+  }
+
+  function _c19_stopTransRecording(){
+    if(!_c19_recording) return;
+    _c19_recording = false;
+    if(_c19_recTimer){ clearInterval(_c19_recTimer); _c19_recTimer = null; }
+    var ind = document.getElementById('c19_recIndicator');
+    if(ind) ind.classList.remove('show');
+    try { _c19_mediaRec.stop(); } catch(_e){}
+  }
+
+  // ─── 언어 선택 팝업 ───
+  function _c19_askLangAndSend(blob, duration){
+    var items = _c19_LANGS.map(function(L, i){
+      var isOrigin = (L.code === 'ko');
+      return '<button class="c19-lang-btn" data-idx="' + i + '" ' +
+             (isOrigin ? 'style="background:rgba(212,168,67,.12);border-color:rgba(212,168,67,.35);"' : '') +
+             '>' +
+             '<span class="c19-flag">' + L.flag + '</span>' +
+             '<span class="c19-name">' + L.name + '</span>' +
+             '</button>';
+    }).join('');
+    _c19_langOverlay.innerHTML = [
+      '<div class="c19-lang-card">',
+      '  <div class="c19-lang-head">',
+      '    <div class="c19-icon">🌍 ✨</div>',
+      '    <div class="c19-title">어느 언어로 보낼까요?</div>',
+      '    <div class="c19-sub">Xy가 ' + duration + '초 음성을 번역해드려요</div>',
+      '  </div>',
+      '  <div class="c19-lang-grid" id="c19_langGrid">' + items + '</div>',
+      '  <button id="c19_langCancel">취소</button>',
+      '</div>'
+    ].join('');
+    _c19_langOverlay.classList.add('show');
+
+    var grid = document.getElementById('c19_langGrid');
+    if(grid){
+      grid.addEventListener('click', function(e){
+        var btn = e.target.closest('.c19-lang-btn');
+        if(!btn) return;
+        var idx = parseInt(btn.getAttribute('data-idx'), 10);
+        _c19_langOverlay.classList.remove('show');
+        var L = _c19_LANGS[idx];
+        if(L.code === 'ko'){
+          _c19_sendKoreanVoice(blob, duration);
+        } else {
+          _c19_translateAndSend(blob, duration, L);
+        }
+      });
+    }
+    var cancel = document.getElementById('c19_langCancel');
+    if(cancel){
+      cancel.addEventListener('click', function(){
+        _c19_langOverlay.classList.remove('show');
+      });
+    }
+  }
+
+  // ─── 한국어 원본 음성 전송 ───
+  function _c19_sendKoreanVoice(blob, duration){
+    var reader = new FileReader();
+    reader.onloadend = function(){
+      var dataUrl = reader.result;
+      var vid = 'v_' + Date.now();
+      _c19_voiceCache[vid] = dataUrl;
+      var msg = document.getElementById('messages') || document.getElementById('cgmMessages');
+      if(!msg) { _c19_toast('⚠️ 메시지 영역을 찾지 못했어요'); return; }
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;justify-content:flex-end;margin:4px 0;';
+      row.innerHTML = [
+        '<div onclick="c19_playVoice(\'' + vid + '\')" style="display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:18px;background:rgba(100,180,250,.15);border:1px solid rgba(100,180,250,.35);cursor:pointer;">',
+        '  <span style="font-size:20px;">🎤</span>',
+        '  <span style="font-size:12px;color:#b4dcff;font-weight:700;">' + duration + '초</span>',
+        '</div>'
+      ].join('');
+      msg.appendChild(row);
+      msg.scrollTop = msg.scrollHeight;
+      _c19_toast('🇰🇷 한국어 원본 음성 전송됨');
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  // ─── 🌐 번역 파이프라인 ───
+  async function _c19_translateAndSend(blob, duration, targetLang){
+    try {
+      _c19_showProg('👂', '듣고 있어요', '한국어 음성을 받아적는 중...');
+      var koText = await _c19_whisperSTT(blob, 'ko');
+      if(!koText){
+        _c19_hideProg();
+        _c19_toast('⚠️ 음성을 인식하지 못했어요. 다시 시도해주세요.');
+        return;
+      }
+      _c19_showProg('🌐', targetLang.flag + ' ' + targetLang.name + '(으)로 번역 중',
+                    '"' + koText.slice(0,30) + (koText.length>30?'...':'') + '"');
+      var translated = await _c19_llamaTranslate(koText, targetLang);
+      if(!translated){
+        _c19_hideProg();
+        _c19_toast('⚠️ 번역에 실패했어요.');
+        return;
+      }
+      _c19_showProg(targetLang.flag, '음성 준비 중',
+                    '"' + translated.slice(0,30) + (translated.length>30?'...':'') + '"');
+      await _c19_speakAndPack(translated, targetLang, blob, duration, koText);
+      _c19_hideProg();
+    } catch(err){
+      _c19_hideProg();
+      console.warn('[C-19 translate error]', err);
+      _c19_toast('⚠️ 번역 중 오류: ' + (err.message || err));
+    }
+  }
+
+  // ─── Whisper STT 호출 ───
+  function _c19_whisperSTT(blob, lang){
+    var fd = new FormData();
+    fd.append('file', blob, 'audio.webm');
+    fd.append('model', 'whisper-large-v3-turbo');
+    if(lang) fd.append('language', lang);
+    fd.append('temperature', '0');
+    return fetch('/api/groq-whisper', { method:'POST', body: fd })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data && data.text) return data.text.trim();
+        throw new Error(data && data.error ? data.error : 'STT failed');
+      });
+  }
+
+  // ─── Llama 번역 호출 ───
+  function _c19_llamaTranslate(text, targetLang){
+    var sysPrompt = [
+      '당신은 전문 번역가입니다.',
+      '사용자가 주는 한국어 문장을 ' + targetLang.name + '(' + targetLang.code + ')(으)로 자연스럽게 번역하세요.',
+      '번역 결과만 출력하세요. 설명·인용 부호·접두사 없이 번역문 자체만.',
+      '문어체가 아닌 실제 대화체로. 격식은 원문에 맞추세요.'
+    ].join('\n');
+
+    return fetch('/api/groq', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        messages:[
+          {role:'system', content: sysPrompt},
+          {role:'user',   content: text}
+        ],
+        max_tokens: 600,
+        temperature: 0.3
+      })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      try {
+        var reply = data.choices[0].message.content || '';
+        return reply.trim().replace(/^["「『]|["」』]$/g, '');
+      } catch(e){ return ''; }
+    });
+  }
+
+  // ─── TTS + 말풍선 패킹 ───
+  function _c19_speakAndPack(translated, targetLang, origBlob, duration, origKoText){
+    return new Promise(function(resolve){
+      var msg = document.getElementById('messages') || document.getElementById('cgmMessages');
+      if(!msg){ resolve(); return; }
+      var reader = new FileReader();
+      reader.onloadend = function(){
+        var origUrl = reader.result;
+        var vid = 'vt_' + Date.now();
+        _c19_voiceCache[vid] = origUrl;
+        var row = document.createElement('div');
+        row.style.cssText = 'display:flex;justify-content:flex-end;margin:6px 0;';
+        row.innerHTML = [
+          '<div class="c19-trans-bubble">',
+          '  <div class="c19-trans-head">',
+          '    <span>🇰🇷 → ' + targetLang.flag + '</span>',
+          '    <span style="opacity:.5;">·</span>',
+          '    <span>Xy 번역</span>',
+          '  </div>',
+          '  <button onclick="c19_playTtsOf(this)" class="c19-trans-play" data-text="' + _c19_esc(translated).replace(/"/g,'&quot;') + '" data-bcp="' + targetLang.bcp + '">',
+          '    <span style="font-size:18px;">' + targetLang.flag + '</span>',
+          '    <span>🔊 재생</span>',
+          '  </button>',
+          '  <div class="c19-trans-text">' + _c19_esc(translated) + '</div>',
+          '  <div class="c19-trans-ko">🇰🇷 ' + _c19_esc(origKoText) + '</div>',
+          '  <button onclick="c19_playVoice(\'' + vid + '\')" class="c19-trans-orig">🎤 원본 음성 (' + duration + '초)</button>',
+          '</div>'
+        ].join('');
+        msg.appendChild(row);
+        msg.scrollTop = msg.scrollHeight;
+        setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 200);
+        resolve();
+      };
+      reader.readAsDataURL(origBlob);
+    });
+  }
+
+  // ─── 🌍 버튼 hold-to-record 바인딩 ───
+  function _c19_bindTransButton(){
+    var btn = document.getElementById('c19_micTransBtn');
+    if(!btn || btn._c19_bound) return;
+    btn._c19_bound = true;
+    var holdTimer = null;
+    var isHold = false;
+    var pressed = false;
+    function start(e){
+      if(pressed) return;
+      pressed = true;
+      isHold = false;
+      btn.classList.add('pressed');
+      holdTimer = setTimeout(function(){
+        isHold = true;
+        _c19_startTransRecording();
+      }, 400);
+    }
+    function end(e){
+      pressed = false;
+      btn.classList.remove('pressed');
+      if(holdTimer){ clearTimeout(holdTimer); holdTimer = null; }
+      if(isHold){
+        if(e){ e.preventDefault && e.preventDefault(); e.stopPropagation && e.stopPropagation(); }
+        _c19_stopTransRecording();
+      } else {
+        _c19_toast('🌍 꾸욱 누르면 14개국 번역');
+      }
+    }
+    btn.addEventListener('mousedown', start);
+    btn.addEventListener('touchstart', function(e){ e.preventDefault(); start(e); }, {passive:false});
+    btn.addEventListener('mouseup', end);
+    btn.addEventListener('mouseleave', function(){
+      if(pressed && _c19_recording){
+        pressed = false;
+        btn.classList.remove('pressed');
+        _c19_stopTransRecording();
+      }
+    });
+    btn.addEventListener('touchend', function(e){ e.preventDefault(); end(e); }, {passive:false});
+    btn.addEventListener('touchcancel', function(e){ end(e); });
+  }
+
+  // ─── 초기화 ───
+  function _c19_init(){
+    _c19_bindTransButton();
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', _c19_init);
+  } else {
+    setTimeout(_c19_init, 100);
+  }
+
+  console.log('[C-19 v1.2] CGO MESSAGE에 14개국 번역 음성 이식 완료 🌍');
+})();
 </script>
 </body>
 </html>
