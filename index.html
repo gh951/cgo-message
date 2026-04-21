@@ -1733,6 +1733,29 @@ window.addEventListener('load', () => {
   const roomsStr = localStorage.getItem('cgm2_rooms');
   if(roomsStr) try{ _rooms = JSON.parse(roomsStr); }catch(e){}
 
+  // 🎯 v1.6.6 대장님 설계: 초대 링크 감지 시 자동 손님 모드
+  //   → 가입/로그인/닉네임 입력 없이 바로 방 입장
+  //   → "손님1", "손님2" 자동 부여
+  //   → 비즈니스 확산 전략: 장벽 제로
+  const urlParams = new URLSearchParams(location.search);
+  const inviteFromUrl = urlParams.get('invite');
+  const inviteCode = urlParams.get('c');
+  const hasInviteLink = inviteFromUrl || inviteCode;
+  
+  if(hasInviteLink && !_myNick){
+    // 처음 온 손님 — 자동으로 손님 닉네임 생성
+    const guestNum = Math.floor(Math.random() * 9000) + 1000; // 1000~9999
+    _myNick = '손님' + guestNum;
+    _myCode = genCode();
+    _myColor = '#64b4fa';
+    localStorage.setItem('cgm2_nick', _myNick);
+    localStorage.setItem('cgm2_code', _myCode);
+    localStorage.setItem('cgm2_color', _myColor);
+    localStorage.setItem('cgm2_logged_in', '1');
+    localStorage.setItem('cgm2_is_guest', '1'); // 나중에 "손님" 식별용
+    console.log('[v1.6.6] 초대 링크 감지 - 손님 자동 생성:', _myNick, _myCode);
+  }
+
   // 로그인 기억된 경우 Username 미리 채움 (표지는 무조건 먼저 보임)
   const savedUser = localStorage.getItem('cgm2_login_user') || '';
   if(savedUser) {
@@ -1740,13 +1763,25 @@ window.addEventListener('load', () => {
     if(uEl) uEl.value = savedUser;
   }
 
-  // 이미 로그인 + 닉네임 있으면 백그라운드로 Firebase 등록 (데이터 준비)
-  // 표지는 그대로 유지 — 사용자가 탭할 때 진짜 화면 이동
+  // 이미 로그인 + 닉네임 있으면 백그라운드로 Firebase 등록
   const loggedIn = localStorage.getItem('cgm2_logged_in')==='1';
   if(loggedIn && _myNick && _myCode){
     registerToFirebase();
     listenInvites();
     renderRoomList();
+  }
+  
+  // 🎯 v1.6.6: 초대 링크 손님이면 바로 방 입장 (표지/로그인 화면 건너뛰기)
+  if(hasInviteLink && _myNick && _myCode){
+    setTimeout(() => {
+      // 표지 화면 건너뛰고 바로 친구 탭으로
+      switchTab('friends');
+      updateNickBars();
+      registerToFirebase();
+      listenInvites();
+      // 초대 처리 (방 자동 생성 + 입장)
+      setTimeout(() => handleInviteParam(inviteFromUrl, inviteCode), 400);
+    }, 200);
   }
 
   // 컬러 선택
@@ -1854,11 +1889,24 @@ function switchTab(tab){
 }
 
 function updateNickBars(){
-  const label = _myNick ? (_myNick + ' · ' + _myCode) : '';
+  const isGuest = localStorage.getItem('cgm2_is_guest') === '1';
+  const guestBadge = isGuest ? ' 👤손님' : '';
+  const label = _myNick ? (_myNick + ' · ' + _myCode + guestBadge) : '';
   const a = document.getElementById('myNickBar');
   const b = document.getElementById('myNickBarFriends');
   if(a) a.textContent = label;
   if(b) b.textContent = label;
+}
+
+// 🎯 v1.6.6: 손님이 닉네임 변경 시 정식 사용자로 승격
+function upgradeGuest(newNick){
+  if(!newNick || !newNick.trim()) return;
+  _myNick = newNick.trim();
+  localStorage.setItem('cgm2_nick', _myNick);
+  localStorage.removeItem('cgm2_is_guest'); // 손님 플래그 제거
+  updateNickBars();
+  registerToFirebase();
+  showToast('✨ 정식 사용자로 승격! (' + _myNick + ')');
 }
 
 // ══ 광장 말풍선 — 랜덤 주제가 떠다님 (장식용) ══
@@ -3963,10 +4011,29 @@ function handleInviteParam(inviterNick, inviterCode){
       }
       const nick = user.nick || inviterNick || '?';
       const color = user.color || '#d4a843';
-      showToast('💬 '+nick+'님과의 대화를 여는 중...');
-      createRoom(inviterCode, nick, color);
+      const isGuest = localStorage.getItem('cgm2_is_guest') === '1';
       
-      // 🎯 초대자 쪽에도 "내가 친구 추가됐다" 알림 → 양쪽 모두 대화방 생성
+      // 방 생성 + 환영 메시지 삽입
+      if(!_rooms[inviterCode]){
+        _rooms[inviterCode] = {
+          code: inviterCode,
+          nick: nick,
+          color: color,
+          lastMsg: '대화 시작',
+          lastTime: Date.now(),
+          unread: 0,
+          msgs: [{
+            id: 'sys_welcome_' + Date.now(),
+            type: 'system',
+            text: '💬 ' + nick + '님과 대화를 시작합니다' + (isGuest ? '\n\n👤 손님 모드로 입장 (' + _myNick + ')\n⚙️ 설정에서 닉네임 바꾸실 수 있어요' : ''),
+            t: Date.now()
+          }]
+        };
+        saveRooms();
+      }
+      renderRoomList();
+      
+      // 🎯 초대자 쪽에도 "새 참가자" 알림
       try {
         dbRef('cgm2/invites/'+inviterCode+'/'+_myCode).set({
           nick: _myNick,
@@ -3975,10 +4042,14 @@ function handleInviteParam(inviterNick, inviterCode){
         });
       } catch(e){ console.warn('[invite signal]', e); }
       
-      // 🎯 확실하게 대화방 전환 (Firebase 렌더 완료 대기)
+      // 대화방 전환
       setTimeout(()=>{
         openRoom(inviterCode);
-        showToast('✅ '+nick+'님과의 대화가 시작되었어요!');
+        showToast('✅ ' + nick + '님과의 대화 시작!');
+        // 🎯 URL 쿼리 정리 (새로고침 시 재입장 방지)
+        if(history && history.replaceState){
+          history.replaceState({}, '', location.pathname);
+        }
       }, 300);
     }).catch(()=>{
       showToast('⚠️ 초대 확인 중 네트워크 오류');
