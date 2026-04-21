@@ -1451,7 +1451,7 @@ input[type=range].sec-range::-moz-range-thumb{
 
   <!-- 입력창 -->
   <div class="input-bar" id="inputBar">
-    <textarea id="msgInput" placeholder="메시지 입력..." rows="1"
+    <textarea id="msgInput" placeholder="메시지 입력... (자이 멈출 때: &quot;잠깐&quot;)" rows="1"
       onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
     <button class="mic-btn" id="micBtn" onclick="startRecording()" title="음성 메시지">🎤</button>
     <!-- ═══ C-19 v1.2: 🌍 번역 음성 버튼 (꾹 누르기) ═══ -->
@@ -2641,6 +2641,36 @@ function sendMsg(){
   const inp = document.getElementById('msgInput');
   const text = inp.value.trim();
   if(!text || !_currentRoom) return;
+  
+  // 🎯 v1.7.8 대장님 설계 - 특허 #46: 자이 명령어 감지
+  //    Xy 말하는 중에 "잠깐"/"멈춰"/"그만"/"쉿" 등 입력 → 즉시 중단
+  //    "계속"/"다시" 입력 → 중단된 적 있으면 재개 안내
+  const lowerText = text.toLowerCase().trim();
+  const stopCommands = ['잠깐', '멈춰', '그만', '쉿', '조용', '자이 잠깐', '자이 멈춰', '자이 그만', '자이 쉿', '자이야 잠깐', '자이야 멈춰', '자이야 그만', 'stop', 'wait'];
+  const resumeCommands = ['계속', '다시', '자이 계속', '자이 다시', '자이야 계속', '자이야 다시', 'continue', 'resume'];
+  
+  // ⭐ Xy 말하는 중 + 중단 명령어 → 즉시 차단 (메시지는 전송 안 함)
+  if(_xySpeaking && stopCommands.includes(lowerText)){
+    interruptXy();
+    inp.value = '';
+    showToast('🤫 자이가 조용히 있어요 — "계속" 이라고 치면 다시 시작');
+    return;
+  }
+  
+  // ⭐ 이전에 중단된 적 있음 + 재개 명령어 → 안내 메시지
+  if(!_xySpeaking && _xyInterruptedCount > 0 && resumeCommands.includes(lowerText)){
+    inp.value = '';
+    showToast('✨ 자이를 다시 부를게요!');
+    // 마지막 맥락으로 자이 재호출
+    const room = _rooms[_currentRoom];
+    if(room && _xyActive){
+      xyReply('이전에 하던 이야기 이어서 해주세요');
+    } else {
+      showToast('⚠️ Xy가 OFF 상태예요. 상단 ✨Xy 버튼을 켜주세요');
+    }
+    return;
+  }
+  
   inp.value = '';
 
   const msg = { from:_myCode, text, t:Date.now(), read:false };
@@ -3291,6 +3321,16 @@ function xyReply(userText){
   _xySpeaking = true;
   _xyAbortCtrl = new AbortController();
   updateXyStopButtonVisibility();
+  
+  // 🎯 첫 사용자 대상 힌트 (세션당 1회만)
+  if(!window._xyStopHintShown){
+    window._xyStopHintShown = true;
+    setTimeout(() => {
+      if(_xySpeaking){
+        showToast('💡 자이 말 끊을 때: "잠깐" 입력 또는 ✋ 버튼');
+      }
+    }, 1500);
+  }
 
   // 로딩 메시지
   const loadMsg = { from:'xy', isAI:true, loading:true, text:'✨ Xy: 생각 중...', t:Date.now() };
