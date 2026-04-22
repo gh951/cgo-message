@@ -4856,18 +4856,31 @@ async function acceptIncomingCall(callerCode, type, roomId, remoteCode){
     const data = snap.val();
     if(!data || !data.offer) throw new Error('Offer 없음');
     
+    console.log('[통화-수신자] setRemoteDescription 시도');
     await _call.peer.setRemoteDescription(new RTCSessionDescription(data.offer));
+    console.log('[통화-수신자] ✅ setRemoteDescription 성공');
+    updateCallStatus('⏳ Answer 생성 중...');
+    
+    // 🎯 v1.7.9.2: 이미 도착한 ICE 처리
+    if(data.iceFromCaller){
+      Object.values(data.iceFromCaller).forEach(ice => {
+        _call.peer.addIceCandidate(new RTCIceCandidate(ice)).catch(e => console.warn('[초기 ICE]', e));
+      });
+    }
+    
     const answer = await _call.peer.createAnswer();
     await _call.peer.setLocalDescription(answer);
     await _call.signalRef.update({
       answer: { type: answer.type, sdp: answer.sdp }
     });
+    console.log('[통화-수신자] ✅ Answer 전송 완료');
+    updateCallStatus('🔍 P2P 연결 중...');
     
     startSpeechRecognition();
     showToast('✅ 통화 수락');
   } catch(err){
     console.error('[수신 수락 실패]', err);
-    showToast('❌ 카메라/마이크 권한 거부됨');
+    showToast('❌ 카메라/마이크 권한 거부됨: ' + err.message);
     endCall(true);
   }
 }
