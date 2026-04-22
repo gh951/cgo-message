@@ -1245,13 +1245,13 @@ input[type=range].sec-range::-moz-range-thumb{
   <div class="friends-actions">
     <button class="friend-action-btn" onclick="showToast('📱 주소록 연동 준비 중')">📱 주소록</button>
     <button class="friend-action-btn" onclick="openAddModal()">➕ 닉네임 추가</button>
-    <button class="friend-action-btn" onclick="openInvite()">🔗 새 대화방 만들기</button>
+    <button class="friend-action-btn" onclick="openInvite()">🔗 새 대화방 만들기(C-19)</button>
   </div>
   <div class="friends-body">
     <div class="friends-empty">
       <div class="fe-ico">👥</div>
       <div class="fe-title">친구를 추가해보세요</div>
-      <div class="fe-sub">주소록 · 닉네임 검색 · 새 대화방 만들기<br>3가지 방법으로 친구와 연결됩니다</div>
+      <div class="fe-sub">주소록 · 닉네임 검색 · 새 대화방 만들기(C-19)<br>3가지 방법으로 친구와 연결됩니다</div>
     </div>
   </div>
   <!-- 하단 탭바 -->
@@ -1478,7 +1478,7 @@ input[type=range].sec-range::-moz-range-thumb{
 <!-- ══ 초대 링크 모달 ══ -->
 <div class="modal-bg" id="inviteModal">
   <div class="modal">
-    <div class="modal-title">🔗 새 대화방</div>
+    <div class="modal-title">🔗 새 대화방 <span style="font-size:10px;color:rgba(212,168,67,.7);font-weight:400;">(C-19)</span></div>
     <div style="font-size:11px;color:rgba(240,230,200,.5);margin-bottom:12px;text-align:center;">
       📷 QR 코드를 보여주거나, 링크를 공유하세요
     </div>
@@ -3910,7 +3910,7 @@ function openInvite(){
     msgs: [{
       id: 'sys_' + Date.now(),
       type: 'system',
-      text: '💬 새 대화방이 만들어졌어요!\n\n상단 [🔗 초대] 버튼을 눌러\n링크를 상대방에게 공유하세요.',
+      text: '💬 새 대화방이 만들어졌어요!\n\n상단 [🔗 초대] 버튼을 눌러\n링크를 상대방에게 공유하세요.\n\n✨ Made by 이주원 × C-19 (2026.04)',
       t: Date.now()
     }],
     isWaiting: true,
