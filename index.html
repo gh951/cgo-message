@@ -4584,6 +4584,92 @@ const _ICE_CONFIG = {
 };
 
 // ══ 📞 통화 시작 (대장님 → 상대방) ══
+// 🌐 Level 3: 14개국 언어 지원 시스템
+const _LANGS = {
+  'ko-KR': { name: '한국어', flag: '🇰🇷', groq: 'Korean' },
+  'en-US': { name: 'English', flag: '🇺🇸', groq: 'English' },
+  'ja-JP': { name: '日本語', flag: '🇯🇵', groq: 'Japanese' },
+  'zh-CN': { name: '中文', flag: '🇨🇳', groq: 'Chinese' },
+  'es-ES': { name: 'Español', flag: '🇪🇸', groq: 'Spanish' },
+  'fr-FR': { name: 'Français', flag: '🇫🇷', groq: 'French' },
+  'de-DE': { name: 'Deutsch', flag: '🇩🇪', groq: 'German' },
+  'it-IT': { name: 'Italiano', flag: '🇮🇹', groq: 'Italian' },
+  'ru-RU': { name: 'Русский', flag: '🇷🇺', groq: 'Russian' },
+  'pt-BR': { name: 'Português', flag: '🇧🇷', groq: 'Portuguese' },
+  'th-TH': { name: 'ไทย', flag: '🇹🇭', groq: 'Thai' },
+  'vi-VN': { name: 'Tiếng Việt', flag: '🇻🇳', groq: 'Vietnamese' },
+  'ar-SA': { name: 'العربية', flag: '🇸🇦', groq: 'Arabic' },
+  'id-ID': { name: 'Indonesia', flag: '🇮🇩', groq: 'Indonesian' }
+};
+
+// 선호 언어 저장/로드
+function getSavedLang(key, defaultVal){
+  return localStorage.getItem('cgm2_' + key) || defaultVal;
+}
+function saveLang(key, val){
+  localStorage.setItem('cgm2_' + key, val);
+}
+
+// 🌐 언어 선택 모달 (통화 시작 전)
+function showLanguageSelectModal(type, onConfirm){
+  const old = document.getElementById('langSelectModal');
+  if(old) old.remove();
+  
+  const myLang = getSavedLang('my_lang', 'ko-KR');
+  const peerLang = getSavedLang('peer_lang', 'en-US');
+  
+  const makeOptions = (selected) => {
+    return Object.keys(_LANGS).map(code => 
+      `<option value="${code}" ${code===selected?'selected':''}>${_LANGS[code].flag} ${_LANGS[code].name}</option>`
+    ).join('');
+  };
+  
+  const ov = document.createElement('div');
+  ov.id = 'langSelectModal';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100003;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:20px;';
+  ov.innerHTML = [
+    '<div style="max-width:380px;width:100%;background:linear-gradient(145deg,#1a1a2e,#16213e);border-radius:20px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5);border:1px solid rgba(212,168,67,.3);">',
+    '  <div style="text-align:center;margin-bottom:20px;">',
+    '    <div style="font-size:40px;margin-bottom:8px;">🌐</div>',
+    '    <div style="font-size:18px;font-weight:800;color:#f0ece0;">통화 언어 설정</div>',
+    '    <div style="font-size:11px;color:rgba(212,168,67,.6);margin-top:4px;">Real-time Translation</div>',
+    '  </div>',
+    '  <div style="margin-bottom:16px;">',
+    '    <label style="display:block;font-size:12px;color:#d4a843;margin-bottom:6px;font-weight:700;">🗣️ 내 언어 (말하기)</label>',
+    '    <select id="selMyLang" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(212,168,67,.3);border-radius:10px;color:#f0ece0;font-size:14px;font-family:inherit;cursor:pointer;">',
+    makeOptions(myLang),
+    '    </select>',
+    '  </div>',
+    '  <div style="margin-bottom:20px;">',
+    '    <label style="display:block;font-size:12px;color:#d4a843;margin-bottom:6px;font-weight:700;">👂 상대방 언어 (번역될 언어)</label>',
+    '    <select id="selPeerLang" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(212,168,67,.3);border-radius:10px;color:#f0ece0;font-size:14px;font-family:inherit;cursor:pointer;">',
+    makeOptions(peerLang),
+    '    </select>',
+    '  </div>',
+    '  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding:10px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:10px;">',
+    '    <input type="checkbox" id="chkTTS" checked style="width:16px;height:16px;accent-color:#38bdf8;cursor:pointer;">',
+    '    <label for="chkTTS" style="font-size:12px;color:#38bdf8;cursor:pointer;flex:1;">🔊 상대방 음성 자동 재생 (TTS)</label>',
+    '  </div>',
+    '  <div style="display:flex;gap:8px;">',
+    '    <button onclick="document.getElementById(\'langSelectModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:rgba(255,255,255,.6);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>',
+    '    <button id="btnStartCallLang" style="flex:2;padding:12px;background:linear-gradient(135deg,#d4a843,#b8922f);border:none;border-radius:10px;color:#000;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">' + (type==='video' ? '🎥 영상통화 시작' : '📞 음성통화 시작') + '</button>',
+    '  </div>',
+    '</div>'
+  ].join('');
+  document.body.appendChild(ov);
+  
+  document.getElementById('btnStartCallLang').onclick = () => {
+    const my = document.getElementById('selMyLang').value;
+    const peer = document.getElementById('selPeerLang').value;
+    const tts = document.getElementById('chkTTS').checked;
+    saveLang('my_lang', my);
+    saveLang('peer_lang', peer);
+    saveLang('tts_enabled', tts ? '1' : '0');
+    ov.remove();
+    onConfirm(my, peer, tts);
+  };
+}
+
 async function startCall(type){
   if(_call.active){ showToast('⚠️ 이미 통화 중입니다'); return; }
   const room = _rooms[_currentRoom];
@@ -4596,6 +4682,18 @@ async function startCall(type){
   }
   
   if(!_currentRoom){ showToast('⚠️ 방 정보 없음'); return; }
+  
+  // 🌐 Level 3: 언어 선택 모달 먼저
+  showLanguageSelectModal(type, async (myLang, peerLang, ttsEnabled) => {
+    _call.myLang = myLang;
+    _call.peerLang = peerLang;
+    _call.ttsEnabled = ttsEnabled;
+    await actualStartCall(type);
+  });
+}
+
+async function actualStartCall(type){
+  const room = _rooms[_currentRoom];
   
   try {
     // 1. 미디어 권한 요청
@@ -4832,6 +4930,11 @@ async function acceptIncomingCall(callerCode, type, roomId, remoteCode){
   document.getElementById('incomingCallPopup').remove();
   
   try {
+    // 🌐 Level 3: 수신자 언어 자동 로드
+    _call.myLang = getSavedLang('my_lang', 'ko-KR');
+    _call.peerLang = getSavedLang('peer_lang', 'en-US');
+    _call.ttsEnabled = getSavedLang('tts_enabled', '1') === '1';
+    
     const constraints = type==='video' 
       ? { audio: true, video: { facingMode: 'user', width: {ideal:640}, height: {ideal:480} } }
       : { audio: true };
@@ -5002,6 +5105,7 @@ function openCallUI(){
     '    <div id="callTimer" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">연결 중...</div>',
     '  </div>',
     '  <div style="font-size:11px;color:#fbbf24;background:rgba(251,191,36,.15);padding:4px 10px;border-radius:8px;">' + (_call.type === 'video' ? '🎥 영상' : '📞 음성') + '</div>',
+    '  <div style="font-size:11px;color:#38bdf8;background:rgba(56,189,248,.12);padding:4px 8px;border-radius:8px;font-weight:700;" title="통화 번역 언어">' + ((_LANGS[_call.myLang]||{}).flag||'🌐') + '→' + ((_LANGS[_call.peerLang]||{}).flag||'🌐') + '</div>',
     '</div>',
     // 영상 영역
     '<div style="flex:1;position:relative;background:#111;overflow:hidden;">',
@@ -5117,9 +5221,12 @@ function startSpeechRecognition(){
     return;
   }
   _call.recog = new SR();
-  _call.recog.lang = 'ko-KR'; // 한국어 우선
+  // 🌐 Level 3: 사용자 선택 언어
+  _call.recog.lang = _call.myLang || 'ko-KR';
   _call.recog.interimResults = false;
   _call.recog.continuous = true;
+  
+  console.log('[STT] 언어 설정:', _call.recog.lang);
   
   _call.recog.onresult = async evt => {
     for(let i = evt.resultIndex; i < evt.results.length; i++){
@@ -5127,11 +5234,27 @@ function startSpeechRecognition(){
       const text = evt.results[i][0].transcript.trim();
       if(!text) continue;
       
-      // 내 자막 표시
+      // 🌐 Level 3: 같은 언어면 번역 생략
+      let translated = text;
+      let needTranslate = _call.myLang !== _call.peerLang;
+      
+      if(needTranslate){
+        try {
+          translated = await translateForCall(text, _call.myLang, _call.peerLang);
+        } catch(e){
+          console.warn('[번역 실패]', e);
+          translated = text; // 실패 시 원문
+        }
+      }
+      
+      // 내 자막 표시 (내 언어로)
       const caption = {
         from: _myCode,
         fromNick: _myNick,
-        text: text,
+        text: text,           // 원문 (내 언어)
+        translated: translated, // 번역 (상대 언어)
+        fromLang: _call.myLang,
+        toLang: _call.peerLang,
         t: Date.now()
       };
       displayCaption(caption, true);
@@ -5161,14 +5284,46 @@ function startSpeechRecognition(){
   }
 }
 
-// 자막 표시
+// 자막 표시 - 🌐 Level 3: 원문 + 번역 둘 다 + TTS 재생
 function displayCaption(caption, isMe){
   if(!_captionsOn) return;
   const box = document.getElementById('callCaptions');
   if(!box) return;
   const el = document.createElement('div');
   el.style.cssText = 'background:rgba(0,0,0,.75);color:#fff;padding:8px 14px;border-radius:14px;font-size:13px;max-width:85%;align-self:' + (isMe ? 'flex-end' : 'flex-start') + ';border:1px solid ' + (isMe ? 'rgba(100,180,250,.4)' : 'rgba(255,136,187,.4)') + ';line-height:1.4;word-break:break-word;';
-  el.innerHTML = '<b style="color:' + (isMe ? '#64b4fa' : '#ff88bb') + ';font-size:11px;">' + escHtml(caption.fromNick || '?') + ':</b> ' + escHtml(caption.text);
+  
+  // 🌐 표시 로직:
+  //   - 내 자막: 내 언어 원문 (작게)
+  //   - 상대 자막: 
+  //     * 번역된 내 언어 (크게, 메인)
+  //     * 원문 (작게, 보조)
+  let content = '<b style="color:' + (isMe ? '#64b4fa' : '#ff88bb') + ';font-size:11px;">' + escHtml(caption.fromNick || '?') + ':</b> ';
+  
+  if(isMe){
+    // 내 말: 원문만
+    content += escHtml(caption.text);
+  } else {
+    // 상대 말: 번역본 크게 (내 언어) + 원문 작게 (상대 언어)
+    const myLang = _call.myLang || 'ko-KR';
+    const shouldTranslate = caption.toLang && caption.toLang === myLang && caption.translated;
+    if(shouldTranslate && caption.translated !== caption.text){
+      // 번역 있음 → 번역본 먼저 표시
+      content += escHtml(caption.translated);
+      content += '<div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:3px;font-style:italic;">🔊 ' + escHtml(caption.text) + '</div>';
+      // 🔊 TTS 재생 (번역된 내 언어로)
+      if(_call.ttsEnabled){
+        speakTranslation(caption.translated, myLang);
+      }
+    } else {
+      // 같은 언어 → 원문 그대로
+      content += escHtml(caption.text);
+      if(_call.ttsEnabled){
+        speakTranslation(caption.text, myLang);
+      }
+    }
+  }
+  
+  el.innerHTML = content;
   box.appendChild(el);
   // 오래된 자막은 페이드아웃
   setTimeout(() => {
@@ -5180,6 +5335,55 @@ function displayCaption(caption, isMe){
   // 상대방 자막이면 아카이빙용 배열에도 저장
   if(!isMe){
     _call.captions.push(caption);
+  }
+}
+
+// 🌐 Level 3: Groq 번역 함수 (통화용)
+async function translateForCall(text, fromLang, toLang){
+  if(fromLang === toLang) return text;
+  const fromName = (_LANGS[fromLang] || {}).groq || fromLang;
+  const toName = (_LANGS[toLang] || {}).groq || toLang;
+  
+  try {
+    const response = await fetch('/api/groq', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional real-time translator for phone/video calls. Translate from ' + fromName + ' to ' + toName + '. Output ONLY the translation, no explanation, no quotes, no romanization. Keep it natural and conversational.'
+          },
+          { role: 'user', content: text }
+        ],
+        max_tokens: 200,
+        temperature: 0.3
+      })
+    });
+    const data = await response.json();
+    const translated = (data.choices?.[0]?.message?.content || '').trim();
+    return translated || text;
+  } catch(e){
+    console.warn('[translate]', e);
+    return text;
+  }
+}
+
+// 🔊 Level 3: TTS 재생 (내 언어로)
+function speakTranslation(text, lang){
+  if(!('speechSynthesis' in window)) return;
+  try {
+    // 기존 발화 취소 (겹침 방지)
+    speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = lang;
+    utt.rate = 1.0;
+    utt.pitch = 1.0;
+    utt.volume = 0.85;
+    speechSynthesis.speak(utt);
+  } catch(e){
+    console.warn('[TTS]', e);
   }
 }
 
@@ -5214,6 +5418,11 @@ function endCall(notifyPeer){
   
   // ⭐ Step 0: 가장 먼저 active = false (STT onend 무한 루프 차단!)
   _call.active = false;
+  
+  // 🔊 Level 3: TTS 즉시 중단
+  if(window.speechSynthesis){
+    try{ speechSynthesis.cancel(); }catch(e){}
+  }
   
   // ⭐ Step 1: STT 완전 종료 (재시작 불가능하게)
   if(_call.recog){
