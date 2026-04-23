@@ -5347,6 +5347,10 @@ function displayCaption(caption, isMe){
 //    - 한국어가 키, 외국어가 값
 //    - 예: entries["안녕하세요"].text = "Hello"
 const CGO_VOICE_DB_BASE = 'https://gh951.github.io/cgo-voice-db';
+// 🎯 C-20 v1.9: Vercel API 엔드포인트 (라이트백 전용)
+// ⚠️ 대장님: cgo-voice-db를 Vercel에 배포 후 실제 도메인으로 교체 필요
+//   (예: https://cgo-voice-db-xxxxx.vercel.app)
+const CGO_VOICE_DB_API = 'https://cgo-voice-db.vercel.app';
 
 // 언어 코드 매핑 (BCP-47 → 짧은 코드)
 function _cgoShortLang(bcp){
@@ -5480,6 +5484,22 @@ async function translateForCall(text, fromLang, toLang){
     if(result && result !== text){
       _translateMemCache[cacheKey] = result;
       try { localStorage.setItem(cacheKey, result); } catch(e){}
+      
+      // ═══ 5단계: cgo-voice-db 라이트백 (fire-and-forget) ═══
+      // 🎯 C-20 v1.9 · 특허 #43: AI 판정 기반 선별적 저장
+      // - Vercel /api/save가 Groq로 3축(보편성·프라이버시·가치) 판정
+      // - 통과 시만 GitHub에 커밋 → 다음 사용자에게 무료 제공
+      // - 실패해도 이 사용자의 번역은 이미 반환됨 (사용자 영향 없음)
+      try {
+        fetch(CGO_VOICE_DB_API + '/api/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: fromLang, to: toLang,
+            original: text, translated: result
+          })
+        }).catch(() => {}); // 네트워크 오류 무시 (사용자에겐 번역이 이미 제공됨)
+      } catch(e){}
     }
     return result;
   } catch(e){
