@@ -5630,8 +5630,8 @@ function displayCaption(caption, isMe){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🛡️ GUARDIAN v2.4.0 "REVIVAL" · Patent #47
-// v2.0.1 단순 로직 복원 + 재시작 버그 수정
+// 🛡️ GUARDIAN v2.5.0 · Patent #47
+// 대장님 지시: v1.9.9 복원 + "화면 밖 몇초 후 방어"
 // ═══════════════════════════════════════════════════════════════
 const _G = {
   active: false,
@@ -5640,7 +5640,7 @@ const _G = {
   detector: null,
   mode: 'off',
   noFace: 0,
-  hasStarted: false  // 재시작 안전 장치
+  hasStarted: false
 };
 
 // 🎯 모드 선택 (버튼 클릭)
@@ -5651,7 +5651,6 @@ async function setGuardianMode(mode){
   _G.mode = mode;
   _guardianUI(mode);
   
-  // OFF 선택
   if(mode === 'off'){
     _G.active = false;
     _G.hasStarted = false;
@@ -5667,9 +5666,7 @@ async function setGuardianMode(mode){
     return;
   }
   
-  // phone 또는 pc 선택 → 카메라 시작
   try {
-    // 이전 스트림 정리 (재시작 대비)
     if(_G.stream){
       _G.stream.getTracks().forEach(t => t.stop());
       _G.stream = null;
@@ -5708,10 +5705,9 @@ async function setGuardianMode(mode){
       _G.detector.onResults(_guardianResult);
     }
     
-    // 🎯 재시작 안전 장치 (대장님 지적한 버그 수정)
     _G.active = true;
     _G.noFace = 0;
-    _G.hasStarted = false; // 첫 얼굴 감지 대기
+    _G.hasStarted = false;
     
     _guardianLoop();
     
@@ -5773,7 +5769,7 @@ async function _guardianLoop(){
   setTimeout(_guardianLoop, 100);
 }
 
-// 📊 감지 결과
+// 📊 감지 결과 처리
 function _guardianResult(results){
   if(!_G.active) return;
   
@@ -5784,18 +5780,15 @@ function _guardianResult(results){
   
   const faces = results.detections || [];
   
-  // 🎯 얼굴 없음
   if(faces.length === 0){
     _G.noFace++;
     
-    // 아직 첫 얼굴 감지 안 됨 = 카메라 초기화 중 → MUFE 안 띄움
     if(!_G.hasStarted){
       layer.style.display = 'none';
       return;
     }
     
-    // 3프레임(0.3초) 유예 후 MUFE
-    if(_G.noFace < 3) return;
+    if(_G.noFace < 3) return; // 0.3초 유예
     
     layer.style.display = 'flex';
     if(distEl) distEl.textContent = '👁️';
@@ -5803,11 +5796,9 @@ function _guardianResult(results){
     return;
   }
   
-  // 얼굴 감지됨
   _G.noFace = 0;
-  _G.hasStarted = true; // 첫 감지 플래그
+  _G.hasStarted = true;
   
-  // 얼굴 2개 이상
   if(faces.length >= 2){
     layer.style.display = 'flex';
     if(distEl) distEl.textContent = '👥';
@@ -5815,7 +5806,6 @@ function _guardianResult(results){
     return;
   }
   
-  // 거리 계산
   const face = faces[0];
   const videoW = _G.video.videoWidth;
   const facePx = face.boundingBox.width * videoW;
@@ -5838,20 +5828,53 @@ function guardianEmergencyOff(){
   setGuardianMode('off');
 }
 
+// 🛡️ 화면 이탈 방어 (대장님 "몇초 후 방어" 지시)
+// visibilitychange: 탭/앱 전환 시 즉시 MUFE (썸네일 유출 방어)
+// blur: 창 포커스 이탈 시 즉시 MUFE (PC Alt+Tab 방어)
+function _guardianForceMufe(reason){
+  if(!_G.active) return;
+  if(_G.mode === 'off') return;
+  
+  const layer = document.getElementById('guardianMufeLayer');
+  const distEl = document.getElementById('guardianDistBig');
+  const msgEl = document.getElementById('guardianMsg');
+  
+  if(layer) layer.style.display = 'flex';
+  if(distEl) distEl.textContent = '🚪';
+  if(msgEl) msgEl.innerHTML = '화면 이탈<br><span style="color:#d4a843;font-weight:700;">' + reason + '</span>';
+}
+
+// ① 탭 전환 / 앱 전환 (스마트폰 최근 앱 미리보기 방어)
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    _guardianForceMufe('탭 전환 방어');
+  } else {
+    if(_G.active) _G.noFace = 0;
+  }
+});
+
+// ② 창 포커스 이탈 (PC Alt+Tab 방어)
+window.addEventListener('blur', () => {
+  _guardianForceMufe('창 전환 방어');
+});
+
+// ③ 복귀 시 정상화
+window.addEventListener('focus', () => {
+  if(_G.active) _G.noFace = 0;
+});
+
 // 호환 stub
 function _guardianUpdateButtonUI(mode){ _guardianUI(mode); }
 function onGuardianSlider(v){}
 function toggleGuardian(){}
 
-// 🚀 시작 시 복원 — 단, 자동 카메라 시작은 안 함 (갇힘 방지)
+// 🚀 시작 시 복원 - 자동 시작 없음 (안전)
 setTimeout(() => {
   const saved = localStorage.getItem('cgm2_guardian_mode') || 'off';
   console.log('[G] 복원:', saved);
   
-  // 🎯 대장님 안전: 복원 시 UI만 표시, 카메라 자동 시작 안 함
-  // 사용자가 직접 버튼 눌러야 카메라 시작 (갇힘 방지)
+  // 자동 시작 방지 (갇힘 방지)
   if(saved !== 'off'){
-    // 이전 설정은 OFF로 리셋 (자동 시작 방지)
     localStorage.setItem('cgm2_guardian_mode', 'off');
   }
   _G.mode = 'off';
