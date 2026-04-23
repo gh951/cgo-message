@@ -1516,12 +1516,67 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="modal-title">⚙️ 설정</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">내 닉네임 변경</div>
     <input class="modal-field" id="changeNickInput" placeholder="새 닉네임">
-    <div class="modal-btns">
+    
+    <!-- 🛡️ 20cm Guardian (특허 #47) -->
+    <div style="margin-top:14px;padding:12px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.3);border-radius:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <div style="font-size:22px;">🛡️</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:800;color:#d4a843;">20cm Guardian</div>
+          <div style="font-size:10px;color:rgba(240,230,200,.5);margin-top:1px;">물리적 거리 기반 보안 · Patent #47</div>
+        </div>
+        <label class="switch" style="position:relative;display:inline-block;width:44px;height:24px;">
+          <input type="checkbox" id="guardianToggle" onchange="toggleGuardian(this.checked)" style="opacity:0;width:0;height:0;">
+          <span id="guardianSlider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.2);transition:.3s;border-radius:24px;"></span>
+        </label>
+      </div>
+      <div style="font-size:10px;color:rgba(240,230,200,.5);line-height:1.4;">
+        카메라로 거리 감지 → 20cm 초과 시 자동으로 화면 가림. 찍어도 읽을 수 없는 노이즈만 저장됩니다.
+      </div>
+    </div>
+    
+    <div class="modal-btns" style="margin-top:14px;">
       <button class="modal-btn cancel" onclick="document.getElementById('settingsModal').classList.remove('open')">닫기</button>
       <button class="modal-btn confirm" onclick="changeNick()">변경</button>
     </div>
   </div>
 </div>
+
+<!-- 🛡️ 20cm Guardian MUFE 레이어 (전역) -->
+<div id="guardianMufeLayer" style="display:none;position:fixed;inset:0;z-index:99999;background:#000;flex-direction:column;align-items:center;justify-content:center;gap:16px;overflow:hidden;">
+  <div id="guardianNoise" style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(212,168,67,0.04) 0px,rgba(212,168,67,0.04) 1px,transparent 1px,transparent 4px);animation:gMufeScroll 0.3s linear infinite;"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(212,168,67,.15),transparent 70%);animation:gMufePulse 1.5s ease-in-out infinite;"></div>
+  <div style="font-size:90px;filter:drop-shadow(0 0 25px rgba(212,168,67,.6));z-index:2;">🛡️</div>
+  <div style="font-size:20px;font-weight:900;color:#d4a843;letter-spacing:1.5px;z-index:2;">MUFE ACTIVATED</div>
+  <div id="guardianDistBig" style="font-size:42px;font-weight:900;color:#f87171;z-index:2;font-variant-numeric:tabular-nums;">—</div>
+  <div id="guardianMsg" style="font-size:12px;color:rgba(240,230,200,.7);text-align:center;padding:0 30px;z-index:2;line-height:1.6;max-width:320px;">
+    시청 거리 임계값 초과<br>
+    <span style="color:#d4a843;font-weight:700;">20cm 이내로 접근하세요</span>
+  </div>
+  <div style="position:absolute;bottom:20px;font-size:9px;color:rgba(240,230,200,.3);z-index:2;">Patent #47 · © 2026 이주원 × C-19</div>
+</div>
+
+<style>
+  @keyframes gMufeScroll {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(4px,4px); }
+  }
+  @keyframes gMufePulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+  }
+  #guardianSlider:before {
+    position: absolute; content: "";
+    height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background: white; transition: .3s; border-radius: 50%;
+  }
+  input:checked + #guardianSlider {
+    background: #d4a843;
+  }
+  input:checked + #guardianSlider:before {
+    transform: translateX(20px);
+  }
+</style>
 
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
@@ -5338,6 +5393,167 @@ function displayCaption(caption, isMe){
   }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ 20cm GUARDIAN · Patent #47
+// 카메라 기반 시청 거리 추정 → 임계값 초과 시 MUFE 자동 활성화
+// ═══════════════════════════════════════════════════════════════
+const _guardian = {
+  active: false,
+  video: null,
+  stream: null,
+  detector: null,
+  threshold: 20,
+  lastDist: null,
+  smoothDist: null,
+  loopId: null
+};
+
+function _guardianLoadPref(){ return localStorage.getItem('cgm2_guardian_on') === '1'; }
+function _guardianSavePref(on){ localStorage.setItem('cgm2_guardian_on', on ? '1' : '0'); }
+
+// 초기 로드
+setTimeout(() => {
+  const tog = document.getElementById('guardianToggle');
+  if(tog){
+    tog.checked = _guardianLoadPref();
+    if(tog.checked) toggleGuardian(true, true);
+  }
+}, 1500);
+
+// 디바이스별 임계값
+function _guardianDetectDevice(){
+  const ua = navigator.userAgent.toLowerCase();
+  return /mobile|android|iphone|ipad|ipod/.test(ua) ? 20 : 40;
+}
+
+// 초점거리 추정 (FOV 70°)
+function _guardianFocalLength(videoWidth){
+  return videoWidth / (2 * Math.tan(35 * Math.PI / 180));
+}
+
+// MediaPipe 동적 로드
+function _guardianLoadMediaPipe(){
+  return new Promise((resolve, reject) => {
+    if(typeof FaceDetection !== 'undefined'){ resolve(); return; }
+    const s1 = document.createElement('script');
+    s1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js';
+    s1.onload = resolve;
+    s1.onerror = reject;
+    document.head.appendChild(s1);
+  });
+}
+
+async function toggleGuardian(on, silent){
+  const tog = document.getElementById('guardianToggle');
+  const layer = document.getElementById('guardianMufeLayer');
+  
+  if(on){
+    try {
+      _guardian.stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
+      });
+      
+      if(!_guardian.video){
+        _guardian.video = document.createElement('video');
+        _guardian.video.autoplay = true;
+        _guardian.video.playsInline = true;
+        _guardian.video.muted = true;
+        _guardian.video.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
+        document.body.appendChild(_guardian.video);
+      }
+      _guardian.video.srcObject = _guardian.stream;
+      await new Promise(r => _guardian.video.onloadedmetadata = r);
+      
+      await _guardianLoadMediaPipe();
+      
+      if(!_guardian.detector){
+        _guardian.detector = new FaceDetection({
+          locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + f
+        });
+        _guardian.detector.setOptions({ model: 'short', minDetectionConfidence: 0.5 });
+        _guardian.detector.onResults(_guardianOnResults);
+      }
+      
+      _guardian.threshold = _guardianDetectDevice();
+      _guardian.active = true;
+      _guardianSavePref(true);
+      _guardianLoop();
+      
+      if(!silent) showToast('🛡️ 20cm Guardian 활성화');
+    } catch(err){
+      console.error('[Guardian]', err);
+      if(tog) tog.checked = false;
+      _guardianSavePref(false);
+      if(!silent) showToast('⚠️ 카메라 권한 필요');
+    }
+  } else {
+    _guardian.active = false;
+    if(_guardian.stream){
+      _guardian.stream.getTracks().forEach(t => t.stop());
+      _guardian.stream = null;
+    }
+    if(layer) layer.style.display = 'none';
+    _guardianSavePref(false);
+    if(!silent) showToast('🛡️ Guardian 해제');
+  }
+}
+
+async function _guardianLoop(){
+  if(!_guardian.active) return;
+  try {
+    if(_guardian.video && _guardian.video.readyState === 4){
+      await _guardian.detector.send({ image: _guardian.video });
+    }
+  } catch(e){}
+  setTimeout(() => {
+    if(_guardian.active) _guardianLoop();
+  }, 333); // 3 FPS (배터리 절약)
+}
+
+function _guardianOnResults(results){
+  if(!_guardian.active) return;
+  const layer = document.getElementById('guardianMufeLayer');
+  const distBig = document.getElementById('guardianDistBig');
+  const msg = document.getElementById('guardianMsg');
+  if(!layer) return;
+  
+  const faces = results.detections || [];
+  
+  if(faces.length === 0){
+    layer.style.display = 'flex';
+    if(distBig) distBig.textContent = '👁️ ?';
+    if(msg) msg.innerHTML = '사용자 부재 감지<br><span style="color:#d4a843;font-weight:700;">화면을 보고 계세요?</span>';
+    return;
+  }
+  if(faces.length >= 2){
+    layer.style.display = 'flex';
+    if(distBig) distBig.textContent = '👥 !';
+    if(msg) msg.innerHTML = '제3자 감지<br><span style="color:#f87171;font-weight:700;">어깨 너머 훔쳐보기 방어</span>';
+    return;
+  }
+  
+  const face = faces[0];
+  const box = face.boundingBox;
+  const videoW = _guardian.video.videoWidth;
+  const facePx = box.width * videoW;
+  const focal = _guardianFocalLength(videoW);
+  let distCm = (14 * focal) / facePx;
+  
+  if(_guardian.smoothDist === null) _guardian.smoothDist = distCm;
+  else _guardian.smoothDist = 0.3 * distCm + 0.7 * _guardian.smoothDist;
+  
+  const finalDist = Math.round(_guardian.smoothDist);
+  _guardian.lastDist = finalDist;
+  
+  if(finalDist > _guardian.threshold){
+    layer.style.display = 'flex';
+    if(distBig) distBig.textContent = finalDist + 'cm';
+    if(msg) msg.innerHTML = '시청 거리 임계값 초과<br><span style="color:#d4a843;font-weight:700;">' + _guardian.threshold + 'cm 이내로 접근</span>';
+  } else {
+    layer.style.display = 'none';
+  }
+}
+
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
 //   2단계: cgo-voice-db CDN (50~200ms) — 실제 배포 중
@@ -5347,10 +5563,6 @@ function displayCaption(caption, isMe){
 //    - 한국어가 키, 외국어가 값
 //    - 예: entries["안녕하세요"].text = "Hello"
 const CGO_VOICE_DB_BASE = 'https://gh951.github.io/cgo-voice-db';
-// 🎯 C-20 v1.9: Vercel API 엔드포인트 (라이트백 전용)
-// ⚠️ 대장님: cgo-voice-db를 Vercel에 배포 후 실제 도메인으로 교체 필요
-//   (예: https://cgo-voice-db-xxxxx.vercel.app)
-const CGO_VOICE_DB_API = 'https://cgo-voice-db.vercel.app';
 
 // 언어 코드 매핑 (BCP-47 → 짧은 코드)
 function _cgoShortLang(bcp){
@@ -5484,22 +5696,6 @@ async function translateForCall(text, fromLang, toLang){
     if(result && result !== text){
       _translateMemCache[cacheKey] = result;
       try { localStorage.setItem(cacheKey, result); } catch(e){}
-      
-      // ═══ 5단계: cgo-voice-db 라이트백 (fire-and-forget) ═══
-      // 🎯 C-20 v1.9 · 특허 #43: AI 판정 기반 선별적 저장
-      // - Vercel /api/save가 Groq로 3축(보편성·프라이버시·가치) 판정
-      // - 통과 시만 GitHub에 커밋 → 다음 사용자에게 무료 제공
-      // - 실패해도 이 사용자의 번역은 이미 반환됨 (사용자 영향 없음)
-      try {
-        fetch(CGO_VOICE_DB_API + '/api/save', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: fromLang, to: toLang,
-            original: text, translated: result
-          })
-        }).catch(() => {}); // 네트워크 오류 무시 (사용자에겐 번역이 이미 제공됨)
-      } catch(e){}
     }
     return result;
   } catch(e){
