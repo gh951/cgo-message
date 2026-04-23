@@ -1525,8 +1525,12 @@ input[type=range].sec-range::-moz-range-thumb{
 
 <!-- 🛡️ 20cm Guardian MUFE 레이어 (전역) -->
 <div id="guardianMufeLayer" style="display:none;position:fixed;inset:0;z-index:99999;background:#000;flex-direction:column;align-items:center;justify-content:center;gap:16px;overflow:hidden;">
-  <div id="guardianNoise" style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(212,168,67,0.04) 0px,rgba(212,168,67,0.04) 1px,transparent 1px,transparent 4px);animation:gMufeScroll 0.3s linear infinite;"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(212,168,67,.15),transparent 70%);animation:gMufePulse 1.5s ease-in-out infinite;"></div>
+  <!-- 🎨 다층 노이즈 (캡처 시에도 글자 안 보이게) -->
+  <div id="guardianNoise" style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(212,168,67,0.15) 0px,rgba(212,168,67,0.15) 2px,rgba(0,0,0,.8) 2px,rgba(0,0,0,.8) 4px);animation:gMufeScroll 0.3s linear infinite;"></div>
+  <div style="position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(168,212,67,0.08) 0px,rgba(168,212,67,0.08) 1px,transparent 1px,transparent 3px);animation:gMufeScroll2 0.5s linear infinite reverse;"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(212,168,67,.2),transparent 70%);animation:gMufePulse 1.5s ease-in-out infinite;"></div>
+  
+  <!-- 🛡️ 중앙 콘텐츠 -->
   <div style="font-size:90px;filter:drop-shadow(0 0 25px rgba(212,168,67,.6));z-index:2;">🛡️</div>
   <div style="font-size:20px;font-weight:900;color:#d4a843;letter-spacing:1.5px;z-index:2;">MUFE ACTIVATED</div>
   <div id="guardianDistBig" style="font-size:42px;font-weight:900;color:#f87171;z-index:2;font-variant-numeric:tabular-nums;">—</div>
@@ -1534,13 +1538,26 @@ input[type=range].sec-range::-moz-range-thumb{
     시청 거리 임계값 초과<br>
     <span style="color:#d4a843;font-weight:700;">20cm 이내로 접근하세요</span>
   </div>
-  <div style="position:absolute;bottom:20px;font-size:9px;color:rgba(240,230,200,.3);z-index:2;">Patent #47 · © 2026 이주원 × C-19</div>
+  
+  <!-- 🚨 비상 탈출 버튼 (감지 실패 시 안전장치) -->
+  <button onclick="guardianEmergencyOff()" style="margin-top:16px;padding:12px 24px;background:rgba(239,68,68,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(239,68,68,.5);">
+    🚨 Guardian 해제 (비상)
+  </button>
+  
+  <div style="position:absolute;bottom:20px;font-size:9px;color:rgba(240,230,200,.3);z-index:2;text-align:center;">
+    Patent #47 · © 2026 이주원 × C-19<br>
+    <span style="color:rgba(240,230,200,.5);">감지 안 되면 위 버튼으로 해제</span>
+  </div>
 </div>
 
 <style>
   @keyframes gMufeScroll {
     0% { transform: translate(0,0); }
     100% { transform: translate(4px,4px); }
+  }
+  @keyframes gMufeScroll2 {
+    0% { transform: translate(0,0); }
+    100% { transform: translate(-3px,3px); }
   }
   @keyframes gMufePulse {
     0%, 100% { opacity: 0.3; }
@@ -5540,12 +5557,26 @@ function _guardianOnResults(results){
   
   const faces = results.detections || [];
   
+  // 🎯 관대 처리: 얼굴 감지 카운터
   if(faces.length === 0){
+    _guardian.noFaceCount = (_guardian.noFaceCount || 0) + 1;
+    
+    // 연속 10회(약 3.3초) 얼굴 없어야 진짜 부재 판정
+    // (조명/각도/순간 얼굴 돌림 등 오탐지 방지)
+    if(_guardian.noFaceCount < 10){
+      return; // 이전 상태 유지
+    }
+    
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = '👁️ ?';
-    if(msg) msg.innerHTML = '사용자 부재 감지<br><span style="color:#d4a843;font-weight:700;">화면을 보고 계세요?</span>';
+    if(msg) msg.innerHTML = '사용자 부재 감지<br><span style="color:#d4a843;font-weight:700;">화면을 보고 계세요?</span><br><span style="font-size:10px;color:rgba(240,230,200,.5);">감지 안 되면 비상 버튼 클릭</span>';
     return;
   }
+  
+  // 얼굴 감지됨 → 카운터 리셋
+  _guardian.noFaceCount = 0;
+  
+  // 위협 2: 얼굴 2개 이상 (어깨 너머 훔쳐보기)
   if(faces.length >= 2){
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = '👥 !';
@@ -5573,6 +5604,36 @@ function _guardianOnResults(results){
   } else {
     layer.style.display = 'none';
   }
+}
+
+// 🚨 비상 탈출 버튼 (감지 실패 시 사용자 보호)
+function guardianEmergencyOff(){
+  console.log('[Guardian] 비상 해제');
+  _guardian.active = false;
+  
+  if(_guardian.stream){
+    _guardian.stream.getTracks().forEach(t => t.stop());
+    _guardian.stream = null;
+  }
+  
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+  
+  // 슬라이더 0으로 초기화
+  const sl = document.getElementById('slGuardian');
+  const valDisplay = document.getElementById('valGuardian');
+  if(sl) sl.value = 0;
+  if(valDisplay){
+    valDisplay.textContent = 'OFF';
+    valDisplay.classList.remove('red', 'yellow');
+    valDisplay.classList.add('green');
+  }
+  
+  _guardianSavePref(false);
+  localStorage.setItem('cgm2_guardian_dist', '0');
+  _guardian.noFaceCount = 0;
+  
+  showToast('🚨 Guardian 비상 해제 · 설정에서 다시 조절하세요');
 }
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
