@@ -1594,6 +1594,161 @@ input[type=range].sec-range::-moz-range-thumb{
 <!-- 토스트 -->
 <div class="toast" id="toast"></div>
 
+<!-- 🔄 플로팅 새로고침 버튼 (대장님 제안) -->
+<div id="floatRefresh" style="position:fixed;right:16px;bottom:80px;z-index:9998;">
+  <!-- 작은 버튼 (평소) -->
+  <button id="floatRefreshBtn" onclick="toggleRefreshMenu()" 
+    style="width:44px;height:44px;border-radius:50%;background:rgba(212,168,67,.85);border:2px solid rgba(255,255,255,.3);color:#000;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.3);backdrop-filter:blur(8px);transition:.3s;display:flex;align-items:center;justify-content:center;">
+    🔄
+  </button>
+  
+  <!-- 펼쳐진 메뉴 (클릭 시) -->
+  <div id="floatRefreshMenu" style="display:none;position:absolute;bottom:54px;right:0;min-width:220px;background:rgba(20,20,25,.95);backdrop-filter:blur(12px);border:1px solid rgba(212,168,67,.4);border-radius:14px;padding:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);">
+    <div style="font-size:12px;font-weight:800;color:#d4a843;margin-bottom:10px;text-align:center;">🔄 앱 새로고침</div>
+    
+    <!-- 일반 새로고침 -->
+    <button onclick="doRefresh('soft')" 
+      style="width:100%;padding:10px;margin-bottom:6px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.4);border-radius:10px;color:#38bdf8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">
+      🔃 일반 새로고침
+    </button>
+    
+    <!-- 강력 새로고침 (캐시 삭제) -->
+    <button onclick="doRefresh('hard')" 
+      style="width:100%;padding:10px;margin-bottom:6px;background:rgba(212,168,67,.18);border:1px solid rgba(212,168,67,.5);border-radius:10px;color:#d4a843;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">
+      ⚡ 강력 새로고침 (캐시 삭제)
+    </button>
+    
+    <!-- 완전 재시작 -->
+    <button onclick="doRefresh('nuclear')" 
+      style="width:100%;padding:10px;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);border-radius:10px;color:#f87171;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">
+      🔥 완전 재시작 (모든 캐시 삭제)
+    </button>
+    
+    <div style="font-size:9px;color:rgba(240,230,200,.5);margin-top:8px;text-align:center;line-height:1.4;">
+      💡 최신 버전 안 보이면 <b style="color:#d4a843;">강력 새로고침</b>
+    </div>
+  </div>
+</div>
+
+<script>
+// 🔄 플로팅 새로고침 메뉴 토글
+function toggleRefreshMenu(){
+  const menu = document.getElementById('floatRefreshMenu');
+  const btn = document.getElementById('floatRefreshBtn');
+  if(!menu) return;
+  const isOpen = menu.style.display === 'block';
+  menu.style.display = isOpen ? 'none' : 'block';
+  if(btn){
+    btn.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+    btn.style.background = isOpen ? 'rgba(212,168,67,.85)' : 'rgba(239,68,68,.9)';
+  }
+}
+
+// 외부 클릭 시 메뉴 닫기
+document.addEventListener('click', function(e){
+  const floater = document.getElementById('floatRefresh');
+  const menu = document.getElementById('floatRefreshMenu');
+  if(!floater || !menu) return;
+  if(menu.style.display === 'block' && !floater.contains(e.target)){
+    toggleRefreshMenu();
+  }
+});
+
+// 🔄 실제 새로고침 실행
+async function doRefresh(mode){
+  if(mode === 'soft'){
+    // 일반 새로고침
+    showToast('🔃 새로고침 중...');
+    setTimeout(() => location.reload(), 300);
+  }
+  else if(mode === 'hard'){
+    // 강력 새로고침 - 캐시 무시 + 쿼리스트링
+    showToast('⚡ 캐시 삭제 + 재로드...');
+    // Service Worker 캐시 삭제
+    try {
+      if('caches' in window){
+        const names = await caches.keys();
+        await Promise.all(names.map(n => caches.delete(n)));
+      }
+    } catch(e){}
+    setTimeout(() => {
+      // 쿼리 스트링으로 강제 최신 로드
+      const url = new URL(location.href);
+      url.searchParams.set('v', Date.now());
+      location.href = url.toString();
+    }, 500);
+  }
+  else if(mode === 'nuclear'){
+    // 완전 재시작 - 모든 저장소 삭제 (설정 유지)
+    if(!confirm('🔥 완전 재시작하시겠어요?\n\n(로그인/대화는 유지됩니다)')) return;
+    showToast('🔥 완전 재시작 중...');
+    try {
+      // Service Worker 삭제
+      if('serviceWorker' in navigator){
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      // 캐시 전체 삭제
+      if('caches' in window){
+        const names = await caches.keys();
+        await Promise.all(names.map(n => caches.delete(n)));
+      }
+      // sessionStorage만 삭제 (localStorage는 보존)
+      sessionStorage.clear();
+    } catch(e){}
+    setTimeout(() => {
+      const url = new URL(location.href);
+      url.searchParams.set('v', Date.now());
+      location.href = url.toString();
+    }, 800);
+  }
+}
+
+// 📍 드래그 가능하게 (선택 사항 - 터치로 위치 이동)
+(function setupRefreshDrag(){
+  const floater = document.getElementById('floatRefresh');
+  if(!floater) return;
+  let dragging = false, startX, startY, startRight, startBottom;
+  
+  floater.addEventListener('touchstart', function(e){
+    if(e.target.id === 'floatRefreshBtn') return; // 버튼 클릭은 그대로
+    const t = e.touches[0];
+    startX = t.clientX;
+    startY = t.clientY;
+    const rect = floater.getBoundingClientRect();
+    startRight = window.innerWidth - rect.right;
+    startBottom = window.innerHeight - rect.bottom;
+    dragging = true;
+  }, { passive: true });
+  
+  floater.addEventListener('touchmove', function(e){
+    if(!dragging) return;
+    const t = e.touches[0];
+    const dx = startX - t.clientX;
+    const dy = startY - t.clientY;
+    floater.style.right = Math.max(10, Math.min(window.innerWidth-54, startRight + dx)) + 'px';
+    floater.style.bottom = Math.max(10, Math.min(window.innerHeight-54, startBottom + dy)) + 'px';
+  }, { passive: true });
+  
+  floater.addEventListener('touchend', function(){
+    dragging = false;
+    // 위치 저장
+    try {
+      localStorage.setItem('cgm2_refresh_pos', JSON.stringify({
+        right: floater.style.right, bottom: floater.style.bottom
+      }));
+    } catch(e){}
+  });
+  
+  // 저장된 위치 복원
+  try {
+    const saved = JSON.parse(localStorage.getItem('cgm2_refresh_pos') || '{}');
+    if(saved.right) floater.style.right = saved.right;
+    if(saved.bottom) floater.style.bottom = saved.bottom;
+  } catch(e){}
+})();
+</script>
+
 <!-- ══ 🎤 음성 녹음 오버레이 (할머니도 쓰기 쉽게) ══ -->
 <div class="record-overlay" id="recordOverlay">
   <div class="record-mic-big">🎤</div>
@@ -3555,6 +3710,16 @@ function toggleSecPanel(){
   const btn = document.getElementById('gearBtn');
   panel.classList.toggle('open');
   btn.classList.toggle('active', panel.classList.contains('open'));
+  
+  // 🎯 팝업 열 때 Guardian 버튼 현재 상태 복원
+  if(panel.classList.contains('open')){
+    setTimeout(() => {
+      const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+      if(typeof _guardianUpdateButtonUI === 'function'){
+        _guardianUpdateButtonUI(currentMode);
+      }
+    }, 50);
+  }
 }
 
 // 🔥 강제 동기화 브로드캐스트 (대장님 v27 — 동의 없이 상대 화면에도 적용)
@@ -5433,14 +5598,69 @@ function _guardianSavePref(on){ localStorage.setItem('cgm2_guardian_on', on ? '1
 // 초기 로드 - 이전에 켜뒀으면 자동 복원
 setTimeout(() => {
   const savedMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  setGuardianMode(savedMode);
+  console.log('[Guardian] 저장된 모드 복원:', savedMode);
+  
+  if(savedMode === 'off'){
+    // OFF는 버튼 UI만 복원
+    _guardianUpdateButtonUI('off');
+  } else {
+    // phone / pc: 카메라 자동 시작
+    setGuardianMode(savedMode);
+    // 상태 유지 피드백
+    setTimeout(() => {
+      const icon = savedMode === 'phone' ? '📱' : '💻';
+      const range = savedMode === 'phone' ? '20~30cm' : '40~60cm';
+      if(typeof showToast === 'function'){
+        showToast('🛡️ Guardian 자동 복원 · ' + icon + ' ' + range);
+      }
+    }, 2000);
+  }
 }, 1500);
 
 // 🛡️ Guardian 모드 선택 (대장님 UX: 버튼 클릭 방식)
 //   'off'   = 비활성
 //   'phone' = 스마트폰 20~30cm (임계값 20, 여유 10)
 //   'pc'    = PC/모니터 40~60cm (임계값 40, 여유 20)
-function setGuardianMode(mode){
+//
+// 🎯 영속성 보장:
+//   - localStorage에 모드 저장
+//   - 새로고침 후 자동 복원
+//   - 설정 팝업 열 때마다 버튼 빛 복원
+//   - 같은 모드 재클릭 시 카메라 재시작 방지
+function setGuardianMode(mode, skipToggle){
+  // 현재 모드와 같으면 스킵 (빛만 다시 표시)
+  const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+  const isSameMode = (currentMode === mode);
+  
+  localStorage.setItem('cgm2_guardian_mode', mode);
+  
+  // 항상 버튼 상태 업데이트 (DOM이 있으면)
+  _guardianUpdateButtonUI(mode);
+  
+  if(mode === 'off'){
+    _guardian.threshold = 0;
+    _guardian.tolerance = 0;
+    if(_guardian.active && !skipToggle) toggleGuardian(false, false);
+    
+  } else if(mode === 'phone'){
+    _guardian.threshold = 20;
+    _guardian.tolerance = 10; // 20~30cm 허용
+    // 같은 모드 + 이미 active면 카메라 재시작 안 함
+    if(!skipToggle && !_guardian.active){
+      toggleGuardian(true, false);
+    }
+    
+  } else if(mode === 'pc'){
+    _guardian.threshold = 40;
+    _guardian.tolerance = 20; // 40~60cm 허용
+    if(!skipToggle && !_guardian.active){
+      toggleGuardian(true, false);
+    }
+  }
+}
+
+// 🎨 버튼 UI만 업데이트 (빛나는 효과)
+function _guardianUpdateButtonUI(mode){
   const valDisplay = document.getElementById('valGuardian');
   const btnOff = document.getElementById('gBtnOff');
   const btnPhone = document.getElementById('gBtnPhone');
@@ -5455,10 +5675,6 @@ function setGuardianMode(mode){
   });
   
   if(mode === 'off'){
-    _guardian.threshold = 0;
-    _guardian.tolerance = 0;
-    localStorage.setItem('cgm2_guardian_mode', 'off');
-    
     if(btnOff){
       btnOff.style.transform = 'scale(1.05)';
       btnOff.style.boxShadow = '0 0 16px rgba(52,211,153,.6)';
@@ -5467,40 +5683,28 @@ function setGuardianMode(mode){
       valDisplay.textContent = 'OFF';
       valDisplay.classList.remove('red', 'yellow');
       valDisplay.classList.add('green');
+      valDisplay.style.color = '';
     }
-    if(_guardian.active) toggleGuardian(false, false);
-    
   } else if(mode === 'phone'){
-    _guardian.threshold = 20;
-    _guardian.tolerance = 10; // 20~30cm 허용
-    localStorage.setItem('cgm2_guardian_mode', 'phone');
-    
     if(btnPhone){
       btnPhone.style.transform = 'scale(1.05)';
       btnPhone.style.boxShadow = '0 0 16px rgba(56,189,248,.6)';
     }
     if(valDisplay){
       valDisplay.textContent = '📱 20~30cm';
-      valDisplay.classList.remove('green', 'yellow');
+      valDisplay.classList.remove('green', 'yellow', 'red');
       valDisplay.style.color = '#38bdf8';
     }
-    if(!_guardian.active) toggleGuardian(true, false);
-    
   } else if(mode === 'pc'){
-    _guardian.threshold = 40;
-    _guardian.tolerance = 20; // 40~60cm 허용
-    localStorage.setItem('cgm2_guardian_mode', 'pc');
-    
     if(btnPc){
       btnPc.style.transform = 'scale(1.05)';
       btnPc.style.boxShadow = '0 0 16px rgba(212,168,67,.6)';
     }
     if(valDisplay){
       valDisplay.textContent = '💻 40~60cm';
-      valDisplay.classList.remove('green', 'red');
+      valDisplay.classList.remove('green', 'red', 'yellow');
       valDisplay.style.color = '#d4a843';
     }
-    if(!_guardian.active) toggleGuardian(true, false);
   }
 }
 
