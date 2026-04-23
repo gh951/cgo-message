@@ -5868,17 +5868,19 @@ function _guardianUpdateButtonUI(mode){ _guardianUI(mode); }
 function onGuardianSlider(v){}
 function toggleGuardian(){}
 
-// 🚀 시작 시 복원 - 자동 시작 없음 (안전)
+// 🚀 시작 시 UI만 복원 (카메라 자동 시작은 사용자 선택)
 setTimeout(() => {
   const saved = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  console.log('[G] 복원:', saved);
+  console.log('[G] 저장된 모드:', saved);
   
-  // 자동 시작 방지 (갇힘 방지)
-  if(saved !== 'off'){
-    localStorage.setItem('cgm2_guardian_mode', 'off');
+  // UI 표시만 복원 (빛 유지)
+  _G.mode = saved;
+  _guardianUI(saved);
+  
+  // phone/pc였으면 자동으로 카메라 다시 시작
+  if(saved === 'phone' || saved === 'pc'){
+    setGuardianMode(saved);
   }
-  _G.mode = 'off';
-  _guardianUI('off');
 }, 1500);
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
