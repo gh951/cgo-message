@@ -5630,389 +5630,208 @@ function displayCaption(caption, isMe){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🛡️ 20cm GUARDIAN · Patent #47
-// 카메라 기반 시청 거리 추정 → 임계값 초과 시 MUFE 자동 활성화
+// 🛡️ GUARDIAN · Patent #47 · v2.2.0 "Pure"
+// 대장님 지시: 단순 명료, 복잡한 거 0개
 // ═══════════════════════════════════════════════════════════════
-const _guardian = {
+const _G = {
   active: false,
-  video: null,
   stream: null,
+  video: null,
   detector: null,
-  threshold: 20,
-  lastDist: null,
-  smoothDist: null,
-  loopId: null
+  mode: 'off',  // 'off' / 'phone' / 'pc'
+  noFace: 0
 };
 
-function _guardianLoadPref(){ return false; } // v2.1.0: 항상 비활성
-function _guardianSavePref(on){ /* v2.1.0 비활성 */ }
-
-// 🚨 v2.1.0: 이전 Guardian 상태 완전 초기화 (시작 시)
-try {
-  localStorage.setItem('cgm2_guardian_mode', 'off');
-  localStorage.setItem('cgm2_guardian_on', '0');
-  localStorage.setItem('cgm2_guardian_dist', '0');
-  console.log('[Guardian v2.1.0] 초기화 완료 - 비활성 상태');
-} catch(e){}
-
-// MUFE 레이어 강제 숨김 (3번 시도)
-setTimeout(() => {
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-}, 100);
-setTimeout(() => {
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-}, 500);
-setTimeout(() => {
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-}, 2000);
-
-// 초기 로드 - Guardian 무조건 OFF
-setTimeout(() => {
-  console.log('[Guardian v2.1.0] 비활성 상태 유지');
-  if(typeof _guardianUpdateButtonUI === 'function'){
-    _guardianUpdateButtonUI('off');
-  }
-}, 1500);
-
-// 🛡️ Guardian 모드 선택 (대장님 UX: 버튼 클릭 방식)
-//   'off'   = 비활성
-//   'phone' = 스마트폰 20~30cm (임계값 20, 여유 10)
-//   'pc'    = PC/모니터 40~60cm (임계값 40, 여유 20)
-//
-// 🎯 영속성 보장:
-//   - localStorage에 모드 저장
-//   - 새로고침 후 자동 복원
-//   - 설정 팝업 열 때마다 버튼 빛 복원
-//   - 같은 모드 재클릭 시 카메라 재시작 방지
-function setGuardianMode(mode, skipToggle){
-  // 🚨 v2.1.0: Guardian 비활성 - 클릭 무시
-  console.log('[Guardian v2.1.0] 비활성 상태 · 클릭 무시:', mode);
+// 🎯 모드 선택 (사용자가 버튼 클릭 시 호출)
+async function setGuardianMode(mode){
+  console.log('[G] 모드 변경:', mode);
   
-  // UI는 항상 OFF로 유지
-  localStorage.setItem('cgm2_guardian_mode', 'off');
-  _guardian.active = false;
-  _guardian.threshold = 0;
-  _guardian.tolerance = 0;
+  // 1. 상태 저장 (재열어도 유지)
+  localStorage.setItem('cgm2_guardian_mode', mode);
+  _G.mode = mode;
   
-  // MUFE 레이어 확실히 숨김
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
+  // 2. 버튼 UI 업데이트 (빛)
+  _guardianUI(mode);
   
-  // 스트림 닫기 (혹시 남아있으면)
-  if(_guardian.stream){
-    try { _guardian.stream.getTracks().forEach(t => t.stop()); } catch(e){}
-    _guardian.stream = null;
-  }
-  
-  // OFF 버튼에 빛 유지
-  _guardianUpdateButtonUI('off');
-  
-  // 안내
-  if(mode !== 'off'){
-    if(typeof showToast === 'function') {
-      showToast('💡 Guardian은 다음 업데이트에서 활성화됩니다');
-    }
-  }
-}
-
-// 🎨 버튼 UI만 업데이트 (CSS 클래스 방식 - inline style 불안정성 해결)
-function _guardianUpdateButtonUI(mode){
-  console.log('━━━━━━━━━━━━━━━━━━━━━━');
-  console.log('[Guardian UI] mode=' + mode);
-  console.log('[Guardian UI] localStorage value:', localStorage.getItem('cgm2_guardian_mode'));
-  
-  // 모든 Guardian 버튼 수집 (2세트)
-  const btn1 = document.getElementById('gBtnOff');
-  const btn2 = document.getElementById('gBtnPhone');
-  const btn3 = document.getElementById('gBtnPc');
-  const btn4 = document.getElementById('gBtnOff2');
-  const btn5 = document.getElementById('gBtnPhone2');
-  const btn6 = document.getElementById('gBtnPc2');
-  
-  console.log('[Guardian UI] 버튼 존재:',
-    btn1 ? '✓채팅방OFF' : '✗',
-    btn2 ? '✓채팅방📱' : '✗',
-    btn3 ? '✓채팅방💻' : '✗',
-    btn4 ? '✓상단OFF' : '✗',
-    btn5 ? '✓상단📱' : '✗',
-    btn6 ? '✓상단💻' : '✗'
-  );
-  
-  const allButtons = [btn1, btn2, btn3, btn4, btn5, btn6].filter(b => b !== null);
-  
-  // 모든 활성 클래스 제거 (완전 초기화)
-  allButtons.forEach(b => {
-    b.classList.remove('g-btn-active-off', 'g-btn-active-phone', 'g-btn-active-pc');
-    b.style.transform = '';
-    b.style.boxShadow = '';
-  });
-  
-  // 선택된 모드에 맞는 버튼들에 활성 클래스 추가
+  // 3. OFF 선택 시 카메라 종료
   if(mode === 'off'){
-    if(btn1) btn1.classList.add('g-btn-active-off');
-    if(btn4) btn4.classList.add('g-btn-active-off');
-    console.log('[Guardian UI] OFF 적용, 클래스:', btn4 ? btn4.className : 'no btn4');
-  } else if(mode === 'phone'){
-    if(btn2) btn2.classList.add('g-btn-active-phone');
-    if(btn5) btn5.classList.add('g-btn-active-phone');
-    console.log('[Guardian UI] PHONE 적용, 클래스:', btn5 ? btn5.className : 'no btn5');
-  } else if(mode === 'pc'){
-    if(btn3) btn3.classList.add('g-btn-active-pc');
-    if(btn6) btn6.classList.add('g-btn-active-pc');
-    console.log('[Guardian UI] PC 적용, 클래스:', btn6 ? btn6.className : 'no btn6');
+    _G.active = false;
+    if(_G.stream){
+      _G.stream.getTracks().forEach(t => t.stop());
+      _G.stream = null;
+    }
+    const layer = document.getElementById('guardianMufeLayer');
+    if(layer) layer.style.display = 'none';
+    return;
   }
   
-  // 값 표시 업데이트 (2세트)
-  const valDisplays = [
-    document.getElementById('valGuardian'),
-    document.getElementById('valGuardian2')
-  ].filter(v => v);
-  
-  valDisplays.forEach(v => {
-    v.classList.remove('red', 'yellow', 'green');
-    if(mode === 'off'){
-      v.textContent = 'OFF';
-      v.classList.add('green');
-      v.style.color = '';
-    } else if(mode === 'phone'){
-      v.textContent = '📱 20~30cm';
-      v.style.color = '#38bdf8';
-    } else if(mode === 'pc'){
-      v.textContent = '💻 40~60cm';
-      v.style.color = '#d4a843';
-    }
-  });
-  
-  console.log('━━━━━━━━━━━━━━━━━━━━━━');
-}
-
-// 기존 onGuardianSlider → setGuardianMode로 리다이렉트 (호환성)
-function onGuardianSlider(val){
-  const v = parseInt(val);
-  if(v === 0) setGuardianMode('off');
-  else if(v <= 30) setGuardianMode('phone');
-  else setGuardianMode('pc');
-}
-
-// 디바이스별 임계값
-function _guardianDetectDevice(){
-  const ua = navigator.userAgent.toLowerCase();
-  return /mobile|android|iphone|ipad|ipod/.test(ua) ? 20 : 40;
-}
-
-// 초점거리 추정 (FOV 70°)
-function _guardianFocalLength(videoWidth){
-  return videoWidth / (2 * Math.tan(35 * Math.PI / 180));
-}
-
-// MediaPipe 동적 로드
-function _guardianLoadMediaPipe(){
-  return new Promise((resolve, reject) => {
-    if(typeof FaceDetection !== 'undefined'){ resolve(); return; }
-    const s1 = document.createElement('script');
-    s1.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js';
-    s1.onload = resolve;
-    s1.onerror = reject;
-    document.head.appendChild(s1);
-  });
-}
-
-async function toggleGuardian(on, silent){
-  // 🚨 v2.1.0: Guardian 비활성 - 카메라 절대 시작 안 함
-  console.log('[Guardian v2.1.0] toggle 무시');
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-  _guardian.active = false;
-  return;
-}
-
-// 이하 구 함수들 보존 (호출 돼도 위 return으로 실행 안 됨)
-async function _toggleGuardianOld_DISABLED(on, silent){
-  const layer = document.getElementById('guardianMufeLayer');
-  const valDisplay = document.getElementById('valGuardian');
-  const dbgCam = document.getElementById('dbgCam');
-  
-  if(on){
-    try {
-      if(dbgCam) dbgCam.textContent = 'requesting...';
-      
-      _guardian.stream = await navigator.mediaDevices.getUserMedia({
+  // 4. phone/pc 선택 시 카메라 시작
+  try {
+    if(!_G.stream){
+      _G.stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
       });
       
-      if(!_guardian.video){
-        _guardian.video = document.createElement('video');
-        _guardian.video.autoplay = true;
-        _guardian.video.playsInline = true;
-        _guardian.video.muted = true;
-        _guardian.video.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;';
-        document.body.appendChild(_guardian.video);
-      }
-      _guardian.video.srcObject = _guardian.stream;
-      await new Promise(r => _guardian.video.onloadedmetadata = r);
+      _G.video = document.createElement('video');
+      _G.video.autoplay = true;
+      _G.video.playsInline = true;
+      _G.video.muted = true;
+      _G.video.style.cssText = 'position:fixed;top:-9999px;width:1px;height:1px;';
+      document.body.appendChild(_G.video);
+      _G.video.srcObject = _G.stream;
+      await new Promise(r => _G.video.onloadedmetadata = r);
       
-      // 🔍 디버그 프리뷰 연결
-      const preview = document.getElementById('guardianPreviewVideo');
-      const previewBox = document.getElementById('guardianCamPreview');
-      if(preview){
-        preview.srcObject = _guardian.stream;
-        previewBox.style.display = 'block';
-      }
-      if(dbgCam) dbgCam.textContent = 'ON (' + _guardian.video.videoWidth + 'x' + _guardian.video.videoHeight + ')';
-      
-      if(dbgCam) dbgCam.textContent += ' · loading MediaPipe...';
-      await _guardianLoadMediaPipe();
-      
-      if(!_guardian.detector){
-        _guardian.detector = new FaceDetection({
-          locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + f
+      // MediaPipe 로드
+      if(typeof FaceDetection === 'undefined'){
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
         });
-        _guardian.detector.setOptions({ model: 'short', minDetectionConfidence: 0.3 }); // 0.5 → 0.3 관대하게
-        _guardian.detector.onResults(_guardianOnResults);
       }
       
-      if(dbgCam) dbgCam.textContent = 'ON · detecting...';
-      
-      _guardian.active = true;
-      _guardian.noFaceCount = 0;
-      _guardian.lastDist = null;
-      _guardian.smoothDist = null;
-      _guardian.firstFaceDetected = false; // 🎯 중요: 재시작 시 리셋!
-      _guardian.pausedUntil = 0;            // 일시정지 해제
-      _guardianSavePref(true);
-      _guardianLoop();
-      
-      if(!silent) showToast('🛡️ Guardian 활성화 · ' + _guardian.threshold + 'cm (+10cm 여유)');
-    } catch(err){
-      console.error('[Guardian]', err);
-      if(dbgCam) dbgCam.textContent = 'ERROR: ' + err.message;
-      _guardianSavePref(false);
-      // OFF 버튼으로 자동 복귀
-      setGuardianMode('off');
-      if(!silent) showToast('⚠️ 카메라 권한 필요: ' + err.message);
+      _G.detector = new FaceDetection({
+        locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + f
+      });
+      _G.detector.setOptions({ model: 'short', minDetectionConfidence: 0.3 });
+      _G.detector.onResults(_guardianResult);
     }
-  } else {
-    _guardian.active = false;
-    if(_guardian.stream){
-      _guardian.stream.getTracks().forEach(t => t.stop());
-      _guardian.stream = null;
-    }
-    const previewBox = document.getElementById('guardianCamPreview');
-    if(previewBox) previewBox.style.display = 'none';
-    if(layer) layer.style.display = 'none';
-    _guardianSavePref(false);
-    if(dbgCam) dbgCam.textContent = 'OFF';
     
-    if(!silent) showToast('🛡️ Guardian 해제');
+    _G.active = true;
+    _G.noFace = 0;
+    _guardianLoop();
+  } catch(e){
+    console.error('[G] 카메라 에러:', e);
+    if(typeof showToast === 'function') showToast('⚠️ 카메라 권한 필요');
+    // 실패 시 OFF로
+    localStorage.setItem('cgm2_guardian_mode', 'off');
+    _G.mode = 'off';
+    _guardianUI('off');
   }
 }
 
-async function _guardianLoop(){
-  // 🚨 v2.1.0: 감지 루프 비활성
-  return;
+// 🎨 버튼 UI 업데이트 (선택된 버튼에 빛)
+function _guardianUI(mode){
+  const ids = ['gBtnOff','gBtnPhone','gBtnPc','gBtnOff2','gBtnPhone2','gBtnPc2'];
+  ids.forEach(id => {
+    const b = document.getElementById(id);
+    if(b){
+      b.classList.remove('g-btn-active-off','g-btn-active-phone','g-btn-active-pc');
+      b.style.transform = '';
+      b.style.boxShadow = '';
+    }
+  });
+  
+  const cls = 'g-btn-active-' + mode;
+  if(mode === 'off'){
+    ['gBtnOff','gBtnOff2'].forEach(id => {
+      const b = document.getElementById(id);
+      if(b) b.classList.add(cls);
+    });
+  } else if(mode === 'phone'){
+    ['gBtnPhone','gBtnPhone2'].forEach(id => {
+      const b = document.getElementById(id);
+      if(b) b.classList.add(cls);
+    });
+  } else if(mode === 'pc'){
+    ['gBtnPc','gBtnPc2'].forEach(id => {
+      const b = document.getElementById(id);
+      if(b) b.classList.add(cls);
+    });
+  }
+  
+  // 값 표시
+  const label = mode === 'phone' ? '📱 20~30cm' : mode === 'pc' ? '💻 40~60cm' : 'OFF';
+  ['valGuardian','valGuardian2'].forEach(id => {
+    const v = document.getElementById(id);
+    if(v) v.textContent = label;
+  });
 }
 
-function _guardianOnResults(results){
-  if(!_guardian.active) return;
+// 🎥 감지 루프 (10 FPS)
+async function _guardianLoop(){
+  if(!_G.active) return;
+  try {
+    if(_G.video && _G.video.readyState === 4){
+      await _G.detector.send({ image: _G.video });
+    }
+  } catch(e){}
+  setTimeout(_guardianLoop, 100);
+}
+
+// 📊 감지 결과 처리
+function _guardianResult(results){
+  if(!_G.active) return;
   
   const layer = document.getElementById('guardianMufeLayer');
-  const distBig = document.getElementById('guardianDistBig');
-  const msg = document.getElementById('guardianMsg');
-  const dbgFace = document.getElementById('dbgFace');
+  const distEl = document.getElementById('guardianDistBig');
+  const msgEl = document.getElementById('guardianMsg');
   if(!layer) return;
   
   const faces = results.detections || [];
   
-  // 🔍 디버그 업데이트
-  if(dbgFace) dbgFace.textContent = faces.length + ' face(s)';
-  
-  // 🎯 대장님 원안: 얼굴 없음 = 즉시 MUFE (유예 없음)
+  // 얼굴 없음 → 3프레임(0.3초) 후 MUFE
   if(faces.length === 0){
-    _guardian.noFaceCount = (_guardian.noFaceCount || 0) + 1;
-    
-    // 0.3초 유예만 (카메라 시작 순간 빈 프레임 1~3개만 방어)
-    // 10 FPS 기준 3프레임 = 0.3초
-    if(_guardian.noFaceCount < 3){
-      return; // 3프레임 미만은 스킵 (판정 유보)
-    }
-    
-    // 0.3초 지나면 즉시 MUFE
+    _G.noFace++;
+    if(_G.noFace < 3) return; // 0.3초 유예
     layer.style.display = 'flex';
-    if(distBig) distBig.textContent = '👁️ ?';
-    if(msg) msg.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로 바라봐 주세요</span>';
+    if(distEl) distEl.textContent = '👁️';
+    if(msgEl) msgEl.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로</span>';
     return;
   }
   
-  // 얼굴 감지됨 → 카운터 리셋
-  _guardian.noFaceCount = 0;
+  _G.noFace = 0;
   
-  // 위협 2: 얼굴 2개 이상 (어깨 너머 훔쳐보기)
+  // 얼굴 2개 이상 → 훔쳐보기 방어
   if(faces.length >= 2){
     layer.style.display = 'flex';
-    if(distBig) distBig.textContent = '👥 ' + faces.length;
-    if(msg) msg.innerHTML = '제3자 감지<br><span style="color:#f87171;font-weight:700;">어깨 너머 훔쳐보기 방어</span>';
+    if(distEl) distEl.textContent = '👥';
+    if(msgEl) msgEl.innerHTML = '제3자 감지<br><span style="color:#f87171;font-weight:700;">훔쳐보기 방어</span>';
     return;
   }
   
+  // 거리 계산 (얼굴 폭 기준)
   const face = faces[0];
-  const box = face.boundingBox;
-  const videoW = _guardian.video.videoWidth;
-  const facePx = box.width * videoW;
-  const focal = _guardianFocalLength(videoW);
-  let distCm = (14 * focal) / facePx;
+  const videoW = _G.video.videoWidth;
+  const facePx = face.boundingBox.width * videoW;
+  const focal = videoW / (2 * Math.tan(35 * Math.PI / 180));
+  const distCm = Math.round((14 * focal) / facePx);
   
-  if(_guardian.smoothDist === null) _guardian.smoothDist = distCm;
-  else _guardian.smoothDist = 0.3 * distCm + 0.7 * _guardian.smoothDist;
+  // 판정 (대장님 범위: phone 30cm, pc 60cm 넘으면 MUFE)
+  const limit = _G.mode === 'phone' ? 30 : 60;
   
-  const finalDist = Math.round(_guardian.smoothDist);
-  _guardian.lastDist = finalDist;
-  
-  // 🎯 여유 범위 적용 (모드별 tolerance)
-  // phone: 20cm + 10 = 30cm 이상 차단
-  // pc: 40cm + 20 = 60cm 이상 차단
-  const threshold = _guardian.threshold;
-  const tolerance = _guardian.tolerance || 10;
-  const triggerDist = threshold + tolerance;
-  
-  if(finalDist > triggerDist){
-    // MUFE 활성화
+  if(distCm > limit){
     layer.style.display = 'flex';
-    if(distBig) distBig.textContent = finalDist + 'cm';
-    if(msg) msg.innerHTML = '시청 거리 초과 (' + triggerDist + 'cm↑)<br><span style="color:#d4a843;font-weight:700;">' + threshold + 'cm 이내로 접근</span>';
+    if(distEl) distEl.textContent = distCm + 'cm';
+    if(msgEl) msgEl.innerHTML = '거리 초과<br><span style="color:#d4a843;font-weight:700;">' + (_G.mode === 'phone' ? '20~30cm' : '40~60cm') + ' 범위로</span>';
   } else {
-    // 정상 (여유 범위 내)
     layer.style.display = 'none';
   }
 }
 
-// Guardian 완전 해제는 설정에서 ⚪ OFF 클릭으로만 가능
+// 🚨 비상 해제 (MUFE 화면 안 버튼)
 function guardianEmergencyOff(){
-  showToast('💡 완전 해제: 설정 → ⚪ OFF 클릭');
+  setGuardianMode('off');
+  if(typeof showToast === 'function') showToast('🛡️ Guardian 해제됨');
 }
 
-// 🛡️ 화면 이탈 감지 (v2.1.0 - 비활성)
-function _guardianForceMufe(reason){
-  // v2.1.0: Guardian 자체가 비활성이므로 아무 동작 안 함
-  return;
-}
+// 🔄 호환성 함수 (기존 코드 호출 대비)
+function onGuardianSlider(v){ /* deprecated */ }
+function toggleGuardian(){ /* deprecated */ }
+function _guardianUpdateButtonUI(mode){ _guardianUI(mode); }
 
-// ① 탭 전환 / 앱 전환 (v2.1.0 비활성)
-document.addEventListener('visibilitychange', () => {
-  // 비활성 - 아무 동작 안 함
-});
-
-// ② 창 포커스 잃음 (v2.1.0 비활성)
-window.addEventListener('blur', () => {
-  // 비활성 - 아무 동작 안 함
-});
-
-// ③ 창 포커스 복귀 (v2.1.0 비활성)
-window.addEventListener('focus', () => {
-  // 비활성 - 아무 동작 안 함
-});
+// 🚀 시작 시 복원 (대장님 지시: 선택 유지!)
+setTimeout(() => {
+  const saved = localStorage.getItem('cgm2_guardian_mode') || 'off';
+  console.log('[G] 복원:', saved);
+  if(saved === 'off'){
+    _guardianUI('off'); // UI만 복원, 카메라 안 켬
+  } else {
+    setGuardianMode(saved); // 카메라도 자동 시작
+  }
+}, 1500);
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
