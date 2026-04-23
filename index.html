@@ -1539,8 +1539,18 @@ input[type=range].sec-range::-moz-range-thumb{
     <span style="color:#d4a843;font-weight:700;">20cm 이내로 접근하세요</span>
   </div>
   
+  <!-- 🔍 디버그 정보 (실제 상태 표시) -->
+  <div id="guardianDebug" style="margin-top:10px;padding:8px 14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;font-size:10px;color:rgba(240,230,200,.7);z-index:2;font-family:monospace;min-width:240px;text-align:center;">
+    Camera: <span id="dbgCam">init</span> · Face: <span id="dbgFace">?</span>
+  </div>
+  
+  <!-- 📹 미니 카메라 프리뷰 (디버그용) -->
+  <div id="guardianCamPreview" style="position:absolute;top:20px;right:20px;width:80px;height:100px;border:2px solid #d4a843;border-radius:10px;overflow:hidden;background:#000;z-index:3;display:none;">
+    <video id="guardianPreviewVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+  </div>
+  
   <!-- 🚨 비상 탈출 버튼 (감지 실패 시 안전장치) -->
-  <button onclick="guardianEmergencyOff()" style="margin-top:16px;padding:12px 24px;background:rgba(239,68,68,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(239,68,68,.5);">
+  <button onclick="guardianEmergencyOff()" style="margin-top:8px;padding:12px 24px;background:rgba(239,68,68,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(239,68,68,.5);">
     🚨 Guardian 해제 (비상)
   </button>
   
@@ -5424,6 +5434,7 @@ setTimeout(() => {
 }, 1500);
 
 // 🛡️ Guardian 슬라이더 핸들러 (0 = OFF, 10~50 = 거리 cm)
+// 실제 차단 거리 = 설정값 + 10cm (여유 범위)
 function onGuardianSlider(val){
   const v = parseInt(val);
   const valDisplay = document.getElementById('valGuardian');
@@ -5443,7 +5454,9 @@ function onGuardianSlider(val){
     _guardian.threshold = cm;
     
     if(valDisplay){
-      valDisplay.textContent = cm + 'cm';
+      // 🎯 여유 범위 표시 (대장님 제안: 20~30cm 식으로)
+      const triggerDist = cm + 10;
+      valDisplay.textContent = cm + '~' + triggerDist + 'cm';
       valDisplay.classList.remove('green');
       if(cm <= 20) valDisplay.classList.add('red');          // 엄격
       else if(cm <= 35) valDisplay.classList.add('yellow');  // 중간
@@ -5482,9 +5495,12 @@ function _guardianLoadMediaPipe(){
 async function toggleGuardian(on, silent){
   const layer = document.getElementById('guardianMufeLayer');
   const valDisplay = document.getElementById('valGuardian');
+  const dbgCam = document.getElementById('dbgCam');
   
   if(on){
     try {
+      if(dbgCam) dbgCam.textContent = 'requesting...';
+      
       _guardian.stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
       });
@@ -5500,28 +5516,43 @@ async function toggleGuardian(on, silent){
       _guardian.video.srcObject = _guardian.stream;
       await new Promise(r => _guardian.video.onloadedmetadata = r);
       
+      // 🔍 디버그 프리뷰 연결
+      const preview = document.getElementById('guardianPreviewVideo');
+      const previewBox = document.getElementById('guardianCamPreview');
+      if(preview){
+        preview.srcObject = _guardian.stream;
+        previewBox.style.display = 'block';
+      }
+      if(dbgCam) dbgCam.textContent = 'ON (' + _guardian.video.videoWidth + 'x' + _guardian.video.videoHeight + ')';
+      
+      if(dbgCam) dbgCam.textContent += ' · loading MediaPipe...';
       await _guardianLoadMediaPipe();
       
       if(!_guardian.detector){
         _guardian.detector = new FaceDetection({
           locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + f
         });
-        _guardian.detector.setOptions({ model: 'short', minDetectionConfidence: 0.5 });
+        _guardian.detector.setOptions({ model: 'short', minDetectionConfidence: 0.3 }); // 0.5 → 0.3 관대하게
         _guardian.detector.onResults(_guardianOnResults);
       }
       
+      if(dbgCam) dbgCam.textContent = 'ON · detecting...';
+      
       _guardian.active = true;
+      _guardian.noFaceCount = 0;
+      _guardian.lastDist = null;
+      _guardian.smoothDist = null;
       _guardianSavePref(true);
       _guardianLoop();
       
-      if(!silent) showToast('🛡️ Guardian 활성화 · ' + _guardian.threshold + 'cm');
+      if(!silent) showToast('🛡️ Guardian 활성화 · ' + _guardian.threshold + 'cm (+10cm 여유)');
     } catch(err){
       console.error('[Guardian]', err);
+      if(dbgCam) dbgCam.textContent = 'ERROR: ' + err.message;
       _guardianSavePref(false);
-      // 슬라이더 원위치
       const sl = document.getElementById('slGuardian');
       if(sl){ sl.value = 0; onGuardianSlider(0); }
-      if(!silent) showToast('⚠️ 카메라 권한 필요');
+      if(!silent) showToast('⚠️ 카메라 권한 필요: ' + err.message);
     }
   } else {
     _guardian.active = false;
@@ -5529,8 +5560,11 @@ async function toggleGuardian(on, silent){
       _guardian.stream.getTracks().forEach(t => t.stop());
       _guardian.stream = null;
     }
+    const previewBox = document.getElementById('guardianCamPreview');
+    if(previewBox) previewBox.style.display = 'none';
     if(layer) layer.style.display = 'none';
     _guardianSavePref(false);
+    if(dbgCam) dbgCam.textContent = 'OFF';
     
     if(!silent) showToast('🛡️ Guardian 해제');
   }
@@ -5553,20 +5587,34 @@ function _guardianOnResults(results){
   const layer = document.getElementById('guardianMufeLayer');
   const distBig = document.getElementById('guardianDistBig');
   const msg = document.getElementById('guardianMsg');
+  const dbgFace = document.getElementById('dbgFace');
   if(!layer) return;
   
   const faces = results.detections || [];
   
-  // 🎯 관대 처리: 얼굴 감지 카운터
+  // 🔍 디버그 업데이트
+  if(dbgFace) dbgFace.textContent = faces.length + ' face(s)';
+  
+  // 🎯 관대 처리: 얼굴 감지 실패 시 30프레임(10초) 유예
   if(faces.length === 0){
     _guardian.noFaceCount = (_guardian.noFaceCount || 0) + 1;
     
-    // 연속 10회(약 3.3초) 얼굴 없어야 진짜 부재 판정
-    // (조명/각도/순간 얼굴 돌림 등 오탐지 방지)
-    if(_guardian.noFaceCount < 10){
-      return; // 이전 상태 유지
+    // 30프레임(10초) 연속 얼굴 없어야 진짜 부재 판정
+    // 너무 엄격하면 실험 불가 → 관대하게
+    if(_guardian.noFaceCount < 30){
+      // 최근 거리 표시 유지 (또는 "감지 중...")
+      if(_guardian.lastDist){
+        // 마지막 거리 기준으로 상태 유지
+        return;
+      } else {
+        // 아직 한 번도 얼굴 못 잡음 - MUFE 숨김 (대기)
+        layer.style.display = 'none';
+        if(dbgFace) dbgFace.textContent = 'waiting... (' + _guardian.noFaceCount + '/30)';
+        return;
+      }
     }
     
+    // 10초 지나도 얼굴 없음 - MUFE 활성화
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = '👁️ ?';
     if(msg) msg.innerHTML = '사용자 부재 감지<br><span style="color:#d4a843;font-weight:700;">화면을 보고 계세요?</span><br><span style="font-size:10px;color:rgba(240,230,200,.5);">감지 안 되면 비상 버튼 클릭</span>';
@@ -5579,7 +5627,7 @@ function _guardianOnResults(results){
   // 위협 2: 얼굴 2개 이상 (어깨 너머 훔쳐보기)
   if(faces.length >= 2){
     layer.style.display = 'flex';
-    if(distBig) distBig.textContent = '👥 !';
+    if(distBig) distBig.textContent = '👥 ' + faces.length;
     if(msg) msg.innerHTML = '제3자 감지<br><span style="color:#f87171;font-weight:700;">어깨 너머 훔쳐보기 방어</span>';
     return;
   }
@@ -5597,11 +5645,20 @@ function _guardianOnResults(results){
   const finalDist = Math.round(_guardian.smoothDist);
   _guardian.lastDist = finalDist;
   
-  if(finalDist > _guardian.threshold){
+  // 🎯 여유 범위 적용 (대장님 제안: 20~30cm 유예존)
+  // 슬라이더 값 = 중심점
+  // +10cm 까지는 경고 없이 OK (헐렁한 범위)
+  const threshold = _guardian.threshold;
+  const tolerance = 10; // cm 여유
+  const triggerDist = threshold + tolerance; // 예: 20cm 설정 시 30cm부터 차단
+  
+  if(finalDist > triggerDist){
+    // MUFE 활성화
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = finalDist + 'cm';
-    if(msg) msg.innerHTML = '시청 거리 임계값 초과<br><span style="color:#d4a843;font-weight:700;">' + _guardian.threshold + 'cm 이내로 접근</span>';
+    if(msg) msg.innerHTML = '시청 거리 초과 (' + triggerDist + 'cm↑)<br><span style="color:#d4a843;font-weight:700;">' + threshold + 'cm 이내로 접근</span>';
   } else {
+    // 정상 (여유 범위 내)
     layer.style.display = 'none';
   }
 }
@@ -5632,6 +5689,8 @@ function guardianEmergencyOff(){
   _guardianSavePref(false);
   localStorage.setItem('cgm2_guardian_dist', '0');
   _guardian.noFaceCount = 0;
+  _guardian.lastDist = null;
+  _guardian.smoothDist = null;
   
   showToast('🚨 Guardian 비상 해제 · 설정에서 다시 조절하세요');
 }
