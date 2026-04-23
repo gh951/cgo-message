@@ -1532,7 +1532,30 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="modal-title">⚙️ 설정</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">내 닉네임 변경</div>
     <input class="modal-field" id="changeNickInput" placeholder="새 닉네임">
-    <div class="modal-btns">
+    
+    <!-- 🛡️ 20cm Guardian (특허 #47) - 상단 설정에도 추가 -->
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(212,168,67,.2);">
+      <div style="font-size:12px;color:#d4a843;margin-bottom:8px;font-weight:700;">🛡️ 시청 거리 제한 <span style="font-size:9px;color:rgba(240,230,200,.5);font-weight:400;">(Patent #47)</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+        <button id="gBtnOff2" onclick="setGuardianMode('off')" 
+          style="padding:10px 6px;background:rgba(52,211,153,.15);border:1.5px solid rgba(52,211,153,.5);border-radius:10px;color:#34d399;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          ⚪ OFF
+        </button>
+        <button id="gBtnPhone2" onclick="setGuardianMode('phone')" 
+          style="padding:10px 6px;background:rgba(56,189,248,.15);border:1.5px solid rgba(56,189,248,.5);border-radius:10px;color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          📱 20~30cm
+        </button>
+        <button id="gBtnPc2" onclick="setGuardianMode('pc')" 
+          style="padding:10px 6px;background:rgba(212,168,67,.15);border:1.5px solid rgba(212,168,67,.5);border-radius:10px;color:#d4a843;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          💻 40~60cm
+        </button>
+      </div>
+      <div style="font-size:9px;color:rgba(240,230,200,.5);margin-top:6px;text-align:center;line-height:1.4;">
+        현재: <span id="valGuardian2" style="color:#34d399;font-weight:700;">OFF</span>
+      </div>
+    </div>
+    
+    <div class="modal-btns" style="margin-top:14px;">
       <button class="modal-btn cancel" onclick="document.getElementById('settingsModal').classList.remove('open')">닫기</button>
       <button class="modal-btn confirm" onclick="changeNick()">변경</button>
     </div>
@@ -3711,14 +3734,17 @@ function toggleSecPanel(){
   panel.classList.toggle('open');
   btn.classList.toggle('active', panel.classList.contains('open'));
   
-  // 🎯 팝업 열 때 Guardian 버튼 현재 상태 복원
+  // 🎯 팝업 열 때 Guardian 버튼 현재 상태 복원 (3중 타이밍 방어)
   if(panel.classList.contains('open')){
-    setTimeout(() => {
+    const restore = () => {
       const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
       if(typeof _guardianUpdateButtonUI === 'function'){
         _guardianUpdateButtonUI(currentMode);
       }
-    }, 50);
+    };
+    restore();
+    setTimeout(restore, 100);
+    setTimeout(restore, 300);
   }
 }
 
@@ -5659,15 +5685,22 @@ function setGuardianMode(mode, skipToggle){
   }
 }
 
-// 🎨 버튼 UI만 업데이트 (빛나는 효과)
+// 🎨 버튼 UI만 업데이트 (빛나는 효과) - 2세트 버튼 모두 동기화
 function _guardianUpdateButtonUI(mode){
-  const valDisplay = document.getElementById('valGuardian');
-  const btnOff = document.getElementById('gBtnOff');
-  const btnPhone = document.getElementById('gBtnPhone');
-  const btnPc = document.getElementById('gBtnPc');
+  // 채팅방 보안 패널 버튼들
+  const valDisplay1 = document.getElementById('valGuardian');
+  const btnOff1 = document.getElementById('gBtnOff');
+  const btnPhone1 = document.getElementById('gBtnPhone');
+  const btnPc1 = document.getElementById('gBtnPc');
+  
+  // 상단 설정 모달 버튼들
+  const valDisplay2 = document.getElementById('valGuardian2');
+  const btnOff2 = document.getElementById('gBtnOff2');
+  const btnPhone2 = document.getElementById('gBtnPhone2');
+  const btnPc2 = document.getElementById('gBtnPc2');
   
   // 모든 버튼 원상복구
-  [btnOff, btnPhone, btnPc].forEach(b => {
+  [btnOff1, btnPhone1, btnPc1, btnOff2, btnPhone2, btnPc2].forEach(b => {
     if(b){
       b.style.transform = 'scale(1)';
       b.style.boxShadow = 'none';
@@ -5675,36 +5708,48 @@ function _guardianUpdateButtonUI(mode){
   });
   
   if(mode === 'off'){
-    if(btnOff){
-      btnOff.style.transform = 'scale(1.05)';
-      btnOff.style.boxShadow = '0 0 16px rgba(52,211,153,.6)';
-    }
-    if(valDisplay){
-      valDisplay.textContent = 'OFF';
-      valDisplay.classList.remove('red', 'yellow');
-      valDisplay.classList.add('green');
-      valDisplay.style.color = '';
-    }
+    [btnOff1, btnOff2].forEach(b => {
+      if(b){
+        b.style.transform = 'scale(1.05)';
+        b.style.boxShadow = '0 0 16px rgba(52,211,153,.6)';
+      }
+    });
+    [valDisplay1, valDisplay2].forEach(v => {
+      if(v){
+        v.textContent = 'OFF';
+        v.classList.remove('red', 'yellow');
+        v.classList.add('green');
+        v.style.color = '';
+      }
+    });
   } else if(mode === 'phone'){
-    if(btnPhone){
-      btnPhone.style.transform = 'scale(1.05)';
-      btnPhone.style.boxShadow = '0 0 16px rgba(56,189,248,.6)';
-    }
-    if(valDisplay){
-      valDisplay.textContent = '📱 20~30cm';
-      valDisplay.classList.remove('green', 'yellow', 'red');
-      valDisplay.style.color = '#38bdf8';
-    }
+    [btnPhone1, btnPhone2].forEach(b => {
+      if(b){
+        b.style.transform = 'scale(1.05)';
+        b.style.boxShadow = '0 0 16px rgba(56,189,248,.6)';
+      }
+    });
+    [valDisplay1, valDisplay2].forEach(v => {
+      if(v){
+        v.textContent = '📱 20~30cm';
+        v.classList.remove('green', 'yellow', 'red');
+        v.style.color = '#38bdf8';
+      }
+    });
   } else if(mode === 'pc'){
-    if(btnPc){
-      btnPc.style.transform = 'scale(1.05)';
-      btnPc.style.boxShadow = '0 0 16px rgba(212,168,67,.6)';
-    }
-    if(valDisplay){
-      valDisplay.textContent = '💻 40~60cm';
-      valDisplay.classList.remove('green', 'red', 'yellow');
-      valDisplay.style.color = '#d4a843';
-    }
+    [btnPc1, btnPc2].forEach(b => {
+      if(b){
+        b.style.transform = 'scale(1.05)';
+        b.style.boxShadow = '0 0 16px rgba(212,168,67,.6)';
+      }
+    });
+    [valDisplay1, valDisplay2].forEach(v => {
+      if(v){
+        v.textContent = '💻 40~60cm';
+        v.classList.remove('green', 'red');
+        v.style.color = '#d4a843';
+      }
+    });
   }
 }
 
@@ -6285,6 +6330,17 @@ function archiveCallToRoom(){
 function openSettings(){
   document.getElementById('changeNickInput').value = _myNick;
   document.getElementById('settingsModal').classList.add('open');
+  
+  // 🎯 Guardian 버튼 상태 복원 (3번에 걸쳐 타이밍 방어)
+  const restore = () => {
+    const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+    if(typeof _guardianUpdateButtonUI === 'function'){
+      _guardianUpdateButtonUI(currentMode);
+    }
+  };
+  restore();
+  setTimeout(restore, 100);
+  setTimeout(restore, 300);
 }
 
 function changeNick(){
