@@ -5644,28 +5644,36 @@ const _guardian = {
   loopId: null
 };
 
-function _guardianLoadPref(){ return localStorage.getItem('cgm2_guardian_on') === '1'; }
-function _guardianSavePref(on){ localStorage.setItem('cgm2_guardian_on', on ? '1' : '0'); }
+function _guardianLoadPref(){ return false; } // v2.1.0: 항상 비활성
+function _guardianSavePref(on){ /* v2.1.0 비활성 */ }
 
-// 초기 로드 - 이전에 켜뒀으면 자동 복원
+// 🚨 v2.1.0: 이전 Guardian 상태 완전 초기화 (시작 시)
+try {
+  localStorage.setItem('cgm2_guardian_mode', 'off');
+  localStorage.setItem('cgm2_guardian_on', '0');
+  localStorage.setItem('cgm2_guardian_dist', '0');
+  console.log('[Guardian v2.1.0] 초기화 완료 - 비활성 상태');
+} catch(e){}
+
+// MUFE 레이어 강제 숨김 (3번 시도)
 setTimeout(() => {
-  const savedMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  console.log('[Guardian] 저장된 모드 복원:', savedMode);
-  
-  if(savedMode === 'off'){
-    // OFF는 버튼 UI만 복원
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+}, 100);
+setTimeout(() => {
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+}, 500);
+setTimeout(() => {
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+}, 2000);
+
+// 초기 로드 - Guardian 무조건 OFF
+setTimeout(() => {
+  console.log('[Guardian v2.1.0] 비활성 상태 유지');
+  if(typeof _guardianUpdateButtonUI === 'function'){
     _guardianUpdateButtonUI('off');
-  } else {
-    // phone / pc: 카메라 자동 시작
-    setGuardianMode(savedMode);
-    // 상태 유지 피드백
-    setTimeout(() => {
-      const icon = savedMode === 'phone' ? '📱' : '💻';
-      const range = savedMode === 'phone' ? '20~30cm' : '40~60cm';
-      if(typeof showToast === 'function'){
-        showToast('🛡️ Guardian 자동 복원 · ' + icon + ' ' + range);
-      }
-    }, 2000);
   }
 }, 1500);
 
@@ -5680,33 +5688,32 @@ setTimeout(() => {
 //   - 설정 팝업 열 때마다 버튼 빛 복원
 //   - 같은 모드 재클릭 시 카메라 재시작 방지
 function setGuardianMode(mode, skipToggle){
-  // 현재 모드와 같으면 스킵 (빛만 다시 표시)
-  const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  const isSameMode = (currentMode === mode);
+  // 🚨 v2.1.0: Guardian 비활성 - 클릭 무시
+  console.log('[Guardian v2.1.0] 비활성 상태 · 클릭 무시:', mode);
   
-  localStorage.setItem('cgm2_guardian_mode', mode);
+  // UI는 항상 OFF로 유지
+  localStorage.setItem('cgm2_guardian_mode', 'off');
+  _guardian.active = false;
+  _guardian.threshold = 0;
+  _guardian.tolerance = 0;
   
-  // 항상 버튼 상태 업데이트 (DOM이 있으면)
-  _guardianUpdateButtonUI(mode);
+  // MUFE 레이어 확실히 숨김
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
   
-  if(mode === 'off'){
-    _guardian.threshold = 0;
-    _guardian.tolerance = 0;
-    if(_guardian.active && !skipToggle) toggleGuardian(false, false);
-    
-  } else if(mode === 'phone'){
-    _guardian.threshold = 20;
-    _guardian.tolerance = 10; // 20~30cm 허용
-    // 같은 모드 + 이미 active면 카메라 재시작 안 함
-    if(!skipToggle && !_guardian.active){
-      toggleGuardian(true, false);
-    }
-    
-  } else if(mode === 'pc'){
-    _guardian.threshold = 40;
-    _guardian.tolerance = 20; // 40~60cm 허용
-    if(!skipToggle && !_guardian.active){
-      toggleGuardian(true, false);
+  // 스트림 닫기 (혹시 남아있으면)
+  if(_guardian.stream){
+    try { _guardian.stream.getTracks().forEach(t => t.stop()); } catch(e){}
+    _guardian.stream = null;
+  }
+  
+  // OFF 버튼에 빛 유지
+  _guardianUpdateButtonUI('off');
+  
+  // 안내
+  if(mode !== 'off'){
+    if(typeof showToast === 'function') {
+      showToast('💡 Guardian은 다음 업데이트에서 활성화됩니다');
     }
   }
 }
@@ -5814,6 +5821,16 @@ function _guardianLoadMediaPipe(){
 }
 
 async function toggleGuardian(on, silent){
+  // 🚨 v2.1.0: Guardian 비활성 - 카메라 절대 시작 안 함
+  console.log('[Guardian v2.1.0] toggle 무시');
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+  _guardian.active = false;
+  return;
+}
+
+// 이하 구 함수들 보존 (호출 돼도 위 return으로 실행 안 됨)
+async function _toggleGuardianOld_DISABLED(on, silent){
   const layer = document.getElementById('guardianMufeLayer');
   const valDisplay = document.getElementById('valGuardian');
   const dbgCam = document.getElementById('dbgCam');
@@ -5894,15 +5911,8 @@ async function toggleGuardian(on, silent){
 }
 
 async function _guardianLoop(){
-  if(!_guardian.active) return;
-  try {
-    if(_guardian.video && _guardian.video.readyState === 4){
-      await _guardian.detector.send({ image: _guardian.video });
-    }
-  } catch(e){}
-  setTimeout(() => {
-    if(_guardian.active) _guardianLoop();
-  }, 100); // 10 FPS (0.1초 간격, 빠른 반응)
+  // 🚨 v2.1.0: 감지 루프 비활성
+  return;
 }
 
 function _guardianOnResults(results){
@@ -5983,49 +5993,25 @@ function guardianEmergencyOff(){
   showToast('💡 완전 해제: 설정 → ⚪ OFF 클릭');
 }
 
-// 🛡️ 화면 이탈 감지 (Patent #47 확장)
-// 탭 전환, 앱 전환, 최근 앱 미리보기, 창 전환 시 즉시 MUFE
+// 🛡️ 화면 이탈 감지 (v2.1.0 - 비활성)
 function _guardianForceMufe(reason){
-  if(!_guardian.active) return;
-  const mode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  if(mode === 'off') return;
-  
-  // 일시 정지 중이면 스킵
-  if(_guardian.pausedUntil && Date.now() < _guardian.pausedUntil) return;
-  
-  console.log('[Guardian] 화면 이탈 감지:', reason);
-  const layer = document.getElementById('guardianMufeLayer');
-  const distBig = document.getElementById('guardianDistBig');
-  const msg = document.getElementById('guardianMsg');
-  
-  if(layer) layer.style.display = 'flex';
-  if(distBig) distBig.textContent = '🚪';
-  if(msg) msg.innerHTML = '화면 이탈 감지<br><span style="color:#d4a843;font-weight:700;">' + reason + '</span><br><span style="font-size:10px;color:rgba(240,230,200,.5);">썸네일 유출 방어 (Patent #47)</span>';
+  // v2.1.0: Guardian 자체가 비활성이므로 아무 동작 안 함
+  return;
 }
 
-// ① 탭 전환 / 앱 전환 (가장 중요 - 스마트폰 최근 앱 미리보기)
+// ① 탭 전환 / 앱 전환 (v2.1.0 비활성)
 document.addEventListener('visibilitychange', () => {
-  if(document.hidden){
-    // 숨겨지는 순간 즉시 MUFE (스마트폰 썸네일에 이거 찍힘)
-    _guardianForceMufe('앱/탭 전환');
-  } else {
-    // 돌아왔을 때 카운터 리셋 (정상 복귀)
-    if(_guardian.active){
-      _guardian.noFaceCount = 0;
-    }
-  }
+  // 비활성 - 아무 동작 안 함
 });
 
-// ② 창 포커스 잃음 (PC 작업 표시줄 미리보기 방어)
+// ② 창 포커스 잃음 (v2.1.0 비활성)
 window.addEventListener('blur', () => {
-  _guardianForceMufe('창 포커스 이탈');
+  // 비활성 - 아무 동작 안 함
 });
 
-// ③ 창 포커스 복귀 (정상 상태 복원)
+// ③ 창 포커스 복귀 (v2.1.0 비활성)
 window.addEventListener('focus', () => {
-  if(_guardian.active){
-    _guardian.noFaceCount = 0;
-  }
+  // 비활성 - 아무 동작 안 함
 });
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
