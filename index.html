@@ -5338,9 +5338,121 @@ function displayCaption(caption, isMe){
   }
 }
 
-// 🌐 Level 3: Groq 번역 함수 (통화용)
+// 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
+//   1단계: localStorage (0ms)
+//   2단계: cgo-voice-db CDN (50~200ms) — 실제 배포 중
+//   3단계: Groq AI API (1~3초)
+// 📍 중앙 허브: https://gh951.github.io/cgo-voice-db/
+// 📦 실제 구조: data/phrases/{langCode}.json
+//    - 한국어가 키, 외국어가 값
+//    - 예: entries["안녕하세요"].text = "Hello"
+const CGO_VOICE_DB_BASE = 'https://gh951.github.io/cgo-voice-db';
+
+// 언어 코드 매핑 (BCP-47 → 짧은 코드)
+function _cgoShortLang(bcp){
+  const map = {
+    'ko-KR':'ko', 'en-US':'en', 'ja-JP':'ja', 'zh-CN':'zh',
+    'es-ES':'es', 'fr-FR':'fr', 'de-DE':'de', 'it-IT':'it',
+    'ru-RU':'ru', 'pt-BR':'pt', 'th-TH':'th', 'vi-VN':'vi',
+    'ar-SA':'ar', 'id-ID':'id'
+  };
+  return map[bcp] || bcp.split('-')[0];
+}
+
+// 메모리 캐시 (세션 내, 초고속)
+const _translateMemCache = {};
+
 async function translateForCall(text, fromLang, toLang){
   if(fromLang === toLang) return text;
+  if(!text || !text.trim()) return text;
+  
+  const cacheKey = `tr_${fromLang}_${toLang}_${text}`;
+  
+  // ═══ 1단계: 메모리 캐시 ═══
+  if(_translateMemCache[cacheKey]) return _translateMemCache[cacheKey];
+  
+  // ═══ 2단계: localStorage ═══
+  try {
+    const local = localStorage.getItem(cacheKey);
+    if(local){
+      _translateMemCache[cacheKey] = local;
+      return local;
+    }
+  } catch(e){}
+  
+  // ═══ 3단계: cgo-voice-db CDN (실제 구조: data/phrases/{langShort}.json) ═══
+  //   - 한국어 → 외국어: 한국어 원문으로 직접 조회
+  //   - 외국어 → 한국어: phrases[to].entries에서 text로 역검색
+  //   - 외국어 → 외국어: 한국어 경유 2단계 조회
+  try {
+    const dictCache = window._cgoDictCache || (window._cgoDictCache = {});
+    
+    // 한국어 → 외국어 (정방향)
+    if(fromLang === 'ko-KR' && toLang !== 'ko-KR'){
+      const toShort = _cgoShortLang(toLang);
+      let db = dictCache[toShort];
+      if(!db){
+        const res = await fetch(CGO_VOICE_DB_BASE + '/data/phrases/' + toShort + '.json', { cache: 'force-cache' });
+        if(res.ok){
+          db = await res.json();
+          dictCache[toShort] = db;
+          console.log('[cgo-voice-db] 로드:', toShort, db.count+'개');
+        } else {
+          dictCache[toShort] = { entries: {} };
+        }
+      }
+      if(db.entries && db.entries[text]){
+        const translated = db.entries[text].text;
+        _translateMemCache[cacheKey] = translated;
+        try { localStorage.setItem(cacheKey, translated); } catch(e){}
+        console.log('[cgo-voice-db] HIT:', text, '→', translated);
+        return translated;
+      }
+    }
+    
+    // 외국어 → 한국어 (역방향)
+    if(toLang === 'ko-KR' && fromLang !== 'ko-KR'){
+      const fromShort = _cgoShortLang(fromLang);
+      let db = dictCache[fromShort];
+      if(!db){
+        const res = await fetch(CGO_VOICE_DB_BASE + '/data/phrases/' + fromShort + '.json', { cache: 'force-cache' });
+        if(res.ok){
+          db = await res.json();
+          dictCache[fromShort] = db;
+        } else {
+          dictCache[fromShort] = { entries: {} };
+        }
+      }
+      // 외국어로 한국어 찾기 (역검색)
+      if(db.entries){
+        for(const korText in db.entries){
+          if(db.entries[korText].text.toLowerCase() === text.toLowerCase()){
+            _translateMemCache[cacheKey] = korText;
+            try { localStorage.setItem(cacheKey, korText); } catch(e){}
+            console.log('[cgo-voice-db] 역검색 HIT:', text, '→', korText);
+            return korText;
+          }
+        }
+      }
+    }
+    
+    // 외국어 → 외국어 (한국어 경유)
+    if(fromLang !== 'ko-KR' && toLang !== 'ko-KR'){
+      const koMid = await translateForCall(text, fromLang, 'ko-KR');
+      if(koMid && koMid !== text){
+        const enResult = await translateForCall(koMid, 'ko-KR', toLang);
+        if(enResult && enResult !== koMid){
+          _translateMemCache[cacheKey] = enResult;
+          try { localStorage.setItem(cacheKey, enResult); } catch(e){}
+          return enResult;
+        }
+      }
+    }
+  } catch(e){
+    console.warn('[cgo-voice-db]', e);
+  }
+  
+  // ═══ 4단계: Groq AI API (폴백) ═══
   const fromName = (_LANGS[fromLang] || {}).groq || fromLang;
   const toName = (_LANGS[toLang] || {}).groq || toLang;
   
@@ -5363,7 +5475,13 @@ async function translateForCall(text, fromLang, toLang){
     });
     const data = await response.json();
     const translated = (data.choices?.[0]?.message?.content || '').trim();
-    return translated || text;
+    const result = translated || text;
+    
+    if(result && result !== text){
+      _translateMemCache[cacheKey] = result;
+      try { localStorage.setItem(cacheKey, result); } catch(e){}
+    }
+    return result;
   } catch(e){
     console.warn('[translate]', e);
     return text;
