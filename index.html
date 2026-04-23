@@ -1441,8 +1441,24 @@ input[type=range].sec-range::-moz-range-thumb{
         <span class="sec-slider-label">🛡️ 시청 거리 제한 <span style="font-size:9px;opacity:.6;">(Patent #47)</span></span>
         <span class="sec-slider-value green" id="valGuardian">OFF</span>
       </div>
-      <input type="range" class="sec-range" id="slGuardian" min="0" max="50" value="0" oninput="onGuardianSlider(this.value)">
-      <div class="sec-range-hint"><span>OFF (0)</span><span>20cm · 40cm · 50cm</span></div>
+      <!-- 🎯 대장님 UX: 슬라이더 대신 3개 버튼 (클릭 한 번) -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px;">
+        <button id="gBtnOff" onclick="setGuardianMode('off')" 
+          style="padding:10px 6px;background:rgba(52,211,153,.15);border:1.5px solid rgba(52,211,153,.5);border-radius:10px;color:#34d399;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          ⚪ OFF
+        </button>
+        <button id="gBtnPhone" onclick="setGuardianMode('phone')" 
+          style="padding:10px 6px;background:rgba(56,189,248,.15);border:1.5px solid rgba(56,189,248,.5);border-radius:10px;color:#38bdf8;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          📱 20~30cm
+        </button>
+        <button id="gBtnPc" onclick="setGuardianMode('pc')" 
+          style="padding:10px 6px;background:rgba(212,168,67,.15);border:1.5px solid rgba(212,168,67,.5);border-radius:10px;color:#d4a843;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;transition:.2s;">
+          💻 40~60cm
+        </button>
+      </div>
+      <div style="font-size:9px;color:rgba(240,230,200,.5);margin-top:6px;text-align:center;line-height:1.4;">
+        📱 스마트폰 용 · 💻 PC·모니터 용 · 클릭하면 카메라 자동 시작
+      </div>
     </div>
   </div>
 
@@ -3859,32 +3875,28 @@ function setLevel(level){
     setSlider('slSpeed', 10);
     setSlider('slOpacity', 0);
     // Guardian OFF
-    setSlider('slGuardian', 0);
-    onGuardianSlider(0);
+    setGuardianMode('off');
   } else if(level==='safe'){
     setSlider('slScroll', 12);
     setSlider('slTime', 15);
     setSlider('slSpeed', 6);
     setSlider('slOpacity', 15);
-    // Guardian 40cm (여유)
-    setSlider('slGuardian', 40);
-    onGuardianSlider(40);
+    // Guardian PC 모드 (여유)
+    setGuardianMode('pc');
   } else if(level==='high'){
     setSlider('slScroll', 6);
     setSlider('slTime', 7);
     setSlider('slSpeed', 3);
     setSlider('slOpacity', 45);
-    // Guardian 30cm
-    setSlider('slGuardian', 30);
-    onGuardianSlider(30);
+    // Guardian Phone 모드
+    setGuardianMode('phone');
   } else if(level==='max'){
     setSlider('slScroll', 4);
     setSlider('slTime', 3);
     setSlider('slSpeed', 1);
     setSlider('slOpacity', 70);
-    // Guardian 20cm (최강!)
-    setSlider('slGuardian', 20);
-    onGuardianSlider(20);
+    // Guardian Phone 모드 (최강!)
+    setGuardianMode('phone');
   }
   onSliderChange();
 }
@@ -5420,53 +5432,84 @@ function _guardianSavePref(on){ localStorage.setItem('cgm2_guardian_on', on ? '1
 
 // 초기 로드 - 이전에 켜뒀으면 자동 복원
 setTimeout(() => {
-  // 슬라이더 초기값 복원
-  const savedDist = parseInt(localStorage.getItem('cgm2_guardian_dist') || '0');
-  const sl = document.getElementById('slGuardian');
-  if(sl && savedDist > 0){
-    sl.value = savedDist;
-    onGuardianSlider(savedDist);
-  }
-  // 자동 복원
-  if(_guardianLoadPref() && savedDist > 0){
-    toggleGuardian(true, true);
-  }
+  const savedMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+  setGuardianMode(savedMode);
 }, 1500);
 
-// 🛡️ Guardian 슬라이더 핸들러 (0 = OFF, 10~50 = 거리 cm)
-// 실제 차단 거리 = 설정값 + 10cm (여유 범위)
-function onGuardianSlider(val){
-  const v = parseInt(val);
+// 🛡️ Guardian 모드 선택 (대장님 UX: 버튼 클릭 방식)
+//   'off'   = 비활성
+//   'phone' = 스마트폰 20~30cm (임계값 20, 여유 10)
+//   'pc'    = PC/모니터 40~60cm (임계값 40, 여유 20)
+function setGuardianMode(mode){
   const valDisplay = document.getElementById('valGuardian');
+  const btnOff = document.getElementById('gBtnOff');
+  const btnPhone = document.getElementById('gBtnPhone');
+  const btnPc = document.getElementById('gBtnPc');
   
-  if(v === 0){
-    // OFF
+  // 모든 버튼 원상복구
+  [btnOff, btnPhone, btnPc].forEach(b => {
+    if(b){
+      b.style.transform = 'scale(1)';
+      b.style.boxShadow = 'none';
+    }
+  });
+  
+  if(mode === 'off'){
+    _guardian.threshold = 0;
+    _guardian.tolerance = 0;
+    localStorage.setItem('cgm2_guardian_mode', 'off');
+    
+    if(btnOff){
+      btnOff.style.transform = 'scale(1.05)';
+      btnOff.style.boxShadow = '0 0 16px rgba(52,211,153,.6)';
+    }
     if(valDisplay){
       valDisplay.textContent = 'OFF';
       valDisplay.classList.remove('red', 'yellow');
       valDisplay.classList.add('green');
     }
-    localStorage.setItem('cgm2_guardian_dist', '0');
     if(_guardian.active) toggleGuardian(false, false);
-  } else {
-    // ON - 거리에 따라 색상
-    const cm = Math.max(10, v); // 최소 10cm
-    _guardian.threshold = cm;
     
-    if(valDisplay){
-      // 🎯 여유 범위 표시 (대장님 제안: 20~30cm 식으로)
-      const triggerDist = cm + 10;
-      valDisplay.textContent = cm + '~' + triggerDist + 'cm';
-      valDisplay.classList.remove('green');
-      if(cm <= 20) valDisplay.classList.add('red');          // 엄격
-      else if(cm <= 35) valDisplay.classList.add('yellow');  // 중간
-      else valDisplay.classList.remove('red', 'yellow');     // 여유
+  } else if(mode === 'phone'){
+    _guardian.threshold = 20;
+    _guardian.tolerance = 10; // 20~30cm 허용
+    localStorage.setItem('cgm2_guardian_mode', 'phone');
+    
+    if(btnPhone){
+      btnPhone.style.transform = 'scale(1.05)';
+      btnPhone.style.boxShadow = '0 0 16px rgba(56,189,248,.6)';
     }
-    localStorage.setItem('cgm2_guardian_dist', String(cm));
+    if(valDisplay){
+      valDisplay.textContent = '📱 20~30cm';
+      valDisplay.classList.remove('green', 'yellow');
+      valDisplay.style.color = '#38bdf8';
+    }
+    if(!_guardian.active) toggleGuardian(true, false);
     
-    // 슬라이더 움직이면 자동 활성화
+  } else if(mode === 'pc'){
+    _guardian.threshold = 40;
+    _guardian.tolerance = 20; // 40~60cm 허용
+    localStorage.setItem('cgm2_guardian_mode', 'pc');
+    
+    if(btnPc){
+      btnPc.style.transform = 'scale(1.05)';
+      btnPc.style.boxShadow = '0 0 16px rgba(212,168,67,.6)';
+    }
+    if(valDisplay){
+      valDisplay.textContent = '💻 40~60cm';
+      valDisplay.classList.remove('green', 'red');
+      valDisplay.style.color = '#d4a843';
+    }
     if(!_guardian.active) toggleGuardian(true, false);
   }
+}
+
+// 기존 onGuardianSlider → setGuardianMode로 리다이렉트 (호환성)
+function onGuardianSlider(val){
+  const v = parseInt(val);
+  if(v === 0) setGuardianMode('off');
+  else if(v <= 30) setGuardianMode('phone');
+  else setGuardianMode('pc');
 }
 
 // 디바이스별 임계값
@@ -5550,8 +5593,8 @@ async function toggleGuardian(on, silent){
       console.error('[Guardian]', err);
       if(dbgCam) dbgCam.textContent = 'ERROR: ' + err.message;
       _guardianSavePref(false);
-      const sl = document.getElementById('slGuardian');
-      if(sl){ sl.value = 0; onGuardianSlider(0); }
+      // OFF 버튼으로 자동 복귀
+      setGuardianMode('off');
       if(!silent) showToast('⚠️ 카메라 권한 필요: ' + err.message);
     }
   } else {
@@ -5645,12 +5688,12 @@ function _guardianOnResults(results){
   const finalDist = Math.round(_guardian.smoothDist);
   _guardian.lastDist = finalDist;
   
-  // 🎯 여유 범위 적용 (대장님 제안: 20~30cm 유예존)
-  // 슬라이더 값 = 중심점
-  // +10cm 까지는 경고 없이 OK (헐렁한 범위)
+  // 🎯 여유 범위 적용 (모드별 tolerance)
+  // phone: 20cm + 10 = 30cm 이상 차단
+  // pc: 40cm + 20 = 60cm 이상 차단
   const threshold = _guardian.threshold;
-  const tolerance = 10; // cm 여유
-  const triggerDist = threshold + tolerance; // 예: 20cm 설정 시 30cm부터 차단
+  const tolerance = _guardian.tolerance || 10;
+  const triggerDist = threshold + tolerance;
   
   if(finalDist > triggerDist){
     // MUFE 활성화
@@ -5667,6 +5710,9 @@ function _guardianOnResults(results){
 function guardianEmergencyOff(){
   console.log('[Guardian] 비상 해제');
   _guardian.active = false;
+  _guardian.noFaceCount = 0;
+  _guardian.lastDist = null;
+  _guardian.smoothDist = null;
   
   if(_guardian.stream){
     _guardian.stream.getTracks().forEach(t => t.stop());
@@ -5676,23 +5722,10 @@ function guardianEmergencyOff(){
   const layer = document.getElementById('guardianMufeLayer');
   if(layer) layer.style.display = 'none';
   
-  // 슬라이더 0으로 초기화
-  const sl = document.getElementById('slGuardian');
-  const valDisplay = document.getElementById('valGuardian');
-  if(sl) sl.value = 0;
-  if(valDisplay){
-    valDisplay.textContent = 'OFF';
-    valDisplay.classList.remove('red', 'yellow');
-    valDisplay.classList.add('green');
-  }
+  // OFF 모드로 전환
+  setGuardianMode('off');
   
-  _guardianSavePref(false);
-  localStorage.setItem('cgm2_guardian_dist', '0');
-  _guardian.noFaceCount = 0;
-  _guardian.lastDist = null;
-  _guardian.smoothDist = null;
-  
-  showToast('🚨 Guardian 비상 해제 · 설정에서 다시 조절하세요');
+  showToast('🚨 Guardian 비상 해제');
 }
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
