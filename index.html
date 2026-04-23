@@ -1588,10 +1588,10 @@ input[type=range].sec-range::-moz-range-thumb{
     <video id="guardianPreviewVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
   </div>
   
-  <!-- ⏸️ 일시 정지 버튼 (MUFE 닫고 30초 유예, 설정 유지) -->
-  <button onclick="guardianEmergencyOff()" style="margin-top:8px;padding:12px 24px;background:rgba(245,158,11,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(245,158,11,.5);">
-    ⏸️ 30초 일시 정지
-  </button>
+  <!-- Guardian 해제는 설정에서 ⚪ OFF 클릭으로만 가능 -->
+  <div style="margin-top:14px;padding:10px 16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;font-size:11px;color:rgba(240,230,200,.7);z-index:2;text-align:center;">
+    💡 얼굴이 보이면 자동 해제됩니다
+  </div>
   
   <div style="position:absolute;bottom:20px;font-size:9px;color:rgba(240,230,200,.3);z-index:2;text-align:center;">
     Patent #47 · © 2026 이주원 × C-19<br>
@@ -5900,18 +5900,11 @@ async function _guardianLoop(){
   } catch(e){}
   setTimeout(() => {
     if(_guardian.active) _guardianLoop();
-  }, 333); // 3 FPS (배터리 절약)
+  }, 100); // 10 FPS (0.1초 간격, 빠른 반응)
 }
 
 function _guardianOnResults(results){
   if(!_guardian.active) return;
-  
-  // ⏸️ 일시 정지 중이면 MUFE 안 띄움
-  if(_guardian.pausedUntil && Date.now() < _guardian.pausedUntil){
-    const layer = document.getElementById('guardianMufeLayer');
-    if(layer) layer.style.display = 'none';
-    return;
-  }
   
   const layer = document.getElementById('guardianMufeLayer');
   const distBig = document.getElementById('guardianDistBig');
@@ -5924,34 +5917,31 @@ function _guardianOnResults(results){
   // 🔍 디버그 업데이트
   if(dbgFace) dbgFace.textContent = faces.length + ' face(s)';
   
-  // 🎯 관대 처리: 얼굴 감지 실패 시 30프레임(10초) 유예
+  // 🎯 대장님 설계: 얼굴 없음 = 0.5초 내 즉시 MUFE
+  // 3 FPS이므로 2프레임 = 약 0.66초 유예 (카메라 초기화 순간만 방어)
   if(faces.length === 0){
     _guardian.noFaceCount = (_guardian.noFaceCount || 0) + 1;
     
-    // 30프레임(10초) 연속 얼굴 없어야 진짜 부재 판정
-    // 너무 엄격하면 실험 불가 → 관대하게
-    if(_guardian.noFaceCount < 30){
-      // 최근 거리 표시 유지 (또는 "감지 중...")
-      if(_guardian.lastDist){
-        // 마지막 거리 기준으로 상태 유지
-        return;
-      } else {
-        // 아직 한 번도 얼굴 못 잡음 - MUFE 숨김 (대기)
+    // 첫 1프레임은 유예 (카메라 막 시작할 때 잠깐 빈 프레임 방어)
+    if(_guardian.noFaceCount < 2){
+      // 아직 한 번도 얼굴 못 잡았으면 MUFE 띄우지 않음 (초기화 중)
+      if(!_guardian.firstFaceDetected){
         layer.style.display = 'none';
-        if(dbgFace) dbgFace.textContent = 'waiting... (' + _guardian.noFaceCount + '/30)';
         return;
       }
+      // 얼굴 감지된 적 있으면 바로 MUFE (0.33초 내)
     }
     
-    // 10초 지나도 얼굴 없음 - MUFE 활성화
+    // 즉시 MUFE 활성화 (보안 우선)
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = '👁️ ?';
-    if(msg) msg.innerHTML = '사용자 부재 감지<br><span style="color:#d4a843;font-weight:700;">화면을 보고 계세요?</span><br><span style="font-size:10px;color:rgba(240,230,200,.5);">감지 안 되면 비상 버튼 클릭</span>';
+    if(msg) msg.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로 바라봐 주세요</span>';
     return;
   }
   
-  // 얼굴 감지됨 → 카운터 리셋
+  // 얼굴 감지됨 → 카운터 리셋 + 첫 감지 플래그
   _guardian.noFaceCount = 0;
+  _guardian.firstFaceDetected = true;
   
   // 위협 2: 얼굴 2개 이상 (어깨 너머 훔쳐보기)
   if(faces.length >= 2){
@@ -5992,28 +5982,9 @@ function _guardianOnResults(results){
   }
 }
 
-// ⏸️ 일시 정지 버튼 (MUFE 닫고 30초 유예 - 설정은 유지)
+// Guardian 완전 해제는 설정에서 ⚪ OFF 클릭으로만 가능
 function guardianEmergencyOff(){
-  console.log('[Guardian] 일시 정지 (30초 유예)');
-  
-  // MUFE 레이어만 강제로 닫기
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-  
-  // 카운터만 리셋 (설정은 유지!)
-  _guardian.noFaceCount = 0;
-  _guardian.lastDist = null;
-  _guardian.smoothDist = null;
-  
-  // 30초간 일시 정지 (카메라는 계속 작동, MUFE만 숨김)
-  _guardian.pausedUntil = Date.now() + 30000;
-  // 현재 모드 유지 (OFF로 바꾸지 않음!)
-  const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  console.log('[Guardian] 모드 유지:', currentMode);
-  
-  showToast('⏸️ Guardian 일시 정지 (30초) · 설정: ' + 
-    (currentMode === 'phone' ? '📱 20~30cm' :
-     currentMode === 'pc' ? '💻 40~60cm' : 'OFF') + ' 유지됨');
+  showToast('💡 완전 해제: 설정 → ⚪ OFF 클릭');
 }
 
 // 🛡️ 화면 이탈 감지 (Patent #47 확장)
