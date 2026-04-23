@@ -1612,6 +1612,32 @@ input[type=range].sec-range::-moz-range-thumb{
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }
   }
+  
+  /* 🛡️ Guardian 버튼 활성 상태 (CSS 클래스로 확실히) */
+  .g-btn-active-off {
+    background: linear-gradient(135deg, #34d399, #10b981) !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 20px rgba(52,211,153,.8), inset 0 0 10px rgba(255,255,255,.3) !important;
+    font-weight: 900 !important;
+  }
+  .g-btn-active-phone {
+    background: linear-gradient(135deg, #38bdf8, #0284c7) !important;
+    color: #fff !important;
+    border: 2px solid #fff !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 20px rgba(56,189,248,.8), inset 0 0 10px rgba(255,255,255,.3) !important;
+    font-weight: 900 !important;
+  }
+  .g-btn-active-pc {
+    background: linear-gradient(135deg, #d4a843, #b8922f) !important;
+    color: #000 !important;
+    border: 2px solid #fff !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 0 20px rgba(212,168,67,.8), inset 0 0 10px rgba(255,255,255,.3) !important;
+    font-weight: 900 !important;
+  }
 </style>
 
 <!-- 토스트 -->
@@ -5685,72 +5711,60 @@ function setGuardianMode(mode, skipToggle){
   }
 }
 
-// 🎨 버튼 UI만 업데이트 (빛나는 효과) - 2세트 버튼 모두 동기화
+// 🎨 버튼 UI만 업데이트 (CSS 클래스 방식 - inline style 불안정성 해결)
 function _guardianUpdateButtonUI(mode){
-  // 채팅방 보안 패널 버튼들
-  const valDisplay1 = document.getElementById('valGuardian');
-  const btnOff1 = document.getElementById('gBtnOff');
-  const btnPhone1 = document.getElementById('gBtnPhone');
-  const btnPc1 = document.getElementById('gBtnPc');
+  // 모든 Guardian 버튼 수집 (2세트)
+  const allButtons = [
+    document.getElementById('gBtnOff'),
+    document.getElementById('gBtnPhone'),
+    document.getElementById('gBtnPc'),
+    document.getElementById('gBtnOff2'),
+    document.getElementById('gBtnPhone2'),
+    document.getElementById('gBtnPc2')
+  ].filter(b => b !== null);
   
-  // 상단 설정 모달 버튼들
-  const valDisplay2 = document.getElementById('valGuardian2');
-  const btnOff2 = document.getElementById('gBtnOff2');
-  const btnPhone2 = document.getElementById('gBtnPhone2');
-  const btnPc2 = document.getElementById('gBtnPc2');
+  // 모든 활성 클래스 제거 (완전 초기화)
+  allButtons.forEach(b => {
+    b.classList.remove('g-btn-active-off', 'g-btn-active-phone', 'g-btn-active-pc');
+    // inline style도 제거 (과거 잔재)
+    b.style.transform = '';
+    b.style.boxShadow = '';
+  });
   
-  // 모든 버튼 원상복구
-  [btnOff1, btnPhone1, btnPc1, btnOff2, btnPhone2, btnPc2].forEach(b => {
-    if(b){
-      b.style.transform = 'scale(1)';
-      b.style.boxShadow = 'none';
+  // 선택된 모드에 맞는 버튼들에 활성 클래스 추가
+  if(mode === 'off'){
+    const offs = [document.getElementById('gBtnOff'), document.getElementById('gBtnOff2')].filter(b => b);
+    offs.forEach(b => b.classList.add('g-btn-active-off'));
+  } else if(mode === 'phone'){
+    const phones = [document.getElementById('gBtnPhone'), document.getElementById('gBtnPhone2')].filter(b => b);
+    phones.forEach(b => b.classList.add('g-btn-active-phone'));
+  } else if(mode === 'pc'){
+    const pcs = [document.getElementById('gBtnPc'), document.getElementById('gBtnPc2')].filter(b => b);
+    pcs.forEach(b => b.classList.add('g-btn-active-pc'));
+  }
+  
+  // 값 표시 업데이트 (2세트)
+  const valDisplays = [
+    document.getElementById('valGuardian'),
+    document.getElementById('valGuardian2')
+  ].filter(v => v);
+  
+  valDisplays.forEach(v => {
+    v.classList.remove('red', 'yellow', 'green');
+    if(mode === 'off'){
+      v.textContent = 'OFF';
+      v.classList.add('green');
+      v.style.color = '';
+    } else if(mode === 'phone'){
+      v.textContent = '📱 20~30cm';
+      v.style.color = '#38bdf8';
+    } else if(mode === 'pc'){
+      v.textContent = '💻 40~60cm';
+      v.style.color = '#d4a843';
     }
   });
   
-  if(mode === 'off'){
-    [btnOff1, btnOff2].forEach(b => {
-      if(b){
-        b.style.transform = 'scale(1.05)';
-        b.style.boxShadow = '0 0 16px rgba(52,211,153,.6)';
-      }
-    });
-    [valDisplay1, valDisplay2].forEach(v => {
-      if(v){
-        v.textContent = 'OFF';
-        v.classList.remove('red', 'yellow');
-        v.classList.add('green');
-        v.style.color = '';
-      }
-    });
-  } else if(mode === 'phone'){
-    [btnPhone1, btnPhone2].forEach(b => {
-      if(b){
-        b.style.transform = 'scale(1.05)';
-        b.style.boxShadow = '0 0 16px rgba(56,189,248,.6)';
-      }
-    });
-    [valDisplay1, valDisplay2].forEach(v => {
-      if(v){
-        v.textContent = '📱 20~30cm';
-        v.classList.remove('green', 'yellow', 'red');
-        v.style.color = '#38bdf8';
-      }
-    });
-  } else if(mode === 'pc'){
-    [btnPc1, btnPc2].forEach(b => {
-      if(b){
-        b.style.transform = 'scale(1.05)';
-        b.style.boxShadow = '0 0 16px rgba(212,168,67,.6)';
-      }
-    });
-    [valDisplay1, valDisplay2].forEach(v => {
-      if(v){
-        v.textContent = '💻 40~60cm';
-        v.classList.remove('green', 'red');
-        v.style.color = '#d4a843';
-      }
-    });
-  }
+  console.log('[Guardian UI] mode=' + mode + ', 버튼 업데이트 완료');
 }
 
 // 기존 onGuardianSlider → setGuardianMode로 리다이렉트 (호환성)
