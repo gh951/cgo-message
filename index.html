@@ -1588,14 +1588,14 @@ input[type=range].sec-range::-moz-range-thumb{
     <video id="guardianPreviewVideo" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
   </div>
   
-  <!-- 🚨 비상 탈출 버튼 (감지 실패 시 안전장치) -->
-  <button onclick="guardianEmergencyOff()" style="margin-top:8px;padding:12px 24px;background:rgba(239,68,68,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(239,68,68,.5);">
-    🚨 Guardian 해제 (비상)
+  <!-- ⏸️ 일시 정지 버튼 (MUFE 닫고 30초 유예, 설정 유지) -->
+  <button onclick="guardianEmergencyOff()" style="margin-top:8px;padding:12px 24px;background:rgba(245,158,11,.85);border:2px solid #fff;border-radius:24px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;z-index:2;box-shadow:0 4px 20px rgba(245,158,11,.5);">
+    ⏸️ 30초 일시 정지
   </button>
   
   <div style="position:absolute;bottom:20px;font-size:9px;color:rgba(240,230,200,.3);z-index:2;text-align:center;">
     Patent #47 · © 2026 이주원 × C-19<br>
-    <span style="color:rgba(240,230,200,.5);">감지 안 되면 위 버튼으로 해제</span>
+    <span style="color:rgba(240,230,200,.5);">완전 해제: 설정 → [⚪ OFF] 클릭</span>
   </div>
 </div>
 
@@ -5713,34 +5713,49 @@ function setGuardianMode(mode, skipToggle){
 
 // 🎨 버튼 UI만 업데이트 (CSS 클래스 방식 - inline style 불안정성 해결)
 function _guardianUpdateButtonUI(mode){
+  console.log('━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('[Guardian UI] mode=' + mode);
+  console.log('[Guardian UI] localStorage value:', localStorage.getItem('cgm2_guardian_mode'));
+  
   // 모든 Guardian 버튼 수집 (2세트)
-  const allButtons = [
-    document.getElementById('gBtnOff'),
-    document.getElementById('gBtnPhone'),
-    document.getElementById('gBtnPc'),
-    document.getElementById('gBtnOff2'),
-    document.getElementById('gBtnPhone2'),
-    document.getElementById('gBtnPc2')
-  ].filter(b => b !== null);
+  const btn1 = document.getElementById('gBtnOff');
+  const btn2 = document.getElementById('gBtnPhone');
+  const btn3 = document.getElementById('gBtnPc');
+  const btn4 = document.getElementById('gBtnOff2');
+  const btn5 = document.getElementById('gBtnPhone2');
+  const btn6 = document.getElementById('gBtnPc2');
+  
+  console.log('[Guardian UI] 버튼 존재:',
+    btn1 ? '✓채팅방OFF' : '✗',
+    btn2 ? '✓채팅방📱' : '✗',
+    btn3 ? '✓채팅방💻' : '✗',
+    btn4 ? '✓상단OFF' : '✗',
+    btn5 ? '✓상단📱' : '✗',
+    btn6 ? '✓상단💻' : '✗'
+  );
+  
+  const allButtons = [btn1, btn2, btn3, btn4, btn5, btn6].filter(b => b !== null);
   
   // 모든 활성 클래스 제거 (완전 초기화)
   allButtons.forEach(b => {
     b.classList.remove('g-btn-active-off', 'g-btn-active-phone', 'g-btn-active-pc');
-    // inline style도 제거 (과거 잔재)
     b.style.transform = '';
     b.style.boxShadow = '';
   });
   
   // 선택된 모드에 맞는 버튼들에 활성 클래스 추가
   if(mode === 'off'){
-    const offs = [document.getElementById('gBtnOff'), document.getElementById('gBtnOff2')].filter(b => b);
-    offs.forEach(b => b.classList.add('g-btn-active-off'));
+    if(btn1) btn1.classList.add('g-btn-active-off');
+    if(btn4) btn4.classList.add('g-btn-active-off');
+    console.log('[Guardian UI] OFF 적용, 클래스:', btn4 ? btn4.className : 'no btn4');
   } else if(mode === 'phone'){
-    const phones = [document.getElementById('gBtnPhone'), document.getElementById('gBtnPhone2')].filter(b => b);
-    phones.forEach(b => b.classList.add('g-btn-active-phone'));
+    if(btn2) btn2.classList.add('g-btn-active-phone');
+    if(btn5) btn5.classList.add('g-btn-active-phone');
+    console.log('[Guardian UI] PHONE 적용, 클래스:', btn5 ? btn5.className : 'no btn5');
   } else if(mode === 'pc'){
-    const pcs = [document.getElementById('gBtnPc'), document.getElementById('gBtnPc2')].filter(b => b);
-    pcs.forEach(b => b.classList.add('g-btn-active-pc'));
+    if(btn3) btn3.classList.add('g-btn-active-pc');
+    if(btn6) btn6.classList.add('g-btn-active-pc');
+    console.log('[Guardian UI] PC 적용, 클래스:', btn6 ? btn6.className : 'no btn6');
   }
   
   // 값 표시 업데이트 (2세트)
@@ -5764,7 +5779,7 @@ function _guardianUpdateButtonUI(mode){
     }
   });
   
-  console.log('[Guardian UI] mode=' + mode + ', 버튼 업데이트 완료');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━');
 }
 
 // 기존 onGuardianSlider → setGuardianMode로 리다이렉트 (호환성)
@@ -5890,6 +5905,14 @@ async function _guardianLoop(){
 
 function _guardianOnResults(results){
   if(!_guardian.active) return;
+  
+  // ⏸️ 일시 정지 중이면 MUFE 안 띄움
+  if(_guardian.pausedUntil && Date.now() < _guardian.pausedUntil){
+    const layer = document.getElementById('guardianMufeLayer');
+    if(layer) layer.style.display = 'none';
+    return;
+  }
+  
   const layer = document.getElementById('guardianMufeLayer');
   const distBig = document.getElementById('guardianDistBig');
   const msg = document.getElementById('guardianMsg');
@@ -5969,27 +5992,74 @@ function _guardianOnResults(results){
   }
 }
 
-// 🚨 비상 탈출 버튼 (감지 실패 시 사용자 보호)
+// ⏸️ 일시 정지 버튼 (MUFE 닫고 30초 유예 - 설정은 유지)
 function guardianEmergencyOff(){
-  console.log('[Guardian] 비상 해제');
-  _guardian.active = false;
+  console.log('[Guardian] 일시 정지 (30초 유예)');
+  
+  // MUFE 레이어만 강제로 닫기
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer) layer.style.display = 'none';
+  
+  // 카운터만 리셋 (설정은 유지!)
   _guardian.noFaceCount = 0;
   _guardian.lastDist = null;
   _guardian.smoothDist = null;
   
-  if(_guardian.stream){
-    _guardian.stream.getTracks().forEach(t => t.stop());
-    _guardian.stream = null;
-  }
+  // 30초간 일시 정지 (카메라는 계속 작동, MUFE만 숨김)
+  _guardian.pausedUntil = Date.now() + 30000;
+  // 현재 모드 유지 (OFF로 바꾸지 않음!)
+  const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+  console.log('[Guardian] 모드 유지:', currentMode);
   
-  const layer = document.getElementById('guardianMufeLayer');
-  if(layer) layer.style.display = 'none';
-  
-  // OFF 모드로 전환
-  setGuardianMode('off');
-  
-  showToast('🚨 Guardian 비상 해제');
+  showToast('⏸️ Guardian 일시 정지 (30초) · 설정: ' + 
+    (currentMode === 'phone' ? '📱 20~30cm' :
+     currentMode === 'pc' ? '💻 40~60cm' : 'OFF') + ' 유지됨');
 }
+
+// 🛡️ 화면 이탈 감지 (Patent #47 확장)
+// 탭 전환, 앱 전환, 최근 앱 미리보기, 창 전환 시 즉시 MUFE
+function _guardianForceMufe(reason){
+  if(!_guardian.active) return;
+  const mode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+  if(mode === 'off') return;
+  
+  // 일시 정지 중이면 스킵
+  if(_guardian.pausedUntil && Date.now() < _guardian.pausedUntil) return;
+  
+  console.log('[Guardian] 화면 이탈 감지:', reason);
+  const layer = document.getElementById('guardianMufeLayer');
+  const distBig = document.getElementById('guardianDistBig');
+  const msg = document.getElementById('guardianMsg');
+  
+  if(layer) layer.style.display = 'flex';
+  if(distBig) distBig.textContent = '🚪';
+  if(msg) msg.innerHTML = '화면 이탈 감지<br><span style="color:#d4a843;font-weight:700;">' + reason + '</span><br><span style="font-size:10px;color:rgba(240,230,200,.5);">썸네일 유출 방어 (Patent #47)</span>';
+}
+
+// ① 탭 전환 / 앱 전환 (가장 중요 - 스마트폰 최근 앱 미리보기)
+document.addEventListener('visibilitychange', () => {
+  if(document.hidden){
+    // 숨겨지는 순간 즉시 MUFE (스마트폰 썸네일에 이거 찍힘)
+    _guardianForceMufe('앱/탭 전환');
+  } else {
+    // 돌아왔을 때 카운터 리셋 (정상 복귀)
+    if(_guardian.active){
+      _guardian.noFaceCount = 0;
+    }
+  }
+});
+
+// ② 창 포커스 잃음 (PC 작업 표시줄 미리보기 방어)
+window.addEventListener('blur', () => {
+  _guardianForceMufe('창 포커스 이탈');
+});
+
+// ③ 창 포커스 복귀 (정상 상태 복원)
+window.addEventListener('focus', () => {
+  if(_guardian.active){
+    _guardian.noFaceCount = 0;
+  }
+});
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
@@ -6345,16 +6415,19 @@ function openSettings(){
   document.getElementById('changeNickInput').value = _myNick;
   document.getElementById('settingsModal').classList.add('open');
   
-  // 🎯 Guardian 버튼 상태 복원 (3번에 걸쳐 타이밍 방어)
+  // 🎯 Guardian 버튼 상태 복원 - 강력한 5중 타이밍 방어
   const restore = () => {
     const currentMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
+    console.log('[openSettings] 복원 시도 mode=' + currentMode);
     if(typeof _guardianUpdateButtonUI === 'function'){
       _guardianUpdateButtonUI(currentMode);
     }
   };
-  restore();
-  setTimeout(restore, 100);
-  setTimeout(restore, 300);
+  restore();                 // 즉시
+  setTimeout(restore, 50);    
+  setTimeout(restore, 150);   
+  setTimeout(restore, 300);   
+  setTimeout(restore, 600);   // 최대 600ms까지 재시도
 }
 
 function changeNick(){
