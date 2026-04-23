@@ -1438,11 +1438,11 @@ input[type=range].sec-range::-moz-range-thumb{
     </div>
     <div class="sec-slider-row">
       <div class="sec-slider-head">
-        <span class="sec-slider-label">🔁 문장 반복 횟수</span>
-        <span class="sec-slider-value green" id="valRepeat">∞</span>
+        <span class="sec-slider-label">🛡️ 시청 거리 제한 <span style="font-size:9px;opacity:.6;">(Patent #47)</span></span>
+        <span class="sec-slider-value green" id="valGuardian">OFF</span>
       </div>
-      <input type="range" class="sec-range" id="slRepeat" min="0" max="5" value="0" oninput="onSliderChange()">
-      <div class="sec-range-hint"><span>∞ (무한)</span><span>5회 (제한)</span></div>
+      <input type="range" class="sec-range" id="slGuardian" min="0" max="50" value="0" oninput="onGuardianSlider(this.value)">
+      <div class="sec-range-hint"><span>OFF (0)</span><span>20cm · 40cm · 50cm</span></div>
     </div>
   </div>
 
@@ -1516,26 +1516,7 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="modal-title">⚙️ 설정</div>
     <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">내 닉네임 변경</div>
     <input class="modal-field" id="changeNickInput" placeholder="새 닉네임">
-    
-    <!-- 🛡️ 20cm Guardian (특허 #47) -->
-    <div style="margin-top:14px;padding:12px;background:rgba(212,168,67,.08);border:1px solid rgba(212,168,67,.3);border-radius:12px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-        <div style="font-size:22px;">🛡️</div>
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:800;color:#d4a843;">20cm Guardian</div>
-          <div style="font-size:10px;color:rgba(240,230,200,.5);margin-top:1px;">물리적 거리 기반 보안 · Patent #47</div>
-        </div>
-        <label class="switch" style="position:relative;display:inline-block;width:44px;height:24px;">
-          <input type="checkbox" id="guardianToggle" onchange="toggleGuardian(this.checked)" style="opacity:0;width:0;height:0;">
-          <span id="guardianSlider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,.2);transition:.3s;border-radius:24px;"></span>
-        </label>
-      </div>
-      <div style="font-size:10px;color:rgba(240,230,200,.5);line-height:1.4;">
-        카메라로 거리 감지 → 20cm 초과 시 자동으로 화면 가림. 찍어도 읽을 수 없는 노이즈만 저장됩니다.
-      </div>
-    </div>
-    
-    <div class="modal-btns" style="margin-top:14px;">
+    <div class="modal-btns">
       <button class="modal-btn cancel" onclick="document.getElementById('settingsModal').classList.remove('open')">닫기</button>
       <button class="modal-btn confirm" onclick="changeNick()">변경</button>
     </div>
@@ -1564,17 +1545,6 @@ input[type=range].sec-range::-moz-range-thumb{
   @keyframes gMufePulse {
     0%, 100% { opacity: 0.3; }
     50% { opacity: 1; }
-  }
-  #guardianSlider:before {
-    position: absolute; content: "";
-    height: 18px; width: 18px; left: 3px; bottom: 3px;
-    background: white; transition: .3s; border-radius: 50%;
-  }
-  input:checked + #guardianSlider {
-    background: #d4a843;
-  }
-  input:checked + #guardianSlider:before {
-    transform: translateX(20px);
   }
 </style>
 
@@ -3852,54 +3822,64 @@ function setLevel(level){
   const btn = document.querySelector('.sec-preset.'+level);
   if(btn) btn.classList.add('active');
 
+  // 🎯 프리셋별 Guardian 거리 자동 설정 (특허 #47)
+  const $ = id => document.getElementById(id);
+  const setSlider = (id, v) => { const el = $(id); if(el) el.value = v; };
+  
   if(level==='normal'){
-    document.getElementById('slScroll').value=15;
-    document.getElementById('slTime').value=30;
-    document.getElementById('slSpeed').value=10; // 0.50초 (여유)
-    document.getElementById('slOpacity').value=0;
-    document.getElementById('slRepeat').value=0;
+    setSlider('slScroll', 15);
+    setSlider('slTime', 30);
+    setSlider('slSpeed', 10);
+    setSlider('slOpacity', 0);
+    // Guardian OFF
+    setSlider('slGuardian', 0);
+    onGuardianSlider(0);
   } else if(level==='safe'){
-    document.getElementById('slScroll').value=12;
-    document.getElementById('slTime').value=15;
-    document.getElementById('slSpeed').value=6; // 0.30초
-    document.getElementById('slOpacity').value=15;
-    document.getElementById('slRepeat').value=0;
+    setSlider('slScroll', 12);
+    setSlider('slTime', 15);
+    setSlider('slSpeed', 6);
+    setSlider('slOpacity', 15);
+    // Guardian 40cm (여유)
+    setSlider('slGuardian', 40);
+    onGuardianSlider(40);
   } else if(level==='high'){
-    document.getElementById('slScroll').value=6;
-    document.getElementById('slTime').value=7;
-    document.getElementById('slSpeed').value=3; // 0.15초
-    document.getElementById('slOpacity').value=45;
-    document.getElementById('slRepeat').value=3;
+    setSlider('slScroll', 6);
+    setSlider('slTime', 7);
+    setSlider('slSpeed', 3);
+    setSlider('slOpacity', 45);
+    // Guardian 30cm
+    setSlider('slGuardian', 30);
+    onGuardianSlider(30);
   } else if(level==='max'){
-    document.getElementById('slScroll').value=4;
-    document.getElementById('slTime').value=3;
-    document.getElementById('slSpeed').value=1; // 0.05초 (초고속)
-    document.getElementById('slOpacity').value=70;
-    document.getElementById('slRepeat').value=2;
+    setSlider('slScroll', 4);
+    setSlider('slTime', 3);
+    setSlider('slSpeed', 1);
+    setSlider('slOpacity', 70);
+    // Guardian 20cm (최강!)
+    setSlider('slGuardian', 20);
+    onGuardianSlider(20);
   }
   onSliderChange();
 }
 
 function onSliderChange(){
-  const scroll = +document.getElementById('slScroll').value;
-  const time   = +document.getElementById('slTime').value;
-  const speed  = +document.getElementById('slSpeed').value;
-  const opacity= +document.getElementById('slOpacity').value;
-  const repeat = +document.getElementById('slRepeat').value;
+  const $ = id => document.getElementById(id);
+  const scroll = +$('slScroll').value;
+  const time   = +$('slTime').value;
+  const speed  = +$('slSpeed').value;
+  const opacity= +$('slOpacity').value;
   // 🎯 대장님 v31: 속도 10단계 (0.05 ~ 0.5초, 0.05초 간격)
-  // 1단계=50ms, 2=100ms, ... 10=500ms
   const speedMs = speed * 50;
   _secSettings = {
     scroll, time,
     speed: speedMs,
     opacity,
-    repeat
+    repeat: 0  // 문장 반복 기능은 슬라이더에서 제거됨 (Guardian 교체)
   };
-  document.getElementById('valScroll').textContent = scroll+'자';
-  document.getElementById('valTime').textContent   = time+'초';
-  document.getElementById('valSpeed').textContent  = (speed*0.05).toFixed(2)+'초';
-  document.getElementById('valOpacity').textContent= opacity+'%';
-  document.getElementById('valRepeat').textContent = repeat===0 ? '∞' : repeat+'회';
+  $('valScroll').textContent = scroll+'자';
+  $('valTime').textContent   = time+'초';
+  $('valSpeed').textContent  = (speed*0.05).toFixed(2)+'초';
+  $('valOpacity').textContent= opacity+'%';
   if(_currentRoom) renderMessages();
 }
 
@@ -5411,14 +5391,53 @@ const _guardian = {
 function _guardianLoadPref(){ return localStorage.getItem('cgm2_guardian_on') === '1'; }
 function _guardianSavePref(on){ localStorage.setItem('cgm2_guardian_on', on ? '1' : '0'); }
 
-// 초기 로드
+// 초기 로드 - 이전에 켜뒀으면 자동 복원
 setTimeout(() => {
-  const tog = document.getElementById('guardianToggle');
-  if(tog){
-    tog.checked = _guardianLoadPref();
-    if(tog.checked) toggleGuardian(true, true);
+  // 슬라이더 초기값 복원
+  const savedDist = parseInt(localStorage.getItem('cgm2_guardian_dist') || '0');
+  const sl = document.getElementById('slGuardian');
+  if(sl && savedDist > 0){
+    sl.value = savedDist;
+    onGuardianSlider(savedDist);
+  }
+  // 자동 복원
+  if(_guardianLoadPref() && savedDist > 0){
+    toggleGuardian(true, true);
   }
 }, 1500);
+
+// 🛡️ Guardian 슬라이더 핸들러 (0 = OFF, 10~50 = 거리 cm)
+function onGuardianSlider(val){
+  const v = parseInt(val);
+  const valDisplay = document.getElementById('valGuardian');
+  
+  if(v === 0){
+    // OFF
+    if(valDisplay){
+      valDisplay.textContent = 'OFF';
+      valDisplay.classList.remove('red', 'yellow');
+      valDisplay.classList.add('green');
+    }
+    localStorage.setItem('cgm2_guardian_dist', '0');
+    if(_guardian.active) toggleGuardian(false, false);
+  } else {
+    // ON - 거리에 따라 색상
+    const cm = Math.max(10, v); // 최소 10cm
+    _guardian.threshold = cm;
+    
+    if(valDisplay){
+      valDisplay.textContent = cm + 'cm';
+      valDisplay.classList.remove('green');
+      if(cm <= 20) valDisplay.classList.add('red');          // 엄격
+      else if(cm <= 35) valDisplay.classList.add('yellow');  // 중간
+      else valDisplay.classList.remove('red', 'yellow');     // 여유
+    }
+    localStorage.setItem('cgm2_guardian_dist', String(cm));
+    
+    // 슬라이더 움직이면 자동 활성화
+    if(!_guardian.active) toggleGuardian(true, false);
+  }
+}
 
 // 디바이스별 임계값
 function _guardianDetectDevice(){
@@ -5444,8 +5463,8 @@ function _guardianLoadMediaPipe(){
 }
 
 async function toggleGuardian(on, silent){
-  const tog = document.getElementById('guardianToggle');
   const layer = document.getElementById('guardianMufeLayer');
+  const valDisplay = document.getElementById('valGuardian');
   
   if(on){
     try {
@@ -5474,16 +5493,17 @@ async function toggleGuardian(on, silent){
         _guardian.detector.onResults(_guardianOnResults);
       }
       
-      _guardian.threshold = _guardianDetectDevice();
       _guardian.active = true;
       _guardianSavePref(true);
       _guardianLoop();
       
-      if(!silent) showToast('🛡️ 20cm Guardian 활성화');
+      if(!silent) showToast('🛡️ Guardian 활성화 · ' + _guardian.threshold + 'cm');
     } catch(err){
       console.error('[Guardian]', err);
-      if(tog) tog.checked = false;
       _guardianSavePref(false);
+      // 슬라이더 원위치
+      const sl = document.getElementById('slGuardian');
+      if(sl){ sl.value = 0; onGuardianSlider(0); }
       if(!silent) showToast('⚠️ 카메라 권한 필요');
     }
   } else {
@@ -5494,6 +5514,7 @@ async function toggleGuardian(on, silent){
     }
     if(layer) layer.style.display = 'none';
     _guardianSavePref(false);
+    
     if(!silent) showToast('🛡️ Guardian 해제');
   }
 }
