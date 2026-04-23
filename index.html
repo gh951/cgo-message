@@ -5863,6 +5863,8 @@ async function toggleGuardian(on, silent){
       _guardian.noFaceCount = 0;
       _guardian.lastDist = null;
       _guardian.smoothDist = null;
+      _guardian.firstFaceDetected = false; // 🎯 중요: 재시작 시 리셋!
+      _guardian.pausedUntil = 0;            // 일시정지 해제
       _guardianSavePref(true);
       _guardianLoop();
       
@@ -5917,31 +5919,25 @@ function _guardianOnResults(results){
   // 🔍 디버그 업데이트
   if(dbgFace) dbgFace.textContent = faces.length + ' face(s)';
   
-  // 🎯 대장님 설계: 얼굴 없음 = 0.5초 내 즉시 MUFE
-  // 3 FPS이므로 2프레임 = 약 0.66초 유예 (카메라 초기화 순간만 방어)
+  // 🎯 대장님 원안: 얼굴 없음 = 즉시 MUFE (유예 없음)
   if(faces.length === 0){
     _guardian.noFaceCount = (_guardian.noFaceCount || 0) + 1;
     
-    // 첫 1프레임은 유예 (카메라 막 시작할 때 잠깐 빈 프레임 방어)
-    if(_guardian.noFaceCount < 2){
-      // 아직 한 번도 얼굴 못 잡았으면 MUFE 띄우지 않음 (초기화 중)
-      if(!_guardian.firstFaceDetected){
-        layer.style.display = 'none';
-        return;
-      }
-      // 얼굴 감지된 적 있으면 바로 MUFE (0.33초 내)
+    // 0.3초 유예만 (카메라 시작 순간 빈 프레임 1~3개만 방어)
+    // 10 FPS 기준 3프레임 = 0.3초
+    if(_guardian.noFaceCount < 3){
+      return; // 3프레임 미만은 스킵 (판정 유보)
     }
     
-    // 즉시 MUFE 활성화 (보안 우선)
+    // 0.3초 지나면 즉시 MUFE
     layer.style.display = 'flex';
     if(distBig) distBig.textContent = '👁️ ?';
     if(msg) msg.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로 바라봐 주세요</span>';
     return;
   }
   
-  // 얼굴 감지됨 → 카운터 리셋 + 첫 감지 플래그
+  // 얼굴 감지됨 → 카운터 리셋
   _guardian.noFaceCount = 0;
-  _guardian.firstFaceDetected = true;
   
   // 위협 2: 얼굴 2개 이상 (어깨 너머 훔쳐보기)
   if(faces.length >= 2){
