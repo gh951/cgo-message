@@ -5656,40 +5656,26 @@ function displayCaption(caption, isMe){
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 🛡️ GUARDIAN v4.0.0 · Patent #47
-// 대장님 설계:
-//   1. 방 안에서만 작동 (입구 자동시작 X)
-//   2. MUFE 작동 시 모든 글자 보안 타이머 정지
-//   3. MUFE 해제 시 멈췄던 지점부터 재개 (공평함)
+// 🛡️ GUARDIAN v5.0.0 · FULI rPPG 방식 · Patent #47
+// MediaPipe 사용 안 함 - 순수 Canvas 피부색 감지
 // ═══════════════════════════════════════════════════════════════
 const _G = {
-  active: false,
-  stream: null,
-  video: null,
-  detector: null,
-  mode: 'off',
-  noFace: 0,
-  loopTimer: null,
-  mufeVisible: false // MUFE 현재 표시 상태
+  active: false, stream: null, video: null, canvas: null, ctx: null,
+  mode: 'off', noFace: 0, loopTimer: null, mufeVisible: false
 };
 
-// ⏸️ 타이머 중앙 관리 (MUFE 연동)
-const _secTimers = new Map(); // msgId → {endTime, timerId, remainingMs}
+const _secTimers = new Map();
 
-// 메시지 타이머 등록 (renderMessages에서 호출)
 function registerSecTimer(msgId, durationMs, callback){
-  // 기존 타이머 있으면 제거
   if(_secTimers.has(msgId)){
     const old = _secTimers.get(msgId);
     if(old.timerId) clearTimeout(old.timerId);
   }
-  
   const endTime = Date.now() + durationMs;
   const timerId = setTimeout(callback, durationMs);
   _secTimers.set(msgId, { endTime, timerId, callback });
 }
 
-// 타이머 제거 (메시지 실제로 지워질 때)
 function unregisterSecTimer(msgId){
   if(_secTimers.has(msgId)){
     const t = _secTimers.get(msgId);
@@ -5698,91 +5684,70 @@ function unregisterSecTimer(msgId){
   }
 }
 
-// 모든 타이머 일시정지 (MUFE 작동 시)
 function pauseAllSecTimers(){
-  _secTimers.forEach((t, msgId) => {
+  _secTimers.forEach((t) => {
     if(t.timerId){
       clearTimeout(t.timerId);
       t.timerId = null;
       t.remainingMs = Math.max(0, t.endTime - Date.now());
     }
   });
-  // CSS 애니메이션 정지
   document.querySelectorAll('.msg-scroll, .msg-bubble').forEach(el => {
     el.style.animationPlayState = 'paused';
   });
-  console.log('[G] 모든 타이머 정지 (' + _secTimers.size + '개)');
 }
 
-// 모든 타이머 재개 (MUFE 해제 시)
 function resumeAllSecTimers(){
-  _secTimers.forEach((t, msgId) => {
+  _secTimers.forEach((t) => {
     if(!t.timerId && t.remainingMs !== undefined){
       t.timerId = setTimeout(t.callback, t.remainingMs);
       t.endTime = Date.now() + t.remainingMs;
     }
   });
-  // CSS 애니메이션 재개
   document.querySelectorAll('.msg-scroll, .msg-bubble').forEach(el => {
     el.style.animationPlayState = 'running';
   });
-  console.log('[G] 모든 타이머 재개 (' + _secTimers.size + '개)');
 }
 
-// MUFE 표시 상태 변경 함수 (중앙 제어)
 function _setMufeVisible(visible){
-  if(_G.mufeVisible === visible) return; // 같으면 스킵
+  if(_G.mufeVisible === visible) return;
   _G.mufeVisible = visible;
-  
   const layer = document.getElementById('guardianMufeLayer');
   if(!layer) return;
-  
   if(visible){
     layer.style.display = 'flex';
-    pauseAllSecTimers(); // ⏸️ 모든 글자 보안 정지
+    pauseAllSecTimers();
   } else {
     layer.style.display = 'none';
-    resumeAllSecTimers(); // ▶️ 재개
+    resumeAllSecTimers();
   }
 }
 
-// 🎯 모드 선택
 async function setGuardianMode(mode){
   console.log('[G] 모드:', mode);
-  
   localStorage.setItem('cgm2_guardian_mode', mode);
   _G.mode = mode;
   _guardianUI(mode);
   
-  // OFF
   if(mode === 'off'){
     _G.active = false;
     _G.noFace = 0;
     if(_G.loopTimer){ clearTimeout(_G.loopTimer); _G.loopTimer = null; }
-    if(_G.stream){
-      _G.stream.getTracks().forEach(t => t.stop());
-      _G.stream = null;
-    }
+    if(_G.stream){ _G.stream.getTracks().forEach(t => t.stop()); _G.stream = null; }
     _setMufeVisible(false);
     if(typeof showToast === 'function') showToast('🛡️ OFF');
     return;
   }
   
-  // 채팅방 밖 → 설정만 저장
   if(!_currentRoom){
-    console.log('[G] 방 밖 - 설정만 저장');
     if(typeof showToast === 'function'){
       showToast('🛡️ ' + (mode === 'phone' ? '📱' : '💻') + ' 설정됨 · 채팅방 들어가면 작동');
     }
     return;
   }
   
-  // 방 안 → 카메라 시작
   try {
-    if(_G.stream){
-      _G.stream.getTracks().forEach(t => t.stop());
-    }
-    
+    if(_G.stream){ _G.stream.getTracks().forEach(t => t.stop()); }
     _G.stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
     });
@@ -5797,23 +5762,13 @@ async function setGuardianMode(mode){
     }
     _G.video.srcObject = _G.stream;
     await new Promise(r => _G.video.onloadedmetadata = r);
+    await _G.video.play();
     
-    if(typeof FaceDetection === 'undefined'){
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js';
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
-    
-    if(!_G.detector){
-      _G.detector = new FaceDetection({
-        locateFile: f => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + f
-      });
-      _G.detector.setOptions({ model: 'short', minDetectionConfidence: 0.3 });
-      _G.detector.onResults(_guardianResult);
+    if(!_G.canvas){
+      _G.canvas = document.createElement('canvas');
+      _G.canvas.width = 64;
+      _G.canvas.height = 64;
+      _G.ctx = _G.canvas.getContext('2d');
     }
     
     _G.active = true;
@@ -5824,7 +5779,7 @@ async function setGuardianMode(mode){
       showToast('🛡️ ' + (mode === 'phone' ? '📱 20~30cm' : '💻 40~60cm') + ' 활성화');
     }
   } catch(e){
-    console.error('[G] 카메라 에러:', e);
+    console.error('[G] 에러:', e);
     if(typeof showToast === 'function') showToast('⚠️ 카메라 권한 필요');
     _G.mode = 'off';
     localStorage.setItem('cgm2_guardian_mode', 'off');
@@ -5832,34 +5787,20 @@ async function setGuardianMode(mode){
   }
 }
 
-// 🎨 버튼 UI 업데이트
 function _guardianUI(mode){
   const ids = ['gBtnOff','gBtnPhone','gBtnPc','gBtnOff2','gBtnPhone2','gBtnPc2'];
   ids.forEach(id => {
     const b = document.getElementById(id);
-    if(b){
-      b.classList.remove('g-btn-active-off','g-btn-active-phone','g-btn-active-pc');
-    }
+    if(b) b.classList.remove('g-btn-active-off','g-btn-active-phone','g-btn-active-pc');
   });
-  
   const cls = 'g-btn-active-' + mode;
   if(mode === 'off'){
-    ['gBtnOff','gBtnOff2'].forEach(id => {
-      const b = document.getElementById(id);
-      if(b) b.classList.add(cls);
-    });
+    ['gBtnOff','gBtnOff2'].forEach(id => { const b = document.getElementById(id); if(b) b.classList.add(cls); });
   } else if(mode === 'phone'){
-    ['gBtnPhone','gBtnPhone2'].forEach(id => {
-      const b = document.getElementById(id);
-      if(b) b.classList.add(cls);
-    });
+    ['gBtnPhone','gBtnPhone2'].forEach(id => { const b = document.getElementById(id); if(b) b.classList.add(cls); });
   } else if(mode === 'pc'){
-    ['gBtnPc','gBtnPc2'].forEach(id => {
-      const b = document.getElementById(id);
-      if(b) b.classList.add(cls);
-    });
+    ['gBtnPc','gBtnPc2'].forEach(id => { const b = document.getElementById(id); if(b) b.classList.add(cls); });
   }
-  
   const label = mode === 'phone' ? '📱 20~30cm' : mode === 'pc' ? '💻 40~60cm' : 'OFF';
   ['valGuardian','valGuardian2'].forEach(id => {
     const v = document.getElementById(id);
@@ -5867,73 +5808,88 @@ function _guardianUI(mode){
   });
 }
 
-// 🎥 감지 루프 (10 FPS)
-async function _guardianLoop(){
-  if(!_G.active) return;
-  try {
-    if(_G.video && _G.video.readyState === 4 && _G.detector){
-      await _G.detector.send({ image: _G.video });
-    }
-  } catch(e){}
-  _G.loopTimer = setTimeout(_guardianLoop, 100);
-}
-
-// 📊 감지 결과 처리
-function _guardianResult(results){
-  if(!_G.active) return;
-  
+// 🎥 FULI rPPG 감지 루프 (피부색 픽셀 카운트)
+function _guardianLoop(){
+  if(!_G.active){ return; }
   const layer = document.getElementById('guardianMufeLayer');
   const distEl = document.getElementById('guardianDistBig');
   const msgEl = document.getElementById('guardianMsg');
-  if(!layer) return;
+  if(!layer || !_G.video || !_G.ctx || _G.video.readyState < 2){
+    _G.loopTimer = setTimeout(_guardianLoop, 200);
+    return;
+  }
   
-  const faces = results.detections || [];
-  
-  // 얼굴 없음
-  if(faces.length === 0){
-    _G.noFace++;
-    if(_G.noFace < 3) return; // 0.3초 유예
+  try {
+    const vw = _G.video.videoWidth, vh = _G.video.videoHeight;
+    if(!vw || !vh){ _G.loopTimer = setTimeout(_guardianLoop, 200); return; }
     
-    _setMufeVisible(true);
-    if(distEl) distEl.textContent = '👁️';
-    if(msgEl) msgEl.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로</span>';
-    return;
-  }
+    // 중앙 50% 영역을 64x64로 축소
+    const sw = vw * 0.5, sh = vh * 0.5;
+    const sx = (vw - sw) / 2, sy = (vh - sh) / 2;
+    _G.ctx.drawImage(_G.video, sx, sy, sw, sh, 0, 0, 64, 64);
+    const d = _G.ctx.getImageData(0, 0, 64, 64).data;
+    
+    // 피부색 픽셀 카운트 (FULI 공식)
+    let skinCount = 0, totalPx = 0;
+    for(let y = 8; y < 56; y++){
+      for(let x = 8; x < 56; x++){
+        const idx = (y * 64 + x) * 4;
+        const r = d[idx], g = d[idx+1], b = d[idx+2];
+        if(r > 80 && g > 40 && b > 20 && r > g && r > b && (r - g) > 10) skinCount++;
+        totalPx++;
+      }
+    }
+    
+    const skinRatio = skinCount / totalPx;
+    const hasFace = skinRatio > 0.12; // 12% 이상 피부색 = 얼굴 있음
+    
+    // 거리 추정 (피부 비율 역수)
+    let estDist = 30;
+    if(skinRatio > 0.45) estDist = 12;
+    else if(skinRatio > 0.35) estDist = 18;
+    else if(skinRatio > 0.25) estDist = 25;
+    else if(skinRatio > 0.18) estDist = 35;
+    else if(skinRatio > 0.12) estDist = 50;
+    else estDist = 70;
+    
+    if(!hasFace){
+      _G.noFace++;
+      if(_G.noFace >= 3){
+        _setMufeVisible(true);
+        if(distEl) distEl.textContent = '👁️';
+        if(msgEl) msgEl.innerHTML = '얼굴 감지 안 됨<br><span style="color:#d4a843;font-weight:700;">화면을 정면으로</span><br><span style="font-size:10px;opacity:.5;">skin: ' + (skinRatio*100).toFixed(0) + '%</span>';
+      }
+    } else {
+      _G.noFace = 0;
+      const limit = _G.mode === 'phone' ? 40 : 70;
+      if(estDist > limit){
+        _setMufeVisible(true);
+        if(distEl) distEl.textContent = '~' + estDist + 'cm';
+        if(msgEl) msgEl.innerHTML = '거리 초과<br><span style="color:#d4a843;font-weight:700;">' + (_G.mode === 'phone' ? '20~30cm' : '40~60cm') + ' 범위로</span>';
+      } else {
+        _setMufeVisible(false);
+      }
+    }
+  } catch(e){}
   
-  _G.noFace = 0;
-  
-  // 얼굴 2개 이상
-  if(faces.length >= 2){
-    _setMufeVisible(true);
-    if(distEl) distEl.textContent = '👥';
-    if(msgEl) msgEl.innerHTML = '제3자 감지<br><span style="color:#f87171;font-weight:700;">훔쳐보기 방어</span>';
-    return;
-  }
-  
-  // 거리 계산
-  const face = faces[0];
-  const videoW = _G.video.videoWidth;
-  const facePx = face.boundingBox.width * videoW;
-  const focal = videoW / (2 * Math.tan(35 * Math.PI / 180));
-  const distCm = Math.round((14 * focal) / facePx);
-  
-  const limit = _G.mode === 'phone' ? 35 : 65;
-  
-  if(distCm > limit){
-    _setMufeVisible(true);
-    if(distEl) distEl.textContent = distCm + 'cm';
-    if(msgEl) msgEl.innerHTML = '거리 초과<br><span style="color:#d4a843;font-weight:700;">' + (_G.mode === 'phone' ? '20~30cm' : '40~60cm') + ' 범위로</span>';
-  } else {
-    _setMufeVisible(false);
-  }
+  _G.loopTimer = setTimeout(_guardianLoop, 100);
 }
 
-// 🚨 비상 해제
-function guardianEmergencyOff(){
-  setGuardianMode('off');
-}
+function guardianEmergencyOff(){ setGuardianMode('off'); }
 
-// 🛡️ 화면 이탈 방어
+// 🖱️ MUFE 레이어 탭하면 일시 닫기 (갇힘 방지)
+setTimeout(() => {
+  const layer = document.getElementById('guardianMufeLayer');
+  if(layer){
+    layer.addEventListener('click', function(e){
+      // 비상 해제 버튼 아닐 때만
+      if(e.target.tagName !== 'BUTTON'){
+        _setMufeVisible(false);
+      }
+    });
+  }
+}, 2000);
+
 function _guardianForceMufe(reason){
   if(!_G.active || _G.mode === 'off') return;
   const distEl = document.getElementById('guardianDistBig');
@@ -5950,18 +5906,14 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('blur', () => _guardianForceMufe('창 전환'));
 window.addEventListener('focus', () => { if(_G.active) _G.noFace = 0; });
 
-// 호환 stub
 function _guardianUpdateButtonUI(mode){ _guardianUI(mode); }
 function onGuardianSlider(v){}
 function toggleGuardian(){}
 
-// 🚀 시작 시 UI만 복원 (카메라는 채팅방 진입 시에만)
 setTimeout(() => {
   const saved = localStorage.getItem('cgm2_guardian_mode') || 'off';
-  console.log('[G] 저장된 모드:', saved);
   _G.mode = saved;
   _guardianUI(saved);
-  // ❌ 자동 카메라 시작 X - 채팅방에서만 작동
 }, 1500);
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
