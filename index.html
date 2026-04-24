@@ -5671,17 +5671,27 @@ function startSpeechRecognition(){
     }
   };
   
-  _call.recog.onerror = (e) => console.warn('[STT 오류]', e.error);
+  _call.recog.onerror = (e) => {
+    console.warn('[STT 오류]', e.error);
+    // 🎯 [C-20] 'aborted' / 'no-speech'는 정상적인 재시작 → 물방울 소리 방지
+    // continuous 모드에서 말 안 하면 자동으로 onend 발생 → 과도한 재시작 방지
+  };
   _call.recog.onend = () => {
     // ⭐ 통화 중이면서 recog 객체도 살아있을 때만 재시작
     //    endCall()에서 _call.recog = null 처리 후엔 재시작 안 함
-    // 🎯 [C-20] 딜레이 추가 · 일부 브라우저의 마이크 허용 팝업 반복 방지
+    // 🎯 [C-20 v2] 딜레이 700ms로 증가 · "뽀롱뽀롱" 물방울 소리 최소화
+    //    (STT 재시작 시 브라우저 알림음 발생 → 간격을 늘려 체감 감소)
     if(_call.active && _call.recog){
       setTimeout(() => {
         if(_call.active && _call.recog){
-          try{ _call.recog.start(); }catch(e){ console.warn('[STT 재시작 실패]', e); }
+          try{ _call.recog.start(); }catch(e){ 
+            // 이미 시작된 경우 무시 (InvalidStateError)
+            if(e.name !== 'InvalidStateError'){
+              console.warn('[STT 재시작 실패]', e); 
+            }
+          }
         }
-      }, 300); // 300ms 딜레이로 브라우저 안정화
+      }, 700); // 700ms 딜레이로 브라우저 안정화 + 소리 간격 늘림
     }
   };
   
@@ -6307,6 +6317,11 @@ const _EMO = {
   motion: 0,         // 얼굴 움직임 정도
   stable: false,     // 안정 상태 여부
   
+  // 🎯 [C-20 v2] 얼굴 감지 추적 (HUD 가이드용)
+  skinPx: 0,         // 피부 픽셀 수
+  totalPx: 0,        // 전체 픽셀 수
+  skinRatio: 0,      // 피부 비율
+  
   // 감정 상태
   emotion: '분석중',
   emotionConfidence: 0,
@@ -6347,8 +6362,11 @@ function emoStart(){
   _EMO.timeBuffer = [];
   _EMO.startTime = Date.now();
   _EMO.bpm = 0;
+  _EMO.skinPx = 0;
+  _EMO.skinRatio = 0;
   _EMO.emotion = '분석중';
   _EMO.emotionIcon = '🤔';
+  _EMO.emotionConfidence = 0;
   
   // HUD 생성
   emoShowHUD();
@@ -6393,7 +6411,16 @@ function emoProcessFrame(remoteVideo){
       }
     }
     
-    if(skinPx < 50) return; // 피부 너무 적으면 스킵
+    // 🎯 [C-20 v2] 얼굴 감지 상태 추적 (HUD에서 사용자 가이드)
+    _EMO.skinPx = skinPx;
+    _EMO.totalPx = d.length / 4;
+    _EMO.skinRatio = skinPx / _EMO.totalPx;
+    
+    if(skinPx < 50){
+      // 얼굴 안 보이면 버퍼 쌓지 말고 가이드만 갱신
+      if(_EMO.bpm === 0) emoUpdateHUD();
+      return;
+    }
     
     const gAvg = gSum / skinPx;
     const now = Date.now();
@@ -6593,6 +6620,10 @@ function emoUpdateHUD(){
   const stateEl = document.getElementById('c20EmoState');
   const confEl = document.getElementById('c20EmoConf');
   
+  // 🎯 [C-20 v2] 얼굴 감지 상태별 친절한 안내
+  const hasFace = _EMO.skinPx >= 50;
+  const hasEnoughFace = _EMO.skinPx >= 150; // 충분한 얼굴
+  
   if(bpmEl && _EMO.bpm > 0){
     bpmEl.innerHTML = _EMO.bpm + ' <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
     // 심박에 따른 색상
@@ -6600,24 +6631,47 @@ function emoUpdateHUD(){
     else if(_EMO.bpm < 60) bpmEl.style.color = '#60a5fa';   // 파랑 (낮음)
     else bpmEl.style.color = '#4ade80';                      // 초록 (정상)
     bpmEl.style.animation = 'c20EmoPulse 1s ease-in-out';
+  } else if(bpmEl){
+    // BPM 아직 안 뜰 때 상태 표시
+    bpmEl.innerHTML = '-- <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
+    bpmEl.style.color = hasFace ? '#4ade80' : '#94a3b8';
   }
   
-  if(stateEl && _EMO.emotion !== '분석중'){
-    stateEl.innerHTML = _EMO.emotionIcon + ' <span>' + _EMO.emotion + '</span>';
-    // 감정별 색상
-    const colorMap = {
-      '기쁨':'#4ade80', '평온':'#64b4fa', '슬픔':'#a78bfa',
-      '화남':'#ef4444', '초조':'#f59e0b', '불안':'#fb923c'
-    };
-    stateEl.style.color = colorMap[_EMO.emotion] || '#64b4fa';
+  if(stateEl){
+    if(_EMO.emotion !== '분석중' && _EMO.bpm > 0){
+      // 정상 감정 표시
+      stateEl.innerHTML = _EMO.emotionIcon + ' <span>' + _EMO.emotion + '</span>';
+      const colorMap = {
+        '기쁨':'#4ade80', '평온':'#64b4fa', '슬픔':'#a78bfa',
+        '화남':'#ef4444', '초조':'#f59e0b', '불안':'#fb923c'
+      };
+      stateEl.style.color = colorMap[_EMO.emotion] || '#64b4fa';
+    } else if(!hasFace){
+      // 얼굴 안 보임
+      stateEl.innerHTML = '👤 <span>얼굴 탐색중</span>';
+      stateEl.style.color = '#94a3b8';
+    } else if(!hasEnoughFace){
+      // 얼굴 일부만
+      stateEl.innerHTML = '🔍 <span>더 가까이</span>';
+      stateEl.style.color = '#fbbf24';
+    } else {
+      // 얼굴 OK, BPM 축적 중
+      stateEl.innerHTML = '❤️ <span>심박 측정중</span>';
+      stateEl.style.color = '#ff6b9d';
+    }
   }
   
   if(confEl){
-    if(_EMO.emotionConfidence > 0){
+    if(_EMO.emotionConfidence > 0 && _EMO.bpm > 0){
       confEl.textContent = '신뢰도 ' + Math.round(_EMO.emotionConfidence * 100) + '%';
+    } else if(!hasFace){
+      confEl.textContent = '정면으로 찍어주세요';
+    } else if(!hasEnoughFace){
+      confEl.textContent = '이마가 보이게';
     } else {
-      const sec = Math.max(0, 15 - Math.floor((Date.now() - _EMO.startTime) / 1000));
-      confEl.textContent = sec > 0 ? (sec + '초 후 결과') : '분석 중...';
+      // 진행률 표시 (0~15초)
+      const progress = Math.min(100, Math.round((_EMO.greenBuffer.length / 90) * 100));
+      confEl.textContent = '심박 수집 ' + progress + '%';
     }
   }
 }
