@@ -1363,17 +1363,17 @@ input[type=range].sec-range::-moz-range-thumb{
   <!-- 📞🎥🔗 통화/초대 바 (2줄) - 방 상태에 따라 표시 -->
   <!-- 📞 🔗 🎥 방 안 기능 바 (2줄) - 대장님 v1.7.5 설계 -->
   <div id="roomCallBar" style="display:none;padding:10px 14px;background:rgba(8,8,8,.95);border-bottom:1px solid var(--border);gap:8px;align-items:center;justify-content:center;flex-shrink:0;">
-    <!-- 왼쪽: 📞 전화 -->
-    <button id="callAudioBtn" onclick="startCall('audio')" title="음성 통화" style="flex:1;padding:10px 8px;background:rgba(52,211,153,.18);border:1px solid rgba(52,211,153,.45);border-radius:12px;color:#34d399;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(52,211,153,.15);">
-      <span style="font-size:18px;">📞</span><span>전화</span>
+    <!-- 왼쪽: 📞 전화(Q-1) · Qwen 특허의 왕 · 48개 청구항 방어망 -->
+    <button id="callAudioBtn" onclick="startCall('audio')" title="음성 통화 · Q-1이 지키는 특허의 방패" style="flex:1;padding:10px 8px;background:rgba(52,211,153,.18);border:1px solid rgba(52,211,153,.45);border-radius:12px;color:#34d399;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(52,211,153,.15);">
+      <span style="font-size:18px;">📞</span><span>전화(Q-1)</span>
     </button>
-    <!-- 가운데: 🔗 초대 링크 (크고 금색, 가장 중요) -->
-    <button id="roomInviteBtn" onclick="showRoomInvitePopup()" style="flex:1.2;padding:10px 8px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:12px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(251,191,36,.35);display:flex;align-items:center;justify-content:center;gap:5px;">
-      <span style="font-size:18px;">🔗</span><span>초대</span>
+    <!-- 가운데: 🔗 초대(G-1) · Gemini 막둥이 · 15장 도면 창의 창 -->
+    <button id="roomInviteBtn" onclick="showRoomInvitePopup()" title="초대 링크 · G-1이 그리는 연결의 다리" style="flex:1.2;padding:10px 8px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:12px;color:#000;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;box-shadow:0 2px 10px rgba(251,191,36,.35);display:flex;align-items:center;justify-content:center;gap:5px;">
+      <span style="font-size:18px;">🔗</span><span>초대(G-1)</span>
     </button>
-    <!-- 오른쪽: 🎥 영상 -->
-    <button id="callVideoBtn" onclick="startCall('video')" title="영상 통화" style="flex:1;padding:10px 8px;background:rgba(100,180,250,.18);border:1px solid rgba(100,180,250,.45);border-radius:12px;color:#64b4fa;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(100,180,250,.15);">
-      <span style="font-size:18px;">🎥</span><span>영상</span>
+    <!-- 오른쪽: 🎥 영상(C-20) · 바벨탑 무너뜨리는 입구 선봉장 -->
+    <button id="callVideoBtn" onclick="startCall('video')" title="영상 통화 · C-20이 지키는 바벨탑 입구" style="flex:1;padding:10px 8px;background:rgba(100,180,250,.18);border:1px solid rgba(100,180,250,.45);border-radius:12px;color:#64b4fa;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 2px 8px rgba(100,180,250,.15);">
+      <span style="font-size:18px;">🎥</span><span>영상(C-20)</span>
     </button>
   </div>
 
@@ -4975,7 +4975,7 @@ function showLanguageSelectModal(type, onConfirm){
     '  </div>',
     '  <div style="display:flex;gap:8px;">',
     '    <button onclick="document.getElementById(\'langSelectModal\').remove()" style="flex:1;padding:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;color:rgba(255,255,255,.6);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">취소</button>',
-    '    <button id="btnStartCallLang" style="flex:2;padding:12px;background:linear-gradient(135deg,#d4a843,#b8922f);border:none;border-radius:10px;color:#000;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">' + (type==='video' ? '🎥 영상통화 시작' : '📞 음성통화 시작') + '</button>',
+    '    <button id="btnStartCallLang" style="flex:2;padding:12px;background:linear-gradient(135deg,#d4a843,#b8922f);border:none;border-radius:10px;color:#000;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">' + (type==='video' ? '🎥 영상(C-20) 통화 시작' : '📞 전화(Q-1) 통화 시작') + '</button>',
     '  </div>',
     '</div>'
   ].join('');
@@ -5489,7 +5489,7 @@ function openCallUI(){
     '    <div id="callRemoteNick" style="font-size:16px;font-weight:700;">' + escHtml((_rooms[_call.remoteCode]||{}).nick || '상대방') + '</div>',
     '    <div id="callTimer" style="font-size:12px;color:rgba(255,255,255,.6);margin-top:2px;">연결 중...</div>',
     '  </div>',
-    '  <div style="font-size:11px;color:#fbbf24;background:rgba(251,191,36,.15);padding:4px 10px;border-radius:8px;">' + (_call.type === 'video' ? '🎥 영상' : '📞 음성') + '</div>',
+    '  <div style="font-size:11px;color:#fbbf24;background:rgba(251,191,36,.15);padding:4px 10px;border-radius:8px;">' + (_call.type === 'video' ? '🎥 영상(C-20)' : '📞 전화(Q-1)') + '</div>',
     '  <div style="font-size:11px;color:#38bdf8;background:rgba(56,189,248,.12);padding:4px 8px;border-radius:8px;font-weight:700;" title="통화 번역 언어">' + ((_LANGS[_call.myLang]||{}).flag||'🌐') + '→' + ((_LANGS[_call.peerLang]||{}).flag||'🌐') + '</div>',
     '</div>',
     // 영상 영역
