@@ -2593,17 +2593,7 @@ function openRoom(code){
   room.unread = 0;
   saveRooms();
   
-  // 🛡️ Guardian 자동 시작 (채팅방 진입 시 - 대장님 지시)
-  // 사용자가 설정에서 📱 또는 💻 선택했다면, 방 들어올 때만 카메라 작동
-  setTimeout(() => {
-    const savedMode = localStorage.getItem('cgm2_guardian_mode') || 'off';
-    if(savedMode === 'phone' || savedMode === 'pc'){
-      console.log('[G] 채팅방 진입 → Guardian 시작:', savedMode);
-      if(typeof setGuardianMode === 'function'){
-        setGuardianMode(savedMode);
-      }
-    }
-  }, 500);
+  // 🛡️ Guardian 자동시작 X - 대장님이 ⚙️ 안에서 📱/💻 눌러야만 작동
 
   // 입력창 복원 (혹시 이전에 숨겨져 있었을 경우)
   const inputBar = document.getElementById('inputBar');
