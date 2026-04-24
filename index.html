@@ -1472,6 +1472,8 @@ input[type=range].sec-range::-moz-range-thumb{
     <button class="mic-btn" id="micBtn" onclick="startRecording()" title="음성 메시지">🎤</button>
     <!-- ═══ C-19 v1.2: 🌍 번역 음성 버튼 (꾹 누르기) ═══ -->
     <button class="mic-btn" id="c19_micTransBtn" title="번역 음성 (꾹 누르기 → 언어 선택)" style="background:rgba(255,136,187,.15);border:1px solid rgba(255,136,187,.4);color:#ff88bb;">🌍</button>
+    <!-- ═══ 🟡 중요 메시지 토글 (Patent #47-10: 렌즈 감지) ═══ -->
+    <button class="mic-btn" id="importantMsgBtn" onclick="toggleImportantMode()" title="중요 메시지 모드 (렌즈 감지 보안)" style="background:rgba(212,168,67,.15);border:1px solid rgba(212,168,67,.5);color:#d4a843;">🟡</button>
     <button class="send-btn" onclick="sendMsg()">↑</button>
   </div>
   <div class="patent-bar">특허 10-2026-0060113 · CGO MESSAGE SECURE MESSENGER</div>
@@ -2736,6 +2738,20 @@ function goBack(){
     }
     const layer = document.getElementById('guardianMufeLayer');
     if(layer) layer.style.display = 'none';
+  }
+  
+  // 🔐 렌즈 감지도 종료 (v5.3)
+  if(typeof _LD !== 'undefined' && _LD.active){
+    _LD.active = false;
+    if(_LD.loopTimer){ clearTimeout(_LD.loopTimer); _LD.loopTimer = null; }
+    if(_LD.stream){ _LD.stream.getTracks().forEach(t => t.stop()); _LD.stream = null; }
+    const btn = document.getElementById('importantMsgBtn');
+    if(btn){
+      btn.style.background = 'rgba(212,168,67,.15)';
+      btn.style.color = '#d4a843';
+      btn.textContent = '🟡';
+      btn.style.boxShadow = '';
+    }
   }
   
   _currentRoom = null;
@@ -5905,6 +5921,235 @@ setTimeout(() => {
   _G.mode = saved;
   _guardianUI(saved);
 }, 1500);
+
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ CAPTURE DEFENSE v5.2 · Patent #47-9
+// 대장님 설계: 터치/키 감지 → 글자 즉시 노이즈 (카메라 X, 배터리 OK)
+// ═══════════════════════════════════════════════════════════════
+
+// 🎨 캡쳐 방어 스타일 주입
+(function injectCaptureDefenseStyle(){
+  const style = document.createElement('style');
+  style.textContent = `
+    .capture-defense .msg-bubble,
+    .capture-defense .msg-bubble * {
+      background: repeating-linear-gradient(45deg, rgba(212,168,67,.5) 0px, rgba(212,168,67,.5) 2px, transparent 2px, transparent 4px) !important;
+      color: transparent !important;
+      text-shadow: 0 0 12px rgba(212,168,67,.8) !important;
+      filter: blur(1px) !important;
+    }
+    .capture-defense #msgInput {
+      color: transparent !important;
+      text-shadow: 0 0 8px rgba(212,168,67,.8) !important;
+      background: repeating-linear-gradient(45deg, rgba(212,168,67,.3) 0px, rgba(212,168,67,.3) 2px, transparent 2px, transparent 4px) !important;
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+// 캡쳐 방어 활성화/해제
+function applyCaptureDefense(){
+  document.body.classList.add('capture-defense');
+}
+function removeCaptureDefense(){
+  document.body.classList.remove('capture-defense');
+}
+
+// 📱 스마트폰: 기능 영역 외 터치 감지
+const ALLOWED_TOUCH_SELECTOR = 'input, textarea, button, .modal, .modal *, .sec-panel, .sec-panel *, .input-bar, .input-bar *, .topbar, .topbar *, .friend-action-btn, .sec-preset, .modal-btn, [onclick], [role="button"], .msg-bubble-list-item';
+
+document.addEventListener('touchstart', function(e){
+  if(!_currentRoom) return; // 방 안에서만 작동
+  
+  const target = e.target;
+  const isAllowed = target.closest(ALLOWED_TOUCH_SELECTOR);
+  
+  // 금지 영역 터치 (메시지 영역)
+  if(!isAllowed){
+    applyCaptureDefense();
+  }
+  
+  // 2개 이상 터치 (손날/여러 손가락)
+  if(e.touches.length >= 2){
+    applyCaptureDefense();
+  }
+  
+  // 손날 감지 (넓은 면적)
+  for(let i = 0; i < e.touches.length; i++){
+    const t = e.touches[i];
+    if((t.radiusX && t.radiusX > 40) || (t.radiusY && t.radiusY > 40)){
+      applyCaptureDefense();
+      break;
+    }
+  }
+}, { passive: true });
+
+// 터치 떼면 해제 (대장님 지시)
+document.addEventListener('touchend', function(){
+  removeCaptureDefense();
+}, { passive: true });
+document.addEventListener('touchcancel', function(){
+  removeCaptureDefense();
+}, { passive: true });
+
+// 💻 PC: 캡쳐 키 차단
+document.addEventListener('keydown', function(e){
+  if(!_currentRoom) return;
+  
+  const k = e.key;
+  const isCapture = 
+    k === 'PrintScreen' ||
+    (e.ctrlKey && (k === 'p' || k === 'P' || k === 's' || k === 'S' || k === 'u' || k === 'U')) ||
+    (e.ctrlKey && e.shiftKey && (k === 'I' || k === 'i' || k === 'S' || k === 's' || k === 'C' || k === 'c' || k === 'J' || k === 'j')) ||
+    (e.metaKey && e.shiftKey && (k === '3' || k === '4' || k === '5' || k === 'S' || k === 's')) ||
+    k === 'F12';
+  
+  if(isCapture){
+    e.preventDefault();
+    applyCaptureDefense();
+    setTimeout(removeCaptureDefense, 1000);
+    return false;
+  }
+});
+
+// 💻 PC: 우클릭 차단 (대장님 Q3: A)
+document.addEventListener('contextmenu', function(e){
+  if(!_currentRoom) return;
+  e.preventDefault();
+  applyCaptureDefense();
+  setTimeout(removeCaptureDefense, 500);
+  return false;
+});
+
+// 💻 PC: 드래그 선택 차단 (대장님 Q4: A)
+document.addEventListener('selectstart', function(e){
+  if(!_currentRoom) return;
+  const t = e.target;
+  // 입력창은 허용
+  if(t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+  e.preventDefault();
+  applyCaptureDefense();
+  setTimeout(removeCaptureDefense, 500);
+  return false;
+});
+
+// ═══════════════════════════════════════════════════════════════
+// 🔐 LENS DETECT v5.3 · Patent #47-10
+// 대장님 설계: 🟡 버튼 ON → 중요 메시지 모드 → 렌즈 반사광 감지 (1초 3번)
+// ═══════════════════════════════════════════════════════════════
+const _LD = {
+  active: false,
+  stream: null,
+  video: null,
+  canvas: null,
+  ctx: null,
+  loopTimer: null
+};
+
+async function toggleImportantMode(){
+  const btn = document.getElementById('importantMsgBtn');
+  
+  if(_LD.active){
+    // 끄기
+    _LD.active = false;
+    if(_LD.loopTimer){ clearTimeout(_LD.loopTimer); _LD.loopTimer = null; }
+    if(_LD.stream){ _LD.stream.getTracks().forEach(t => t.stop()); _LD.stream = null; }
+    if(btn){
+      btn.style.background = 'rgba(212,168,67,.15)';
+      btn.style.color = '#d4a843';
+      btn.textContent = '🟡';
+    }
+    if(typeof showToast === 'function') showToast('🟡 중요 메시지 모드 OFF');
+    return;
+  }
+  
+  if(!_currentRoom){
+    if(typeof showToast === 'function') showToast('🟡 채팅방에서만 사용 가능');
+    return;
+  }
+  
+  // 켜기
+  try {
+    _LD.stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 320 }, height: { ideal: 240 } }
+    });
+    
+    if(!_LD.video){
+      _LD.video = document.createElement('video');
+      _LD.video.autoplay = true;
+      _LD.video.playsInline = true;
+      _LD.video.muted = true;
+      _LD.video.style.cssText = 'position:fixed;top:-9999px;width:1px;height:1px;';
+      document.body.appendChild(_LD.video);
+    }
+    _LD.video.srcObject = _LD.stream;
+    await new Promise(r => _LD.video.onloadedmetadata = r);
+    await _LD.video.play();
+    
+    if(!_LD.canvas){
+      _LD.canvas = document.createElement('canvas');
+      _LD.canvas.width = 64;
+      _LD.canvas.height = 64;
+      _LD.ctx = _LD.canvas.getContext('2d');
+    }
+    
+    _LD.active = true;
+    _lensDetectLoop();
+    
+    if(btn){
+      btn.style.background = 'linear-gradient(135deg,#d4a843,#b8922f)';
+      btn.style.color = '#000';
+      btn.textContent = '🔐';
+      btn.style.boxShadow = '0 0 16px rgba(212,168,67,.7)';
+    }
+    if(typeof showToast === 'function') showToast('🔐 중요 메시지 모드 · 렌즈 감지 작동');
+  } catch(e){
+    console.error('[LD] 에러:', e);
+    if(typeof showToast === 'function') showToast('⚠️ 카메라 권한 필요');
+  }
+}
+
+function _lensDetectLoop(){
+  if(!_LD.active) return;
+  
+  try {
+    if(_LD.video && _LD.video.readyState >= 2 && _LD.ctx){
+      _LD.ctx.drawImage(_LD.video, 0, 0, 64, 64);
+      const d = _LD.ctx.getImageData(0, 0, 64, 64).data;
+      
+      // 렌즈 반사광 감지: 매우 밝은 점이 집중된 작은 영역
+      let brightSpots = 0;
+      let maxBright = 0;
+      
+      for(let i = 0; i < d.length; i += 4){
+        const r = d[i], g = d[i+1], b = d[i+2];
+        const bright = (r + g + b) / 3;
+        if(bright > 240){
+          brightSpots++;
+          maxBright = Math.max(maxBright, bright);
+        }
+      }
+      
+      // 의심 조건: 매우 밝은 점 5~30개 (너무 많으면 그냥 조명)
+      const suspicious = (brightSpots >= 5 && brightSpots <= 30 && maxBright > 250);
+      
+      if(suspicious){
+        console.log('[LD] 렌즈 반사광 감지:', brightSpots, 'spots');
+        _setMufeVisible(true);
+        const distEl = document.getElementById('guardianDistBig');
+        const msgEl = document.getElementById('guardianMsg');
+        if(distEl) distEl.textContent = '📷';
+        if(msgEl) msgEl.innerHTML = '렌즈 감지<br><span style="color:#d4a843;font-weight:700;">외부 카메라 촬영 시도</span>';
+      }
+    }
+  } catch(e){}
+  
+  // 1초에 3번 (330ms)
+  _LD.loopTimer = setTimeout(_lensDetectLoop, 330);
+}
+
+// 방 나가면 렌즈 감지도 자동 종료
+// (goBack 호출 시 자동 처리되도록 _LD.active 체크)
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
