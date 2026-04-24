@@ -5019,6 +5019,37 @@ async function actualStartCall(type){
   const room = _rooms[_currentRoom];
   
   try {
+    // ═══════════════════════════════════════════════════════════
+    // 🎯 영상(C-20) · 바벨탑 무너뜨리는 입구 선봉장
+    // Guardian(_G) + LensDetect(_LD) 카메라 점유 해제
+    // Patent #47 기능과 영상통화 충돌 방지
+    // ═══════════════════════════════════════════════════════════
+    if(type==='video'){
+      if(typeof _G !== 'undefined' && _G.active){
+        console.log('[📞 C-20] Guardian 일시 종료 (영상통화 카메라 확보)');
+        _G.active = false;
+        if(_G.loopTimer){ clearTimeout(_G.loopTimer); _G.loopTimer = null; }
+        if(_G.stream){
+          _G.stream.getTracks().forEach(t => t.stop());
+          _G.stream = null;
+        }
+        const gLayer = document.getElementById('guardianMufeLayer');
+        if(gLayer) gLayer.style.display = 'none';
+      }
+      if(typeof _LD !== 'undefined' && _LD.active){
+        console.log('[📞 C-20] LensDetect 일시 종료 (영상통화 카메라 확보)');
+        _LD.active = false;
+        if(_LD.loopTimer){ clearTimeout(_LD.loopTimer); _LD.loopTimer = null; }
+        if(_LD.stream){
+          _LD.stream.getTracks().forEach(t => t.stop());
+          _LD.stream = null;
+        }
+      }
+      // 브라우저가 카메라 해제할 시간 확보
+      await new Promise(r => setTimeout(r, 250));
+    }
+    // ═══════════════════════════════════════════════════════════
+    
     // 1. 미디어 권한 요청
     showToast(type==='video' ? '🎥 카메라 + 마이크 준비 중...' : '📞 마이크 준비 중...');
     const constraints = type==='video' 
@@ -5257,6 +5288,37 @@ async function acceptIncomingCall(callerCode, type, roomId, remoteCode){
     _call.myLang = getSavedLang('my_lang', 'ko-KR');
     _call.peerLang = getSavedLang('peer_lang', 'en-US');
     _call.ttsEnabled = getSavedLang('tts_enabled', '1') === '1';
+    
+    // ═══════════════════════════════════════════════════════════
+    // 🎯 영상(C-20) · 바벨탑 무너뜨리는 입구 선봉장
+    // Guardian(_G) + LensDetect(_LD) 카메라 점유 해제
+    // Patent #47 기능과 영상통화 충돌 방지 (수신자)
+    // ═══════════════════════════════════════════════════════════
+    if(type==='video'){
+      if(typeof _G !== 'undefined' && _G.active){
+        console.log('[📞 C-20] Guardian 일시 종료 (영상통화 수신 - 카메라 확보)');
+        _G.active = false;
+        if(_G.loopTimer){ clearTimeout(_G.loopTimer); _G.loopTimer = null; }
+        if(_G.stream){
+          _G.stream.getTracks().forEach(t => t.stop());
+          _G.stream = null;
+        }
+        const gLayer = document.getElementById('guardianMufeLayer');
+        if(gLayer) gLayer.style.display = 'none';
+      }
+      if(typeof _LD !== 'undefined' && _LD.active){
+        console.log('[📞 C-20] LensDetect 일시 종료 (영상통화 수신 - 카메라 확보)');
+        _LD.active = false;
+        if(_LD.loopTimer){ clearTimeout(_LD.loopTimer); _LD.loopTimer = null; }
+        if(_LD.stream){
+          _LD.stream.getTracks().forEach(t => t.stop());
+          _LD.stream = null;
+        }
+      }
+      // 브라우저가 카메라 해제할 시간 확보
+      await new Promise(r => setTimeout(r, 250));
+    }
+    // ═══════════════════════════════════════════════════════════
     
     const constraints = type==='video' 
       ? { audio: true, video: { facingMode: 'user', width: {ideal:640}, height: {ideal:480} } }
@@ -6486,6 +6548,23 @@ function endCall(notifyPeer){
   
   showToast('📞 통화 종료');
   if(wasRoom && _rooms[wasRoom]) renderMessages();
+  
+  // ═══════════════════════════════════════════════════════════
+  // 🎯 영상(C-20) · Guardian 자동 복구
+  // 통화 전 Guardian이 켜져 있었으면 다시 켬 (사용자 설정 유지)
+  // ═══════════════════════════════════════════════════════════
+  try {
+    const savedMode = localStorage.getItem('cgm2_guardian_mode');
+    if(savedMode && savedMode !== 'off' && typeof setGuardianMode === 'function'){
+      console.log('[📞 C-20] Guardian 자동 복구:', savedMode);
+      setTimeout(() => {
+        if(_currentRoom && !_call.active){
+          setGuardianMode(savedMode);
+        }
+      }, 500);
+    }
+  } catch(e){ console.warn('[Guardian 복구 실패]', e); }
+  // ═══════════════════════════════════════════════════════════
   
   console.log('[통화 종료 완료] 마이크/카메라 모두 해제됨');
 }
