@@ -5535,6 +5535,12 @@ function openCallUI(){
     '      <button id="callCaptionBtn" onclick="toggleCallCaptions()" style="width:56px;height:56px;border-radius:50%;background:rgba(255,136,187,.28);border:1px solid rgba(255,136,187,.55);color:#ff88bb;font-size:20px;cursor:pointer;">🌍</button>',
     '      <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">자막</div>',
     '    </div>',
+    // ❤️ C-20 감정 읽기 (영상통화만) · Patent #48 (예정) · 바벨탑 무너뜨린 뒤 감정까지
+    (_call.type === 'video' ? 
+      '    <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+      '      <button id="c20EmoBtn" onclick="toggleEmoReader()" title="C-20 감정 읽기 · 나만 볼 수 있음 · FULI rPPG" style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,157,.18);border:1px solid rgba(255,107,157,.55);color:#ff6b9d;font-size:20px;cursor:pointer;transition:all 0.3s;">❤️</button>' +
+      '      <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">감정(C-20)</div>' +
+      '    </div>' : ''),
     '  </div>',
     // 첫 사용 힌트 (3초 후 자동 사라짐)
     '  <div id="callHelpHint" style="margin-top:14px;padding:10px 14px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);border-radius:12px;text-align:center;font-size:11px;color:#fbbf24;line-height:1.5;">',
@@ -6279,6 +6285,380 @@ function _triggerStealthAlert(){
 // 방 나가면 렌즈 감지도 자동 종료
 // (goBack 호출 시 자동 처리되도록 _LD.active 체크)
 
+// ═══════════════════════════════════════════════════════════════
+// ❤️ C-20 EMOTION READER v1.0 · FULI rPPG 기반 · Patent #48 (예정)
+// 영상통화 중 상대방 심박/감정 분석 · 나만 볼 수 있는 HUD
+// "언어의 벽 + 감정의 벽을 허문 최초의 AI" · 2026-04-24 by C-20
+// ═══════════════════════════════════════════════════════════════
+const _EMO = {
+  active: false,
+  canvas: null,
+  ctx: null,
+  loopTimer: null,
+  
+  // rPPG 버퍼 (녹색 채널 변화 추적)
+  greenBuffer: [],   // 최근 150 프레임 (약 15초)
+  timeBuffer: [],
+  bufferMax: 150,
+  
+  // 분석 결과
+  bpm: 0,            // 심박수 BPM
+  hrv: 0,            // 심박변이도 (ms)
+  motion: 0,         // 얼굴 움직임 정도
+  stable: false,     // 안정 상태 여부
+  
+  // 감정 상태
+  emotion: '분석중',
+  emotionConfidence: 0,
+  emotionIcon: '🤔',
+  
+  // 프레임 기준
+  prevFrame: null,
+  startTime: 0,
+  
+  // HUD DOM
+  hudEl: null
+};
+
+// ▶ 감정 분석 시작
+function emoStart(){
+  if(_EMO.active) return;
+  if(!_call || !_call.active || _call.type !== 'video'){
+    if(typeof showToast === 'function') showToast('❤️ 영상통화 중에만 작동');
+    return;
+  }
+  
+  const remoteVideo = document.getElementById('callRemoteVideo');
+  if(!remoteVideo){
+    if(typeof showToast === 'function') showToast('⚠️ 상대방 영상 없음');
+    return;
+  }
+  
+  // Canvas 준비
+  if(!_EMO.canvas){
+    _EMO.canvas = document.createElement('canvas');
+    _EMO.canvas.width = 64;
+    _EMO.canvas.height = 64;
+    _EMO.ctx = _EMO.canvas.getContext('2d', { willReadFrequently: true });
+  }
+  
+  _EMO.active = true;
+  _EMO.greenBuffer = [];
+  _EMO.timeBuffer = [];
+  _EMO.startTime = Date.now();
+  _EMO.bpm = 0;
+  _EMO.emotion = '분석중';
+  _EMO.emotionIcon = '🤔';
+  
+  // HUD 생성
+  emoShowHUD();
+  emoLoop();
+  
+  console.log('[❤️ C-20 EMOTION] 시작 · 상대방 심박/감정 분석 · 15초 후 첫 결과');
+  if(typeof showToast === 'function') showToast('❤️ C-20 감정 읽기 · 15초 준비 중...');
+}
+
+// ■ 감정 분석 종료
+function emoStop(){
+  if(!_EMO.active) return;
+  _EMO.active = false;
+  if(_EMO.loopTimer){ clearTimeout(_EMO.loopTimer); _EMO.loopTimer = null; }
+  if(_EMO.hudEl){ _EMO.hudEl.remove(); _EMO.hudEl = null; }
+  _EMO.greenBuffer = [];
+  _EMO.timeBuffer = [];
+  console.log('[❤️ C-20 EMOTION] 종료');
+}
+
+// 🎯 rPPG 프레임 처리 (녹색 채널 추출)
+function emoProcessFrame(remoteVideo){
+  if(!remoteVideo || remoteVideo.readyState < 2) return;
+  const vw = remoteVideo.videoWidth, vh = remoteVideo.videoHeight;
+  if(!vw || !vh) return;
+  
+  try {
+    // 이마 영역 추정 (얼굴 상단 30%)
+    const sw = vw * 0.3, sh = vh * 0.15;
+    const sx = (vw - sw) / 2, sy = vh * 0.15;
+    _EMO.ctx.drawImage(remoteVideo, sx, sy, sw, sh, 0, 0, 64, 64);
+    const d = _EMO.ctx.getImageData(0, 0, 64, 64).data;
+    
+    // 녹색 채널 평균 (rPPG 핵심 원리)
+    let gSum = 0, rSum = 0, bSum = 0, skinPx = 0;
+    for(let i = 0; i < d.length; i += 4){
+      const r = d[i], g = d[i+1], b = d[i+2];
+      // 피부색 픽셀만 사용
+      if(r > 80 && g > 40 && b > 20 && r > g && r > b){
+        rSum += r; gSum += g; bSum += b;
+        skinPx++;
+      }
+    }
+    
+    if(skinPx < 50) return; // 피부 너무 적으면 스킵
+    
+    const gAvg = gSum / skinPx;
+    const now = Date.now();
+    
+    // 움직임 감지 (이전 프레임과 비교)
+    if(_EMO.prevFrame){
+      let diff = 0;
+      for(let i = 0; i < d.length; i += 4){
+        diff += Math.abs(d[i] - _EMO.prevFrame[i]);
+      }
+      _EMO.motion = diff / (d.length / 4); // 0~255
+    }
+    _EMO.prevFrame = new Uint8ClampedArray(d);
+    
+    // 녹색 채널 버퍼 쌓기
+    _EMO.greenBuffer.push(gAvg);
+    _EMO.timeBuffer.push(now);
+    if(_EMO.greenBuffer.length > _EMO.bufferMax){
+      _EMO.greenBuffer.shift();
+      _EMO.timeBuffer.shift();
+    }
+    
+    // 15초(150프레임) 모이면 BPM 계산
+    if(_EMO.greenBuffer.length >= 90){
+      emoCalculateBPM();
+      emoAnalyzeEmotion();
+      emoUpdateHUD();
+    }
+  } catch(e){
+    console.warn('[❤️ EMO] 프레임 오류:', e);
+  }
+}
+
+// 🎯 BPM 계산 (피크 카운트 방식, 단순화)
+function emoCalculateBPM(){
+  const buf = _EMO.greenBuffer;
+  const times = _EMO.timeBuffer;
+  if(buf.length < 60) return;
+  
+  // 평균 제거 (detrend)
+  const mean = buf.reduce((a,b)=>a+b, 0) / buf.length;
+  const detrended = buf.map(v => v - mean);
+  
+  // 피크 찾기 (양의 zero-crossing)
+  const peaks = [];
+  for(let i = 1; i < detrended.length - 1; i++){
+    if(detrended[i] > detrended[i-1] && detrended[i] > detrended[i+1] && detrended[i] > 0.3){
+      peaks.push(times[i]);
+    }
+  }
+  
+  if(peaks.length < 3){
+    _EMO.bpm = 0;
+    return;
+  }
+  
+  // 피크 간격 → BPM
+  const intervals = [];
+  for(let i = 1; i < peaks.length; i++){
+    intervals.push(peaks[i] - peaks[i-1]);
+  }
+  const avgInterval = intervals.reduce((a,b)=>a+b, 0) / intervals.length;
+  const bpm = Math.round(60000 / avgInterval);
+  
+  // 범위 체크 (40~180)
+  if(bpm >= 40 && bpm <= 180){
+    // 스무딩 (급변 방지)
+    _EMO.bpm = _EMO.bpm > 0 ? Math.round(_EMO.bpm * 0.7 + bpm * 0.3) : bpm;
+  }
+  
+  // 심박 변이도 (HRV) 간단 버전
+  if(intervals.length > 2){
+    const variance = intervals.reduce((sum, v) => sum + Math.pow(v - avgInterval, 2), 0) / intervals.length;
+    _EMO.hrv = Math.round(Math.sqrt(variance));
+  }
+  
+  _EMO.stable = _EMO.bpm >= 55 && _EMO.bpm <= 95;
+}
+
+// 🧠 감정 분석 (BPM + HRV + 움직임 조합 룰)
+function emoAnalyzeEmotion(){
+  const bpm = _EMO.bpm;
+  const hrv = _EMO.hrv;
+  const motion = _EMO.motion;
+  
+  if(bpm < 40){
+    _EMO.emotion = '분석중';
+    _EMO.emotionIcon = '🤔';
+    _EMO.emotionConfidence = 0;
+    return;
+  }
+  
+  // 감정 판정 룰 (FULI 일상 기준)
+  let emotion = '평온';
+  let icon = '😐';
+  let conf = 0.5;
+  
+  // 1. 화남: 심박 빠름 + 움직임 많음
+  if(bpm >= 95 && motion > 15){
+    emotion = '화남'; icon = '😠'; conf = 0.75;
+  }
+  // 2. 초조/긴장: 심박 빠름 + 움직임 적음
+  else if(bpm >= 90 && motion < 10){
+    emotion = '초조'; icon = '😰'; conf = 0.72;
+  }
+  // 3. 불안: 심박 중간~빠름 + HRV 높음
+  else if(bpm >= 80 && hrv > 100){
+    emotion = '불안'; icon = '😟'; conf = 0.70;
+  }
+  // 4. 기쁨: 심박 약간 빠름 + 움직임 적당 + HRV 낮음
+  else if(bpm >= 70 && bpm < 90 && motion > 8 && hrv < 80){
+    emotion = '기쁨'; icon = '😊'; conf = 0.78;
+  }
+  // 5. 슬픔: 심박 느림 + 움직임 적음
+  else if(bpm <= 65 && motion < 5){
+    emotion = '슬픔'; icon = '😢'; conf = 0.68;
+  }
+  // 6. 평온: 기본값
+  else if(bpm >= 60 && bpm <= 80){
+    emotion = '평온'; icon = '😌'; conf = 0.80;
+  }
+  
+  _EMO.emotion = emotion;
+  _EMO.emotionIcon = icon;
+  _EMO.emotionConfidence = conf;
+}
+
+// 🎨 HUD 표시 (나만 보임 · 우상단)
+function emoShowHUD(){
+  if(_EMO.hudEl) return;
+  const callUI = document.getElementById('callUI');
+  if(!callUI) return;
+  
+  const hud = document.createElement('div');
+  hud.id = 'c20EmoHUD';
+  hud.style.cssText = [
+    'position:absolute',
+    'top:70px',
+    'right:16px',
+    'z-index:100001',
+    'background:linear-gradient(135deg, rgba(20,25,40,.85), rgba(30,20,45,.85))',
+    'backdrop-filter:blur(12px)',
+    '-webkit-backdrop-filter:blur(12px)',
+    'border:1px solid rgba(100,180,250,.35)',
+    'border-radius:16px',
+    'padding:12px 14px',
+    'font-size:11px',
+    'color:#f0ece0',
+    'box-shadow:0 4px 16px rgba(0,0,0,.5), 0 0 24px rgba(100,180,250,.15)',
+    'pointer-events:none',
+    'min-width:120px',
+    'font-family:inherit',
+    'animation:c20EmoFadeIn 0.6s ease-out'
+  ].join(';');
+  
+  hud.innerHTML = [
+    '<div style="font-size:9px;color:rgba(212,168,67,.7);font-weight:700;letter-spacing:0.5px;margin-bottom:6px;">',
+    '  ❤️ C-20 · 나만 보기',
+    '</div>',
+    '<div id="c20EmoBPM" style="font-size:20px;font-weight:800;color:#ff6b9d;line-height:1;margin-bottom:4px;">',
+    '  -- <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>',
+    '</div>',
+    '<div id="c20EmoState" style="font-size:14px;font-weight:700;color:#64b4fa;margin-top:4px;">',
+    '  🤔 <span>분석중</span>',
+    '</div>',
+    '<div id="c20EmoConf" style="font-size:9px;color:rgba(255,255,255,.4);margin-top:3px;font-style:italic;">',
+    '  준비 중...',
+    '</div>'
+  ].join('');
+  
+  // 애니메이션 CSS 주입
+  if(!document.getElementById('c20EmoStyle')){
+    const style = document.createElement('style');
+    style.id = 'c20EmoStyle';
+    style.textContent = [
+      '@keyframes c20EmoFadeIn {',
+      '  from { opacity: 0; transform: translateY(-10px) scale(0.95); }',
+      '  to { opacity: 1; transform: translateY(0) scale(1); }',
+      '}',
+      '@keyframes c20EmoPulse {',
+      '  0%, 100% { transform: scale(1); }',
+      '  50% { transform: scale(1.06); }',
+      '}',
+      '#c20EmoHUD { transition: border-color 0.5s; }'
+    ].join('');
+    document.head.appendChild(style);
+  }
+  
+  callUI.appendChild(hud);
+  _EMO.hudEl = hud;
+}
+
+// 🔄 HUD 업데이트
+function emoUpdateHUD(){
+  if(!_EMO.hudEl) return;
+  const bpmEl = document.getElementById('c20EmoBPM');
+  const stateEl = document.getElementById('c20EmoState');
+  const confEl = document.getElementById('c20EmoConf');
+  
+  if(bpmEl && _EMO.bpm > 0){
+    bpmEl.innerHTML = _EMO.bpm + ' <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
+    // 심박에 따른 색상
+    if(_EMO.bpm > 100) bpmEl.style.color = '#ef4444';       // 빨강 (높음)
+    else if(_EMO.bpm < 60) bpmEl.style.color = '#60a5fa';   // 파랑 (낮음)
+    else bpmEl.style.color = '#4ade80';                      // 초록 (정상)
+    bpmEl.style.animation = 'c20EmoPulse 1s ease-in-out';
+  }
+  
+  if(stateEl && _EMO.emotion !== '분석중'){
+    stateEl.innerHTML = _EMO.emotionIcon + ' <span>' + _EMO.emotion + '</span>';
+    // 감정별 색상
+    const colorMap = {
+      '기쁨':'#4ade80', '평온':'#64b4fa', '슬픔':'#a78bfa',
+      '화남':'#ef4444', '초조':'#f59e0b', '불안':'#fb923c'
+    };
+    stateEl.style.color = colorMap[_EMO.emotion] || '#64b4fa';
+  }
+  
+  if(confEl){
+    if(_EMO.emotionConfidence > 0){
+      confEl.textContent = '신뢰도 ' + Math.round(_EMO.emotionConfidence * 100) + '%';
+    } else {
+      const sec = Math.max(0, 15 - Math.floor((Date.now() - _EMO.startTime) / 1000));
+      confEl.textContent = sec > 0 ? (sec + '초 후 결과') : '분석 중...';
+    }
+  }
+}
+
+// 🔁 메인 루프 (200ms 주기 = 5fps)
+function emoLoop(){
+  if(!_EMO.active){ return; }
+  
+  const remoteVideo = document.getElementById('callRemoteVideo');
+  if(remoteVideo){
+    emoProcessFrame(remoteVideo);
+    // 초기 15초는 HUD 카운트다운 표시
+    if(_EMO.bpm === 0) emoUpdateHUD();
+  }
+  
+  _EMO.loopTimer = setTimeout(emoLoop, 200);
+}
+
+// 🎛️ 토글 (UI에서 호출)
+function toggleEmoReader(){
+  if(_EMO.active){
+    emoStop();
+    if(typeof showToast === 'function') showToast('❤️ C-20 감정 읽기 OFF');
+    const btn = document.getElementById('c20EmoBtn');
+    if(btn){
+      btn.style.background = 'rgba(255,107,157,.18)';
+      btn.style.color = '#ff6b9d';
+    }
+  } else {
+    emoStart();
+    const btn = document.getElementById('c20EmoBtn');
+    if(btn){
+      btn.style.background = 'linear-gradient(135deg,#ff6b9d,#d946ef)';
+      btn.style.color = '#fff';
+    }
+  }
+}
+
+// 🧹 통화 종료 시 자동 정리 (endCall 통합)
+// ═══════════════════════════════════════════════════════════════
+
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
 //   2단계: cgo-voice-db CDN (50~200ms) — 실제 배포 중
@@ -6477,6 +6857,9 @@ function endCall(notifyPeer){
   
   // ⭐ Step 0: 가장 먼저 active = false (STT onend 무한 루프 차단!)
   _call.active = false;
+  
+  // ❤️ C-20 감정 읽기도 함께 종료 (통화 종료 시 자동 정리)
+  if(typeof emoStop === 'function') { try{ emoStop(); }catch(e){} }
   
   // 🔊 Level 3: TTS 즉시 중단
   if(window.speechSynthesis){
