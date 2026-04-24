@@ -6138,14 +6138,63 @@ function _lensDetectLoop(){
         _setMufeVisible(true);
         const distEl = document.getElementById('guardianDistBig');
         const msgEl = document.getElementById('guardianMsg');
-        if(distEl) distEl.textContent = '📷';
-        if(msgEl) msgEl.innerHTML = '렌즈 감지<br><span style="color:#d4a843;font-weight:700;">외부 카메라 촬영 시도</span>';
+        if(distEl) distEl.textContent = '🚨';
+        if(msgEl) msgEl.innerHTML = '🚨 도촬 시도 감지<br><span style="color:#f87171;font-weight:700;">외부 카메라 렌즈 탐지됨</span>';
+        
+        // 📳 진동 + 🔴 빨강 플래시 (대장님 Patent #47-11)
+        _triggerStealthAlert();
       }
     }
   } catch(e){}
   
   // 1초에 3번 (330ms)
   _LD.loopTimer = setTimeout(_lensDetectLoop, 330);
+}
+
+// 📳 무음 경고 시스템 (대장님 설계: 진동 + 화면 플래시)
+// - 진동: [100, 50, 100] 짧게 부드럽게
+// - 2초마다 반복 (렌즈 있는 동안)
+// - 진동 미지원 기기: 빨강 화면 플래시
+let _lastAlertTime = 0;
+let _flashOverlay = null;
+
+function _triggerStealthAlert(){
+  const now = Date.now();
+  // 2초마다 반복 (대장님 Q2: B)
+  if(now - _lastAlertTime < 2000) return;
+  _lastAlertTime = now;
+  
+  // 📳 진동 시도 (대장님 Q1: B)
+  let vibrated = false;
+  if(navigator.vibrate){
+    try {
+      vibrated = navigator.vibrate([100, 50, 100]);
+    } catch(e){ vibrated = false; }
+  }
+  
+  // 🔴 화면 플래시 (대장님 Q4: A - 진동 백업)
+  if(!_flashOverlay){
+    _flashOverlay = document.createElement('div');
+    _flashOverlay.style.cssText = 
+      'position:fixed;inset:0;pointer-events:none;z-index:99998;' +
+      'background:rgba(239,68,68,.4);opacity:0;' +
+      'transition:opacity 0.15s;mix-blend-mode:multiply;';
+    document.body.appendChild(_flashOverlay);
+  }
+  
+  // 빨강 깜빡 3번
+  let flashCount = 0;
+  const flashInterval = setInterval(() => {
+    if(!_flashOverlay){ clearInterval(flashInterval); return; }
+    _flashOverlay.style.opacity = flashCount % 2 === 0 ? '0.6' : '0';
+    flashCount++;
+    if(flashCount >= 6){
+      clearInterval(flashInterval);
+      _flashOverlay.style.opacity = '0';
+    }
+  }, 150);
+  
+  console.log('[LD] 🚨 Stealth Alert · vibrate:', vibrated, '· flash: ON');
 }
 
 // 방 나가면 렌즈 감지도 자동 종료
