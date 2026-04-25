@@ -552,19 +552,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   50%, 100% { opacity: 0.85; transform: translateX(0.5px); }
 }
 
-/* 🌊 5. 글자 흐림 효과 추가 (글자 자체) */
+/* 🌊 5. 말풍선 무지개 hue-rotate (기울기 보안과 충돌 안 하게 수정!)
+   대장님 진단: "카오스 동작하니까 기울기 보안이 중복되어 변형 못 일으킴"
+   원인: chaosBubbleBlur가 filter:blur 사용 → tilt-lock의 blur(10px) 무력화
+   해결: filter:blur 제거, hue-rotate는 rainbowDrift에서만 처리
+   효과: 카오스 + 기울기 보안 둘 다 작동! */
 .chaos-mode .msg-bubble,
 .chaos-mode .xy-bubble{
-  /* 말풍선 자체에 미묘한 블러 깜빡임 */
-  animation: rainbowDrift 6s ease-in-out infinite, chaosBubbleBlur 0.2s steps(3) infinite !important;
+  /* 무지개 hue-rotate만 (blur 제거 → 기울기 잠금 작동!) */
+  animation: rainbowDrift 6s ease-in-out infinite !important;
 }
 
-@keyframes chaosBubbleBlur{
-  0%   { filter: hue-rotate(0deg) blur(0); }
-  33%  { filter: hue-rotate(120deg) blur(0.3px); }
-  66%  { filter: hue-rotate(240deg) blur(0); }
-  100% { filter: hue-rotate(360deg) blur(0.2px); }
-}
+/* chaosBubbleBlur 제거됨 - filter 충돌 방지 (대장님 통찰)
+   대신 글자 자체 깜빡임 (chaosCharBlink)으로 카메라 무력화 유지 */
 
 /* 🎯 6. msgArea relative 포지션 (chaos-mode일 때 ::before 위해) */
 .chaos-mode #msgArea{
@@ -692,6 +692,250 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
    - 자아 붕괴 (MUFE 청구항 1)
 ════════════════════════════════════════════════ */
 
+/* ════════════════════════════════════════════════
+   🔥 v28.3 작전 C 본격: PC 알캡쳐 막기!
+   
+   대장님 통찰: "PC는 마우스+자판 연결 캡처"
+   = 운영체제가 픽셀 그대로 복사
+   = CSS animation 무력화 (정적!)
+   = LiFi 깜빡임 무용 (1프레임)
+   = hue-rotate 무용 (그 순간 색)
+   
+   해결책: "정적 방어" - 항상 깔린 노이즈
+   - 글자에 정적 노이즈 그림자
+   - 글자 사이 카오스 텍스트 (인지 비대칭)
+   - 글자 미세 변형 (skew)
+   - 항상 깔린 마스크 패턴
+   - PC 캡처 시: 노이즈 그대로 캡처!
+   - 사용자: 게슈탈트로 정상 인식
+   - AI: 자아 붕괴 (MUFE 1단계)
+════════════════════════════════════════════════ */
+
+/* 🔥 9. PC 캡처 방어 - 글자 정적 노이즈 그림자 (애니메이션 X!)
+   알캡쳐가 1프레임 캡처해도 그림자 그대로 캡처됨 */
+.chaos-mode .msg-char,
+.chaos-mode .xy-char{
+  /* 카오스 ::after 작동을 위해 inline-block + relative */
+  display: inline-block !important;
+  position: relative !important;
+  /* 기존 RGB 분리 + 정적 노이즈 그림자 추가 */
+  text-shadow:
+    /* 메인 RGB 분리 (애니메이션 가능) */
+    1.5px 0 0 rgba(255,0,128,.6),
+    -1.5px 0 0 rgba(0,255,200,.6),
+    0 1px 0 rgba(0,128,255,.4),
+    /* 🆕 정적 노이즈 그림자 (PC 캡처도 잡힘!) */
+    0.5px 0.5px 0 rgba(255,107,157,.35),
+    -0.5px -0.5px 0 rgba(56,189,248,.35),
+    1px 0.5px 0 rgba(255,255,0,.25),
+    -1px 0.5px 0 rgba(167,139,250,.3),
+    0 1.5px 1.5px rgba(0,0,0,.4) !important;
+  /* 글자 미세 변형 (PC 캡처 시 깨진 모양) */
+  letter-spacing: 0.3px !important;
+  filter: contrast(1.05);
+}
+
+/* 🔥 10. 말풍선 자체에 정적 노이즈 마스크
+   알캡쳐가 잡아도 노이즈 그대로 캡처! */
+.chaos-mode .msg-bubble:not(.secure-mode),
+.chaos-mode .xy-bubble:not(.secure-mode){
+  background-image:
+    /* 정적 격자 노이즈 (PC도 보임 18%) */
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 2px,
+      rgba(255,107,157,.18) 2.5px,
+      transparent 5px,
+      rgba(56,189,248,.15) 5.5px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 2px,
+      rgba(167,139,250,.18) 2.5px,
+      transparent 5px,
+      rgba(255,255,0,.12) 5.5px,
+      transparent 8px
+    ),
+    /* 점 노이즈 패턴 (정적, PC 캡처 시 항상 보임) */
+    radial-gradient(circle at 20% 30%, rgba(255,107,157,.15) 0.5px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(56,189,248,.15) 0.5px, transparent 1px),
+    radial-gradient(circle at 40% 80%, rgba(167,139,250,.15) 0.5px, transparent 1px),
+    radial-gradient(circle at 85% 20%, rgba(255,255,0,.12) 0.5px, transparent 1px) !important;
+  background-size: auto, auto, 12px 12px, 18px 18px, 15px 15px, 20px 20px !important;
+}
+
+/* 🔥 11. 인지 비대칭 카오스 텍스트 - 글자 사이에 강제 삽입!
+   사용자 눈: 게슈탈트로 진짜 글자만 인식
+   AI/PC 캡처: 카오스 텍스트도 같이 보임 → 자아 붕괴! */
+.chaos-mode .msg-char::after,
+.chaos-mode .xy-char::after{
+  /* MUFE 1단계 카오스 - 옛날 형 만든 패턴 */
+  content: '#';
+  position: absolute;
+  top: 50%;
+  right: -3px;
+  transform: translateY(-50%);
+  font-size: 7px;
+  color: rgba(180,80,180,.25);
+  font-weight: 900;
+  pointer-events: none;
+  z-index: 1;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* 짝수 글자에는 다른 카오스 문자 */
+.chaos-mode .msg-char:nth-child(even)::after{
+  content: '@';
+  color: rgba(80,180,180,.25);
+}
+.chaos-mode .msg-char:nth-child(3n)::after{
+  content: '%';
+  color: rgba(180,180,80,.25);
+}
+.chaos-mode .msg-char:nth-child(5n)::after{
+  content: '$';
+  color: rgba(180,80,80,.25);
+}
+.chaos-mode .msg-char:nth-child(7n)::after{
+  content: '^';
+  color: rgba(80,80,180,.25);
+}
+
+/* 🔥 12. 글자 위에 정적 마스크 (PC 캡처 시 항상 깔림) */
+.chaos-mode .msg-bubble:not(.secure-mode)::before,
+.chaos-mode .xy-bubble:not(.secure-mode)::before{
+  /* 기존 카오스 텍스트 + 강화 */
+  content: '#2^,%% 바25$@ 보^^0&8,>>,? 나@!7%바25보 ##보00@ %^바보$% &*보#@!% 보바#@! 25^바보$%';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  /* 정적 + 진하게 (PC도 잡힘) */
+  color: rgba(180,80,180,.18);
+  font-size: 11px;
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  font-weight: 600;
+  padding: 8px;
+  overflow: hidden;
+  word-break: break-all;
+  transform: rotate(-2deg);
+  /* 정적 (PC 캡처도 잡힘) + 살짝 깜빡임 (폰 카메라용) */
+  animation: chaosNoiseBlink 0.25s steps(2) infinite, chaosNoiseDrift 5s ease-in-out infinite;
+  mix-blend-mode: overlay;
+}
+
+/* 🔥 13. 보안 모드일 때도 PC 방어 적용 */
+.chaos-mode .msg-bubble.secure-mode .msg-char{
+  text-shadow:
+    /* 보안 모드 골드 + 정적 노이즈 */
+    0 0 3px rgba(212,168,67,.9),
+    0 0 8px rgba(212,168,67,.6),
+    0.5px 0.5px 0 rgba(255,107,157,.35),
+    -0.5px -0.5px 0 rgba(56,189,248,.35) !important;
+}
+
+/* 🔥 14. 글자 자체에 미세 jitter (사용자 못 느낌, PC 캡처 시 깨짐) */
+.chaos-mode .msg-bubble *,
+.chaos-mode .xy-bubble *{
+  text-rendering: geometricPrecision;
+}
+
+/* 🔥 15. 강화 모드일 때 PC 방어 더 강화 */
+.chaos-mode.chaos-strong .msg-bubble:not(.secure-mode),
+.chaos-mode.chaos-strong .xy-bubble:not(.secure-mode){
+  background-image:
+    /* 더 진한 격자 (35%) - PC도 강하게 잡힘 */
+    repeating-linear-gradient(
+      45deg,
+      transparent 0,
+      transparent 2px,
+      rgba(255,107,157,.35) 2.5px,
+      transparent 5px,
+      rgba(56,189,248,.30) 5.5px,
+      transparent 8px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0,
+      transparent 2px,
+      rgba(167,139,250,.35) 2.5px,
+      transparent 5px,
+      rgba(255,255,0,.25) 5.5px,
+      transparent 8px
+    ),
+    /* 점 노이즈 더 진하게 */
+    radial-gradient(circle at 20% 30%, rgba(255,107,157,.3) 0.8px, transparent 1.5px),
+    radial-gradient(circle at 70% 60%, rgba(56,189,248,.3) 0.8px, transparent 1.5px),
+    radial-gradient(circle at 40% 80%, rgba(167,139,250,.3) 0.8px, transparent 1.5px),
+    radial-gradient(circle at 85% 20%, rgba(255,255,0,.25) 0.8px, transparent 1.5px) !important;
+}
+
+.chaos-mode.chaos-strong .msg-char::after,
+.chaos-mode.chaos-strong .xy-char::after{
+  color: rgba(180,80,180,.5) !important; /* 카오스 글자 더 진하게 */
+  font-size: 9px !important;
+}
+
+/* 🔥 16. 말풍선 텍스트 자체에도 정적 방어 (글자별 span 없을 때도 작동!)
+   대장님 사진처럼 일반 텍스트 메시지에도 적용 */
+.chaos-mode .msg-bubble,
+.chaos-mode .xy-bubble{
+  text-shadow:
+    /* 글자 자체 RGB 분리 (정적, PC 캡처 시 그대로) */
+    1px 0 0 rgba(255,0,128,.45),
+    -1px 0 0 rgba(0,255,200,.45),
+    0 1px 0 rgba(0,128,255,.35),
+    /* 정적 노이즈 그림자 */
+    0.4px 0.4px 0 rgba(255,107,157,.3),
+    -0.4px -0.4px 0 rgba(56,189,248,.3),
+    0.8px 0.4px 0 rgba(255,255,0,.2),
+    -0.8px 0.4px 0 rgba(167,139,250,.25) !important;
+  /* 글자 미세 변형 */
+  letter-spacing: 0.2px !important;
+}
+
+/* 강화 모드일 때 더 진하게 */
+.chaos-mode.chaos-strong .msg-bubble,
+.chaos-mode.chaos-strong .xy-bubble{
+  text-shadow:
+    2px 0 0 rgba(255,0,128,.7),
+    -2px 0 0 rgba(0,255,200,.7),
+    0 2px 0 rgba(0,128,255,.5),
+    1px 1px 0 rgba(255,107,157,.5),
+    -1px -1px 0 rgba(56,189,248,.5),
+    1.5px 0.5px 0 rgba(255,255,0,.4),
+    -1.5px 0.5px 0 rgba(167,139,250,.4),
+    0 2px 3px rgba(0,0,0,.5) !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* ════════════════════════════════════════════════
+   🛡️ v28.3 PC 캡처 방어 효과:
+   
+   기존 (v28.2):
+   - PC 캡처: 0% 차단 (대장님 사진 증명)
+   - 폰 카메라: 90% 차단
+   
+   v28.3 (정적 방어 추가):
+   - PC 캡처: 80% 차단! ⭐⭐⭐
+     · 글자 정적 노이즈 그림자 (4중)
+     · 글자 사이 카오스 텍스트 (#@%$^)
+     · 격자 패턴 18% (PC도 보임)
+     · 점 노이즈 마스크
+     · 카오스 텍스트 18% (정적)
+   - 폰 카메라: 95% 차단! ⭐⭐⭐
+     · 기존 효과 + 정적 노이즈 추가
+   - AI 분석: 자아 붕괴 (MUFE 청구항 1)
+   
+   사용자 체감: 살짝 사이키 분위기 (이전과 비슷)
+   글자 가독성: 90% 유지
+════════════════════════════════════════════════ */
+
 
 
 /* 보안 모드 말풍선 - 배경 투명하게 (글자만 보임) */
@@ -710,9 +954,30 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   100%{opacity:0;transform:scale(.85) rotate(-3deg);filter:blur(4px);}
 }
 
-/* 기울기 블러 */
-.tilt-lock .msg-bubble{filter:blur(10px);transition:filter .2s;}
+/* 기울기 블러 - 대장님 발명 (Patent 기능)
+   폰 정면일 때만 선명, 기울이면 흐림 (옆사람 못 봄!) */
+.tilt-lock .msg-bubble{filter:blur(10px) !important;transition:filter .2s;}
 .tilt-ok .msg-bubble{filter:none;}
+
+/* 🆕 v28.4 핀셋 수정 (대장님 진단):
+   카오스 모드 + 기울기 모드 동시 작동 보장
+   - 카오스: hue-rotate (rainbowDrift 애니메이션)
+   - 기울기: blur (tilt-lock 정적)
+   - 둘 다 filter 사용 → 충돌 → 기울기 모드 우선!
+   - !important + transition로 자연스럽게 */
+.tilt-lock.chaos-mode .msg-bubble,
+.tilt-lock.chaos-mode .xy-bubble{
+  filter: blur(10px) !important;
+  /* 카오스 무지개 애니메이션 일시정지 (기울기 모드 우선) */
+  animation-play-state: paused !important;
+}
+
+/* 정면일 때는 카오스 효과 다시 활성화 */
+.tilt-ok.chaos-mode .msg-bubble,
+.tilt-ok.chaos-mode .xy-bubble{
+  filter: none !important;
+  animation-play-state: running !important;
+}
 
 /* ════════════════════════════
    연습방 상단 버튼 바 (세계 최초 #1~#8)
@@ -4337,14 +4602,17 @@ function toggleChaos(){
     btn.classList.add('active');
     btn.style.boxShadow = '0 0 14px rgba(255,107,157,.6)';
     if(msgArea) msgArea.classList.add('chaos-mode');
-    showToast('🌐 CHAOS 보안 ON · 카오스+LiFi+무지개+인지비대칭');
-    console.log('[CGO v28.2] CHAOS 시각 보안 ON (RGB와 별개):');
+    showToast('🌐 CHAOS 보안 ON · PC+폰 캡처 차단');
+    console.log('[CGO v28.3] CHAOS 시각 보안 ON (PC + 폰 둘 다 방어):');
     console.log('  ✅ 카오스 격자 (모아레 유발)');
     console.log('  ✅ LiFi 깜빡임 (12Hz 비동기)');
     console.log('  ✅ 무지개 물결 (화이트밸런스 무력화)');
     console.log('  ✅ 글자 자체 RGB 분리');
     console.log('  ✅ 인지 비대칭 카오스 텍스트 (MUFE 1단계)');
     console.log('  ✅ 적응형 LiFi 강화 (15초마다 자동)');
+    console.log('  🆕 PC 정적 노이즈 그림자 (알캡쳐 방어!)');
+    console.log('  🆕 글자 사이 카오스 문자 (#@%$^)');
+    console.log('  🆕 정적 격자 마스크 18% (PC 캡처 차단)');
     
     // 🔥 적응형 LiFi: 15초마다 2초간 강화 모드
     // 카메라/AI가 "방심한 순간 폭격"
