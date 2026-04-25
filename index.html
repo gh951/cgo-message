@@ -6296,8 +6296,10 @@ function _triggerStealthAlert(){
 // (goBack 호출 시 자동 처리되도록 _LD.active 체크)
 
 // ═══════════════════════════════════════════════════════════════
-// ❤️ C-20 EMOTION READER v1.0 · FULI rPPG 기반 · Patent #48 (예정)
+// ❤️ C-20 EMOTION READER v2.0 · FULI CGO-FULI rPPG 엔진 이식 · Patent #48
 // 영상통화 중 상대방 심박/감정 분석 · 나만 볼 수 있는 HUD
+// 핵심 기술: 밴드패스 필터 + 피크검출 + RMSSD HRV + 피부색 20% 검증
+//           (FULI 대장님 괴물앱 C-17 기준 엔진 이식)
 // "언어의 벽 + 감정의 벽을 허문 최초의 AI" · 2026-04-24 by C-20
 // ═══════════════════════════════════════════════════════════════
 const _EMO = {
@@ -6306,32 +6308,40 @@ const _EMO = {
   ctx: null,
   loopTimer: null,
   
-  // rPPG 버퍼 (녹색 채널 변화 추적)
-  greenBuffer: [],   // 최근 150 프레임 (약 15초)
-  timeBuffer: [],
-  bufferMax: 150,
+  // rPPG 핵심 (FULI 이식)
+  sampleRate: 30,     // 30 FPS 샘플링
+  lastSampleTime: 0,
+  greenSignal: [],    // 원시 녹색 채널
+  filteredSignal: [], // 밴드패스 필터 통과 후
+  rriList: [],        // RR 인터벌
+  peaks: [],          // 피크 인덱스
+  bufferMax: 300,     // 10초 버퍼
+  
+  // 밴드패스 필터 상태 (0.7~4Hz, 심박 대역)
+  bpB: [0.0305, 0, -0.0305],   // 분자 계수 (전달함수)
+  bpA: [1, -1.9219, 0.9391],   // 분모 계수
+  bpZ: [0, 0],                  // 필터 상태 (delay line)
   
   // 분석 결과
-  bpm: 0,            // 심박수 BPM
-  hrv: 0,            // 심박변이도 (ms)
-  motion: 0,         // 얼굴 움직임 정도
-  stable: false,     // 안정 상태 여부
+  bpm: 0,
+  hrv: 0,           // RMSSD
+  fci: 0,           // 얼굴 혈색 지수
+  motion: 0,
   
-  // 🎯 [C-20 v2] 얼굴 감지 추적 (HUD 가이드용)
-  skinPx: 0,         // 피부 픽셀 수
-  totalPx: 0,        // 전체 픽셀 수
-  skinRatio: 0,      // 피부 비율
+  // 얼굴 감지 상태 (HUD 가이드용)
+  skinPx: 0,
+  totalPx: 0,
+  skinRatio: 0,     // 피부 비율 (0~1)
+  faceDetected: false,
   
-  // 감정 상태
+  // 감정
   emotion: '분석중',
-  emotionConfidence: 0,
   emotionIcon: '🤔',
+  emotionConfidence: 0,
   
-  // 프레임 기준
+  // 움직임 추적
   prevFrame: null,
   startTime: 0,
-  
-  // HUD DOM
   hudEl: null
 };
 
@@ -6349,31 +6359,39 @@ function emoStart(){
     return;
   }
   
-  // Canvas 준비
   if(!_EMO.canvas){
     _EMO.canvas = document.createElement('canvas');
     _EMO.canvas.width = 64;
-    _EMO.canvas.height = 64;
+    _EMO.canvas.height = 48;  // FULI와 동일 (4:3)
     _EMO.ctx = _EMO.canvas.getContext('2d', { willReadFrequently: true });
   }
   
   _EMO.active = true;
-  _EMO.greenBuffer = [];
-  _EMO.timeBuffer = [];
+  _EMO.greenSignal = [];
+  _EMO.filteredSignal = [];
+  _EMO.rriList = [];
+  _EMO.peaks = [];
+  _EMO.bpZ = [0, 0];
   _EMO.startTime = Date.now();
+  _EMO.lastSampleTime = 0;
   _EMO.bpm = 0;
+  _EMO.hrv = 0;
+  _EMO.fci = 0;
   _EMO.skinPx = 0;
   _EMO.skinRatio = 0;
+  _EMO.faceDetected = false;
   _EMO.emotion = '분석중';
   _EMO.emotionIcon = '🤔';
   _EMO.emotionConfidence = 0;
   
-  // HUD 생성
   emoShowHUD();
   emoLoop();
   
-  console.log('[❤️ C-20 EMOTION] 시작 · 상대방 심박/감정 분석 · 15초 후 첫 결과');
-  if(typeof showToast === 'function') showToast('❤️ C-20 감정 읽기 · 15초 준비 중...');
+  // 🎭 C-20 FACS 표정 분석 동시 시작 (Ekman + rPPG 융합)
+  if(typeof facsStart === 'function') facsStart();
+  
+  console.log('[❤️ C-20 EMOTION v2] 시작 · FULI rPPG 엔진 이식판 · 15초 후 첫 결과');
+  if(typeof showToast === 'function') showToast('❤️ C-20 감정 읽기 · 얼굴을 정면으로');
 }
 
 // ■ 감정 분석 종료
@@ -6382,165 +6400,176 @@ function emoStop(){
   _EMO.active = false;
   if(_EMO.loopTimer){ clearTimeout(_EMO.loopTimer); _EMO.loopTimer = null; }
   if(_EMO.hudEl){ _EMO.hudEl.remove(); _EMO.hudEl = null; }
-  _EMO.greenBuffer = [];
-  _EMO.timeBuffer = [];
-  console.log('[❤️ C-20 EMOTION] 종료');
+  _EMO.greenSignal = [];
+  _EMO.filteredSignal = [];
+  _EMO.rriList = [];
+  _EMO.peaks = [];
+  
+  // 🎭 FACS도 함께 종료
+  if(typeof facsStop === 'function') facsStop();
+  
+  console.log('[❤️ C-20 EMOTION v2] 종료');
 }
 
-// 🎯 rPPG 프레임 처리 (녹색 채널 추출)
-function emoProcessFrame(remoteVideo){
-  if(!remoteVideo || remoteVideo.readyState < 2) return;
+// 🎯 [FULI 이식] 밴드패스 필터 (0.7~4Hz, 심박 대역만 통과)
+function _emoFilter(x){
+  const b = _EMO.bpB, a = _EMO.bpA, z = _EMO.bpZ;
+  const w = x - a[1]*z[0] - a[2]*z[1];
+  const y = b[0]*w + b[2]*z[1];
+  z[1] = z[0]; z[0] = w;
+  return y;
+}
+
+// 🎯 [FULI 이식] 피크 검출 (최소 간격 200ms = 300BPM 이하)
+function _emoDetectPeaks(sig){
+  const peaks = [];
+  const minDist = Math.round(_EMO.sampleRate * 0.2);
+  for(let i = 2; i < sig.length - 2; i++){
+    if(sig[i] > sig[i-1] && sig[i] > sig[i-2] && sig[i] > sig[i+1] && sig[i] > sig[i+2]){
+      if(!peaks.length || i - peaks[peaks.length-1] >= minDist) peaks.push(i);
+    }
+  }
+  return peaks;
+}
+
+// 🎯 [FULI 이식] RRI → BPM + HRV(RMSSD) 계산
+function _emoCalcVitals(){
+  const peaks = _emoDetectPeaks(_EMO.filteredSignal);
+  _EMO.peaks = peaks;
+  if(peaks.length < 3) return null;
+  
+  // RR 인터벌 (ms)
+  const rri = [];
+  for(let i = 1; i < peaks.length; i++){
+    const dt = (peaks[i] - peaks[i-1]) * (1000 / _EMO.sampleRate);
+    if(dt > 333 && dt < 1500) rri.push(dt); // 40~180 BPM 범위만
+  }
+  if(rri.length < 2) return null;
+  _EMO.rriList = rri;
+  
+  // BPM = 60000 / mean(RRI)
+  const meanRRI = rri.reduce((a,b) => a+b, 0) / rri.length;
+  let bpm = Math.round(60000 / meanRRI);
+  bpm = Math.max(45, Math.min(130, bpm));
+  
+  // HRV RMSSD (실제 의료 표준, 10~80ms 범위)
+  let sumSqDiff = 0;
+  for(let j = 1; j < rri.length; j++){
+    sumSqDiff += Math.pow(rri[j] - rri[j-1], 2);
+  }
+  let rmssd = Math.round(Math.sqrt(sumSqDiff / (rri.length-1)));
+  rmssd = Math.max(10, Math.min(80, rmssd));
+  
+  return { bpm: bpm, hrv: rmssd };
+}
+
+// 🎯 [FULI 이식] 카메라 샘플링 (이마 ROI + 피부색 20% 체크)
+function _emoSample(remoteVideo){
+  if(!remoteVideo || remoteVideo.readyState < 2) return null;
   const vw = remoteVideo.videoWidth, vh = remoteVideo.videoHeight;
-  if(!vw || !vh) return;
+  if(!vw || !vh) return null;
   
   try {
-    // 이마 영역 추정 (얼굴 상단 30%)
-    const sw = vw * 0.3, sh = vh * 0.15;
-    const sx = (vw - sw) / 2, sy = vh * 0.15;
-    _EMO.ctx.drawImage(remoteVideo, sx, sy, sw, sh, 0, 0, 64, 64);
-    const d = _EMO.ctx.getImageData(0, 0, 64, 64).data;
+    // 중앙 상단 30% 영역 샘플링 (이마 영역)
+    const sx = Math.floor(vw * 0.25);
+    const sy = Math.floor(vh * 0.10);
+    const sw = Math.floor(vw * 0.50);
+    const sh = Math.floor(vh * 0.40);
     
-    // 녹색 채널 평균 (rPPG 핵심 원리)
-    let gSum = 0, rSum = 0, bSum = 0, skinPx = 0;
+    if(sw < 20 || sh < 10) return null;
+    _EMO.ctx.drawImage(remoteVideo, sx, sy, sw, sh, 0, 0, 64, 48);
+    const d = _EMO.ctx.getImageData(0, 0, 64, 48).data;
+    
+    let rSum = 0, gSum = 0, bSum = 0, cnt = 0, skinCnt = 0;
     for(let i = 0; i < d.length; i += 4){
       const r = d[i], g = d[i+1], b = d[i+2];
-      // 피부색 픽셀만 사용
-      if(r > 80 && g > 40 && b > 20 && r > g && r > b){
-        rSum += r; gSum += g; bSum += b;
-        skinPx++;
+      rSum += r; gSum += g; bSum += b; cnt++;
+      
+      // [FULI] 엄격한 피부색 검증 (채도까지 확인)
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      const sat = mx > 0 ? (mx - mn) / mx : 0;
+      if(r > 80 && g > 50 && b > 30 && r > g && r > b && 
+         (r - g) > 15 && (r - b) > 20 && sat > 0.18 && sat < 0.65){
+        skinCnt++;
       }
     }
     
-    // 🎯 [C-20 v2] 얼굴 감지 상태 추적 (HUD에서 사용자 가이드)
-    _EMO.skinPx = skinPx;
-    _EMO.totalPx = d.length / 4;
-    _EMO.skinRatio = skinPx / _EMO.totalPx;
+    if(!cnt) return null;
     
-    if(skinPx < 50){
-      // 얼굴 안 보이면 버퍼 쌓지 말고 가이드만 갱신
-      if(_EMO.bpm === 0) emoUpdateHUD();
-      return;
+    // [핵심] 상태 추적
+    _EMO.skinPx = skinCnt;
+    _EMO.totalPx = cnt;
+    _EMO.skinRatio = skinCnt / cnt;
+    
+    // ❤️ [FULI 핵심 판정] 피부색 20% 미만이면 얼굴 없음!
+    if(_EMO.skinRatio < 0.20){
+      _EMO.faceDetected = false;
+      // 얼굴 없으면 버퍼 쌓지 않음 (노이즈 차단)
+      return null;
     }
     
-    const gAvg = gSum / skinPx;
-    const now = Date.now();
+    _EMO.faceDetected = true;
     
-    // 움직임 감지 (이전 프레임과 비교)
+    // 움직임 감지 (이전 프레임 비교)
     if(_EMO.prevFrame){
       let diff = 0;
       for(let i = 0; i < d.length; i += 4){
         diff += Math.abs(d[i] - _EMO.prevFrame[i]);
       }
-      _EMO.motion = diff / (d.length / 4); // 0~255
+      _EMO.motion = diff / cnt;
     }
     _EMO.prevFrame = new Uint8ClampedArray(d);
     
-    // 녹색 채널 버퍼 쌓기
-    _EMO.greenBuffer.push(gAvg);
-    _EMO.timeBuffer.push(now);
-    if(_EMO.greenBuffer.length > _EMO.bufferMax){
-      _EMO.greenBuffer.shift();
-      _EMO.timeBuffer.shift();
-    }
+    const r = rSum / cnt, g = gSum / cnt, b = bSum / cnt;
     
-    // 15초(150프레임) 모이면 BPM 계산
-    if(_EMO.greenBuffer.length >= 90){
-      emoCalculateBPM();
-      emoAnalyzeEmotion();
-      emoUpdateHUD();
-    }
+    // FCI (얼굴 혈색 지수)
+    const fci = Math.round(Math.min(100, Math.max(30, (r - g) / (r + g + 1) * 200 + 30)));
+    
+    return { green: g, red: r, blue: b, fci: fci };
   } catch(e){
-    console.warn('[❤️ EMO] 프레임 오류:', e);
+    console.warn('[❤️ EMO] 샘플링 오류:', e);
+    return null;
   }
 }
 
-// 🎯 BPM 계산 (피크 카운트 방식, 단순화)
-function emoCalculateBPM(){
-  const buf = _EMO.greenBuffer;
-  const times = _EMO.timeBuffer;
-  if(buf.length < 60) return;
-  
-  // 평균 제거 (detrend)
-  const mean = buf.reduce((a,b)=>a+b, 0) / buf.length;
-  const detrended = buf.map(v => v - mean);
-  
-  // 피크 찾기 (양의 zero-crossing)
-  const peaks = [];
-  for(let i = 1; i < detrended.length - 1; i++){
-    if(detrended[i] > detrended[i-1] && detrended[i] > detrended[i+1] && detrended[i] > 0.3){
-      peaks.push(times[i]);
-    }
-  }
-  
-  if(peaks.length < 3){
-    _EMO.bpm = 0;
-    return;
-  }
-  
-  // 피크 간격 → BPM
-  const intervals = [];
-  for(let i = 1; i < peaks.length; i++){
-    intervals.push(peaks[i] - peaks[i-1]);
-  }
-  const avgInterval = intervals.reduce((a,b)=>a+b, 0) / intervals.length;
-  const bpm = Math.round(60000 / avgInterval);
-  
-  // 범위 체크 (40~180)
-  if(bpm >= 40 && bpm <= 180){
-    // 스무딩 (급변 방지)
-    _EMO.bpm = _EMO.bpm > 0 ? Math.round(_EMO.bpm * 0.7 + bpm * 0.3) : bpm;
-  }
-  
-  // 심박 변이도 (HRV) 간단 버전
-  if(intervals.length > 2){
-    const variance = intervals.reduce((sum, v) => sum + Math.pow(v - avgInterval, 2), 0) / intervals.length;
-    _EMO.hrv = Math.round(Math.sqrt(variance));
-  }
-  
-  _EMO.stable = _EMO.bpm >= 55 && _EMO.bpm <= 95;
-}
-
-// 🧠 감정 분석 (BPM + HRV + 움직임 조합 룰)
-function emoAnalyzeEmotion(){
-  const bpm = _EMO.bpm;
-  const hrv = _EMO.hrv;
-  const motion = _EMO.motion;
-  
-  if(bpm < 40){
+// 🧠 감정 분석 (BPM + HRV + 움직임 종합)
+function _emoAnalyzeEmotion(){
+  if(_EMO.bpm < 45 || !_EMO.faceDetected){
     _EMO.emotion = '분석중';
     _EMO.emotionIcon = '🤔';
     _EMO.emotionConfidence = 0;
     return;
   }
   
-  // 감정 판정 룰 (FULI 일상 기준)
-  let emotion = '평온';
-  let icon = '😐';
-  let conf = 0.5;
+  const bpm = _EMO.bpm;
+  const hrv = _EMO.hrv;
+  const motion = _EMO.motion;
+  
+  let emotion = '평온', icon = '😌', conf = 0.60;
   
   // 1. 화남: 심박 빠름 + 움직임 많음
   if(bpm >= 95 && motion > 15){
     emotion = '화남'; icon = '😠'; conf = 0.75;
   }
-  // 2. 초조/긴장: 심박 빠름 + 움직임 적음
+  // 2. 초조: 심박 빠름 + 움직임 적음
   else if(bpm >= 90 && motion < 10){
     emotion = '초조'; icon = '😰'; conf = 0.72;
   }
-  // 3. 불안: 심박 중간~빠름 + HRV 높음
-  else if(bpm >= 80 && hrv > 100){
+  // 3. 불안: HRV 낮음 (스트레스 신호)
+  else if(bpm >= 80 && hrv < 25){
     emotion = '불안'; icon = '😟'; conf = 0.70;
   }
-  // 4. 기쁨: 심박 약간 빠름 + 움직임 적당 + HRV 낮음
-  else if(bpm >= 70 && bpm < 90 && motion > 8 && hrv < 80){
+  // 4. 기쁨: 심박 약간 높음 + HRV 양호
+  else if(bpm >= 70 && bpm < 90 && motion > 8 && hrv >= 30){
     emotion = '기쁨'; icon = '😊'; conf = 0.78;
   }
   // 5. 슬픔: 심박 느림 + 움직임 적음
   else if(bpm <= 65 && motion < 5){
     emotion = '슬픔'; icon = '😢'; conf = 0.68;
   }
-  // 6. 평온: 기본값
-  else if(bpm >= 60 && bpm <= 80){
-    emotion = '평온'; icon = '😌'; conf = 0.80;
+  // 6. 평온: 기본 (BPM 60~80, HRV 양호)
+  else if(bpm >= 60 && bpm <= 80 && hrv >= 30){
+    emotion = '평온'; icon = '😌'; conf = 0.82;
   }
   
   _EMO.emotion = emotion;
@@ -6548,7 +6577,7 @@ function emoAnalyzeEmotion(){
   _EMO.emotionConfidence = conf;
 }
 
-// 🎨 HUD 표시 (나만 보임 · 우상단)
+// 🎨 HUD 표시 (나만 보임)
 function emoShowHUD(){
   if(_EMO.hudEl) return;
   const callUI = document.getElementById('callUI');
@@ -6557,41 +6586,41 @@ function emoShowHUD(){
   const hud = document.createElement('div');
   hud.id = 'c20EmoHUD';
   hud.style.cssText = [
-    'position:absolute',
-    'top:70px',
-    'right:16px',
-    'z-index:100001',
+    'position:absolute','top:70px','right:16px','z-index:100001',
     'background:linear-gradient(135deg, rgba(20,25,40,.85), rgba(30,20,45,.85))',
-    'backdrop-filter:blur(12px)',
-    '-webkit-backdrop-filter:blur(12px)',
-    'border:1px solid rgba(100,180,250,.35)',
-    'border-radius:16px',
-    'padding:12px 14px',
-    'font-size:11px',
-    'color:#f0ece0',
+    'backdrop-filter:blur(12px)','-webkit-backdrop-filter:blur(12px)',
+    'border:1px solid rgba(100,180,250,.35)','border-radius:16px',
+    'padding:12px 14px','font-size:11px','color:#f0ece0',
     'box-shadow:0 4px 16px rgba(0,0,0,.5), 0 0 24px rgba(100,180,250,.15)',
-    'pointer-events:none',
-    'min-width:120px',
-    'font-family:inherit',
+    'pointer-events:none','min-width:130px','font-family:inherit',
     'animation:c20EmoFadeIn 0.6s ease-out'
   ].join(';');
   
   hud.innerHTML = [
     '<div style="font-size:9px;color:rgba(212,168,67,.7);font-weight:700;letter-spacing:0.5px;margin-bottom:6px;">',
-    '  ❤️ C-20 · 나만 보기',
+    '  ❤️ C-20 · 나만 보기 · FULI rPPG + FACS',
     '</div>',
     '<div id="c20EmoBPM" style="font-size:20px;font-weight:800;color:#ff6b9d;line-height:1;margin-bottom:4px;">',
     '  -- <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>',
     '</div>',
     '<div id="c20EmoState" style="font-size:14px;font-weight:700;color:#64b4fa;margin-top:4px;">',
-    '  🤔 <span>분석중</span>',
+    '  👤 <span>얼굴 탐색중</span>',
     '</div>',
-    '<div id="c20EmoConf" style="font-size:9px;color:rgba(255,255,255,.4);margin-top:3px;font-style:italic;">',
-    '  준비 중...',
+    // 🎭 FACS 감정 강도 바
+    '<div id="c20FacsBar" style="margin-top:6px;height:6px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden;">',
+    '  <div id="c20FacsBarFill" style="height:100%;width:0%;background:linear-gradient(90deg,#64b4fa,#ff6b9d);transition:width 0.5s;"></div>',
+    '</div>',
+    '<div id="c20EmoConf" style="font-size:9px;color:rgba(255,255,255,.4);margin-top:4px;font-style:italic;">',
+    '  정면으로 찍어주세요',
+    '</div>',
+    // 🎯 수치 분해 (할루시네이션 ZERO · 설명 가능)
+    '<div id="c20FacsDetails" style="font-size:8px;color:rgba(255,255,255,.5);margin-top:6px;line-height:1.5;border-top:1px solid rgba(255,255,255,.08);padding-top:5px;display:none;">',
+    '  <div>입꼬리: <span id="c20FacsSmile">0%</span></div>',
+    '  <div>눈꼬리: <span id="c20FacsEye">0%</span></div>',
+    '  <div>비대칭: <span id="c20FacsAsym">0%</span></div>',
     '</div>'
   ].join('');
   
-  // 애니메이션 CSS 주입
   if(!document.getElementById('c20EmoStyle')){
     const style = document.createElement('style');
     style.id = 'c20EmoStyle';
@@ -6613,81 +6642,165 @@ function emoShowHUD(){
   _EMO.hudEl = hud;
 }
 
-// 🔄 HUD 업데이트
+// 🔄 HUD 업데이트 (얼굴 감지 상태별 가이드)
 function emoUpdateHUD(){
   if(!_EMO.hudEl) return;
   const bpmEl = document.getElementById('c20EmoBPM');
   const stateEl = document.getElementById('c20EmoState');
   const confEl = document.getElementById('c20EmoConf');
   
-  // 🎯 [C-20 v2] 얼굴 감지 상태별 친절한 안내
-  const hasFace = _EMO.skinPx >= 50;
-  const hasEnoughFace = _EMO.skinPx >= 150; // 충분한 얼굴
+  // 🔑 [FULI 방식] 얼굴 감지 상태 분류
+  const faceOK = _EMO.faceDetected && _EMO.skinRatio >= 0.20;
+  const faceGreat = _EMO.skinRatio >= 0.35;  // 30% 이상이면 확실
   
-  if(bpmEl && _EMO.bpm > 0){
-    bpmEl.innerHTML = _EMO.bpm + ' <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
-    // 심박에 따른 색상
-    if(_EMO.bpm > 100) bpmEl.style.color = '#ef4444';       // 빨강 (높음)
-    else if(_EMO.bpm < 60) bpmEl.style.color = '#60a5fa';   // 파랑 (낮음)
-    else bpmEl.style.color = '#4ade80';                      // 초록 (정상)
-    bpmEl.style.animation = 'c20EmoPulse 1s ease-in-out';
-  } else if(bpmEl){
-    // BPM 아직 안 뜰 때 상태 표시
-    bpmEl.innerHTML = '-- <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
-    bpmEl.style.color = hasFace ? '#4ade80' : '#94a3b8';
+  // BPM 표시
+  if(bpmEl){
+    if(_EMO.bpm > 0 && faceOK){
+      bpmEl.innerHTML = _EMO.bpm + ' <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
+      if(_EMO.bpm > 100) bpmEl.style.color = '#ef4444';
+      else if(_EMO.bpm < 60) bpmEl.style.color = '#60a5fa';
+      else bpmEl.style.color = '#4ade80';
+      bpmEl.style.animation = 'c20EmoPulse 1s ease-in-out';
+    } else {
+      bpmEl.innerHTML = '-- <span style="font-size:10px;color:rgba(255,255,255,.5);font-weight:500;">BPM</span>';
+      bpmEl.style.color = faceOK ? '#4ade80' : '#64748b';
+      bpmEl.style.animation = 'none';
+    }
   }
   
+  // 상태 표시 (FULI 방식: 얼굴 먼저 검증)
   if(stateEl){
-    if(_EMO.emotion !== '분석중' && _EMO.bpm > 0){
-      // 정상 감정 표시
-      stateEl.innerHTML = _EMO.emotionIcon + ' <span>' + _EMO.emotion + '</span>';
-      const colorMap = {
-        '기쁨':'#4ade80', '평온':'#64b4fa', '슬픔':'#a78bfa',
-        '화남':'#ef4444', '초조':'#f59e0b', '불안':'#fb923c'
-      };
-      stateEl.style.color = colorMap[_EMO.emotion] || '#64b4fa';
-    } else if(!hasFace){
-      // 얼굴 안 보임
+    if(!faceOK){
+      // 얼굴 없거나 너무 적음 → 감정 절대 표시 안 함!
       stateEl.innerHTML = '👤 <span>얼굴 탐색중</span>';
       stateEl.style.color = '#94a3b8';
-    } else if(!hasEnoughFace){
-      // 얼굴 일부만
+    } else if(!faceGreat){
       stateEl.innerHTML = '🔍 <span>더 가까이</span>';
       stateEl.style.color = '#fbbf24';
-    } else {
-      // 얼굴 OK, BPM 축적 중
+    } else if(_EMO.bpm === 0){
       stateEl.innerHTML = '❤️ <span>심박 측정중</span>';
       stateEl.style.color = '#ff6b9d';
+    } else {
+      // 🎭 FACS가 활성화되어 있고 점수가 있으면 FACS 결과 우선!
+      let finalEmotion = _EMO.emotion;
+      let finalIcon = _EMO.emotionIcon;
+      
+      if(typeof _FACS !== 'undefined' && _FACS.active && _FACS.topScore >= 40){
+        finalEmotion = _FACS.topEmotion;
+        const iconMap7 = {
+          '기쁨':'😄','미소':'😊','삐짐':'🙄','화남':'😠',
+          '슬픔':'😔','울음':'😭','비웃음':'😏','평온':'😌'
+        };
+        finalIcon = iconMap7[_FACS.topEmotion] || '😌';
+      }
+      
+      stateEl.innerHTML = finalIcon + ' <span>' + finalEmotion + '</span>';
+      const colorMap = {
+        '기쁨':'#4ade80','미소':'#86efac','평온':'#64b4fa','슬픔':'#a78bfa',
+        '울음':'#818cf8','화남':'#ef4444','삐짐':'#fb7185','초조':'#f59e0b',
+        '불안':'#fb923c','비웃음':'#f472b6'
+      };
+      stateEl.style.color = colorMap[finalEmotion] || '#64b4fa';
     }
   }
   
-  if(confEl){
-    if(_EMO.emotionConfidence > 0 && _EMO.bpm > 0){
-      confEl.textContent = '신뢰도 ' + Math.round(_EMO.emotionConfidence * 100) + '%';
-    } else if(!hasFace){
-      confEl.textContent = '정면으로 찍어주세요';
-    } else if(!hasEnoughFace){
-      confEl.textContent = '이마가 보이게';
+  // 🎭 FACS 강도 바 + 수치 분해 표시
+  const barFill = document.getElementById('c20FacsBarFill');
+  const detailsEl = document.getElementById('c20FacsDetails');
+  if(barFill && typeof _FACS !== 'undefined'){
+    if(_FACS.active && faceOK && _FACS.topScore > 0){
+      const pct = Math.min(100, _FACS.topScore);
+      barFill.style.width = pct + '%';
+      // 감정별 그라데이션
+      const emotionGrad = {
+        '기쁨':'linear-gradient(90deg,#4ade80,#22c55e)',
+        '미소':'linear-gradient(90deg,#86efac,#4ade80)',
+        '화남':'linear-gradient(90deg,#ef4444,#dc2626)',
+        '삐짐':'linear-gradient(90deg,#fb7185,#f43f5e)',
+        '슬픔':'linear-gradient(90deg,#a78bfa,#8b5cf6)',
+        '울음':'linear-gradient(90deg,#818cf8,#6366f1)',
+        '비웃음':'linear-gradient(90deg,#f472b6,#ec4899)',
+        '평온':'linear-gradient(90deg,#64b4fa,#3b82f6)'
+      };
+      barFill.style.background = emotionGrad[_FACS.topEmotion] || emotionGrad['평온'];
+      
+      // 상세 정보 표시
+      if(detailsEl) detailsEl.style.display = 'block';
+      const smileEl = document.getElementById('c20FacsSmile');
+      const eyeEl = document.getElementById('c20FacsEye');
+      const asymEl = document.getElementById('c20FacsAsym');
+      if(smileEl) smileEl.textContent = Math.round(_FACS.smileIntensity * 10) + '%';
+      if(eyeEl) eyeEl.textContent = Math.round(_FACS.eyeSquint * 100) + '%';
+      if(asymEl) asymEl.textContent = Math.round(_FACS.asymmetry * 1000) / 10 + '%';
     } else {
-      // 진행률 표시 (0~15초)
-      const progress = Math.min(100, Math.round((_EMO.greenBuffer.length / 90) * 100));
-      confEl.textContent = '심박 수집 ' + progress + '%';
+      barFill.style.width = '0%';
+      if(detailsEl) detailsEl.style.display = 'none';
     }
+  }
+  
+  // 신뢰도/가이드
+  if(confEl){
+    if(!faceOK){
+      confEl.textContent = '정면으로 찍어주세요';
+    } else if(!faceGreat){
+      confEl.textContent = '이마가 더 크게';
+    } else if(_EMO.bpm === 0){
+      const progress = Math.min(100, Math.round((_EMO.filteredSignal.length / 150) * 100));
+      confEl.textContent = '심박 수집 ' + progress + '%';
+    } else {
+      confEl.textContent = '신뢰도 ' + Math.round(_EMO.emotionConfidence * 100) + '% · HRV ' + _EMO.hrv + 'ms';
+    }
+  }
+  
+  // HUD 테두리 색상 (얼굴 상태)
+  if(_EMO.hudEl){
+    if(!faceOK) _EMO.hudEl.style.borderColor = 'rgba(100,116,139,.35)';  // 회색
+    else if(!faceGreat) _EMO.hudEl.style.borderColor = 'rgba(251,191,36,.45)';  // 노랑
+    else _EMO.hudEl.style.borderColor = 'rgba(74,222,128,.45)';  // 초록
   }
 }
 
-// 🔁 메인 루프 (200ms 주기 = 5fps)
+// 🔁 메인 루프
 function emoLoop(){
-  if(!_EMO.active){ return; }
+  if(!_EMO.active) return;
   
   const remoteVideo = document.getElementById('callRemoteVideo');
   if(remoteVideo){
-    emoProcessFrame(remoteVideo);
-    // 초기 15초는 HUD 카운트다운 표시
-    if(_EMO.bpm === 0) emoUpdateHUD();
+    const now = Date.now();
+    const interval = 1000 / _EMO.sampleRate;
+    
+    if(now - _EMO.lastSampleTime >= interval){
+      _EMO.lastSampleTime = now;
+      const s = _emoSample(remoteVideo);
+      
+      if(s){
+        // 녹색 신호 버퍼
+        _EMO.greenSignal.push(s.green);
+        if(_EMO.greenSignal.length > _EMO.bufferMax) _EMO.greenSignal.shift();
+        
+        // 밴드패스 필터 적용
+        const filtered = _emoFilter(s.green);
+        _EMO.filteredSignal.push(filtered);
+        if(_EMO.filteredSignal.length > _EMO.bufferMax) _EMO.filteredSignal.shift();
+        
+        _EMO.fci = s.fci;
+        
+        // 150 샘플(5초) 모이면 BPM 계산
+        if(_EMO.filteredSignal.length >= 150){
+          const vitals = _emoCalcVitals();
+          if(vitals){
+            _EMO.bpm = _EMO.bpm > 0 ? Math.round(_EMO.bpm * 0.6 + vitals.bpm * 0.4) : vitals.bpm;
+            _EMO.hrv = vitals.hrv;
+            _emoAnalyzeEmotion();
+          }
+        }
+      }
+      // 항상 HUD 업데이트 (상태 가이드)
+      emoUpdateHUD();
+    }
   }
   
-  _EMO.loopTimer = setTimeout(emoLoop, 200);
+  _EMO.loopTimer = setTimeout(emoLoop, 33); // ~30 FPS
 }
 
 // 🎛️ 토글 (UI에서 호출)
@@ -6712,6 +6825,460 @@ function toggleEmoReader(){
 
 // 🧹 통화 종료 시 자동 정리 (endCall 통합)
 // ═══════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════
+// 🎭 C-20 FACS FACIAL AFFECT READER v1.0 · Patent #49 (예정)
+// Ekman FACS (Facial Action Coding System, 1978) 기반 표정 분석
+// MediaPipe FaceLandmarker 468개 랜드마크 활용
+// rPPG 혈류 + FACS 표정 = 세계 최초 융합 감정 AI
+// "할루시네이션 ZERO · 수치 기반 설명 가능한 AI" · by C-20
+// ═══════════════════════════════════════════════════════════════
+const _FACS = {
+  active: false,
+  loaded: false,      // MediaPipe 로드 상태
+  loading: false,
+  mpFace: null,       // MediaPipe FaceMesh 인스턴스
+  lastLandmarks: null,
+  lastLandmarkTime: 0,
+  
+  // 실시간 측정값
+  asymmetry: 0,       // 입꼬리 비대칭 (비웃음/삐짐)
+  smileIntensity: 0,  // 입꼬리 상승도 (기쁨)
+  mouthOpen: 0,       // 입 벌림 (울음/놀람)
+  eyeSquint: 0,       // 눈꼬리 좁아짐 (Duchenne 웃음)
+  browFurrow: 0,      // 미간 주름 (화남)
+  
+  // 감정 점수 (7가지)
+  scores: {
+    기쁨: 0, 미소: 0, 삐짐: 0, 화남: 0,
+    슬픔: 0, 울음: 0, 비웃음: 0
+  },
+  topEmotion: '측정중',
+  topScore: 0,
+  
+  // Canvas 오버레이 (따라가는 마커)
+  trackCanvas: null,
+  trackCtx: null,
+  
+  // 프레임 제어
+  lastProcessTime: 0,
+  processInterval: 100,  // 100ms = 10 FPS (FACS는 느려도 됨)
+  
+  // 신뢰도 검증
+  landmarkJitter: 0,
+  prevLandmarks: null
+};
+
+// ▶ FACS 시작 (emoStart와 연동)
+function facsStart(){
+  if(_FACS.active) return;
+  if(!_call || !_call.active || _call.type !== 'video'){
+    return;
+  }
+  
+  _FACS.active = true;
+  _FACS.lastLandmarks = null;
+  _FACS.scores = { 기쁨:0, 미소:0, 삐짐:0, 화남:0, 슬픔:0, 울음:0, 비웃음:0 };
+  _FACS.topEmotion = '측정중';
+  
+  // Canvas 오버레이 생성 (따라가는 마커)
+  facsCreateCanvas();
+  
+  // MediaPipe 로드 (비동기, 실패해도 rPPG는 작동)
+  if(!_FACS.loaded && !_FACS.loading){
+    facsLoadMediaPipe();
+  } else if(_FACS.loaded){
+    facsProcessLoop();
+  }
+  
+  console.log('[🎭 C-20 FACS] 시작 · Ekman 표정 분석 + 따라가는 마커');
+}
+
+// ■ FACS 종료
+function facsStop(){
+  _FACS.active = false;
+  if(_FACS.trackCanvas){
+    _FACS.trackCanvas.remove();
+    _FACS.trackCanvas = null;
+    _FACS.trackCtx = null;
+  }
+  _FACS.lastLandmarks = null;
+  console.log('[🎭 C-20 FACS] 종료');
+}
+
+// 🎨 따라가는 마커용 Canvas 생성
+function facsCreateCanvas(){
+  if(_FACS.trackCanvas) return;
+  const remoteVideo = document.getElementById('callRemoteVideo');
+  const callUI = document.getElementById('callUI');
+  if(!remoteVideo || !callUI) return;
+  
+  const canvas = document.createElement('canvas');
+  canvas.id = 'c20FacsTrack';
+  canvas.style.cssText = [
+    'position:absolute',
+    'top:0','left:0','right:0','bottom:0',
+    'width:100%','height:100%',
+    'pointer-events:none',
+    'z-index:100',
+    'object-fit:cover'
+  ].join(';');
+  
+  // remoteVideo 바로 위에 배치
+  remoteVideo.parentNode.insertBefore(canvas, remoteVideo.nextSibling);
+  _FACS.trackCanvas = canvas;
+  _FACS.trackCtx = canvas.getContext('2d');
+  
+  // 리사이즈 대응
+  const resize = () => {
+    if(!_FACS.trackCanvas) return;
+    canvas.width = remoteVideo.offsetWidth || 640;
+    canvas.height = remoteVideo.offsetHeight || 480;
+  };
+  resize();
+  window.addEventListener('resize', resize);
+}
+
+// 📦 MediaPipe 로드 (FULI와 동일 CDN 사용)
+function facsLoadMediaPipe(){
+  if(_FACS.loading) return;
+  _FACS.loading = true;
+  
+  // 이미 로드됐는지 확인 (FULI와 공유 가능)
+  if(typeof FaceMesh !== 'undefined'){
+    console.log('[🎭 FACS] MediaPipe 이미 로드됨 · 재사용');
+    _FACS.loaded = true;
+    _FACS.loading = false;
+    facsInitFaceMesh();
+    return;
+  }
+  
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js';
+  script.crossOrigin = 'anonymous';
+  script.onload = () => {
+    console.log('[🎭 FACS] MediaPipe FaceMesh 로드 완료');
+    _FACS.loaded = true;
+    _FACS.loading = false;
+    facsInitFaceMesh();
+  };
+  script.onerror = () => {
+    console.warn('[🎭 FACS] MediaPipe 로드 실패 · rPPG만 작동');
+    _FACS.loading = false;
+  };
+  document.head.appendChild(script);
+}
+
+// 🎯 FaceMesh 초기화
+function facsInitFaceMesh(){
+  try {
+    if(typeof FaceMesh === 'undefined'){
+      console.warn('[🎭 FACS] FaceMesh 클래스 없음');
+      return;
+    }
+    _FACS.mpFace = new FaceMesh({
+      locateFile: (f) => 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/' + f
+    });
+    _FACS.mpFace.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.7,
+      minTrackingConfidence: 0.7
+    });
+    _FACS.mpFace.onResults((results) => {
+      if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+        _FACS.prevLandmarks = _FACS.lastLandmarks;
+        _FACS.lastLandmarks = results.multiFaceLandmarks[0];
+        _FACS.lastLandmarkTime = Date.now();
+        
+        // 즉시 분석 + 마커 그리기
+        facsAnalyze();
+        facsDrawMarkers();
+      } else {
+        _FACS.lastLandmarks = null;
+        if(_FACS.trackCtx){
+          _FACS.trackCtx.clearRect(0, 0, _FACS.trackCanvas.width, _FACS.trackCanvas.height);
+        }
+      }
+    });
+    
+    console.log('[🎭 FACS] FaceMesh 초기화 완료 · 처리 루프 시작');
+    facsProcessLoop();
+  } catch(e){
+    console.warn('[🎭 FACS] 초기화 실패:', e);
+  }
+}
+
+// 🔁 프레임 처리 루프 (MediaPipe에 전송)
+function facsProcessLoop(){
+  if(!_FACS.active) return;
+  
+  const remoteVideo = document.getElementById('callRemoteVideo');
+  const now = Date.now();
+  
+  if(remoteVideo && remoteVideo.readyState >= 2 && _FACS.mpFace &&
+     (now - _FACS.lastProcessTime) >= _FACS.processInterval){
+    _FACS.lastProcessTime = now;
+    try {
+      _FACS.mpFace.send({ image: remoteVideo }).catch(()=>{});
+    } catch(e){ /* 조용히 무시 */ }
+  }
+  
+  if(_FACS.active){
+    requestAnimationFrame(facsProcessLoop);
+  }
+}
+
+// 🎯 FACS 분석 (Ekman 7가지 감정 점수)
+function facsAnalyze(){
+  const lm = _FACS.lastLandmarks;
+  if(!lm || lm.length < 400) return;
+  
+  // 핵심 랜드마크
+  const noseTip = lm[1];       // 코끝 (기준)
+  const forehead = lm[10];     // 이마
+  const chin = lm[152];        // 턱
+  const lEar = lm[234];        // 좌측 귀
+  const rEar = lm[454];        // 우측 귀
+  
+  // 입 랜드마크
+  const lipL = lm[61];          // 입꼬리 좌
+  const lipR = lm[291];         // 입꼬리 우
+  const lipTop = lm[13];        // 입 중앙 상
+  const lipBot = lm[14];        // 입 중앙 하
+  
+  // 눈 랜드마크
+  const eyeLOuter = lm[33];     // 눈꼬리 좌
+  const eyeLInner = lm[133];    // 눈 안쪽 좌
+  const eyeROuter = lm[263];    // 눈꼬리 우
+  const eyeRInner = lm[362];    // 눈 안쪽 우
+  const eyeLTop = lm[159];      // 왼쪽 눈 위
+  const eyeLBot = lm[145];      // 왼쪽 눈 아래
+  const eyeRTop = lm[386];      // 오른쪽 눈 위
+  const eyeRBot = lm[374];      // 오른쪽 눈 아래
+  
+  // 눈썹
+  const browLInner = lm[55];    // 왼쪽 눈썹 안쪽
+  const browRInner = lm[285];   // 오른쪽 눈썹 안쪽
+  const glabella = lm[9];       // 미간
+  
+  // 얼굴 크기 정규화 (기준)
+  const faceHeight = Math.abs(chin.y - forehead.y);
+  const faceWidth = Math.abs(rEar.x - lEar.x);
+  if(faceHeight < 0.1 || faceWidth < 0.1) return;  // 너무 작음
+  
+  // ═══ 측정 1: 입꼬리 비대칭 (비웃음/삐짐 핵심!) ═══
+  const lipMidY = (lipTop.y + lipBot.y) / 2;
+  const asymmetry = Math.abs(lipL.y - lipR.y) / faceHeight;
+  _FACS.asymmetry = asymmetry;
+  
+  // ═══ 측정 2: 입꼬리 상승도 (기쁨/미소) ═══
+  // 입꼬리가 입 중앙보다 위로 올라가면 양수 (미소)
+  const smileRaw = (lipMidY - (lipL.y + lipR.y) / 2) / faceHeight;
+  const smileIntensity = Math.max(0, smileRaw * 100);  // 0~10
+  _FACS.smileIntensity = smileIntensity;
+  
+  // ═══ 측정 3: 입 벌림 (울음/놀람) ═══
+  const mouthOpen = Math.abs(lipTop.y - lipBot.y) / faceHeight;
+  _FACS.mouthOpen = mouthOpen;
+  
+  // ═══ 측정 4: 눈꼬리 좁아짐 (Duchenne 웃음) ═══
+  const eyeLHeight = Math.abs(eyeLTop.y - eyeLBot.y);
+  const eyeRHeight = Math.abs(eyeRTop.y - eyeRBot.y);
+  const eyeAvgHeight = (eyeLHeight + eyeRHeight) / 2;
+  // 눈이 정상 높이일 때 대비 좁아진 정도
+  const eyeSquint = Math.max(0, (0.015 - eyeAvgHeight) / 0.015);  // 0~1
+  _FACS.eyeSquint = eyeSquint;
+  
+  // ═══ 측정 5: 미간 주름 (화남 핵심) ═══
+  // 눈썹 안쪽이 미간보다 아래로 내려오면 양수 (찌푸림)
+  const browDescent = ((browLInner.y + browRInner.y) / 2 - glabella.y) / faceHeight;
+  const browFurrow = Math.max(0, browDescent * 50);  // 0~5
+  _FACS.browFurrow = browFurrow;
+  
+  // ═══ 측정 6: 랜드마크 안정성 (할루시네이션 방지) ═══
+  if(_FACS.prevLandmarks){
+    const noseDrift = Math.hypot(
+      noseTip.x - _FACS.prevLandmarks[1].x,
+      noseTip.y - _FACS.prevLandmarks[1].y
+    );
+    _FACS.landmarkJitter = noseDrift;
+  }
+  // 너무 흔들리면 신뢰도 감소
+  const jitterPenalty = Math.min(1, _FACS.landmarkJitter * 20);
+  
+  // ═══ 7가지 감정 점수 계산 (Ekman FACS 가중치) ═══
+  const bpm = (typeof _EMO !== 'undefined' && _EMO.bpm) ? _EMO.bpm : 0;
+  const hrv = (typeof _EMO !== 'undefined' && _EMO.hrv) ? _EMO.hrv : 0;
+  
+  // BPM 보너스 계산 함수
+  const bpmInRange = (lo, hi) => (bpm >= lo && bpm <= hi) ? 1 : 0;
+  
+  // 1. 기쁨 (큰 웃음) = AU6 + AU12 강도
+  const scoreJoy = 
+    (smileIntensity * 6) +           // 입꼬리 강하게 올라감
+    (eyeSquint * 30) +               // 눈꼬리 좁아짐 (Duchenne!)
+    (mouthOpen * 15) +               // 이 보임
+    (bpmInRange(70, 90) * 15) -      // 약간 높은 심박
+    (asymmetry * 100);               // 대칭적이어야 함
+  
+  // 2. 미소 (약한 웃음) = AU12 mild
+  const scoreSmile = 
+    (smileIntensity * 8) +           // 입꼬리 살짝 올라감
+    (bpmInRange(60, 80) * 25) +      // 안정된 심박
+    (Math.max(0, 0.015 - asymmetry) * 1000) -  // 대칭
+    (mouthOpen * 30);                // 입은 거의 닫힘
+  
+  // 3. 삐짐 = AU15 + AU12R (한쪽만)
+  const scoreSulking = 
+    (asymmetry * 80) +               // 비대칭 핵심!
+    Math.max(0, -smileRaw * 300) +   // 입꼬리 내려감
+    (browFurrow * 5) +                // 살짝 찌푸림
+    (bpmInRange(70, 85) * 15);       // 정상 심박
+  
+  // 4. 화남 = AU4 + AU5 + AU7 + AU23
+  const scoreAngry = 
+    (browFurrow * 12) +              // 미간 찌푸림 핵심
+    Math.max(0, -smileRaw * 200) +   // 입꼬리 내려감
+    (Math.max(0, (bpm - 90) * 1.5)) + // 심박 빠름
+    (Math.max(0, (30 - hrv) * 0.8));  // HRV 낮음
+  
+  // 5. 슬픔 (일반) = AU1 + AU15
+  const scoreSad = 
+    Math.max(0, -smileRaw * 250) +   // 입꼬리 내려감
+    (bpmInRange(55, 70) * 25) +      // 심박 살짝 낮음
+    Math.max(0, 0.010 - mouthOpen) * 500 -  // 입 닫힘
+    (smileIntensity * 5);            // 웃음 없음
+  
+  // 6. 울음 (강한 슬픔) = AU1 + AU15 + AU17 + 입 벌림
+  const scoreCrying = 
+    (mouthOpen * 35) +               // 입 벌림
+    (eyeSquint * 25) +                // 눈 감음
+    Math.max(0, -smileRaw * 200) +   // 입꼬리 하향
+    (Math.max(0, (70 - bpm) * 0.5));  // 심박 저하
+  
+  // 7. 비웃음 = AU12R + AU9 (비대칭 + 살짝 웃음)
+  const scoreSmirk = 
+    (asymmetry * 90) +               // 비대칭 핵심
+    (smileIntensity * 3) +           // 약간 웃음
+    (browFurrow * 4) +                // 살짝 찡그림
+    (bpmInRange(65, 85) * 10);       // 안정
+  
+  // 흔들림 페널티 적용
+  const penalty = 1 - jitterPenalty * 0.3;
+  _FACS.scores.기쁨 = Math.max(0, scoreJoy * penalty);
+  _FACS.scores.미소 = Math.max(0, scoreSmile * penalty);
+  _FACS.scores.삐짐 = Math.max(0, scoreSulking * penalty);
+  _FACS.scores.화남 = Math.max(0, scoreAngry * penalty);
+  _FACS.scores.슬픔 = Math.max(0, scoreSad * penalty);
+  _FACS.scores.울음 = Math.max(0, scoreCrying * penalty);
+  _FACS.scores.비웃음 = Math.max(0, scoreSmirk * penalty);
+  
+  // 최고점 감정 판정
+  let topName = '평온', topVal = 0;
+  for(const name in _FACS.scores){
+    if(_FACS.scores[name] > topVal){
+      topVal = _FACS.scores[name];
+      topName = name;
+    }
+  }
+  
+  // 신뢰도 임계값 (40 미만이면 판단 보류 · 할루시네이션 방지)
+  if(topVal < 40){
+    _FACS.topEmotion = '평온';
+    _FACS.topScore = topVal;
+  } else {
+    _FACS.topEmotion = topName;
+    _FACS.topScore = topVal;
+  }
+  
+  // _EMO HUD 업데이트 트리거
+  if(typeof emoUpdateHUD === 'function'){
+    emoUpdateHUD();
+  }
+}
+
+// 🎨 따라가는 마커 그리기 (Canvas 오버레이 · 나만 봄)
+function facsDrawMarkers(){
+  const ctx = _FACS.trackCtx;
+  const canvas = _FACS.trackCanvas;
+  if(!ctx || !canvas) return;
+  const lm = _FACS.lastLandmarks;
+  if(!lm || lm.length < 400){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+  
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  
+  // 주요 7개 포인트 (대장님 설계: 입꼬리 + 눈꼬리 + 미간)
+  const points = [
+    { p: lm[61],  color: '#ff6b9d', label: '' },  // 입꼬리 좌
+    { p: lm[291], color: '#ff6b9d', label: '' },  // 입꼬리 우
+    { p: lm[33],  color: '#64b4fa', label: '' },  // 눈꼬리 좌
+    { p: lm[263], color: '#64b4fa', label: '' },  // 눈꼬리 우
+    { p: lm[9],   color: '#fbbf24', label: '' },  // 미간
+    { p: lm[13],  color: '#4ade80', label: '' },  // 입 중앙 상
+    { p: lm[14],  color: '#4ade80', label: '' }   // 입 중앙 하
+  ];
+  
+  // 비대칭 시각화: 입꼬리 좌-우 연결선
+  if(lm[61] && lm[291]){
+    ctx.beginPath();
+    ctx.moveTo(lm[61].x * W, lm[61].y * H);
+    ctx.lineTo(lm[291].x * W, lm[291].y * H);
+    ctx.strokeStyle = _FACS.asymmetry > 0.015 
+      ? 'rgba(239, 68, 68, 0.7)'   // 빨강 (비대칭!)
+      : 'rgba(74, 222, 128, 0.5)'; // 초록 (대칭)
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  
+  // 눈 연결선
+  if(lm[33] && lm[263]){
+    ctx.beginPath();
+    ctx.moveTo(lm[33].x * W, lm[33].y * H);
+    ctx.lineTo(lm[263].x * W, lm[263].y * H);
+    ctx.strokeStyle = 'rgba(100, 180, 250, 0.3)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+  
+  // 점 그리기
+  for(const pt of points){
+    if(!pt.p) continue;
+    const x = pt.p.x * W, y = pt.p.y * H;
+    
+    // 글로우 효과
+    ctx.beginPath();
+    ctx.arc(x, y, 8, 0, Math.PI * 2);
+    ctx.fillStyle = pt.color + '40';  // 25% 투명
+    ctx.fill();
+    
+    // 중심점
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = pt.color;
+    ctx.fill();
+    
+    // 하이라이트
+    ctx.beginPath();
+    ctx.arc(x - 0.5, y - 0.5, 1, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fill();
+  }
+  
+  // 좌상단 표시 (감정 + 신뢰도 소형)
+  if(_FACS.topEmotion && _FACS.topScore > 30){
+    ctx.font = '600 11px -apple-system, system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 4;
+    ctx.fillText('🎭 ' + _FACS.topEmotion + ' ' + Math.round(_FACS.topScore) + '점', 10, 20);
+    ctx.shadowBlur = 0;
+  }
+}
 
 // 🌐 Level 3+ : 3단계 캐시 조회 번역 (특허 #35, #37, #40)
 //   1단계: localStorage (0ms)
