@@ -8,6 +8,50 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
 <title>CGO MESSAGE</title>
+<!-- 🚀 C-20: 인앱 브라우저 즉시 점프 (페이지 로드 전 우선 실행) -->
+<!-- "디자인도 이쁘게 만들었는데 알림이 항상 떠서" - 대장님 ㅋㅋ -->
+<script>
+(function(){
+  try {
+    if(sessionStorage.getItem('c20_inAppJumped') === '1') return;
+    var ua = navigator.userAgent || '';
+    var isKakao = /KAKAOTALK/i.test(ua);
+    var isLine = /Line\//i.test(ua);
+    var isFB = /FBAN|FBAV/i.test(ua);
+    var isInsta = /Instagram/i.test(ua);
+    var isNaver = /NAVER\(inapp;|Whale\//i.test(ua);
+    var isBand = /BAND\//i.test(ua);
+    var isInApp = isKakao || isLine || isFB || isInsta || isNaver || isBand;
+    if(!isInApp) return;
+    
+    sessionStorage.setItem('c20_inAppJumped', '1');
+    var url = location.href;
+    
+    // 🎯 카카오톡: 공식 URL Scheme (사용자 모르게 자동)
+    if(isKakao){
+      location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
+      return;
+    }
+    // 🎯 라인: 공식 파라미터
+    if(isLine){
+      var sep = url.indexOf('?') > -1 ? '&' : '?';
+      location.href = url + sep + 'openExternalBrowser=1';
+      return;
+    }
+    // 🎯 안드로이드 (페북/인스타/네이버/밴드): Chrome Intent
+    if(/Android/i.test(ua)){
+      location.href = 'intent://' + url.replace(/^https?:\/\//, '')
+                    + '#Intent;scheme=https;package=com.android.chrome;'
+                    + 'S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+      return;
+    }
+    // 🎯 iOS (페북/인스타): Chrome 시도
+    if(/iPhone|iPad|iPod/i.test(ua)){
+      location.href = url.replace(/^https?:\/\//, 'googlechromes://');
+    }
+  } catch(e){ /* 조용히 실패 → 인앱에서 그대로 진행 */ }
+})();
+</script>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
@@ -3911,83 +3955,58 @@ function detectLocalFile(){
   });
 }
 
-// ══ 🚨 카카오톡 인앱 브라우저 감지 및 크롬 유도 ══
+// ══ 🚀 C-20: 인앱 브라우저 자동 외부 점프 (사용자 클릭 X · 무인 작동) ══
+// "디자인도 이쁘게 만들었는데 알림이 항상 떠서" - 대장님 ㅋㅋ
+// 알림 박멸 · 카카오톡 공식 URL Scheme 활용
 function detectKakaoInApp(){
+  // 이미 한번 점프 시도했으면 재시도 안 함 (무한 루프 방지)
+  if(sessionStorage.getItem('c20_inAppJumped') === '1') return;
+  
   const ua = navigator.userAgent || '';
   const isKakao = /KAKAOTALK/i.test(ua);
-  const isNaver = /NAVER\(inapp;|Whale/i.test(ua);
+  const isNaver = /NAVER\(inapp;|Whale\//i.test(ua);
   const isFacebook = /FBAN|FBAV/i.test(ua);
   const isInstagram = /Instagram/i.test(ua);
   const isLine = /Line\//i.test(ua);
   const isBand = /BAND\//i.test(ua);
+  const isInApp = isKakao || isNaver || isFacebook || isInstagram || isLine || isBand;
   
-  if(!(isKakao || isNaver || isFacebook || isInstagram || isLine || isBand)) return;
+  if(!isInApp) return; // 정상 브라우저 → 무영향
   
-  // 이미 크롬 유도 배너 처리 중이면 재실행 금지
-  if(document.getElementById('c19_kakaoBanner')) return;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const currentUrl = location.href;
   
-  const appName = isKakao ? '카카오톡' 
-                : isNaver ? '네이버'
-                : isFacebook ? '페이스북'
-                : isInstagram ? '인스타그램'
-                : isLine ? '라인'
-                : isBand ? '밴드'
-                : '앱';
+  // 점프 시도 마킹 (한 번만)
+  sessionStorage.setItem('c20_inAppJumped', '1');
   
-  const banner = document.createElement('div');
-  banner.id = 'c19_kakaoBanner';
-  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100000;background:linear-gradient(135deg,#fbbf24,#f97316);color:#000;padding:14px 16px;font-size:13px;font-weight:700;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.3);line-height:1.5;';
-  banner.innerHTML = [
-    '⚠️ <b>' + appName + ' 내장 브라우저</b>에서 열렸어요',
-    '<div style="font-size:11px;margin-top:6px;font-weight:500;">음성 기능이 안 될 수 있어요. <u>크롬으로 열어주세요!</u></div>',
-    '<div style="display:flex;gap:8px;margin-top:10px;justify-content:center;">',
-    '  <button id="c19_openChromeBtn" style="padding:8px 16px;background:#000;color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;">🌐 크롬으로 열기</button>',
-    '  <button id="c19_dismissBtn" style="padding:8px 14px;background:transparent;color:#000;border:1px solid rgba(0,0,0,.3);border-radius:10px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;">그냥 계속</button>',
-    '</div>',
-    '<div style="font-size:10px;margin-top:8px;opacity:.7;">또는 우측 상단 [⋮] → "다른 브라우저로 열기"</div>'
-  ].join('');
-  document.body.appendChild(banner);
+  // 🎯 카카오톡: 공식 URL Scheme (가장 깔끔!)
+  if(isKakao){
+    location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(currentUrl);
+    return;
+  }
   
-  // body 위쪽 패딩 (배너 공간)
-  document.body.style.paddingTop = banner.offsetHeight + 'px';
+  // 🎯 라인: 공식 파라미터
+  if(isLine){
+    const sep = currentUrl.indexOf('?') > -1 ? '&' : '?';
+    location.href = currentUrl + sep + 'openExternalBrowser=1';
+    return;
+  }
   
-  // 크롬으로 열기 버튼
-  document.getElementById('c19_openChromeBtn').addEventListener('click', function(){
-    const currentUrl = location.href;
-    const isAndroid = /Android/i.test(ua);
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    
-    if(isAndroid){
-      // Android: Intent URL로 크롬 강제 실행
-      const intentUrl = 'intent://' + currentUrl.replace(/^https?:\/\//, '') 
-                      + '#Intent;scheme=https;package=com.android.chrome;end';
-      location.href = intentUrl;
-    } else if(isIOS){
-      // iOS: googlechromes:// 스킴 사용 (크롬 앱 설치 시 열림)
-      const chromeUrl = currentUrl.replace(/^https?:\/\//, 'googlechromes://');
-      location.href = chromeUrl;
-      // 크롬 없으면 App Store로 유도
-      setTimeout(function(){
-        if(confirm('크롬이 설치되어 있지 않아요. App Store에서 설치할까요?')){
-          location.href = 'https://apps.apple.com/kr/app/google-chrome/id535886823';
-        }
-      }, 1500);
-    } else {
-      alert('우측 상단 [⋮] 메뉴 → "다른 브라우저로 열기" 눌러주세요');
-    }
-  });
+  // 🎯 안드로이드 (페북/인스타/네이버/밴드): Chrome Intent
+  if(isAndroid){
+    const intentUrl = 'intent://' + currentUrl.replace(/^https?:\/\//, '')
+                    + '#Intent;scheme=https;package=com.android.chrome;'
+                    + 'S.browser_fallback_url=' + encodeURIComponent(currentUrl) + ';end';
+    location.href = intentUrl;
+    return;
+  }
   
-  // 그냥 계속
-  document.getElementById('c19_dismissBtn').addEventListener('click', function(){
-    banner.style.display = 'none';
-    document.body.style.paddingTop = '0';
-    sessionStorage.setItem('c19_kakaoBannerDismissed', '1');
-  });
-  
-  // 이전에 "그냥 계속" 눌렀으면 이번 세션에서 다시 안 뜸
-  if(sessionStorage.getItem('c19_kakaoBannerDismissed') === '1'){
-    banner.style.display = 'none';
-    document.body.style.paddingTop = '0';
+  // 🎯 iOS (페북/인스타): Chrome 앱 직접 호출
+  if(isIOS){
+    location.href = currentUrl.replace(/^https?:\/\//, 'googlechromes://');
+    // Chrome 없으면 그냥 인앱에서 계속 (조용히 실패)
+    return;
   }
 }
 function toggleRGB(){
