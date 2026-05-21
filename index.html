@@ -1274,7 +1274,7 @@ input[type=range].sec-range::-moz-range-thumb{
     </div>
     
     <!-- ✨ CGO MESSAGE 연습하기 카드 -->
-    <div onclick="cgoOpenPractice()" style="margin:0 16px 16px;background:linear-gradient(135deg,#FF6B9D,#C44569);border-radius:20px;padding:20px 22px;color:white;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 20px rgba(255,107,157,0.3);">
+    <div onclick="cgoShowWelcome()" style="margin:0 16px 16px;background:linear-gradient(135deg,#FF6B9D,#C44569);border-radius:20px;padding:20px 22px;color:white;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 20px rgba(255,107,157,0.3);">
       <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">✨</div>
       <div style="flex:1;">
         <div style="font-size:15px;font-weight:900;margin-bottom:3px;">✨ CGO MESSAGE 연습하기</div>
@@ -1297,13 +1297,6 @@ input[type=range].sec-range::-moz-range-thumb{
         <div style="font-size:11px;color:rgba(255,255,255,.5);">BPM·HRV·SpO2</div>
         </div>
       
-      <div onclick="cgoFeature('svi')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
-        <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
-        <div style="font-size:36px;margin-bottom:8px;">✨</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 피부</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">SVI 7단계</div>
-        </div>
-      
       <div onclick="cgoFeature('skinage')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">⏳</div>
@@ -1324,12 +1317,12 @@ input[type=range].sec-range::-moz-range-thumb{
         <div style="font-size:11px;color:rgba(255,255,255,.5);">CogAns 지수</div>
         </div>
       
-      <div onclick="cgoFeature('aq')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:160px;">
+      <div onclick="cgoFeature('aq')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🎯</div>
         <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 AQ</div>
         <div style="font-size:11px;color:rgba(255,255,255,.5);">멘사 차원 X</div>
-        <div style="margin-top:6px;padding:3px 6px;background:rgba(255,107,157,.12);color:#FF6B9D;font-size:9px;font-weight:800;border-radius:8px;">🔗 치매와 동일 rPPG</div>
+        
       </div>
       
     </div>
@@ -1521,14 +1514,7 @@ input[type=range].sec-range::-moz-range-thumb{
         🚀 측정 시작
       </button>
       
-      <div id="featureShared" style="display:none;background:rgba(255,107,157,.1);border:1.5px solid rgba(255,107,157,.3);border-radius:16px;padding:16px;margin-top:14px;font-size:12px;color:#FF6B9D;line-height:1.6;text-align:left;">
-        <b style="color:#FF88BB;">⭐ 천재적 통찰:</b><br>
-        나의 AQ는 치매 예방과 <b style="color:#FF88BB;">동일 rPPG 엔진</b> 공유<br>
-        
-        ▶ + 안구 추적 (Gaze Latency)<br>
-        ▶ + 자율신경 동시 측정<br>
-        = 단일 발명성 보강
-      </div>
+      
       
     </div>
   </div>
@@ -1985,6 +1971,327 @@ input[type=range].sec-range::-moz-range-thumb{
 
 #scrRoom .back-btn {
   color: #0d3a3a !important;
+}
+
+
+
+/* ════════════════════════════════════════════════
+   🛡️ v3.9 박입: Welcome 팝업 색상 통일 (비번 페이지 톤)
+══════════════════════════════════════════════════ */
+
+/* Welcome 팝업 오버레이 - 민트 톤 */
+.welcome-overlay {
+  background: radial-gradient(ellipse at center, 
+    rgba(159,232,232,0.7) 0%, 
+    rgba(159,232,232,0.92) 100%) !important;
+}
+
+/* Welcome 카드 - 비번 카드와 동일 (글래스모피즘) */
+.welcome-card {
+  background: rgba(255,255,255,0.5) !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow:
+    0 10px 40px rgba(0,60,60,0.18),
+    0 0 0 1px rgba(255,255,255,0.3) inset !important;
+}
+
+/* Welcome 타이틀 - 다크 청록 */
+.welcome-title {
+  background: linear-gradient(135deg, #0d3a3a 0%, #1a5470 50%, #0d3a3a 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* Welcome 시 (poem) - 다크 청록 */
+.welcome-poem {
+  color: #1a3a3a !important;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.4) !important;
+}
+
+/* Welcome 본문 텍스트 */
+.welcome-body {
+  color: #1a3a3a !important;
+}
+
+.welcome-body b {
+  color: #0d3a3a !important;
+}
+
+/* Welcome 기능 박스들 */
+.welcome-feature {
+  background: rgba(255,255,255,0.4) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  color: #0d3a3a !important;
+}
+
+.welcome-xy-hint {
+  color: #1a5470 !important;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
+}
+
+/* Welcome 버튼들 */
+.welcome-btn.skip {
+  background: rgba(255,255,255,0.5) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+}
+
+.welcome-btn.start {
+  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
+  color: #1A1A1A !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(212,163,50,0.4) !important;
+}
+
+
+
+/* ════════════════════════════════════════════════
+   🛡️ v4.0 박입: 채팅 흰색 + 전체 가독성 강화
+   대장님: "채팅 네모 금색 → 세련된 흰색, 글씨 잘 보이게"
+══════════════════════════════════════════════════ */
+
+/* ─── 채팅 말풍선 (내 말풍선) ─── */
+.msg-wrap.me .msg-bubble {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F4F6F8 100%) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(0,80,80,0.08) !important;
+  border-bottom-right-radius: 4px !important;
+  box-shadow: 
+    0 2px 8px rgba(0,60,60,0.08),
+    0 1px 3px rgba(0,60,60,0.05) !important;
+}
+
+/* ─── 채팅 말풍선 (상대 말풍선) ─── */
+.msg-wrap.you .msg-bubble {
+  background: rgba(255,255,255,0.65) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom-left-radius: 4px !important;
+  box-shadow: 0 2px 8px rgba(0,60,60,0.06) !important;
+}
+
+/* 보안 메시지 (다층 은닉)도 흰색 톤 유지 */
+.msg-wrap.me .msg-bubble.secure-active,
+.msg-wrap.me.secure .msg-bubble {
+  background: linear-gradient(180deg, #FFF8E1 0%, #FFFEF0 100%) !important;
+  border: 1.5px solid rgba(212,163,50,0.4) !important;
+}
+
+/* ─── 메시지 메타 (시간/이름) ─── */
+.msg-sender {
+  color: #0d3a3a !important;
+}
+
+.msg-meta {
+  color: rgba(13,58,58,0.55) !important;
+}
+
+/* ─── 채팅방 (scrRoom) 전체 가독성 ─── */
+#scrRoom .msg-area {
+  background: transparent !important;
+}
+
+#scrRoom .room-topbar {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+#scrRoom .r-name {
+  color: #0d3a3a !important;
+  font-weight: 900 !important;
+}
+
+#scrRoom .back-btn,
+#scrRoom .btn-icon {
+  color: #0d3a3a !important;
+}
+
+/* 입력창 - 깨끗한 흰색 */
+#scrRoom textarea,
+#scrRoom input[type="text"] {
+  background: rgba(255,255,255,0.85) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(0,80,80,0.12) !important;
+}
+
+#scrRoom textarea::placeholder,
+#scrRoom input[type="text"]::placeholder {
+  color: rgba(13,58,58,0.4) !important;
+}
+
+#scrRoom .input-bar,
+#scrRoom .room-input,
+#scrRoom .composer {
+  background: rgba(255,255,255,0.45) !important;
+  border-top: 1px solid rgba(0,80,80,0.08) !important;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* xy-actionbar (보안 슬라이드) */
+#scrRoom .xy-actionbar,
+#scrRoom .xy-act-btn {
+  background: rgba(255,255,255,0.5) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(0,80,80,0.1) !important;
+}
+
+#scrRoom .xy-act-btn.active {
+  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
+  color: #1A1A1A !important;
+  border-color: #D4A332 !important;
+}
+
+/* 보안 슬라이더 라벨/값 */
+#scrRoom .sec-slider-label,
+#scrRoom .sec-slider-head,
+#scrRoom .sec-slider-value {
+  color: #0d3a3a !important;
+}
+
+#scrRoom .sec-preset {
+  background: rgba(255,255,255,0.5) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(0,80,80,0.1) !important;
+}
+
+#scrRoom .sec-preset.active {
+  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
+  color: #1A1A1A !important;
+}
+
+/* 보안 슬라이더 range */
+#scrRoom .sec-range,
+#scrRoom input[type="range"] {
+  accent-color: #D4A332 !important;
+}
+
+/* ─── 친구 탭 (scrFriends) 텍스트 ─── */
+#scrFriends .fe-ico {
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+}
+
+#scrFriends .fe-title {
+  color: #0d3a3a !important;
+  font-weight: 900 !important;
+}
+
+#scrFriends .fe-sub {
+  color: rgba(13,58,58,0.75) !important;
+}
+
+#scrFriends .friend-action-btn {
+  background: rgba(255,255,255,0.55) !important;
+  color: #0d3a3a !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  font-weight: 700 !important;
+}
+
+#scrFriends .friend-action-btn:hover {
+  background: rgba(255,255,255,0.75) !important;
+}
+
+/* ─── 채팅 목록 (scrList) ─── */
+#scrList .room-item {
+  background: rgba(255,255,255,0.5) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  color: #1a3a3a !important;
+}
+
+#scrList .room-name,
+#scrList .room-nick {
+  color: #0d3a3a !important;
+  font-weight: 900 !important;
+}
+
+#scrList .room-last,
+#scrList .room-preview {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+#scrList .room-time {
+  color: rgba(13,58,58,0.5) !important;
+}
+
+#scrList .empty-text,
+#scrList .friends-empty {
+  color: #0d3a3a !important;
+}
+
+/* Xy 연습방 - 핑크 톤 유지하되 가독성 */
+#scrList .room-item.xy-practice .room-name {
+  color: #c44569 !important;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
+}
+
+#scrList .room-item.xy-practice .room-last {
+  color: rgba(196,69,105,0.7) !important;
+}
+
+.practice-badge {
+  background: linear-gradient(135deg, #FF6B9D, #C44569) !important;
+  color: white !important;
+}
+
+/* ─── 광장 (scrPlaza) ─── */
+#scrPlaza .plaza-empty,
+#scrPlaza .pe-title,
+#scrPlaza .pe-sub {
+  color: #0d3a3a !important;
+}
+
+#scrPlaza .pe-sub {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+/* ─── scrHome 카드들 - 더 또렷한 텍스트 ─── */
+#scrHome [onclick*="cgoFeature"] div[style*="color:#f0ece0"],
+#scrHome [onclick*="cgoFeature"] div[style*="font-weight:900"] {
+  color: #0d3a3a !important;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+}
+
+#scrHome [onclick*="cgoFeature"] div[style*="rgba(255,255,255"] {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+/* ─── scrFeature 페이지 ─── */
+#scrFeature #featureName {
+  color: #0d3a3a !important;
+}
+
+#scrFeature #featureDesc {
+  color: #1a3a3a !important;
+}
+
+#scrFeature #featureDesc b {
+  color: #1a5470 !important;
+  font-weight: 900 !important;
+}
+
+/* ─── 닉네임 바 (myNickBar) ─── */
+.topbar-me {
+  color: rgba(13,58,58,0.7) !important;
+  font-weight: 700 !important;
+}
+
+/* ─── 일반/보안 모드 표시 ─── */
+.mode-badge {
+  background: rgba(255,255,255,0.5) !important;
+  color: #0d3a3a !important;
+  border: 1px solid rgba(0,80,80,0.1) !important;
+}
+
+.mode-badge.secure {
+  background: linear-gradient(135deg, #C0392B, #8B1A1A) !important;
+  color: gold !important;
+  border-color: #C0392B !important;
 }
 
 </style>
@@ -7793,11 +8100,7 @@ function cgoFeature(name) {
       icon:'❤️', name:'나의 건강 예측', tag:'',
       desc:'▶ rPPG 기반 BPM·HRV·SpO2·혈압 비접촉 측정<br>▶ 의료기기급 정확도<br>▶ 카메라 30fps · 30초 측정' 
     },
-    'svi': { 
-      icon:'✨', name:'나의 피부 (SVI 7단계)', tag:'',
-      desc:'▶ <b>1단계: 눌렀다 뗌 (콜라겐 회복)</b> ⭐<br>▶ 2단계: MediaPipe 6부위 안면 분석<br>▶ 3단계: rPPG 자율신경 측정<br>▶ 4단계: 피부 나이 계산<br>▶ 5단계: AI 컨설턴트<br>▶ 6단계: 시간 추이<br>▶ 7단계: 좌우 비대칭 분석' 
-    },
-    'skinage': { 
+        'skinage': { 
       icon:'⏳', name:'나의 피부 나이', tag:'',
       desc:'▶ <b>FuliAge 알고리즘 ⭐ 세계 최초</b><br>▶ 안면 6부위 가중 평균<br>▶ 콜라겐 회복도 + 자율신경 융합<br>▶ 실제 나이 vs 피부 나이 비교' 
     },
@@ -7811,8 +8114,7 @@ function cgoFeature(name) {
     },
     'aq': { 
       icon:'🎯', name:'나의 AQ', tag:'',
-      desc:'▶ 멘사 차원 X — 세계 최초 ⭐<br>▶ 치매 예방과 동일 rPPG 엔진 공유<br>▶ 안구 추적 (Gaze Latency)<br>▶ 자율신경 동시 측정<br>▶ Brain Endurance Index<br>▶ <b>찍기 0% 분별</b>',
-      shared: true 
+      desc:'▶ 멘사 차원 X — 세계 최초 ⭐<br>▶ 안구 추적 (Gaze Latency)<br>▶ 자율신경 동시 측정<br>▶ Brain Endurance Index<br>▶ <b>찍기 0% 분별</b>'
     },
     'makeup':   { 
       icon:'💄', name:'AR 메이크업', tag:'',
@@ -7843,7 +8145,7 @@ function cgoFeature(name) {
   document.getElementById('featureDesc').innerHTML = f.desc;
   document.getElementById('featureTitle').textContent = f.icon + ' ' + f.name;
   
-  document.getElementById('featureShared').style.display = f.shared ? 'block' : 'none';
+  const sharedEl = document.getElementById('featureShared'); if(sharedEl) sharedEl.style.display = f.shared ? 'block' : 'none';
   
   goScreen('scrFeature');
 }
@@ -7857,9 +8159,25 @@ function cgoStartFeature() {
   }
 }
 
-function cgoOpenPractice() {
-  if(typeof showToast === 'function') {
-    showToast('✨ CGO 연습방 준비 중');
+// cgoOpenPractice() 제거됨 — 본진 openPracticeFromButton() 직접 호출
+
+
+// ════════════════════════════════════════════════
+// 🛡️ v4.1 박입: 연습 카드 클릭 → 팝업 바로 표시
+// 대장님 명령: "채팅 목록 깜빡 보이지 말고 팝업만"
+// 본진 openPracticeFromButton()은 채팅 탭 활성화 후 팝업 → 
+//   채팅 목록(scrList) 깜빡 보임
+// 우리 cgoShowWelcome()은 팝업만 즉시 표시
+// 사용자가 "네, 시작할게요!" 누르면 본진 closeWelcome(true)가
+//   ensureXyPracticeRoom() + openRoom() 호출 → 연습방 진입
+// ════════════════════════════════════════════════
+function cgoShowWelcome(){
+  const overlay = document.getElementById('welcomeOverlay');
+  if(overlay){
+    overlay.classList.add('show');
+    console.log('[연습 팝업] 바로 표시 (홈에서)');
+  } else {
+    console.log('[연습 팝업] welcomeOverlay 없음');
   }
 }
 
