@@ -3121,7 +3121,8 @@ function renderMessages(){
       html += `<div class="msg-wrap ${isMe?'me':'you'}" data-msg-idx="${idx}">
         ${!isMe?`<div class="msg-sender">${escHtml(room.nick||'?')}</div>`:''}
         <div class="msg-bubble" style="background:linear-gradient(135deg,rgba(255,136,187,.12),rgba(100,180,250,.08));border:1px solid rgba(255,136,187,.3);box-shadow:0 0 14px rgba(255,136,187,.1);max-width:82%;padding:12px 14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:11px;color:rgba(240,230,200,.55);">
+          <!-- ★ C-40 박입 ⑥-2 — 상단 헤더 색도 어둡게 (베이지 반투명 → 진한 갈색) -->
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;font-size:11px;color:#4a3d20;font-weight:600;">
             <span>🇰🇷 → ${T.flag} · Xy 번역</span>
             ${timerBadge}
           </div>
@@ -3135,8 +3136,9 @@ function renderMessages(){
               <span>🔊 원어민</span>
             </button>
           </div>
-          <div style="font-size:14px;color:#fff;line-height:1.5;margin-bottom:6px;word-break:break-word;font-weight:500;">${escHtml(T.translated)}</div>
-          <div style="font-size:11px;color:rgba(240,230,200,.5);padding-top:6px;border-top:1px dashed rgba(240,230,200,.15);line-height:1.5;word-break:break-word;">🇰🇷 ${escHtml(T.koText)}</div>
+          <!-- ★ C-40 박입 ⑥ — 대장님 명령: 음성 풍선 내 텍스트 흰색 → 검정 (가독성 부활) -->
+          <div style="font-size:14px;color:#1a1408;line-height:1.5;margin-bottom:6px;word-break:break-word;font-weight:600;">${escHtml(T.translated)}</div>
+          <div style="font-size:11px;color:#3d2f10;padding-top:6px;border-top:1px dashed rgba(74,61,32,.35);line-height:1.5;word-break:break-word;font-weight:500;">🇰🇷 ${escHtml(T.koText)}</div>
         </div>
         <div class="msg-meta">${time} ${isMe?(msg.read?'✓✓':'✓'):''}</div>
       </div>`;
@@ -7460,10 +7462,34 @@ window.addEventListener('appinstalled', function(){
         } catch(e){
           console.warn('[C-19 speakAndPack]', e);
         }
-        // C-19 v1.4.2: 자동 재생 제거 (대장님 지적)
-        // 이유: 자동 재생이 스마트폰 브라우저 TTS 실패 → 폴백 팝업 뜸
-        //       사용자가 원할 때 말풍선의 🔊 재생 버튼 직접 탭하면 됨
-        // setTimeout(function(){ _c19_speak(translated, targetLang.bcp); }, 300);
+        // ★ C-40 박입 ⑤ — 대장님 명령 v40: 자동 음성 재생 부활 (silent fail · 폴백 팝업 차단)
+        // 이전 C-19 v1.4.2가 자동 재생 제거한 이유: TTS 실패 → 폴백 팝업 뜸
+        // C-40 해결: _c19_speak 우회 + 직접 SpeechSynthesisUtterance + silent fail
+        //          → 음성팩 있으면 재생, 없으면 조용히 무시 (팝업 X)
+        //          → 사용자가 🔊 버튼 누르면 정상 폴백 (그건 그대로)
+        setTimeout(function(){
+          try {
+            if(!('speechSynthesis' in window)) return;
+            var voices = window.speechSynthesis.getVoices();
+            if(!voices || voices.length === 0) return;
+            var langCode = targetLang.bcp.split('-')[0];
+            var match = null;
+            for(var i=0; i<voices.length; i++){
+              if(voices[i].lang === targetLang.bcp){ match = voices[i]; break; }
+              if(!match && voices[i].lang.split('-')[0] === langCode){ match = voices[i]; }
+            }
+            if(!match) return;  // 매칭 음성팩 없음 = silent (폴백 X)
+            window.speechSynthesis.cancel();
+            var u = new SpeechSynthesisUtterance(translated);
+            u.voice = match;
+            u.lang = targetLang.bcp;
+            u.rate = 1.0;
+            window.speechSynthesis.speak(u);
+            console.log('[C-40 박입 ⑤] 🌍 자동 음성 재생:', targetLang.flag, targetLang.name, '— ' + match.name);
+          } catch(_e){
+            console.log('[C-40 박입 ⑤] TTS 자동 재생 silent fail — 사용자가 🔊 직접 탭 가능');
+          }
+        }, 300);
         if(typeof showToast === 'function') showToast('🌍 ' + targetLang.flag + ' 번역 전송 완료');
         resolve();
       };
