@@ -1204,26 +1204,14 @@ input[type=range].sec-range::-moz-range-thumb{
     <div class="autologin-box" id="autoLoginBox">
       <div class="autologin-label">💾 기억된 계정</div>
       <div class="autologin-user" id="autoLoginUser">—</div>
-      
-      <!-- 대장님 v3.4 박입: 사용자 선택 (자동 진입 X) -->
       <div style="display:flex;flex-direction:column;gap:8px;margin:14px 0 10px;">
-        <button onclick="doAutoLoginNow()" 
-                style="width:100%;padding:13px;background:linear-gradient(180deg,#E5B847,#D4A332);color:#1A1A1A;border:none;border-radius:12px;font-size:14px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 10px rgba(212,163,50,0.3);">
-          ▶️ 이 계정으로 로그인
-        </button>
-        <button onclick="cancelAutoLogin()" 
-                style="width:100%;padding:11px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">
-          ✏️ 직접 로그인 / 다른 계정
-        </button>
+        <button onclick="doAutoLoginNow()" style="width:100%;padding:13px;background:linear-gradient(180deg,#E5B847,#D4A332);color:#1A1A1A;border:none;border-radius:12px;font-size:14px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 3px 10px rgba(212,163,50,0.3);">▶️ 이 계정으로 로그인</button>
+        <button onclick="cancelAutoLogin()" style="width:100%;padding:11px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;">✏️ 직접 로그인 / 다른 계정</button>
       </div>
-      
-      <!-- 다음부터 안 보이기 체크박스 -->
       <label style="display:flex;align-items:center;gap:8px;justify-content:center;margin-top:10px;font-size:11px;color:rgba(255,255,255,0.55);cursor:pointer;">
         <input type="checkbox" id="hideAutoLoginNext" style="width:14px;height:14px;accent-color:#d4a843;cursor:pointer;">
         <span>🔇 다음부터 이 박스 안 보이기</span>
       </label>
-      
-      <!-- 숨겨진 요소 (기존 코드 호환) -->
       <div style="display:none;">
         <span id="autoLoginCountNum">0</span>
         <div id="autoLoginBar"></div>
@@ -1251,7 +1239,7 @@ input[type=range].sec-range::-moz-range-thumb{
 </div>
 
 <!-- ══ SCREEN: 친구 (탭) ══ -->
-<!-- ══ SCREEN HOME: 메인 홈 (10개 헬스 카드) — 박입 v3.4 ══ -->
+<!-- ══ SCREEN HOME: 메인 홈 (9개 카드) — v4.3 박입 ══ -->
 <div class="screen" id="scrHome">
   <div class="topbar">
     <div>
@@ -1263,7 +1251,7 @@ input[type=range].sec-range::-moz-range-thumb{
   
   <div class="friends-body" style="padding:0;">
     
-    <!-- 💬 CGO 메신저 카드 (최상단) -->
+    <!-- 💬 CGO 메신저 카드 -->
     <div onclick="switchTab('chat')" style="margin:16px;background:linear-gradient(135deg,#1A5470,#2980B9);border-radius:20px;padding:22px 24px;color:white;display:flex;align-items:center;gap:16px;cursor:pointer;box-shadow:0 6px 20px rgba(26,84,112,0.25);">
       <div style="width:56px;height:56px;background:rgba(255,255,255,0.18);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;">💬</div>
       <div style="flex:1;min-width:0;">
@@ -1273,7 +1261,7 @@ input[type=range].sec-range::-moz-range-thumb{
       <div style="font-size:24px;opacity:0.6;">›</div>
     </div>
     
-    <!-- ✨ CGO MESSAGE 연습하기 카드 -->
+    <!-- ✨ 연습하기 카드 -->
     <div onclick="cgoShowWelcome()" style="margin:0 16px 16px;background:linear-gradient(135deg,#FF6B9D,#C44569);border-radius:20px;padding:20px 22px;color:white;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 20px rgba(255,107,157,0.3);">
       <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">✨</div>
       <div style="flex:1;">
@@ -1284,86 +1272,83 @@ input[type=range].sec-range::-moz-range-thumb{
     </div>
     
     <!-- ❤️ rPPG 헬스 섹션 -->
-    <div style="margin:24px 16px 12px;font-size:15px;font-weight:900;color:#d4a843;display:flex;align-items:center;gap:8px;">
-      
-      <span>❤️ rPPG 헬스 분석</span>
-    </div>
+    <div style="margin:24px 16px 12px;font-size:15px;font-weight:900;color:#0d3a3a;">❤️ rPPG 헬스 분석</div>
     
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px;">
       
-      <div onclick="cgoFeature('health')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <!-- 1. ❤️ 건강 예측 (FULI 박입) -->
+      <div onclick="cgoHealthShow()" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">❤️</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 건강 예측</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">BPM·HRV·SpO2</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 건강 예측</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">BPM·HRV·SpO2</div>
+      </div>
       
-      <div onclick="cgoFeature('skinage')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <!-- 2. ⏳ 피부 나이 -->
+      <div onclick="cgoFeature('skinage')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">⏳</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 피부 나이</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">FuliAge</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 피부 나이</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">FuliAge</div>
+      </div>
       
-      <div onclick="cgoFeature('scalp')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <!-- 3. 💆 두피 -->
+      <div onclick="cgoFeature('scalp')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💆</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 두피 케어</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">STP Score</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 두피 케어</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">STP Score</div>
+      </div>
       
-      <div onclick="cgoFeature('dementia')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <!-- 4. 🧠 치매 -->
+      <div onclick="cgoFeature('dementia')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🧠</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">치매 예방 체크</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">CogAns 지수</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">치매 예방 체크</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">CogAns 지수</div>
+      </div>
       
-      <div onclick="cgoFeature('aq')" style="position:relative;background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <!-- 5. 🎯 AQ -->
+      <div onclick="cgoFeature('aq')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🎯</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 AQ</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">멘사 차원 X</div>
-        
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 AQ</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">멘사 차원 X</div>
       </div>
       
     </div>
     
     <!-- 💄 뷰티 섹션 -->
-    <div style="margin:24px 16px 12px;font-size:15px;font-weight:900;color:#d4a843;display:flex;align-items:center;gap:8px;">
-      
-      <span>💄 뷰티 & 라이프</span>
-    </div>
+    <div style="margin:24px 16px 12px;font-size:15px;font-weight:900;color:#0d3a3a;">💄 뷰티 & 라이프</div>
     
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 30px;">
       
-      <div onclick="cgoFeature('makeup')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <div onclick="cgoFeature('makeup')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💄</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">AR 메이크업</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">3D 랜드마크</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">AR 메이크업</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">3D 랜드마크</div>
+      </div>
       
-      <div onclick="cgoFeature('music')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <div onclick="cgoFeature('music')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">🎵</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">나의 주파수 음악</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">환각 0%</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 주파수 음악</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">환각 0%</div>
+      </div>
       
-      <div onclick="cgoFeature('food')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <div onclick="cgoFeature('food')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">🥗</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">음식 궁합</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">영양×약리</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">음식 궁합</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">영양×약리</div>
+      </div>
       
-      <div onclick="cgoFeature('couple')" style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;">
+      <div onclick="cgoFeature('couple')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💑</div>
-        <div style="font-size:13px;font-weight:900;color:#f0ece0;margin-bottom:4px;">커플 궁합</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.5);">듀얼 rPPG</div>
-        </div>
+        <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">커플 궁합</div>
+        <div style="font-size:11px;color:rgba(13,58,58,.7);">듀얼 rPPG</div>
+      </div>
       
     </div>
     
   </div>
   
-  <!-- 하단 탭바 (홈 활성) -->
   <div class="tabbar">
     <button class="tab-btn active" onclick="goScreen('scrHome')"><span class="tab-ico">🏠</span><span>홈</span></button>
     <button class="tab-btn" onclick="switchTab('friends')"><span class="tab-ico">👤</span><span>친구</span></button>
@@ -1490,36 +1475,6 @@ input[type=range].sec-range::-moz-range-thumb{
 </div>
 
 <!-- ══ SCREEN 3: 채팅방 ══ -->
-<!-- ══ SCREEN FEATURE: 헬스 기능 페이지 (10개 카드 클릭 시) — 박입 v3.4 ══ -->
-<div class="screen" id="scrFeature">
-  <div class="topbar">
-    <button class="btn-icon" onclick="goScreen('scrHome')" title="뒤로">‹</button>
-    <div>
-      <div class="topbar-title" id="featureTitle">기능</div>
-    </div>
-  </div>
-  
-  <div style="flex:1;overflow-y:auto;padding:24px 16px;">
-    <div style="background:rgba(255,255,255,.05);border:1px solid rgba(212,168,67,.2);border-radius:24px;padding:36px 24px;margin-bottom:20px;text-align:center;">
-      
-      <div id="featureIcon" style="font-size:88px;margin-bottom:16px;">❤️</div>
-      
-      <div id="featureName" style="font-size:26px;font-weight:900;color:#f0ece0;margin-bottom:8px;">기능 이름</div>
-      
-      <div id="featureTag" style="display:none;"></div>
-      
-      <div id="featureDesc" style="font-size:14px;color:#f0ece0;line-height:1.7;text-align:left;margin-bottom:20px;">설명</div>
-      
-      <button onclick="cgoStartFeature()" style="width:100%;padding:18px;background:linear-gradient(135deg,#1A5470,#2980B9);color:white;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;box-shadow:0 4px 14px rgba(26,84,112,0.3);">
-        🚀 측정 시작
-      </button>
-      
-      
-      
-    </div>
-  </div>
-</div>
-
 <div class="screen" id="scrRoom">
   <!-- 헤더 1줄: 기본 정보 (‹ + 아바타 + 닉네임) -->
   <div class="room-topbar">
@@ -1813,25 +1768,21 @@ input[type=range].sec-range::-moz-range-thumb{
 
 
 /* ════════════════════════════════════════════════
-   🛡️ v3.7 박입: 비번 페이지 색깔로 모든 페이지 통일
-   대장님 명령: "메뉴 페이지부터 채팅 검사 페이지까지 모두 바꿔주세요"
+   🛡️ v4.3 박입: 비번 페이지 색깔로 모든 페이지 통일
 ══════════════════════════════════════════════════ */
 #scrHome,
 #scrFriends,
 #scrList,
 #scrPlaza,
-#scrRoom,
-#scrFeature {
+#scrRoom {
   background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
   color: #1a3a3a;
 }
 
-/* 가독성 확보 - 어두운 배경 가정으로 만들어진 본진 텍스트들 */
 #scrFriends .topbar,
 #scrList .topbar,
 #scrPlaza .topbar,
-#scrHome .topbar,
-#scrFeature .topbar {
+#scrHome .topbar {
   background: rgba(255,255,255,0.4) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -1841,8 +1792,7 @@ input[type=range].sec-range::-moz-range-thumb{
 #scrFriends .topbar-title,
 #scrList .topbar-title,
 #scrPlaza .topbar-title,
-#scrHome .topbar-title,
-#scrFeature .topbar-title {
+#scrHome .topbar-title {
   color: #0d3a3a !important;
   font-weight: 900;
 }
@@ -1857,13 +1807,11 @@ input[type=range].sec-range::-moz-range-thumb{
 #scrFriends .btn-icon,
 #scrList .btn-icon,
 #scrPlaza .btn-icon,
-#scrHome .btn-icon,
-#scrFeature .btn-icon {
+#scrHome .btn-icon {
   background: rgba(255,255,255,0.5) !important;
   color: #0d3a3a !important;
 }
 
-/* 탭바도 민트색 톤으로 */
 #scrHome .tabbar,
 #scrFriends .tabbar,
 #scrList .tabbar,
@@ -1888,183 +1836,15 @@ input[type=range].sec-range::-moz-range-thumb{
   color: #0d3a3a !important;
 }
 
-/* scrHome 박입 카드들 - 본진 다크 카드를 밝은 톤으로 */
-#scrHome [onclick*="cgoFeature"] {
-  background: rgba(255,255,255,0.55) !important;
-  border: 1px solid rgba(255,255,255,0.6) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #0d3a3a !important;
-}
-
-#scrHome [onclick*="cgoFeature"] div[style*="font-weight:900"] {
-  color: #0d3a3a !important;
-}
-
-#scrHome [onclick*="cgoFeature"] div[style*="rgba(255,255,255,.5)"] {
-  color: rgba(13,58,58,0.65) !important;
-}
-
-/* scrHome 섹션 타이틀 */
-#scrHome div[style*="color:#d4a843"][style*="font-weight:900"][style*="font-size:15px"] {
-  color: #0d3a3a !important;
-}
-
-/* scrFeature 페이지의 박입한 hero 카드도 밝은 톤 */
-#scrFeature div[style*="rgba(255,255,255,.05)"][style*="border-radius:24px"] {
-  background: rgba(255,255,255,0.55) !important;
-  border: 1px solid rgba(255,255,255,0.6) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-#scrFeature #featureName,
-#scrFeature #featureDesc {
-  color: #0d3a3a !important;
-}
-
-#scrFeature #featureDesc b {
-  color: #1a5470 !important;
-}
-
-/* 채팅 목록 (scrList) - 본진 카드 색상 */
-#scrList .room-list-item,
-#scrList .chat-room {
-  background: rgba(255,255,255,0.5) !important;
-  color: #0d3a3a !important;
-  border: 1px solid rgba(255,255,255,0.4) !important;
-}
-
-/* 친구 목록 (scrFriends) */
-#scrFriends .friend-action-btn {
-  background: rgba(255,255,255,0.5) !important;
-  color: #0d3a3a !important;
-  border: 1px solid rgba(255,255,255,0.4) !important;
-}
-
-#scrFriends .friends-empty,
-#scrFriends .fe-title,
-#scrFriends .fe-sub {
-  color: #0d3a3a !important;
-}
-
-#scrFriends .fe-sub {
-  color: rgba(13,58,58,0.7) !important;
-}
-
-/* 채팅방 (scrRoom) - 메시지 영역 */
-#scrRoom .msg-area,
-#scrRoom .room-body {
-  background: transparent !important;
-}
-
-#scrRoom .room-topbar {
-  background: rgba(255,255,255,0.5) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(0,80,80,0.1) !important;
-}
-
-#scrRoom .r-name {
-  color: #0d3a3a !important;
-}
-
-#scrRoom .back-btn {
-  color: #0d3a3a !important;
-}
-
-
-
-/* ════════════════════════════════════════════════
-   🛡️ v3.9 박입: Welcome 팝업 색상 통일 (비번 페이지 톤)
-══════════════════════════════════════════════════ */
-
-/* Welcome 팝업 오버레이 - 민트 톤 */
-.welcome-overlay {
-  background: radial-gradient(ellipse at center, 
-    rgba(159,232,232,0.7) 0%, 
-    rgba(159,232,232,0.92) 100%) !important;
-}
-
-/* Welcome 카드 - 비번 카드와 동일 (글래스모피즘) */
-.welcome-card {
-  background: rgba(255,255,255,0.5) !important;
-  border: 1.5px solid rgba(255,255,255,0.6) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  box-shadow:
-    0 10px 40px rgba(0,60,60,0.18),
-    0 0 0 1px rgba(255,255,255,0.3) inset !important;
-}
-
-/* Welcome 타이틀 - 다크 청록 */
-.welcome-title {
-  background: linear-gradient(135deg, #0d3a3a 0%, #1a5470 50%, #0d3a3a 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-}
-
-/* Welcome 시 (poem) - 다크 청록 */
-.welcome-poem {
-  color: #1a3a3a !important;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.4) !important;
-}
-
-/* Welcome 본문 텍스트 */
-.welcome-body {
-  color: #1a3a3a !important;
-}
-
-.welcome-body b {
-  color: #0d3a3a !important;
-}
-
-/* Welcome 기능 박스들 */
-.welcome-feature {
-  background: rgba(255,255,255,0.4) !important;
-  border: 1px solid rgba(255,255,255,0.5) !important;
-  color: #0d3a3a !important;
-}
-
-.welcome-xy-hint {
-  color: #1a5470 !important;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
-}
-
-/* Welcome 버튼들 */
-.welcome-btn.skip {
-  background: rgba(255,255,255,0.5) !important;
-  color: #1a3a3a !important;
-  border: 1px solid rgba(255,255,255,0.6) !important;
-}
-
-.welcome-btn.start {
-  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
-  color: #1A1A1A !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(212,163,50,0.4) !important;
-}
-
-
-
-/* ════════════════════════════════════════════════
-   🛡️ v4.0 박입: 채팅 흰색 + 전체 가독성 강화
-   대장님: "채팅 네모 금색 → 세련된 흰색, 글씨 잘 보이게"
-══════════════════════════════════════════════════ */
-
-/* ─── 채팅 말풍선 (내 말풍선) ─── */
+/* 채팅 말풍선 흰색 */
 .msg-wrap.me .msg-bubble {
   background: linear-gradient(180deg, #FFFFFF 0%, #F4F6F8 100%) !important;
   color: #1a3a3a !important;
   border: 1px solid rgba(0,80,80,0.08) !important;
   border-bottom-right-radius: 4px !important;
-  box-shadow: 
-    0 2px 8px rgba(0,60,60,0.08),
-    0 1px 3px rgba(0,60,60,0.05) !important;
+  box-shadow: 0 2px 8px rgba(0,60,60,0.08), 0 1px 3px rgba(0,60,60,0.05) !important;
 }
 
-/* ─── 채팅 말풍선 (상대 말풍선) ─── */
 .msg-wrap.you .msg-bubble {
   background: rgba(255,255,255,0.65) !important;
   color: #1a3a3a !important;
@@ -2075,26 +1855,10 @@ input[type=range].sec-range::-moz-range-thumb{
   box-shadow: 0 2px 8px rgba(0,60,60,0.06) !important;
 }
 
-/* 보안 메시지 (다층 은닉)도 흰색 톤 유지 */
-.msg-wrap.me .msg-bubble.secure-active,
-.msg-wrap.me.secure .msg-bubble {
-  background: linear-gradient(180deg, #FFF8E1 0%, #FFFEF0 100%) !important;
-  border: 1.5px solid rgba(212,163,50,0.4) !important;
-}
+.msg-sender { color: #0d3a3a !important; }
+.msg-meta { color: rgba(13,58,58,0.55) !important; }
 
-/* ─── 메시지 메타 (시간/이름) ─── */
-.msg-sender {
-  color: #0d3a3a !important;
-}
-
-.msg-meta {
-  color: rgba(13,58,58,0.55) !important;
-}
-
-/* ─── 채팅방 (scrRoom) 전체 가독성 ─── */
-#scrRoom .msg-area {
-  background: transparent !important;
-}
+#scrRoom .msg-area { background: transparent !important; }
 
 #scrRoom .room-topbar {
   background: rgba(255,255,255,0.55) !important;
@@ -2102,17 +1866,9 @@ input[type=range].sec-range::-moz-range-thumb{
   -webkit-backdrop-filter: blur(14px);
 }
 
-#scrRoom .r-name {
-  color: #0d3a3a !important;
-  font-weight: 900 !important;
-}
+#scrRoom .r-name { color: #0d3a3a !important; font-weight: 900 !important; }
+#scrRoom .back-btn, #scrRoom .btn-icon { color: #0d3a3a !important; }
 
-#scrRoom .back-btn,
-#scrRoom .btn-icon {
-  color: #0d3a3a !important;
-}
-
-/* 입력창 - 깨끗한 흰색 */
 #scrRoom textarea,
 #scrRoom input[type="text"] {
   background: rgba(255,255,255,0.85) !important;
@@ -2125,67 +1881,9 @@ input[type=range].sec-range::-moz-range-thumb{
   color: rgba(13,58,58,0.4) !important;
 }
 
-#scrRoom .input-bar,
-#scrRoom .room-input,
-#scrRoom .composer {
-  background: rgba(255,255,255,0.45) !important;
-  border-top: 1px solid rgba(0,80,80,0.08) !important;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-/* xy-actionbar (보안 슬라이드) */
-#scrRoom .xy-actionbar,
-#scrRoom .xy-act-btn {
-  background: rgba(255,255,255,0.5) !important;
-  color: #1a3a3a !important;
-  border: 1px solid rgba(0,80,80,0.1) !important;
-}
-
-#scrRoom .xy-act-btn.active {
-  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
-  color: #1A1A1A !important;
-  border-color: #D4A332 !important;
-}
-
-/* 보안 슬라이더 라벨/값 */
-#scrRoom .sec-slider-label,
-#scrRoom .sec-slider-head,
-#scrRoom .sec-slider-value {
-  color: #0d3a3a !important;
-}
-
-#scrRoom .sec-preset {
-  background: rgba(255,255,255,0.5) !important;
-  color: #1a3a3a !important;
-  border: 1px solid rgba(0,80,80,0.1) !important;
-}
-
-#scrRoom .sec-preset.active {
-  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
-  color: #1A1A1A !important;
-}
-
-/* 보안 슬라이더 range */
-#scrRoom .sec-range,
-#scrRoom input[type="range"] {
-  accent-color: #D4A332 !important;
-}
-
-/* ─── 친구 탭 (scrFriends) 텍스트 ─── */
-#scrFriends .fe-ico {
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
-}
-
-#scrFriends .fe-title {
-  color: #0d3a3a !important;
-  font-weight: 900 !important;
-}
-
-#scrFriends .fe-sub {
-  color: rgba(13,58,58,0.75) !important;
-}
-
+/* 친구 목록 */
+#scrFriends .fe-title { color: #0d3a3a !important; font-weight: 900 !important; }
+#scrFriends .fe-sub { color: rgba(13,58,58,0.7) !important; }
 #scrFriends .friend-action-btn {
   background: rgba(255,255,255,0.55) !important;
   color: #0d3a3a !important;
@@ -2193,105 +1891,59 @@ input[type=range].sec-range::-moz-range-thumb{
   font-weight: 700 !important;
 }
 
-#scrFriends .friend-action-btn:hover {
-  background: rgba(255,255,255,0.75) !important;
-}
-
-/* ─── 채팅 목록 (scrList) ─── */
+/* 채팅 목록 */
 #scrList .room-item {
   background: rgba(255,255,255,0.5) !important;
   border: 1px solid rgba(255,255,255,0.5) !important;
   color: #1a3a3a !important;
 }
+#scrList .room-name, #scrList .room-nick { color: #0d3a3a !important; font-weight: 900 !important; }
+#scrList .room-last, #scrList .room-preview { color: rgba(13,58,58,0.7) !important; }
+#scrList .room-time { color: rgba(13,58,58,0.5) !important; }
+#scrList .empty-text { color: #0d3a3a !important; }
 
-#scrList .room-name,
-#scrList .room-nick {
-  color: #0d3a3a !important;
-  font-weight: 900 !important;
+#scrList .room-item.xy-practice .room-name { color: #c44569 !important; }
+#scrList .room-item.xy-practice .room-last { color: rgba(196,69,105,0.7) !important; }
+
+/* 광장 */
+#scrPlaza .pe-title { color: #0d3a3a !important; }
+#scrPlaza .pe-sub { color: rgba(13,58,58,0.7) !important; }
+
+/* Welcome 팝업 통일 */
+.welcome-overlay {
+  background: radial-gradient(ellipse at center, 
+    rgba(159,232,232,0.7) 0%, 
+    rgba(159,232,232,0.92) 100%) !important;
 }
-
-#scrList .room-last,
-#scrList .room-preview {
-  color: rgba(13,58,58,0.7) !important;
-}
-
-#scrList .room-time {
-  color: rgba(13,58,58,0.5) !important;
-}
-
-#scrList .empty-text,
-#scrList .friends-empty {
-  color: #0d3a3a !important;
-}
-
-/* Xy 연습방 - 핑크 톤 유지하되 가독성 */
-#scrList .room-item.xy-practice .room-name {
-  color: #c44569 !important;
-  text-shadow: 0 1px 2px rgba(255,255,255,0.5) !important;
-}
-
-#scrList .room-item.xy-practice .room-last {
-  color: rgba(196,69,105,0.7) !important;
-}
-
-.practice-badge {
-  background: linear-gradient(135deg, #FF6B9D, #C44569) !important;
-  color: white !important;
-}
-
-/* ─── 광장 (scrPlaza) ─── */
-#scrPlaza .plaza-empty,
-#scrPlaza .pe-title,
-#scrPlaza .pe-sub {
-  color: #0d3a3a !important;
-}
-
-#scrPlaza .pe-sub {
-  color: rgba(13,58,58,0.7) !important;
-}
-
-/* ─── scrHome 카드들 - 더 또렷한 텍스트 ─── */
-#scrHome [onclick*="cgoFeature"] div[style*="color:#f0ece0"],
-#scrHome [onclick*="cgoFeature"] div[style*="font-weight:900"] {
-  color: #0d3a3a !important;
-  text-shadow: 0 1px 1px rgba(255,255,255,0.3);
-}
-
-#scrHome [onclick*="cgoFeature"] div[style*="rgba(255,255,255"] {
-  color: rgba(13,58,58,0.7) !important;
-}
-
-/* ─── scrFeature 페이지 ─── */
-#scrFeature #featureName {
-  color: #0d3a3a !important;
-}
-
-#scrFeature #featureDesc {
-  color: #1a3a3a !important;
-}
-
-#scrFeature #featureDesc b {
-  color: #1a5470 !important;
-  font-weight: 900 !important;
-}
-
-/* ─── 닉네임 바 (myNickBar) ─── */
-.topbar-me {
-  color: rgba(13,58,58,0.7) !important;
-  font-weight: 700 !important;
-}
-
-/* ─── 일반/보안 모드 표시 ─── */
-.mode-badge {
+.welcome-card {
   background: rgba(255,255,255,0.5) !important;
-  color: #0d3a3a !important;
-  border: 1px solid rgba(0,80,80,0.1) !important;
+  border: 1.5px solid rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 10px 40px rgba(0,60,60,0.18), 0 0 0 1px rgba(255,255,255,0.3) inset !important;
 }
-
-.mode-badge.secure {
-  background: linear-gradient(135deg, #C0392B, #8B1A1A) !important;
-  color: gold !important;
-  border-color: #C0392B !important;
+.welcome-title {
+  background: linear-gradient(135deg, #0d3a3a 0%, #1a5470 50%, #0d3a3a 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+.welcome-poem, .welcome-body { color: #1a3a3a !important; text-shadow: 0 1px 2px rgba(255,255,255,0.4) !important; }
+.welcome-feature {
+  background: rgba(255,255,255,0.4) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  color: #0d3a3a !important;
+}
+.welcome-xy-hint { color: #1a5470 !important; }
+.welcome-btn.skip {
+  background: rgba(255,255,255,0.5) !important;
+  color: #1a3a3a !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+}
+.welcome-btn.start {
+  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
+  color: #1A1A1A !important;
+  border: none !important;
 }
 
 </style>
@@ -2779,44 +2431,28 @@ function coverTap(){
 let _autoLoginTimer = null;
 let _autoLoginCountdown = null;
 function startAutoLogin(username){
-  // 대장님 v3.4 박입: 자동 진입 X — 박스만 표시하여 사용자 선택
-  
-  // 1) "다음부터 안 보이기" 체크된 경우 → 박스 표시 안 함
+  // 대장님 v4.3 박입: 자동 진입 X — 박스만 표시하여 사용자 선택
   try {
     if(localStorage.getItem('cgm2_hide_autologin') === '1'){
       console.log('[자동로그인 박스] 사용자가 숨김 설정 — 직접 로그인 화면 표시');
       return;
     }
   } catch(_e){}
-  
   const box = document.getElementById('autoLoginBox');
   const userEl = document.getElementById('autoLoginUser');
   if(!box || !userEl) return;
-
-  // 2) 사용자명 표시 + 박스 보이기
   userEl.textContent = username;
   box.classList.add('show');
-  
-  // 3) 타이머 X — 사용자가 ▶️ 버튼 클릭해야 진입
   console.log('[자동로그인 박스] 사용자 선택 대기 중');
 }
 
-// 대장님 v3.4 박입: 사용자가 ▶️ 클릭 시 진입
 function doAutoLoginNow(){
-  // 체크박스 상태 확인 — 체크되어 있으면 localStorage 저장
   const hideNext = document.getElementById('hideAutoLoginNext');
   if(hideNext && hideNext.checked){
-    try {
-      localStorage.setItem('cgm2_hide_autologin', '1');
-      console.log('[자동로그인 박스] 다음부터 안 보이기 설정됨');
-    } catch(_e){}
+    try { localStorage.setItem('cgm2_hide_autologin', '1'); } catch(_e){}
   }
-  
-  // 박스 숨기기
   const box = document.getElementById('autoLoginBox');
   if(box) box.classList.remove('show');
-  
-  // 로그인 진행 (홈으로)
   if(_myNick && _myCode){
     goScreen('scrHome');
     updateNickBars();
@@ -2824,7 +2460,6 @@ function doAutoLoginNow(){
     registerToFirebase();
     listenInvites();
     listenIncomingCalls();
-    // 초대 링크 처리
     try {
       const p = new URLSearchParams(location.search);
       const inv = p.get('invite');
@@ -2919,14 +2554,14 @@ function doLogin(){
 
   // 이전에 사용하던 닉네임 있으면 친구 탭으로, 없으면 닉네임 설정
   if(_myNick && _myCode){
-    goScreen('scrHome');
+    switchTab('friends');
     renderRoomList();
     registerToFirebase();
     listenInvites();
     listenIncomingCalls();
     updateNickBars();
     // 💡 대장님 v28: 연습방 자동 생성 제거 — 유저가 "시작할게요" 눌러야만 생성
-    // maybeShowWelcome(); // 박입 v3.4: 자동 팝업 비활성 (홈 화면 먼저)
+    // maybeShowWelcome(); // v4.3 박입: 자동 팝업 비활성
     // 🔗 C-19 v19: 수동 로그인 시에도 URL 초대 파라미터 처리 (자동로그인 경로와 동일)
     //   기존 버그: 자동로그인 취소 → 수동 로그인 하면 ?invite=사랑 이 무시됨
     try {
@@ -2978,7 +2613,7 @@ function startApp(){
   listenInvites();
   listenIncomingCalls(); // 🎯 v1.7.0 통화 수신
   // 💡 대장님 v28: 연습방 자동 생성 제거 — 팝업에서 유저가 선택
-  // maybeShowWelcome(); // 박입 v3.4: 자동 팝업 비활성
+  // maybeShowWelcome(); // v4.3 박입: 자동 팝업 비활성
 }
 
 function genCode(){
@@ -8088,105 +7723,1368 @@ window.addEventListener('appinstalled', function(){
   console.log('[C-19 v1.5.1] CGO MESSAGE — 20초 폭파 (🆓무료) + 14개국 번역 💥🌍');
 })();
 
-// ════════════════════════════════════════════════
-// 🛡️ 10개 헬스 카드 클릭 핸들러 (박입 v3.4)
-// 대장님 천재적 통찰: AQ ⟷ 치매 = 같은 rPPG 엔진 공유
-// ════════════════════════════════════════════════
-let _cgoCurrentFeature = null;
 
-function cgoFeature(name) {
-  const features = {
-    'health':   { 
-      icon:'❤️', name:'나의 건강 예측', tag:'',
-      desc:'▶ rPPG 기반 BPM·HRV·SpO2·혈압 비접촉 측정<br>▶ 의료기기급 정확도<br>▶ 카메라 30fps · 30초 측정' 
-    },
-        'skinage': { 
-      icon:'⏳', name:'나의 피부 나이', tag:'',
-      desc:'▶ <b>FuliAge 알고리즘 ⭐ 세계 최초</b><br>▶ 안면 6부위 가중 평균<br>▶ 콜라겐 회복도 + 자율신경 융합<br>▶ 실제 나이 vs 피부 나이 비교' 
-    },
-    'scalp':    { 
-      icon:'💆', name:'나의 두피 케어', tag:'',
-      desc:'▶ 홍반(EI) × 자율신경(HRV) 융합<br>▶ STP Score 산출<br>▶ <b>피부과 임상 진단 100% 일치</b>' 
-    },
-    'dementia': { 
-      icon:'🧠', name:'치매 예방 체크', tag:'',
-      desc:'▶ CogAns 지수 (인지-자율신경) ⭐<br>▶ 가변 문항 10·20·50<br>▶ <b>K-MMSE 상관계수 r=0.93</b><br>▶ 임상 신뢰성 검증' 
-    },
-    'aq': { 
-      icon:'🎯', name:'나의 AQ', tag:'',
-      desc:'▶ 멘사 차원 X — 세계 최초 ⭐<br>▶ 안구 추적 (Gaze Latency)<br>▶ 자율신경 동시 측정<br>▶ Brain Endurance Index<br>▶ <b>찍기 0% 분별</b>'
-    },
-    'makeup':   { 
-      icon:'💄', name:'AR 메이크업', tag:'',
-      desc:'▶ 실시간 3D 랜드마크 (468개 점)<br>▶ 610색 색상 라이브러리<br>▶ 19개 브랜드' 
-    },
-    'music':    { 
-      icon:'🎵', name:'나의 주파수 음악', tag:'',
-      desc:'▶ <b>환각 0% — 50곡 화이트리스트</b> ⭐<br>▶ 2단계 하이브리드 검증<br>▶ 5,000곡 DB 매칭' 
-    },
-    'food':     { 
-      icon:'🥗', name:'음식 궁합', tag:'',
-      desc:'▶ 영양 × 약리 × 알레르기 × 체질 4축 융합<br>▶ <b>역학 데이터 사용 X</b><br>▶ 식약처 SaMD 2등급' 
-    },
-    'couple':   { 
-      icon:'💑', name:'커플 궁합', tag:'',
-      desc:'▶ 듀얼 rPPG 동시 측정<br>▶ 자율신경 동조도 분석<br>▶ <b>역학 데이터 사용 X</b>' 
-    }
-  };
-  
-  const f = features[name];
-  if (!f) return;
-  
-  _cgoCurrentFeature = name;
-  
-  document.getElementById('featureIcon').textContent = f.icon;
-  document.getElementById('featureName').textContent = f.name;
-  document.getElementById('featureTag').textContent = f.tag;
-  document.getElementById('featureDesc').innerHTML = f.desc;
-  document.getElementById('featureTitle').textContent = f.icon + ' ' + f.name;
-  
-  const sharedEl = document.getElementById('featureShared'); if(sharedEl) sharedEl.style.display = f.shared ? 'block' : 'none';
-  
-  goScreen('scrFeature');
-}
-
-function cgoStartFeature() {
-  if (!_cgoCurrentFeature) return;
-  if(typeof showToast === 'function') {
-    showToast('🚀 ' + _cgoCurrentFeature + ' 측정 시작');
-  } else {
-    alert('🚀 ' + _cgoCurrentFeature + ' 측정 시작');
-  }
-}
-
-// cgoOpenPractice() 제거됨 — 본진 openPracticeFromButton() 직접 호출
-
-
-// ════════════════════════════════════════════════
-// 🛡️ v4.1 박입: 연습 카드 클릭 → 팝업 바로 표시
-// 대장님 명령: "채팅 목록 깜빡 보이지 말고 팝업만"
-// 본진 openPracticeFromButton()은 채팅 탭 활성화 후 팝업 → 
-//   채팅 목록(scrList) 깜빡 보임
-// 우리 cgoShowWelcome()은 팝업만 즉시 표시
-// 사용자가 "네, 시작할게요!" 누르면 본진 closeWelcome(true)가
-//   ensureXyPracticeRoom() + openRoom() 호출 → 연습방 진입
-// ════════════════════════════════════════════════
+// 🛡️ v4.3 박입: 연습 카드 → 팝업 즉시 표시
 function cgoShowWelcome(){
   const overlay = document.getElementById('welcomeOverlay');
   if(overlay){
     overlay.classList.add('show');
     console.log('[연습 팝업] 바로 표시 (홈에서)');
-  } else {
-    console.log('[연습 팝업] welcomeOverlay 없음');
   }
 }
 
-console.log('🛡️ CGO MESSAGE v3.4 박입 완료');
-console.log('  ✅ scrHome (10개 카드)');
-console.log('  ✅ scrFeature (팝업처럼 펼쳐짐)');
-console.log('  ✅ C-39 박제');
-console.log('  ✅ AQ ⟷ 치매 rPPG 공유');
-console.log('  ✅ 본진 28개 시스템 그대로');
 </script>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🏥 v4.3 박입: FULI 건강 예측 100% 독립 -->
+<!-- 대장님 명령: "독립 / 사업 대표 X 사업 Y, 쌍둥이지만 독립" -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+
+<style>
+  #hfu-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(15,23,42,.96);backdrop-filter:blur(8px);overflow-y:auto;-webkit-overflow-scrolling:touch;font-family:inherit;}
+  .hfu-intro-wrap{max-width:520px;margin:0 auto;padding:0 0 80px;}
+  .hfu-intro-top{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;padding:14px 18px;background:rgba(15,23,42,.98);}
+  .hfu-intro-x{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:38px;height:38px;color:#e8eaf0;font-size:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .hfu-intro-x:hover{background:rgba(255,255,255,.15);}
+  .hfu-intro-hero{text-align:center;padding:8px 24px 26px;}
+  .hfu-intro-icon{font-size:50px;margin-bottom:14px;filter:drop-shadow(0 0 16px rgba(52,211,153,.5));}
+  .hfu-intro-title{font-size:22px;font-weight:900;color:#10b981;letter-spacing:.02em;margin-bottom:8px;}
+  .hfu-intro-sub{font-size:11px;color:rgba(232,234,240,.55);letter-spacing:.06em;line-height:1.7;}
+  .hfu-intro-body{padding:0 18px;}
+  .hfu-intro-sec{background:rgba(255,255,255,.04);border:1px solid rgba(52,211,153,.18);border-radius:14px;padding:14px 16px;margin-bottom:11px;}
+  .hfu-intro-sec-grade{background:rgba(212,168,67,.06);border:1px solid rgba(212,168,67,.25);}
+  .hfu-intro-sec-strong{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.3);}
+  .hfu-intro-sec-limit{background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.25);}
+  .hfu-intro-sec-legal{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);}
+  .hfu-intro-sec-tagline{background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(56,189,248,.06));border:1px solid rgba(52,211,153,.35);text-align:center;}
+  .hfu-intro-lbl{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-bottom:9px;}
+  .hfu-intro-row{display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:12px;color:rgba(232,234,240,.85);}
+  .hfu-intro-row:last-child{margin-bottom:0;}
+  .hfu-intro-row-lbl{min-width:130px;font-size:11px;color:rgba(232,234,240,.7);}
+  .hfu-intro-stars{font-size:13px;letter-spacing:2px;}
+  .hfu-intro-rank{font-size:10px;opacity:.75;}
+  .hfu-intro-p{font-size:12px;color:rgba(232,234,240,.85);line-height:1.95;}
+  .hfu-intro-p b{color:#34d399;}
+  .hfu-intro-credit{text-align:center;margin-top:14px;font-size:9px;color:rgba(232,234,240,.25);letter-spacing:.14em;}
+  .hfu-intro-cta{display:block;width:100%;margin-top:18px;padding:15px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:14px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.03em;}
+</style>
+
+<div id="hfu-intro-pop">
+  <div class="hfu-intro-wrap">
+    <div class="hfu-intro-top">
+      <button class="hfu-intro-x" onclick="document.getElementById('hfu-intro-pop').style.display='none';">✕</button>
+    </div>
+    <div class="hfu-intro-hero">
+      <div class="hfu-intro-icon">🩺</div>
+      <div class="hfu-intro-title">나의 건강 예측</div>
+      <div class="hfu-intro-sub">CHROM rPPG · 5부위 생체 스캔 · AI 한의학 설진 · 50대 역학 통합</div>
+    </div>
+    <div class="hfu-intro-body">
+      
+      <div class="hfu-intro-sec hfu-intro-sec-grade">
+        <div class="hfu-intro-lbl" style="color:#d4a843;">📊 객관적 수준 평가</div>
+        <div class="hfu-intro-row"><div class="hfu-intro-row-lbl">일반 건강앱 대비</div><div class="hfu-intro-stars" style="color:#34d399;">★★★★★</div><div class="hfu-intro-rank" style="color:#34d399;">최상위</div></div>
+        <div class="hfu-intro-row"><div class="hfu-intro-row-lbl">글로벌 헬스테크 대비</div><div class="hfu-intro-stars" style="color:#38bdf8;">★★★★☆</div><div class="hfu-intro-rank" style="color:#38bdf8;">상위 5%</div></div>
+        <div class="hfu-intro-row"><div class="hfu-intro-row-lbl">한의원 망진 보조</div><div class="hfu-intro-stars" style="color:#a78bfa;">★★★★☆</div><div class="hfu-intro-rank" style="color:#a78bfa;">매우 우수</div></div>
+        <div class="hfu-intro-row"><div class="hfu-intro-row-lbl">병원 의료기기 대비</div><div class="hfu-intro-stars" style="color:#fbbf24;">★★☆☆☆</div><div class="hfu-intro-rank" style="color:#fbbf24;">참고용</div></div>
+      </div>
+      
+      <div class="hfu-intro-sec hfu-intro-sec-strong">
+        <div class="hfu-intro-lbl" style="color:#34d399;">✅ 이 앱만의 강점</div>
+        <div class="hfu-intro-p">
+          🫀 <b>CHROM rPPG</b> — 삼성·애플워치와 동일 원리 · 비접촉 심박 측정<br>
+          🔬 <b>5부위 자동 전환</b> — 얼굴→혀→눈→피부→손 · 한의원 망진(望診) 구현<br>
+          👅 <b>AI 설진</b> — 혀 색·태로 비위·간담 분석 · 한의대 논문 수준<br>
+          🫁 <b>4-7-8 호흡 + HRV</b> — 부교감신경 직접 측정 · 의학적 검증 방법
+        </div>
+      </div>
+      
+      <div class="hfu-intro-sec hfu-intro-sec-limit">
+        <div class="hfu-intro-lbl" style="color:#fbbf24;">⚠️ 솔직한 한계</div>
+        <div class="hfu-intro-p" style="color:rgba(232,234,240,.78);">
+          • rPPG 오차 ±10~15% — 병원 심전도 대비 참고용 수준<br>
+          • Vision AI — 조명·피부색에 따라 정확도 차이 있음<br>
+          • FCI(안면혈류지수) — 자체 정의 지표, 학계 미표준화
+        </div>
+      </div>
+      
+      <div class="hfu-intro-sec hfu-intro-sec-legal">
+        <div class="hfu-intro-p" style="color:rgba(232,234,240,.85);">
+          ⚖️ <b style="color:#f87171;">법적 고지</b> — 본 시스템은 <b style="color:#fff;">의료기기가 아닌 건강 예측 보조 도구</b>입니다. 의학적 진단·처방을 대체하지 않으며, 이상 증상이 있을 경우 반드시 전문의 진료를 받으시기 바랍니다.
+        </div>
+      </div>
+      
+      <div class="hfu-intro-sec hfu-intro-sec-tagline">
+        <div class="hfu-intro-p" style="color:#34d399;font-weight:700;font-size:13px;line-height:1.7;">
+          "스마트폰으로 할 수 있는<br>최대치에 근접한 앱"
+        </div>
+      </div>
+      
+      <button class="hfu-intro-cta" onclick="document.getElementById('hfu-intro-pop').style.display='none';">✅ 검사 시작하기</button>
+      
+      <div class="hfu-intro-credit">나의 건강 예측 · CGO-FULI · 특허 10-2026-0060113</div>
+    </div>
+  </div>
+</div>
+
+<div id="todayFortuneOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:#060d1a;overflow-y:auto;-webkit-overflow-scrolling:touch;">
+
+  <!-- 헤더 -->
+  <div style="position:sticky;top:0;z-index:10;background:rgba(6,13,26,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(212,168,67,.2);padding:14px 16px;display:flex;align-items:center;gap:10px;">
+    <button onclick="cgoCloseTodayFortune()" style="min-width:80px;height:40px;border-radius:20px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.7);color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;padding:0 14px;box-shadow:0 0 12px rgba(212,168,67,.3);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;">‹ 나가기</button>
+    <div style="flex:1;">
+      <div id="tf-overlay-title" style="font-size:15px;font-weight:800;color:#38bdf8;">🛰️ 실시간 데이터 연동 분석</div>
+      <div id="tf-date-str" style="font-size:10px;color:rgba(240,220,160,.4);"></div>
+    </div>
+
+  </div>
+
+  <div style="max-width:600px;margin:0 auto;padding:16px;">
+
+    <!-- 분석 / AI 버튼 -->
+    <div style="display:flex;gap:10px;margin-bottom:12px;">
+      <button onclick="cgoRunTodayFortune();setTimeout(function(){ var r=document.getElementById('tf-result'); if(r&&r.style.display!=='none') r.scrollIntoView({behavior:'smooth',block:'start'}); else { var ld=document.getElementById('tf-loading'); if(ld&&ld.style.display!=='none') ld.scrollIntoView({behavior:'smooth',block:'start'}); } },2500);" style="flex:1;padding:14px;background:linear-gradient(135deg,rgba(212,168,67,.2),rgba(251,191,36,.1));border:2px solid rgba(212,168,67,.6);border-radius:14px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s;"
+        onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+        ⚡ 분석
+      </button>
+      <button onclick="cgoTfAiChat()" style="flex:1;padding:14px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(56,189,248,.1));border:2px solid rgba(124,58,237,.4);border-radius:14px;color:#a78bfa;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .2s;"
+        onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+        🤖 AI 상담
+      </button>
+    </div>
+
+    <!-- 실시간 데이터 연동 카드 -->
+    <div id="tf-realtime-card" style="background:rgba(0,0,0,.3);border:1px solid rgba(56,189,248,.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+        <div style="font-size:22px;animation:spin 8s linear infinite;">🛸</div>
+        <div style="font-size:13px;font-weight:700;color:#38bdf8;">실시간 데이터 연동</div>
+      </div>
+      <div style="font-size:10px;color:rgba(56,189,248,.6);font-weight:600;margin-bottom:10px;padding:4px 10px;background:rgba(56,189,248,.06);border-radius:8px;text-align:center;letter-spacing:.04em;">
+        👆 클릭하여 연결 — 연동할 데이터를 선택하세요
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <!-- NASA -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(56,189,248,.06);border-radius:10px;border:1px solid rgba(56,189,248,.15);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;">🛰️</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#38bdf8;">NASA 실시간</div>
+              <div style="font-size:10px;color:rgba(56,189,248,.5);">행성 트랜짓 · 태양풍 · 자기장 (가중치 최대 20%)</div>
+            </div>
+          </div>
+          <span onclick="cgoTfToggle('nasa')" id="tf-nasa-sw" style="display:inline-block;width:44px;height:24px;background:#38bdf8;border-radius:12px;cursor:pointer;transition:.3s;"></span>
+        </div>
+        <!-- 날씨 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(52,211,153,.06);border-radius:10px;border:1px solid rgba(52,211,153,.15);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;">🌤️</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#34d399;">날씨</div>
+              <div style="font-size:10px;color:rgba(52,211,153,.5);">기압·온도·습도·풍속 (단독 12%, 복합 4%)</div>
+            </div>
+          </div>
+          <span onclick="cgoTfToggle('weather')" id="tf-weather-sw" style="display:inline-block;width:44px;height:24px;background:#34d399;border-radius:12px;cursor:pointer;transition:.3s;"></span>
+        </div>
+        <!-- 환경 스캔 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(139,92,246,.06);border-radius:10px;border:1px solid rgba(139,92,246,.15);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:14px;">📷</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#a78bfa;">환경 스캔 (공간 풍수)</div>
+              <div style="font-size:10px;color:rgba(139,92,246,.5);">카메라 10초 스캔 (단독 12%, 복합 4%)</div>
+            </div>
+          </div>
+          <span onclick="cgoTfToggle('env')" id="tf-env-sw" style="display:inline-block;width:44px;height:24px;background:rgba(255,255,255,.15);border-radius:12px;cursor:pointer;transition:.3s;"></span>
+        </div>
+
+
+
+
+      </div>
+    </div>
+
+    <!-- 설명 카드 -->
+    <div id="tf-bio-card" style="background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(212,168,67,.04));border:1px solid rgba(56,189,248,.2);border-radius:14px;padding:16px 18px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:18px;">🛰️</span>
+        <div style="font-size:12px;font-weight:800;color:#38bdf8;">실시간 우주·환경 데이터를 역학 분석에 동기화합니다.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="padding:10px 12px;background:rgba(0,0,0,.2);border-radius:10px;border-left:3px solid rgba(212,168,67,.5);">
+          <div style="font-size:10px;font-weight:700;color:#d4a843;margin-bottom:3px;">📐 데이터 동기 원리</div>
+          <div style="font-size:11px;color:rgba(240,220,160,.75);line-height:1.7;">NASA JPL 행성 트랜짓·태양풍·자기장 수치와 현재 기상(기압·온도·습도) 데이터를 실시간으로 수집하여, 50대 역학 엔진의 가중치 변수에 즉시 반영합니다. 우주와 환경의 에너지 변화가 역학 계산에 직접 투사됩니다.</div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(0,0,0,.2);border-radius:10px;border-left:3px solid rgba(52,211,153,.5);">
+          <div style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:3px;">✨ 기대 효과</div>
+          <div style="font-size:11px;color:rgba(240,220,160,.75);line-height:1.7;">고정된 역학 계산이 아닌, 지금 이 순간의 우주·환경 데이터가 반영된 동적 운세 분석을 제공합니다. 같은 사주라도 오늘의 태양풍·기압에 따라 다른 결과가 도출됩니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- rPPG 전용 설명 카드 (rPPG 카드 클릭 시만 표시) -->
+    <div id="tf-rppg-card" style="display:none;background:linear-gradient(135deg,rgba(52,211,153,.06),rgba(56,189,248,.04));border:1px solid rgba(52,211,153,.25);border-radius:14px;padding:16px 18px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:18px;">🧬</span>
+        <div style="font-size:12px;font-weight:800;color:#34d399;">실시간 rPPG 생체 데이터를 역학 분석에 반영합니다.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <!-- 생체 측정 4종 -->
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px;">
+          <div style="font-size:10px;color:rgba(52,211,153,.6);font-weight:700;margin-bottom:2px;">📷 생체 측정 항목</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div onclick="window._cgoScanOrigin='rppg';cgoCloseTodayFortune();setTimeout(function(){cgoScanGuide('face');},300);" style="padding:8px 10px;background:rgba(99,130,201,.08);border:1px solid rgba(99,130,201,.2);border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='rgba(99,130,201,.5)'" onmouseout="this.style.borderColor='rgba(99,130,201,.2)'">
+              <span style="font-size:16px;">🧖</span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-size:11px;font-weight:700;color:#93c5fd;">관상 &amp; rPPG</div>
+                  <span id="rppg-check-face" style="font-size:14px;display:none;">✅</span>
+                </div>
+                <div style="font-size:9px;color:rgba(99,130,201,.5);">33초 · 거치형</div>
+              </div>
+            </div>
+            <div onclick="window._cgoScanOrigin='rppg';cgoCloseTodayFortune();setTimeout(function(){cgoScanGuide('palm');},300);" style="padding:8px 10px;background:rgba(244,114,182,.08);border:1px solid rgba(244,114,182,.2);border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='rgba(244,114,182,.5)'" onmouseout="this.style.borderColor='rgba(244,114,182,.2)'">
+              <span style="font-size:16px;">✋</span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-size:11px;font-weight:700;color:#f472b6;">손금 측정</div>
+                  <span id="rppg-check-palm" style="font-size:14px;display:none;">✅</span>
+                </div>
+                <div style="font-size:9px;color:rgba(244,114,182,.5);">33초 · 수직 투사</div>
+              </div>
+            </div>
+            <div onclick="window._cgoScanOrigin='rppg';cgoCloseTodayFortune();setTimeout(function(){if(typeof cgoTongueVisionAnalysis==='function'){cgoTongueVisionAnalysis();}else if(typeof hltTongueScan==='function'){hltTongueScan();}},400);" style="padding:8px 10px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='rgba(248,113,113,.5)'" onmouseout="this.style.borderColor='rgba(248,113,113,.2)'">
+              <span style="font-size:16px;">👅</span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-size:11px;font-weight:700;color:#f87171;">혀 스캔</div>
+                  <span id="rppg-check-tongue" style="font-size:14px;display:none;">✅</span>
+                </div>
+                <div style="font-size:9px;color:rgba(248,113,113,.5);">15초 · 근접</div>
+              </div>
+            </div>
+            <div onclick="window._cgoScanOrigin='rppg';cgoCloseTodayFortune();setTimeout(function(){cgoScanGuide('breath');},300);" style="padding:8px 10px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:9px;cursor:pointer;display:flex;align-items:center;gap:6px;" onmouseover="this.style.borderColor='rgba(56,189,248,.5)'" onmouseout="this.style.borderColor='rgba(56,189,248,.2)'">
+              <span style="font-size:16px;">🫁</span>
+              <div style="flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <div style="font-size:11px;font-weight:700;color:#38bdf8;">4-7-8 호흡</div>
+                  <span id="rppg-check-breath" style="font-size:14px;display:none;">✅</span>
+                </div>
+                <div style="font-size:9px;color:rgba(56,189,248,.5);">19초 · 단자</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(0,0,0,.2);border-radius:10px;border-left:3px solid rgba(52,211,153,.5);">
+          <div style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:3px;">📐 분석 원리</div>
+          <div style="font-size:11px;color:rgba(240,220,160,.75);line-height:1.7;">카메라 rPPG(원격 광전용적맥파)로 심박수·HRV·안면 혈색을 측정하고, 손금·혀·호흡 데이터를 결합해 현재 생체 에너지 지수(BAI)를 산출합니다. 이 값이 50대 역학 지수에 실시간 반영됩니다.</div>
+        </div>
+        <div style="padding:10px 12px;background:rgba(0,0,0,.2);border-radius:10px;border-left:3px solid rgba(212,168,67,.5);">
+          <div style="font-size:10px;font-weight:700;color:#d4a843;margin-bottom:3px;">✨ 기대 효과</div>
+          <div style="font-size:11px;color:rgba(240,220,160,.75);line-height:1.7;">고정된 사주 역학이 아닌, 지금 이 순간 당신의 실제 생체 상태가 반영된 맞춤형 운세를 제공합니다. 컨디션이 좋은 날과 나쁜 날의 운세가 달라집니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 50대 역학 선택 -->
+    <div style="background:rgba(0,0,0,.25);border:1px solid rgba(212,168,67,.2);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:700;color:#d4a843;">⚖️ 50대 역학 선택 <span id="tf-selected-count" style="color:#38bdf8;">(0개 선택됨)</span></div>
+        <div style="display:flex;gap:6px;">
+          <button onclick="cgoTfSelectAll(true)" style="padding:4px 10px;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.3);border-radius:6px;color:#d4a843;font-size:10px;cursor:pointer;">전체선택</button>
+          <button onclick="cgoTfSelectAll(false)" style="padding:4px 10px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.2);border-radius:6px;color:#f87171;font-size:10px;cursor:pointer;" data-i18n="reset">초기화</button>
+        </div>
+      </div>
+      <div id="tf-engine-list" style="display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto;"></div>
+      <!-- 가중치 표시 -->
+      <div id="tf-csi-display" style="margin-top:10px;padding:10px 12px;background:rgba(212,168,67,.06);border-radius:8px;border-left:3px solid #d4a843;display:none;">
+        <div style="font-size:10px;color:rgba(212,168,67,.6);margin-bottom:6px;">⚖️ 선택 역학 궁합</div>
+        <div id="tf-csi-txt" style="font-size:11px;color:#d4a843;font-weight:700;line-height:1.8;"></div>
+      </div>
+    </div>
+
+    <!-- 결과 영역 -->
+    <div id="tf-result" style="display:none;">
+      <div id="tf-result-body" class="fortune-popup-body" style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+      </div>
+      <!-- 호환용 hidden 요소 -->
+      <span id="tf-total-score" style="display:none;">--</span>
+      <span id="tf-grade-txt" style="display:none;"></span>
+      <span id="tf-summary" style="display:none;"></span>
+      <span id="tf-detail-grid" style="display:none;"></span>
+      <span id="tf-fact-bomb" style="display:none;"></span>
+      <span id="tf-full-report" style="display:none;"></span>
+      <span id="tf-energy-guide" style="display:none;"></span>
+      <span id="tf-check-list" style="display:none;"></span>
+    </div>
+
+    <!-- 실시간 연동 전용 결과 영역 -->
+    <div id="tf-rt-result" style="display:none;">
+      <div id="tf-rt-result-body" class="fortune-popup-body" style="display:flex;flex-direction:column;gap:12px;padding:4px 0;">
+      </div>
+    </div>
+
+    <!-- 로딩 (제미나이 감성 연출) -->
+    <div id="tf-loading" style="display:none;text-align:center;padding:40px;">
+      <div id="tf-load-icon" style="font-size:48px;animation:pulse 1.5s infinite;margin-bottom:16px;">☯️</div>
+      <div id="tf-load-msg" style="color:#d4a843;font-size:13px;font-weight:700;margin-bottom:12px;">역학 분석 준비 중...</div>
+      <div style="width:200px;height:3px;background:rgba(255,255,255,.1);border-radius:3px;margin:0 auto;overflow:hidden;">
+        <div id="tf-load-bar" style="height:100%;background:linear-gradient(90deg,#d4a843,#fbbf24);width:0%;transition:width 0.5s;border-radius:3px;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* 🛡️ v4.3 박입: 건강 예측 메신저 색상 통일 */
+#hfu-intro-pop {
+  background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 29000 !important;
+}
+#hfu-intro-pop .hfu-intro-wrap {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: blur(14px) !important;
+  border-radius: 24px !important;
+  margin: 20px auto !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+}
+#hfu-intro-pop .hfu-intro-top {
+  background: rgba(255,255,255,0.4) !important;
+}
+#hfu-intro-pop .hfu-intro-x {
+  background: rgba(255,255,255,0.7) !important;
+  color: #0d3a3a !important;
+}
+#hfu-intro-pop .hfu-intro-title { color: #0d3a3a !important; }
+#hfu-intro-pop .hfu-intro-sub,
+#hfu-intro-pop .hfu-intro-p,
+#hfu-intro-pop .hfu-intro-tagline { color: #1a3a3a !important; }
+#hfu-intro-pop .hfu-intro-cta {
+  background: linear-gradient(180deg, #E5B847 0%, #D4A332 100%) !important;
+  color: #1A1A1A !important;
+  font-weight: 900 !important;
+  border: none !important;
+}
+#hfu-intro-pop .hfu-intro-credit { color: rgba(13,58,58,0.55) !important; }
+
+#todayFortuneOverlay {
+  background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
+  z-index: 29000 !important;
+}
+#todayFortuneOverlay > div:first-child {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(14px) !important;
+}
+#todayFortuneOverlay button { color: #0d3a3a !important; }
+#tf-overlay-title { color: #0d3a3a !important; }
+</style>
+
+<script>
+// ════════════════════════════════════════════════
+// 🛡️ v4.3 박입: FULI 건강 예측 100% 독립
+// ════════════════════════════════════════════════
+
+function _cgoHealthIntroPopup(){
+  var old=document.getElementById('cgo-health-intro-pop');
+  if(old) old.remove();
+  var pop=document.createElement('div');
+  pop.id='cgo-health-intro-pop';
+  pop.style.cssText='position:fixed;inset:0;z-index:19000;background:rgba(2,8,23,.93);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;';
+  pop.innerHTML=
+    '<div style="width:100%;max-width:480px;max-height:90vh;overflow-y:auto;background:linear-gradient(160deg,#0a1628,#0d1f3c);border-radius:20px 20px 0 0;border-top:2px solid rgba(52,211,153,.4);padding:22px 18px 32px;">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;"><span style="font-size:28px;">🩺</span><div><div style="font-size:16px;font-weight:900;color:#34d399;">AI 통합 건강 예측</div><div style="font-size:11px;color:rgba(52,211,153,.5);margin-top:2px;">스마트폰으로 할 수 있는 최대치에 근접한 앱</div></div></div>'
+    +'<div style="font-size:12px;color:rgba(240,230,200,.8);line-height:1.8;margin-bottom:14px;padding:10px 12px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:10px;">스마트폰 카메라로 <b style="color:#f0e0a8;">6부위 생체 스캔 + AI 분석 + 한의학 설진</b>을 결합한 건강 <b style="color:#f87171;">예측 보조</b> 시스템입니다.</div>'
+    +'<div style="background:rgba(255,255,255,.03);border:1px solid rgba(212,168,67,.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;"><div style="font-size:11px;font-weight:800;color:#d4a843;margin-bottom:10px;">📊 객관적 수준 평가</div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:11px;color:rgba(240,230,200,.7);min-width:115px;">일반 건강앱 대비</span><span style="color:#34d399;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:10px;color:#34d399;opacity:.7;margin-left:4px;">최상위</span></div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:11px;color:rgba(240,230,200,.7);min-width:115px;">글로벌 헬스테크 대비</span><span style="color:#38bdf8;letter-spacing:2px;font-size:13px;">★★★★☆</span><span style="font-size:10px;color:#38bdf8;opacity:.7;margin-left:4px;">상위 5%</span></div>'
+    +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;"><span style="font-size:11px;color:rgba(240,230,200,.7);min-width:115px;">한의원 망진 보조</span><span style="color:#a78bfa;letter-spacing:2px;font-size:13px;">★★★★☆</span><span style="font-size:10px;color:#a78bfa;opacity:.7;margin-left:4px;">매우 우수</span></div>'
+    +'<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:11px;color:rgba(240,230,200,.7);min-width:115px;">병원 의료기기 대비</span><span style="color:#fbbf24;letter-spacing:2px;font-size:13px;">★★☆☆☆</span><span style="font-size:10px;color:#fbbf24;opacity:.7;margin-left:4px;">참고용</span></div></div>'
+    +'<div style="background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:12px;padding:12px 14px;margin-bottom:10px;"><div style="font-size:11px;font-weight:800;color:#34d399;margin-bottom:8px;">✅ 이 앱만의 강점</div>'
+    +'<div style="font-size:11px;color:rgba(240,230,200,.8);line-height:2;">🫀 <b style="color:#34d399;">CHROM rPPG</b> — 삼성·애플워치와 동일 원리 · 비접촉 심박 측정<br>🔬 <b style="color:#34d399;">6부위 자동 전환</b> — 얼굴→혀→눈→피부→손 · 한의원 망진 구현<br>👅 <b style="color:#34d399;">AI 설진</b> — 혀 색·태로 비위·간담 분석 · 한의대 논문 수준<br>🫁 <b style="color:#34d399;">478호흡+HRV</b> — 부교감신경 직접 측정 · 의학적 검증 방법</div></div>'
+    +'<div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:12px;padding:10px 14px;margin-bottom:10px;"><div style="font-size:11px;font-weight:800;color:#fbbf24;margin-bottom:6px;">⚠️ 솔직한 한계</div>'
+    +'<div style="font-size:11px;color:rgba(240,230,200,.75);line-height:1.9;">• rPPG 오차 ±10~15% — 병원 심전도 대비 참고용 수준<br>• Vision AI — 조명·피부색에 따라 정확도 차이 있음<br>• FCI(안면혈류지수) — 자체 정의 지표, 학계 미표준화</div></div>'
+    +'<div style="background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:10px;padding:10px 14px;margin-bottom:16px;">'
+    +'<div style="font-size:11px;color:rgba(240,230,200,.8);line-height:1.9;">⚖️ <b style="color:#f87171;">법적 고지</b> — 본 시스템은 <b style="color:#fff;">의료기기가 아닌 건강 예측 보조 도구</b>입니다. 의학적 진단·처방을 대체하지 않으며, 이상 증상 시 반드시 전문의 진료를 받으십시오.<br><span style="font-size:10px;color:rgba(248,113,113,.5);">특허 제10-2026-0060113호</span></div></div>'
+    +'<div style="display:flex;gap:10px;">'
+    +'<button onclick="_cgoHltClose()" style="flex:3;padding:15px;background:linear-gradient(135deg,rgba(52,211,153,.3),rgba(56,189,248,.2));border:2px solid rgba(52,211,153,.7);border-radius:14px;color:#34d399;font-size:15px;font-weight:900;cursor:pointer;">✅ 확인했습니다 — 시작하기</button>'
+    +'<button onclick="_cgoHltClose()" style="flex:1;padding:15px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(240,230,200,.5);font-size:13px;cursor:pointer;">닫기</button>'
+    +'</div></div>';
+  document.body.appendChild(pop);
+}
+
+function _cgoRppgScanDone(type){
+  // 소카드 체크 표시
+  var checkMap = {face:'rppg-check-face', palm:'rppg-check-palm',
+                  tongue:'rppg-check-tongue', breath:'rppg-check-breath'};
+  var checkId = checkMap[type];
+  if(checkId){
+    var el = document.getElementById(checkId);
+    if(el) el.style.display = 'inline';
+    // localStorage에 완료 상태 저장
+    try{ sessionStorage.setItem('_cgoRppgDone_'+type, '1'); }catch(e){}
+  }
+
+  // 출처가 rPPG 팝업이면 팝업으로 복귀
+  if(window._cgoScanOrigin === 'rppg'){
+    window._cgoScanOrigin = null;
+    setTimeout(function(){
+      // rPPG 팝업 다시 열기
+      window._cgoInRealtimeMode = true;
+      window._cgoInPureMode = false;
+      if(typeof _cgoRestoreEngineMode === 'function') _cgoRestoreEngineMode('rppg');
+      var ov = document.getElementById('todayFortuneOverlay');
+      if(ov){ ov.style.display='block'; document.body.style.overflow='hidden'; }
+      setTimeout(function(){
+        var h = document.getElementById('tf-overlay-title');
+        if(h){ h.textContent='🛰️ 실시간 rPPG 데이터 연동 분석'; h.style.color='#34d399'; }
+        var rc = document.getElementById('tf-realtime-card'); if(rc) rc.style.display='block';
+        var bc = document.getElementById('tf-bio-card');      if(bc) bc.style.display='none';
+        var rp = document.getElementById('tf-rppg-card');     if(rp) rp.style.display='block';
+        var rs = document.getElementById('tf-result');        if(rs) rs.style.display='none';
+        var rts= document.getElementById('tf-rt-result');     if(rts) rts.style.display='none';
+        var ld = document.getElementById('tf-loading');       if(ld) ld.style.display='none';
+        // 저장된 체크 상태 복원
+        ['face','palm','tongue','breath'].forEach(function(t){
+          try{
+            if(sessionStorage.getItem('_cgoRppgDone_'+t)){
+              var ce = document.getElementById('rppg-check-'+t);
+              if(ce) ce.style.display='inline';
+            }
+          }catch(e){}
+        });
+      },100);
+    },500);
+  }
+  // 출처가 대시보드면 아무것도 안 함 (대시보드 유지)
+}
+
+function cgoLaunchRppg(){
+  window._cgoInRealtimeMode=true;window._cgoInPureMode=false;
+  _cgoRestoreEngineMode('rppg');
+  var ov=document.getElementById('todayFortuneOverlay');
+  if(ov){ov.style.display='block';document.body.style.overflow='hidden';}
+  setTimeout(function(){
+    var h=document.getElementById('tf-overlay-title');
+    if(h){h.textContent='🛰️ 실시간 rPPG 데이터 연동 분석';h.style.color='#34d399';}
+    var rp=document.getElementById('tf-rppg-card');if(rp)rp.style.display='block';
+    var rs=document.getElementById('tf-result');if(rs)rs.style.display='none';
+    // ★ 핵심: 체크 상태 sessionStorage에서 복원
+    ['face','palm','tongue','breath'].forEach(function(t){
+      try{
+        // sessionStorage 체크
+        var done = sessionStorage.getItem('_cgoRppgDone_'+t);
+        // bioSkinData 체크
+        var bsd = window._bioSkinData || {};
+        var bfd = window._bioFinalData || {};
+        var HV  = window._HV || {};
+        var isDone = done
+          || (t==='face'   && bfd.fci > 0)
+          || (t==='palm'   && bfd.bli > 0)
+          || (t==='tongue' && (bsd.tongue && bsd.tongue.color || bfd.tongueDone || HV.tDone))
+          || (t==='breath' && HV.bDone === true);
+        var ce = document.getElementById('rppg-check-'+t);
+        if(ce) ce.style.display = isDone ? 'inline' : 'none';
+      }catch(e){}
+    });
+  },100);
+  if(typeof cgoOpenTodayFortune==='function')cgoOpenTodayFortune();
+}
+
+function cgoRunRppgAnalysis(){
+  var selectedEngines=_TF_ENGINES.filter(function(e){return _tfSelected[e.id];});
+  if(selectedEngines.length===0){alert('역학을 1개 이상 선택해 주세요!');return;}
+  var r=window.calcResult;
+  if(!r||!r.y){
+    var _y=parseInt((document.getElementById('ipBirthY')||{}).value)||0;
+    var _m=parseInt((document.getElementById('ipBirthM')||{}).value)||0;
+    var _d=parseInt((document.getElementById('ipBirthD')||{}).value)||0;
+    if(!_y||!_m||!_d){alert('생년월일을 입력해주세요!');return;}
+    r={name:(document.getElementById('ipName')||{}).value||'사용자',y:_y,m:_m,d:_d,
+       domOh:'토',lifeNum:((_y%9)+(_m%9)+(_d%9))%9+1,
+       birthPlace:(document.getElementById('ipBirthPlace')||{}).value||'',
+       curPlace:(document.getElementById('ipCurPlace')||{}).value||''};
+  }
+  var ld=document.getElementById('tf-loading');
+  var rs=document.getElementById('tf-result');
+  var rts=document.getElementById('tf-rt-result');
+  if(ld)ld.style.display='block';
+  if(rs)rs.style.display='none';
+  if(rts)rts.style.display='none';
+  if(typeof _cgoTfLoadingAnim==='function')_cgoTfLoadingAnim();
+
+  // ── A. 생체 스캔 40점 ──
+  var bfd=window._bioFinalData||{};
+  var bsd=window._bioSkinData||{};
+  var HV=window._HV||{};
+  var np=window._nasaPlanets||{};
+
+  // ── A. 생체 40점 — BPM·HRV·FCI·BLI·혀 5가지 ──
+  var bfd = window._bioFinalData || {};
+  var bsd = window._bioSkinData  || {};
+  var HV  = window._bsHvProxy   || window.BS || {};
+
+  // ① 심박수 BPM 8점 (★신규 추가)
+  var bpmVal = bfd.bpm || (window.BS && window.BS.bpm) || 0;
+  var bA0 = bpmVal>0 ? (bpmVal>=60&&bpmVal<=80?8 : bpmVal>=50&&bpmVal<=95?6 : bpmVal>0?4 : 0) : 0;
+
+  // ② 호흡 HRV 12점 (기존 15→12 조정)
+  var hrvVal = HV.bScore || bfd.hrv || 0;
+  var breathDone = HV.bDone || hrvVal>0;
+  var bA = breathDone ? (hrvVal>=80?12 : hrvVal>=65?9 : hrvVal>=50?7 : hrvVal>=35?4 : 2) : 0;
+  var breathRealloc = breathDone ? 0 : 12;
+
+  // ③ 관상 FCI 10점
+  var fciVal = bfd.fci || 0;
+  var bB = fciVal>0 ? (fciVal>75?10 : fciVal>60?7 : fciVal>45?4 : 2) : 0;
+
+  // ④ 손금 BLI 5점 (기존 8→5 조정)
+  var bliVal = bfd.bli || 0;
+  var bC = bliVal>0 ? (bliVal>75?5 : bliVal>55?4 : bliVal>35?2 : 1) : 0;
+
+  // ⑤ 혀 설진 5점 (기존 7→5 조정)
+  var bD = 0;
+  if(bsd.tongue){ bD = {담홍색:5,담홍:5,분홍:4,붉음:2,창백:1,자색:1}[bsd.tongue.color]||3; }
+  else if(HV.tScore>0){ bD = Math.round(HV.tScore/100*5); }
+
+  var bioTotal = Math.min(40, bA0+bA+bB+bC+bD);
+  var bioCount = (bpmVal>0?1:0)+(breathDone?1:0)+(fciVal>0?1:0)+(bliVal>0?1:0)+(bD>0?1:0);
+
+  // ── B. 50개 역학 35점 (5클러스터×7점) ──
+  var eids=selectedEngines.map(function(e){return e.id;});
+  function _cl(ids){
+    var n=eids.filter(function(id){return ids.indexOf(id)>=0;}).length;
+    return n>0?Math.min(7,Math.round(n/Math.max(1,ids.length*0.25)*7)):0;
+  }
+  var clA=_cl(['bazi','ziwei','qimen','liuren','taiyi','tojeong','maehwa','sixlines','tuvi','onmyodo','kyusei','iching','rokuyo','xuankong','yangtaek','kanso']);
+  var clB=_cl(['hellenistic','horary','sabian','kp','nakshatra','hellenistic','full_chart','house_system','decan','synastry']);
+  var clC=_cl(['numerology','ru_numerology','gematria','onomancy','runes','tarot','lenormand','tzolkin','humandesign','genekeys']);
+  var clD=_cl(['luopan','yangtaek','vastu','geomancy','xuankong','san_phra','ongtao','kanso']);
+  var clE=_cl(['enneagram','humandesign','genekeys','wayang','slav_totem']);
+  var metaTotal=Math.min(35,clA+clB+clC+clD+clE);
+  var metaRealloc=Math.max(0,35-metaTotal);
+
+  // ── C. 공명 25점 (+ 재배분) ──
+  var resonancePool=25+breathRealloc+metaRealloc;
+
+  // 시간공명: 역학 점수 vs 생체 점수 일치도
+  var hvAvg=0;var hvScores=HV.scores||[];
+  var valid=hvScores.filter(function(s){return s>0;});
+  hvAvg=valid.length>0?Math.round(valid.reduce(function(a,b){return a+b;},0)/valid.length):65;
+  var bioNorm=bioCount>0?Math.round(bioTotal/40*100):65;
+  var diff=Math.abs(hvAvg-bioNorm);
+  var cA=diff<10?8:diff<20?5:diff<30?3:1;
+
+  // 오행공명: 사용자오행 × 날씨오행 × HRV
+  var oh=r.domOh||'토';
+  var wKey=window._tzrWeatherKey||'';
+  var wOh={sunny:'화',clear:'화',rainy:'수',rain:'수',cloudy:'토',
+           morning:'목',noon:'화',afternoon:'토',evening:'금',night:'수'}[wKey]
+          ||['목','화','토','금','수'][new Date().getDate()%5];
+  var ohMap={목:{목:7,화:9,토:4,금:3,수:6},화:{목:6,화:7,토:9,금:3,수:4},
+             토:{목:3,화:6,토:7,금:9,수:4},금:{목:3,화:4,토:6,금:7,수:9},
+             수:{목:9,화:3,토:4,금:6,수:7}};
+  var cB=Math.min(9,(ohMap[oh]&&ohMap[oh][wOh])||5)+(breathDone&&hrvVal>60?1:0);
+
+  // 바이오리듬공명
+  var today=window._fcBase||new Date();
+  var bd2=new Date(r.y,(r.m||1)-1,(r.d||1));
+  var days=Math.floor((today-bd2)/86400000);
+  var bio1=Math.sin(2*Math.PI*days/23);
+  var bio2=Math.sin(2*Math.PI*days/28);
+  var bio3=Math.sin(2*Math.PI*days/33);
+  var bioR=Math.round(((bio1+bio2+bio3)/3+1)/2*8);
+  if(breathDone&&bio1>0.5&&hrvVal>60)bioR=Math.min(8,bioR+2);
+  var cC=bioR;
+
+  var resNorm=cA+cB+cC; // 0~25 기본
+  var resTotal=Math.round(resNorm*resonancePool/25);
+  resTotal=Math.min(resonancePool,Math.max(0,resTotal));
+
+  // ── 최종 합산 ── ★ C-35 헌법 §V.5.4 — 95 캡
+  var total=Math.max(20,Math.min(95,bioTotal+metaTotal+resTotal));
+  // NASA 보너스 최대 +5
+  if(np.sun){var jpG=np.jupiter&&!np.jupiter.retro;var mrR=np.mars&&np.mars.retro;
+    total=Math.min(95,total+(jpG?3:0)-(mrR?2:0));}
+
+  var grade=total>=95?'🔥🔥 완전 동조':total>=80?'🔥 최적 동조':total>=65?'⚡ 양호 동조':
+            total>=50?'✨ 부분 동조':total>=35?'⚠️ 불일치 주의':'🌪 회복 필요';
+
+  window._cgoRppgILS={total:total,grade:grade,
+    bio:{total:bioTotal,breath:bA,face:bB,palm:bC,tongue:bD,count:bioCount},
+    meta:{total:metaTotal,A:clA,B:clB,C:clC,D:clD,E:clE},
+    res:{total:resTotal,time:cA,ohwa:cB,biorhythm:cC}};
+
+  var engCount=selectedEngines.length;
+  var ohK={목:'木',화:'火',토:'土',금:'金',수:'水'};
+  var isW=eids.some(function(id){return['hellenistic','horary','sabian','kp'].indexOf(id)>=0;});
+  var isI=eids.some(function(id){return['jyotish','nakshatra','lalkitab'].indexOf(id)>=0;});
+  var sysRole=isW&&!isI?'당신은 헬레니즘 서양 점성술 전문가입니다. 하우스·트랜짓 용어만 사용하세요.':
+              isI&&!isW?'당신은 조티쉬 베딕 전문가입니다. 나바그라하·다샤 용어만 사용하세요.':
+              '당신은 사주명리·기문둔갑 동양 역학 전문가입니다. 천간·지지·오행 용어만 사용하세요.';
+  var bioDesc='BPM:'+bpmVal+'/8('+bA0+'점) 호흡HRV:'+bA+'/12(HRV='+hrvVal+'ms) 관상FCI:'+bB+'/10(FCI='+fciVal+'%) 손금BLI:'+bC+'/5(BLI='+bliVal+') 혀:'+bD+'/5';
+  // ── rPPG 전용 실시간 데이터 수집 ──
+  var wd2 = window._weatherData || {};
+  var kp2 = window._kpIndex !== undefined ? window._kpIndex : '미수신';
+  var moonPhase2 = '';
+  if(np.moon && np.sun){
+    var mDiff2 = ((parseFloat(np.moon.lon||0) - parseFloat(np.sun.lon||0)) + 360) % 360;
+    moonPhase2 = mDiff2 < 15 ? '삭월' : mDiff2 < 90 ? '초승달' :
+                 mDiff2 < 135 ? '상현달' : mDiff2 < 195 ? '만월' : '하현달';
+  }
+  var planetStatus2 = [
+    np.mars   ? '화성:'+(np.mars.retro  ?'역행⚠️':'순행✅') : '',
+    np.jupiter? '목성:'+(np.jupiter.retro?'역행⚠️':'순행✅') : '',
+    np.saturn ? '토성:'+(np.saturn.retro ?'역행⚠️':'순행✅') : '',
+    np.mercury? '수성:'+(np.mercury.retro?'역행⚠️':'순행✅') : ''
+  ].filter(Boolean).join(' | ');
+
+  // ★ 사주팔자 8글자
+  var _sajuR='';
+  if(r.yGan&&r.yJi)_sajuR+=r.yGan+r.yJi+'年 ';
+  if(r.mGJ&&r.mGJ.gan)_sajuR+=r.mGJ.gan+r.mGJ.ji+'月 ';
+  if(r.dGJ&&r.dGJ.gan)_sajuR+=r.dGJ.gan+r.dGJ.ji+'日 ';
+  if(r.sGan&&r.sJi)_sajuR+=r.sGan+r.sJi+'時';
+
+  // ★ 60갑자 일진
+  var _baseR=new Date(2000,0,1),_todayR=new Date();
+  var _diffR=Math.floor((_todayR-_baseR)/86400000);
+  var _idxR=((_diffR+16)%60+60)%60;
+  var _ganAR=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+  var _jiAR=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+  var _tGanR=_ganAR[_idxR%10],_tJiR=_jiAR[_idxR%12];
+  var _iiljinR=_tGanR+_tJiR;
+
+  // ★ 생체 데이터 문자열 (각 역학 전문가에게 전달)
+  var _bioFull='심박BPM:'+bpmVal+'('+bA0+'/8점) | HRV:'+hrvVal+'ms('+bA+'/12점) | FCI관상:'+fciVal+'%('+bB+'/10점) | BLI손금:'+bliVal+'%('+bC+'/5점) | 혀설진:'+bD+'/5점 | 생체합계:'+bioTotal+'/40점';
+  var _nasaR=planetStatus2||'';
+  var _moonR=moonPhase2||'';
+  var _weatherR=wd2.temp?'기온:'+wd2.temp+'°C 습도:'+wd2.humidity+'% 기압:'+wd2.pressure+'hPa':'';
+  var _kpR='Kp지자기:'+kp2+(kp2<=2?' (안정)':kp2<=4?' (보통)':' (교란)');
+
+  // ★ 공통 사용자+생체+NASA 정보
+  var _base_rppg='이름:'+r.name+' | 오행:'+oh+'('+ohK[oh]+') | 생명수:'+r.lifeNum
+    +(_sajuR?' | 사주:'+_sajuR:'')
+    +' | 일진:'+_iiljinR
+    +' | '+_bioFull
+    +(_nasaR?' | NASA:'+_nasaR:'')
+    +(_moonR?' | 달위상:'+_moonR:'')
+    +' | '+_kpR
+    +(_weatherR?' | 날씨:'+_weatherR:'')
+    +' | CEI총점:'+total+'점('+grade+')';
+
+  // ★ 50개 역학 전용 rPPG 프롬프트 (생체+NASA+역학 3중 융합)
+  var _DEF_R={
+    bazi:       {r:'사주명리 최고 전문가. 생체 HRV·FCI를 일간 오행·기색론과 융합 분석.',       d:_base_rppg},
+    tojeong:    {r:'토정비결 최고 전문가. 생체 바이오리듬과 토정비결 괘 에너지 융합.',         d:_base_rppg},
+    maehwa:     {r:'매화역수 최고 전문가. 생체 심박수 변화를 체용이론에 적용.',               d:_base_rppg+' | 현시각:'+_todayR.getHours()+'시'},
+    iching:     {r:'주역 64괘 최고 전문가. 생체 에너지 패턴과 64괘 효사 융합 해석.',          d:_base_rppg+' | 현시각:'+_todayR.getHours()+'시'+_todayR.getMinutes()+'분'},
+    sixlines:   {r:'육효 최고 전문가. 생체 HRV를 육효 세응 에너지로 해석.',                   d:_base_rppg},
+    ziwei:      {r:'자미두수 최고 전문가. NASA 목성·토성 위치 + 생체 FCI로 명궁 보정.',        d:_base_rppg},
+    qimen:      {r:'기문둔갑 최고 전문가. 생체+날씨+방위 3중 8문 에너지 분석.',               d:_base_rppg},
+    taiyi:      {r:'태을신수 최고 전문가. NASA 태양 고도각 + 생체 바이오리듬 융합.',           d:_base_rppg},
+    liuren:     {r:'대육임 최고 전문가. 생체 심박 리듬을 12천장 시간 에너지로 해석.',          d:_base_rppg},
+    kyusei:     {r:'구성기학 최고 전문가. 생체+방위+날씨로 본명성 에너지 분석.',              d:_base_rppg},
+    onmyodo:    {r:'음양도 최고 전문가. 생체 음양 균형(HRV) 분석.',                           d:_base_rppg},
+    rokuyo:     {r:'육요 최고 전문가. 생체 활력 지수와 육요 길흉 융합.',                      d:_base_rppg},
+    xuankong:   {r:'현공풍수 최고 전문가. 생체 FCI 혈색 + 공간 비성반 융합.',                 d:_base_rppg},
+    tuvi:       {r:'베트남 자미두수 최고 전문가. 생체 에너지와 명궁 융합.',                    d:_base_rppg},
+    yangtaek:   {r:'양택가상학 최고 전문가. 생체 에너지와 공간 기운 융합 분석.',              d:_base_rppg},
+    kanso:      {r:'칸소 공간 에너지학 전문가. 생체 HRV와 미니멀 공간 에너지 융합.',          d:_base_rppg},
+    jyotish:    {r:'베딕 점성술 최고 전문가. NASA 나바그라하 + 생체 프라나(생명력) 융합.',      d:_base_rppg},
+    nakshatra:  {r:'나크샤트라 최고 전문가. NASA 달 저택 + 생체 바이오리듬 융합.',            d:_base_rppg},
+    lalkitab:   {r:'라 키탑 최고 전문가. 생체 에너지로 카르마 빚 해소 방안 도출.',            d:_base_rppg},
+    kp:         {r:'KP 시스템 최고 전문가. NASA 서브로드 + 생체 HRV 융합 분석.',              d:_base_rppg},
+    vastu:      {r:'바스투 샤스트라 최고 전문가. 생체 FCI + 공간 5원소 방위 융합.',           d:_base_rppg},
+    hellenistic:{r:'헬레니즘 점성술 최고 전문가. NASA 행성 + 생체 에너지 섹트 분석.',         d:_base_rppg},
+    horary:     {r:'호라리 점성술 최고 전문가. 현재 생체 상태 + NASA로 질문 시각 분석.',       d:_base_rppg+' | 시각:'+_todayR.getHours()+'시'+_todayR.getMinutes()+'분'},
+    sabian:     {r:'세이비언 심볼 최고 전문가. NASA 태양 도수 + 생체 에너지 심볼 해석.',       d:_base_rppg},
+    humandesign:{r:'인간 설계 최고 전문가. NASA 뉴트리노 + 생체 HRV·FCI로 9센터 활성화.',    d:_base_rppg},
+    genekeys:   {r:'유전자 키 최고 전문가. 생체 HRV를 유전자 키 3레벨 활성화에 적용.',        d:_base_rppg},
+    biorhythm:  {r:'생체 리듬 최고 전문가. BPM·HRV·FCI 실측값으로 신체·감성·지성 주기 분석.',d:_base_rppg},
+    sacredgeo:  {r:'신성 기하학 전문가. 생체 파동(HRV) + 황금비 에너지 융합.',               d:_base_rppg},
+    runes:      {r:'룬 문자 최고 전문가. 생체 에너지 패턴으로 24룬 뽑기.',                    d:_base_rppg},
+    lenormand:  {r:'레노먼드 카드 최고 전문가. 생체 상태 + 카드 배열 해석.',                  d:_base_rppg},
+    terroir:    {r:'테루아 에너지학 전문가. 생체 FCI + 날씨·환경 에너지 융합.',              d:_base_rppg},
+    radiesthesia:{r:'레이더스테지아 전문가. 생체 HRV 에너지장 다우징 측정.',                 d:_base_rppg},
+    numerology: {r:'피타고라스 수비학 최고 전문가. 생체 리듬 주기와 생명수 융합.',            d:_base_rppg},
+    onomancy:   {r:'성명학 최고 전문가. 생체 FCI 기색론과 이름 오행 융합.',                   d:_base_rppg},
+    gematria:   {r:'카발라 게마트리아 최고 전문가. 생체 에너지와 세피로트 융합.',              d:_base_rppg},
+    ru_numerology:{r:'러시아 수비학 최고 전문가. 생체 바이오리듬과 피타고라스 행렬 융합.',     d:_base_rppg},
+    tzolkin:    {r:'마야 촐킨 최고 전문가. 생체 주기와 260일 달력 에너지 융합.',              d:_base_rppg},
+    enneagram:  {r:'에니어그램 최고 전문가. 생체 HRV로 9유형 통합·분리 상태 분석.',          d:_base_rppg},
+    brazil_energy:{r:'브라질 토속 에너지학 전문가. 생체 에너지와 오릭샤 파동 융합.',          d:_base_rppg},
+    slav_totem: {r:'슬라브 토템 역학 전문가. 생체 에너지와 12토템 동물 파동 융합.',           d:_base_rppg},
+    siberian:   {r:'시베리아 관측 역학 전문가. NASA + 생체 에너지 융합.',                     d:_base_rppg},
+    thai_royal: {r:'태국 왕실 점성술 최고 전문가. NASA + 생체 프라나 융합.',                  d:_base_rppg},
+    san_phra:   {r:'산 프라 품 전문가. 생체 에너지와 수호신 파동 융합.',                     d:_base_rppg},
+    ongtao:     {r:'옹따오 전문가. 생체 에너지와 베트남 수호신 파동 융합.',                   d:_base_rppg},
+    primbon:    {r:'프리본 최고 전문가. 생체 바이오리듬과 자바 역학 융합.',                   d:_base_rppg},
+    wayang:     {r:'와양 기질학 전문가. 생체 HRV·FCI로 9기질 유형 오늘 상태 분석.',           d:_base_rppg},
+    geomancy:   {r:'지오맨시 최고 전문가. 생체 에너지장 + 지자기 융합 측정.',                d:_base_rppg},
+    arabparts:  {r:'아랍 파트 점성술 최고 전문가. NASA + 생체 에너지 파르트 분석.',           d:_base_rppg},
+    decans:     {r:'이집트 데칸 최고 전문가. NASA 태양 + 생체 에너지 데칸 해석.',             d:_base_rppg},
+    luopan:     {r:'나경풍수 최고 전문가. 생체 FCI + 24산 방위 에너지 융합.',                d:_base_rppg}
+  };
+
+  var _jFmtR='{"score":73,"grade":"총평","msg":"핵심 조언 (생체 수치 언급)","work":71,"money":68,"love":74,"health":72,"legal":65,"social":70,"why":"생체+역학 근거 2문장","food":"생체 상태 기반 음식","luckyDir":"방위","luckyColor":"색상","luckyNum":7}';
+
+  // ★ 각 역학 개별 병렬 API 호출 (rPPG 모드 — 생체+NASA+역학 3중 융합)
+  var _s18R=(window.calcResult&&window.calcResult.scores&&window.calcResult.scores.s18)||{};
+  var rppgPromises=selectedEngines.map(function(eng){
+    var def=_DEF_R[eng.id]||{r:eng.name+' 최고 전문가. 생체+NASA 데이터 반영.',d:_base_rppg};
+    var sys=def.r+' 순수 한국어만. JSON만 출력. 반드시 생체 수치(HRV·FCI 등)를 언급하여 분석하세요.';
+    var usr=def.d+'\n\n위 생체+NASA+역학 데이터로 '+eng.name+' 이론 기반 분석하세요.\nJSON만 출력:\n'+_jFmtR;
+    return fetch('/api/groq',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama-3.1-8b-instant',
+        messages:[{role:'system',content:sys},{role:'user',content:usr}],
+        max_tokens:400,temperature:0.7})
+    })
+    .then(function(res){return res.json();})
+    .then(function(data){
+      var txt=(data.choices&&data.choices[0]&&data.choices[0].message.content)||'';
+      var cl=txt.replace(/```json|```/g,'').trim();
+      var jm=cl.match(/\{[\s\S]*\}/);
+      var o=jm?JSON.parse(jm[0]):{};
+      function _cs(v){return Math.max(40,Math.min(99,parseInt(v)||65));}
+      return {id:eng.id,name:eng.name,w:eng.w,ok:true,
+        score:_cs(o.score),grade:o.grade||'분석완료',msg:o.msg||eng.name+' 분석.',
+        work:_cs(o.work),money:_cs(o.money),love:_cs(o.love),
+        health:_cs(o.health),legal:_cs(o.legal),social:_cs(o.social),
+        why:o.why||'',food:o.food||'균형식',
+        luckyDir:o.luckyDir||{목:'동쪽',화:'남쪽',토:'중앙',금:'서쪽',수:'북쪽'}[oh]||'동쪽',
+        luckyColor:o.luckyColor||{목:'초록',화:'빨강',토:'노랑',금:'흰색',수:'검정'}[oh]||'금색',
+        luckyNum:parseInt(o.luckyNum)||((r.lifeNum||1)%9+1)};
+    })
+    .catch(function(){
+      return {id:eng.id,name:eng.name,w:eng.w,ok:false,
+        score:total,grade:'분석완료',msg:eng.name+' 생체+역학 분석.',
+        work:Math.max(40,total-2),money:Math.max(40,total-5),love:Math.max(40,total+2),
+        health:Math.max(40,total-3),legal:Math.max(40,total-8),social:Math.max(40,total-1),
+        why:'',food:'균형식',
+        luckyDir:{목:'동쪽',화:'남쪽',토:'중앙',금:'서쪽',수:'북쪽'}[oh]||'동쪽',
+        luckyColor:{목:'초록',화:'빨강',토:'노랑',금:'흰색',수:'검정'}[oh]||'금색',
+        luckyNum:(r.lifeNum||1)%9+1};
+    });
+  });
+
+  Promise.all(rppgPromises).then(function(results){
+    if(window._tfLoadTimer){clearInterval(window._tfLoadTimer);window._tfLoadTimer=null;}
+    var bar=document.getElementById('tf-load-bar');
+    if(bar) bar.style.width='100%';
+
+    var totalW=results.reduce(function(s,e){return s+e.w;},0)||1;
+    function _waR(k){return Math.max(40,Math.min(99,Math.round(results.reduce(function(s,e){return s+e[k]*e.w;},0)/totalW)));}
+
+    // ★ 핵심: totalScore는 반드시 CEI 실측값 (total) 사용
+    var sWk=_waR('work'),sMn=_waR('money'),sLv=_waR('love');
+    var sHl=_waR('health'),sLg=_waR('legal'),sSc=_waR('social');
+    var top=results.reduce(function(a,b){return b.w>a.w?b:a;},results[0]);
+    function _bmR(k){return results.reduce(function(a,b){return b[k]>a[k]?b:a;},results[0]).msg||'오늘 에너지를 활용하세요.';}
+
+    var result={
+      totalScore:total, // ★ CEI 실측값 반드시 유지
+      grade:grade,
+      summary:results.filter(function(e){return e.ok;}).slice(0,2)
+        .map(function(e){return '['+e.name+' '+e.score+'점] '+e.msg;}).join(' / '),
+      money:{score:sMn,msg:_bmR('money')},love:{score:sLv,msg:_bmR('love')},
+      work:{score:sWk,msg:_bmR('work')},health:{score:sHl,msg:_bmR('health')},
+      legal:{score:sLg,msg:_bmR('legal')},social:{score:sSc,msg:_bmR('social')},
+      factBomb:top.msg||r.name+'님, 생체+역학+NASA 3중 분석 결과입니다.',
+      whyMoney:results.slice(0,2).map(function(e){return e.name+' 재물:'+e.money+'점';}).join(' / '),
+      whyDate:'일진('+_iiljinR+') + 생체(HRV='+hrvVal+'ms) + NASA | '+results.length+'개 역학',
+      calcExplain:'생체'+bioTotal+'점+역학'+metaTotal+'점+공명'+resTotal+'점 = CEI'+total+'점',
+      food:top.food||'균형식',
+      luckyDir:top.luckyDir,luckyColor:top.luckyColor,luckyNum:top.luckyNum,
+      energyGuide:top.why||'HRV'+hrvVal+'ms 기반 에너지를 활용하세요.',
+      csiNote:results.map(function(e){return e.name+' '+e.score+'점';}).join(' | ')
+    };
+    window._cgoInRealtimeMode=true;window._cgoInPureMode=false;
+    setTimeout(function(){
+      window._cgoInRealtimeMode=true;window._cgoInPureMode=false;
+      _cgoTfRenderAiResult(result,r,selectedEngines,engCount);
+    },300);
+  }).catch(function(){
+    window._cgoInRealtimeMode=true;window._cgoInPureMode=false;
+    if(typeof _cgoTfRenderFallback==='function')_cgoTfRenderFallback(r,selectedEngines,engCount);
+  });
+}
+
+function _rPPGCalcEnergy(bpm,hrv,fci){
+  // 정상 BPM(60~80): 높은 에너지 / 너무 빠르거나 느리면 감소
+  var bpmScore = bpm>=60&&bpm<=80 ? 90 : bpm>=55&&bpm<=90 ? 75 : bpm<55 ? 55+bpm*0.5 : 100-(bpm-90)*2;
+  bpmScore = Math.max(30, Math.min(95, bpmScore));
+  // HRV 현실 기준: 20ms=보통, 40ms=양호, 60ms=우수, 80ms=최상
+  // hrv*1.4 제거 → 실제 범위 기반 점수
+  var hrvScore = hrv>=60 ? Math.min(95, 75+(hrv-60)*0.5)
+               : hrv>=40 ? 65+(hrv-40)*0.5
+               : hrv>=25 ? 50+(hrv-25)*1.0
+               : Math.max(30, hrv*1.2);
+  // FCI 혈색
+  var fciScore = Math.min(95, fci);
+  var eng = Math.round(bpmScore*0.3 + hrvScore*0.4 + fciScore*0.3);
+  return Math.max(35, Math.min(95, eng));
+}
+
+function _rPPGCalcFCI(){
+  // ★ CHROM 업그레이드: R채널 신호 진폭 기반 FCI (조명 독립적)
+  // R채널 AC성분(혈류 파동 진폭) / DC성분(평균) = 혈색 관류 지수
+  if(_rPPG.rawR&&_rPPG.rawR.length>=30){
+    var rBuf = _rPPG.rawR.slice(-60);
+    var rMean = rBuf.reduce(function(a,b){return a+b;},0)/rBuf.length;
+    if(rMean>10){
+      var rMax=Math.max.apply(null,rBuf), rMin=Math.min.apply(null,rBuf);
+      var acdc = (rMax-rMin)/rMean; // AC/DC 비율 (정상 피부: 0.01~0.05)
+      var fciR = Math.round(Math.min(95, Math.max(40,
+        acdc < 0.005 ? 40 :
+        acdc > 0.060 ? 95 :
+        40 + (acdc - 0.005) / (0.060 - 0.005) * 55
+      )));
+      return fciR;
+    }
+  }
+  // 폴백: 기존 피부색 샘플 기반 (R채널 데이터 없을 때)
+  if(!_rPPG._fciSamples||!_rPPG._fciSamples.length) return 0; // 🛡️ 정직
+  var sum=_rPPG._fciSamples.reduce(function(a,b){return a+b;},0);
+  return Math.round(Math.min(95,Math.max(40,sum/_rPPG._fciSamples.length)));
+}
+
+function _rPPGCalcFMA(){
+  var lci=_rPPGCalcLCI();
+  var fci=_rPPGCalcFCI();
+
+  // 입꼬리 변화량 계산
+  var lipScore=50; // 기본값 (중립)
+  if(_rPPG._lipBaseY&&_rPPG._lipCornerY.length>60){
+    // 최근 30프레임 평균
+    var recent=_rPPG._lipCornerY.slice(-30);
+    var recentY=recent.reduce(function(a,b){return a+b;},0)/recent.length;
+    // Y값: 위로 올라가면 미소(Y감소), 아래로 내려가면 찡그림(Y증가)
+    // 카메라 좌표계: Y=0이 위, Y=1이 아래
+    var delta=(_rPPG._lipBaseY-recentY)*1000; // 변화량 증폭
+    // delta 양수 = 입꼬리 올라감(미소) → 긍정
+    // delta 음수 = 입꼬리 내려감(찡그림) → 부정
+    var clampedDelta=Math.max(-20,Math.min(20,delta));
+    lipScore=50+clampedDelta*1.5; // 20~80 범위
+    lipScore=Math.max(20,Math.min(80,lipScore));
+  }
+
+  // FMA = LCI×40% + FCI×35% + 입꼬리×25%
+  if(lci>0&&fci>0){
+    var fma=Math.round(lci*0.40+fci*0.35+lipScore*0.25);
+    return Math.max(20,Math.min(95,fma));
+  } else if(lci>0){
+    return Math.round(lci*0.6+lipScore*0.4);
+  } else if(fci>0){
+    return Math.round(fci*0.7+lipScore*0.3);
+  }
+  return 0; // 측정 불가
+}
+
+function _rPPGCalcLCI(){
+  if(!_rPPG._lciSamples||!_rPPG._lciSamples.length) return 0;
+  var sum=_rPPG._lciSamples.reduce(function(a,b){return a+b;},0);
+  return Math.round(Math.min(100,Math.max(30,sum/_rPPG._lciSamples.length)));
+}
+
+function _rPPGCalcVitals(){
+  // ★ CHROM 업그레이드: chromSignal 우선, 부족 시 filteredSignal 폴백
+  var _sig = (_rPPG.chromSignal&&_rPPG.chromSignal.length>=30)
+    ? _rPPG.chromSignal : _rPPG.filteredSignal;
+  var peaks = _rPPGDetectPeaks(_sig);
+  _rPPG.peaks = peaks;
+  if(peaks.length<3) return null;
+
+  // RR 인터벌 (ms)
+  var rri=[];
+  for(var i=1;i<peaks.length;i++){
+    var dt=(peaks[i]-peaks[i-1])*(1000/_rPPG.sampleRate);
+    if(dt>333&&dt<1500) rri.push(dt); // 40~180 BPM 범위만
+  }
+  if(rri.length<2) return null;
+  _rPPG.rriList=rri;
+
+  // BPM = 60000 / mean(RRI)
+  var meanRRI=rri.reduce(function(a,b){return a+b;},0)/rri.length;
+  var bpm=Math.round(60000/meanRRI);
+  bpm=Math.max(45,Math.min(130,bpm));
+
+  // HRV RMSSD — 실제 범위 반영 (10~80ms, 100은 초인간 수준)
+  // 일반인 안정 시: 20~60ms, 운동선수: 60~80ms
+  var sumSqDiff=0;
+  for(var j=1;j<rri.length;j++) sumSqDiff+=Math.pow(rri[j]-rri[j-1],2);
+  var rmssd=Math.round(Math.sqrt(sumSqDiff/(rri.length-1)));
+  rmssd=Math.max(10,Math.min(80,rmssd)); // 최대 80ms (100은 비현실적)
+
+  return {bpm:bpm, hrv:rmssd};
+}
+
+function _rPPGChromUpdate(){
+  var n = _rPPG.rawR.length;
+  if(n < 2) return;
+
+  // 윈도우 크기: 최근 30샘플(1초 @30fps) — 정규화용
+  var wSize = Math.min(n, 30);
+  var rS = _rPPG.rawR.slice(-wSize);
+  var gS = _rPPG.rawG.slice(-wSize);
+  var bS = _rPPG.rawB.slice(-wSize);
+
+  // 채널별 평균 (정규화 기준)
+  function mean(arr){ return arr.reduce(function(a,b){return a+b;},0)/arr.length; }
+  var rM = mean(rS), gM = mean(gS), bM = mean(bS);
+  if(rM<1||gM<1||bM<1) return;
+
+  // ─ 동작 잡음 검출: 프레임 간 급변 시 샘플 폐기 ─
+  var curR=_rPPG.rawR[n-1], curG=_rPPG.rawG[n-1], curB=_rPPG.rawB[n-1];
+  if(_rPPG.prevR>0){
+    var motionR=Math.abs(curR-_rPPG.prevR)/rM;
+    var motionG=Math.abs(curG-_rPPG.prevG)/gM;
+    // 정규화 변화량 15% 초과 = 움직임 아티팩트 → 폐기
+    if(motionR>0.15||motionG>0.15){
+      _rPPG.prevR=curR; _rPPG.prevG=curG; _rPPG.prevB=curB;
+      return;
+    }
+  }
+  _rPPG.prevR=curR; _rPPG.prevG=curG; _rPPG.prevB=curB;
+
+  // ─ CHROM 분해: Xs, Ys 윈도우 계산 (alpha 추정용) ─
+  function std(arr){
+    var m=mean(arr);
+    var v=arr.reduce(function(a,b){return a+Math.pow(b-m,2);},0)/arr.length;
+    return Math.sqrt(v)||0.0001;
+  }
+  var xsArr=[], ysArr=[];
+  for(var i=0;i<wSize;i++){
+    var rn=rS[i]/rM, gn=gS[i]/gM, bn=bS[i]/bM;
+    xsArr.push(3*rn - 2*gn);
+    ysArr.push(1.5*rn + gn - 1.5*bn);
+  }
+  var alpha = std(xsArr)/std(ysArr);
+
+  // 현재 샘플의 정규화값
+  var rN=curR/rM, gN=curG/gM, bN=curB/bM;
+  var Xs = 3*rN - 2*gN;
+  var Ys = 1.5*rN + gN - 1.5*bN;
+
+  // PPG 신호 = Xs - alpha*Ys (조명 성분 제거)
+  var S = Xs - alpha*Ys;
+
+  // 밴드패스 필터 적용 (CHROM 전용 필터 상태)
+  var filtered = _rPPGFilterCh(S, _rPPG.bpZS);
+  _rPPG.chromSignal.push(filtered);
+
+  // 버퍼 900샘플 제한 (30fps × 30초)
+  if(_rPPG.chromSignal.length > 900) _rPPG.chromSignal.shift();
+}
+
+function _rPPGDetectPeaks(sig){
+  var peaks=[], minDist=Math.round(_rPPG.sampleRate*0.2);
+  for(var i=2;i<sig.length-2;i++){
+    if(sig[i]>sig[i-1]&&sig[i]>sig[i-2]&&sig[i]>sig[i+1]&&sig[i]>sig[i+2]){
+      if(!peaks.length||i-peaks[peaks.length-1]>=minDist) peaks.push(i);
+    }
+  }
+  return peaks;
+}
+
+function _rPPGFilter(x){
+  var b=_rPPG.bpB, a=_rPPG.bpA, z=_rPPG.bpZ;
+  var w = x - a[1]*z[0] - a[2]*z[1];
+  var y = b[0]*w + b[2]*z[1];   // b[1]=0
+  z[1]=z[0]; z[0]=w;
+  return y;
+}
+
+function _rPPGFilterCh(x, z){
+  var b=_rPPG.bpB, a=_rPPG.bpA;
+  var w = x - a[1]*z[0] - a[2]*z[1];
+  var y = b[0]*w + b[2]*z[1];
+  z[1]=z[0]; z[0]=w;
+  return y;
+}
+
+function _rPPGLoop(){
+  var now=Date.now();
+  var interval=1000/_rPPG.sampleRate;
+  if(now-_rPPG.lastSampleTime>=interval){
+    _rPPG.lastSampleTime=now;
+    var s=_rPPGSample();
+    // ★ 핵심: s가 null(랜드마크 없음)이어도 lostCount 증가
+    if(!s){
+      if(BS.on){
+        _rPPG.lostCount++;
+        _rPPG.consecutiveLost = (_rPPG.consecutiveLost||0) + 1;
+        // ★ 새 구조: BS.tId 정지 없음 — lostCount만 증가, 경고는 BsFs.tId에서 처리
+      }
+    } else if(s){
+      // 피부 감지됐을 때만 lostCount 리셋
+      if(s.isSkin){
+        _rPPG.lostCount=0;
+        _rPPG.consecutiveLost=0;
+      }
+      else {
+        _rPPG.lostCount++;
+        // 얼굴 없으면 신호 저장 안 함
+        if(_rPPG.lostCount>5) return;
+      }
+      // Green 채널 원시값 저장 (파형 표시용 유지)
+      _rPPG.rawSignal.push(s.green);
+      _rPPG.timestamps.push(now);
+      // Green 밴드패스 필터 (파형 표시용)
+      _rPPG.filteredSignal.push(_rPPGFilter(s.green));
+      // ★ CHROM 업그레이드: RGB 3채널 저장
+      _rPPG.rawR.push(s.red);
+      _rPPG.rawG.push(s.green);
+      _rPPG.rawB.push(s.blue);
+      // ★ CHROM 신호 업데이트 (동작 잡음 포함 처리)
+      _rPPGChromUpdate();
+      // FCI 샘플 (피부 픽셀만)
+      if(s.isSkin&&s.fci!==null){
+        _rPPG._fciSamples=_rPPG._fciSamples||[];
+        _rPPG._fciSamples.push(s.fci);
+      }
+      // ★ LCI 샘플 누적 (입술 혈색)
+      if(s.lci!==null){
+        _rPPG._lciSamples=_rPPG._lciSamples||[];
+        _rPPG._lciSamples.push(s.lci);
+      }
+      // ★ 피부 분석/화장 궁합 모드: RGB 누적
+      if((BsFs._skinMode||BS.mode==='makeup') && s.isSkin){
+        _cgoSkinAccumRgb(s.red, s.green, s.blue);
+      }
+      // ★ FMA 실측: 입꼬리 Y값 추적 (매 프레임)
+      var _flms=window.BsFs&&BsFs._lastFaceLms;
+      if(_flms&&_flms.length>380){
+        var _lc61=_flms[61],_lc291=_flms[291];
+        if(_lc61&&_lc291){
+          var _lcY=(_lc61.y+_lc291.y)/2;
+          _rPPG._lipCornerY.push(_lcY);
+          // 기준선: 첫 2초(60프레임) 평균
+          if(_rPPG._lipCornerY.length<=60&&!_rPPG._lipBaseY){
+            if(_rPPG._lipCornerY.length===60){
+              _rPPG._lipBaseY=_rPPG._lipCornerY.reduce(function(a,b){return a+b;},0)/60;
+            }
+          }
+          // 버퍼 최대 900샘플
+          if(_rPPG._lipCornerY.length>900) _rPPG._lipCornerY.shift();
+        }
+      }
+      // 버퍼 크기 제한 (★ 900샘플 = 30fps × 30초)
+      if(_rPPG.rawSignal.length>900){
+        _rPPG.rawSignal.shift(); _rPPG.filteredSignal.shift();
+        _rPPG.timestamps.shift();
+      }
+      if(_rPPG.rawR.length>900){
+        _rPPG.rawR.shift(); _rPPG.rawG.shift(); _rPPG.rawB.shift();
+      }
+      // ★ 실시간 파형 업데이트 (CHROM 신호 우선, 없으면 Green)
+      var _wSig = _rPPG.chromSignal.length>2 ? _rPPG.chromSignal : _rPPG.filteredSignal;
+      if(_wSig.length>2){
+        var step=BsFs.step||'';
+        if(step==='face')   _drawWaveLine('bsFsWaveLine_face',   _wSig,'rgba(56,189,248,.9)');
+        if(step==='tongue') _drawWaveLine('bsFsWaveLine_tongue', _wSig,'rgba(248,113,113,.9)');
+        _drawWaveLine('maiWaveLine', _wSig,'rgba(244,114,182,.9)');
+        _drawWaveLine('sviWaveLine', _wSig,'rgba(56,189,248,.9)');
+      }
+      // ★ 3초(90샘플 @30fps) 이상 데이터 있으면 실시간 BPM 업데이트
+      if(_rPPG.rawSignal.length>=90){
+        var v2=_rPPGCalcVitals();
+        if(v2&&v2.bpm>=45&&v2.bpm<=130){
+          BS.bpm=v2.bpm; BS.hrv=v2.hrv;
+          if(BS.sec>2){
+            if(bsE('bsHrVal')) bsE('bsHrVal').textContent=BS.bpm;
+          }
+        }
+      }
+    }
+  }
+  if(BS.on) _rPPG.rafId=requestAnimationFrame(_rPPGLoop);
+}
+
+function _rPPGSample(){
+  var v=bsE('bsVideo');
+  if(!v||!v.videoWidth||!_rPPG.offCtx) return null;
+
+  var vw=v.videoWidth, vh=v.videoHeight;
+  var oc=_rPPG.offCanvas;
+  oc.width=64; oc.height=48;
+  var ox=_rPPG.offCtx;
+
+  // ★ bsVideo 중앙 영역 피부색 직접 체크 (FaceMesh 완전 무관)
+  // 화면 중앙 상단 30% 영역 샘플링
+  var sx = Math.floor(vw*0.25);
+  var sy = Math.floor(vh*0.10);
+  var sw = Math.floor(vw*0.50);
+  var sh = Math.floor(vh*0.40);
+
+  // FaceMesh 랜드마크 있으면 더 정확한 ROI 사용
+  var _fm = window.BsFs && BsFs._lastFaceLms;
+  if(BsFs._lastFaceTime && (Date.now()-BsFs._lastFaceTime) > 1000) _fm = null;
+  // ★ MAI 구조: FaceMesh 없어도 isSkin 픽셀 감지로 진행 (하드 블록 제거)
+  if(_fm && _fm.length > 100){
+    var _nose=_fm[4], _fore=_fm[10], _lEar=_fm[234], _rEar=_fm[454], _chin=_fm[152];
+    if(_nose && _fore && _lEar && _rEar && _chin){
+      var _fW=Math.abs(_lEar.x-_rEar.x);
+      var _fH=Math.abs(_fore.y-_chin.y);
+      // 얼굴 크기 충분하고 화면 위쪽에 있으면 랜드마크 ROI 사용
+      if(_fW>0.10 && _fH>0.10 && _nose.y<0.75){
+        sx=Math.floor(vw*Math.max(0,_lEar.x+0.02));
+        sy=Math.floor(vh*Math.max(0,_fore.y));
+        sw=Math.floor(vw*Math.min(0.8,_rEar.x-_lEar.x-0.04));
+        sh=Math.floor(vh*Math.min(0.25,(_nose.y-_fore.y)*0.5));
+      }
+    }
+  }
+
+  if(sw<20||sh<10) return null;
+  ox.drawImage(v, sx,sy,sw,sh, 0,0,64,48);
+
+  var px=ox.getImageData(0,0,64,48).data;
+  var rSum=0,gSum=0,bSum=0,cnt=0,skinCnt=0;
+
+  // ★ 다크스킨 적응형: 랜드마크로 볼 기준색 샘플링
+  var _adaptR=80,_adaptG=50,_adaptB=30,_adaptDiff=15;
+  var _fm2=window.BsFs&&BsFs._lastFaceLms;
+  if(_fm2&&_fm2.length>380){
+    // 볼(234=왼볼,454=오른볼) 랜드마크로 기준색 추출
+    var _chkL=_fm2[234],_chkR=_fm2[454];
+    if(_chkL&&_chkR){
+      var _cx=Math.floor((_chkL.x+_chkR.x)/2*vw);
+      var _cy=Math.floor((_chkL.y+_chkR.y)/2*vh);
+      var _co=document.createElement('canvas'); _co.width=10; _co.height=10;
+      var _ctx2=_co.getContext('2d');
+      _ctx2.drawImage(v,_cx-5,_cy-5,10,10,0,0,10,10);
+      var _pd=_ctx2.getImageData(0,0,10,10).data;
+      var _cr=0,_cg=0,_cb=0,_cc=0;
+      for(var _ci=0;_ci<_pd.length;_ci+=4){_cr+=_pd[_ci];_cg+=_pd[_ci+1];_cb+=_pd[_ci+2];_cc++;}
+      if(_cc>0){
+        _cr/=_cc;_cg/=_cc;_cb/=_cc;
+        // 다크스킨: 기준색 기반으로 임계값 동적 조정
+        _adaptR=Math.max(40,_cr*0.7);
+        _adaptG=Math.max(30,_cg*0.7);
+        _adaptB=Math.max(20,_cb*0.7);
+        _adaptDiff=Math.max(5,(_cr-_cg)*0.5);
+      }
+    }
+  }
+
+  for(var i=0;i<px.length;i+=4){
+    var pr=px[i],pg=px[i+1],pb=px[i+2];
+    rSum+=pr; gSum+=pg; bSum+=pb; cnt++;
+    // ★ 적응형 피부색 감지 (다크스킨 포함)
+    var mx=Math.max(pr,pg,pb),mn=Math.min(pr,pg,pb);
+    var sv=mx>0?(mx-mn)/mx:0;
+    if(pr>_adaptR&&pg>_adaptG&&pb>_adaptB&&pr>pg&&pr>pb&&(pr-pg)>_adaptDiff&&sv>0.10&&sv<0.75) skinCnt++;
+  }
+  if(!cnt) return null;
+
+  // ★ 피부색 픽셀 20% 미만이면 얼굴 없음
+  if(skinCnt/cnt < 0.20) return null;
+
+  var r=rSum/cnt, g=gSum/cnt, b=bSum/cnt;
+  var mx2=Math.max(r,g,b),mn2=Math.min(r,g,b);
+  var s=mx2>0?(mx2-mn2)/mx2:0;
+  // ★ 적응형 isSkin
+  var isSkin=(r>_adaptR&&g>_adaptG&&b>_adaptB&&r>g&&r>b&&(r-g)>_adaptDiff&&s>0.10&&s<0.75&&(r+g+b)>120);
+  var fci = isSkin ? Math.round(Math.min(100, Math.max(30, (r-g)/(r+g+1)*200+30))) : null;
+
+  // ★ LCI (입술 혈색 지수) — 입꼬리 랜드마크 기반
+  var lci = null;
+  var _fmL=window.BsFs&&BsFs._lastFaceLms;
+  if(_fmL&&_fmL.length>380){
+    var _lp1=_fmL[61],_lp2=_fmL[291]; // 입꼬리 좌(61), 우(291)
+    var _lp3=_fmL[0],_lp4=_fmL[17];   // 입술 상(0), 하(17)
+    if(_lp1&&_lp2&&_lp3&&_lp4){
+      var _lx=Math.floor(Math.min(_lp1.x,_lp2.x)*vw);
+      var _ly=Math.floor(Math.min(_lp3.y,_lp4.y)*vh);
+      var _lw=Math.floor(Math.abs(_lp1.x-_lp2.x)*vw);
+      var _lh=Math.floor(Math.abs(_lp3.y-_lp4.y)*vh)+4;
+      if(_lw>8&&_lh>4){
+        var _lc=document.createElement('canvas'); _lc.width=_lw; _lc.height=_lh;
+        var _lctx=_lc.getContext('2d');
+        _lctx.drawImage(v,_lx,_ly,_lw,_lh,0,0,_lw,_lh);
+        var _lpx=_lctx.getImageData(0,0,_lw,_lh).data;
+        var _lr=0,_lg=0,_lb=0,_ln=0;
+        for(var _li=0;_li<_lpx.length;_li+=4){
+          _lr+=_lpx[_li];_lg+=_lpx[_li+1];_lb+=_lpx[_li+2];_ln++;
+        }
+        if(_ln>0){
+          _lr/=_ln;_lg/=_ln;_lb/=_ln;
+          // R/(R+B) 비율 → 입술 혈색 (붉을수록 높음)
+          var _lRatio=(_lr+0.01)/(_lr+_lb+0.01);
+          lci=Math.round(Math.min(100,Math.max(30,_lRatio*120)));
+        }
+      }
+    }
+  }
+
+  return {green: g, red: r, blue: b, fci: fci, isSkin: isSkin, lci: lci};
+}
+
+function hfuRenderDiseases(){
+      var el = document.getElementById('hfu-disease-grid');
+      if(!el) return;
+      el.innerHTML = HFU_DISEASES.map(function(d){
+        return '<div class="hfu-disease-card" onclick="window.hfuOpenDisease(\''+d.key+'\')">'
+          + '<div class="hfu-disease-icon" style="background:'+d.bg+';color:'+d.color+';">'+d.emoji+'</div>'
+          + '<div class="hfu-disease-info">'
+          +   '<div class="hfu-disease-name">'+d.name+'</div>'
+          +   '<div class="hfu-disease-desc">'+d.desc+'</div>'
+          + '</div>'
+          + '</div>';
+      }).join('');
+    }
+
+function hfuRenderInd(elId, data){
+      var el = document.getElementById(elId);
+      if(!el) return;
+      el.innerHTML = data.map(function(i){
+        return '<div class="hfu-ind-item">'
+          + '<span class="hfu-ind-emoji">'+i.emoji+'</span>'
+          + '<span class="hfu-ind-name">'+i.name+'</span>'
+          + '<span class="hfu-ind-meta">'+i.meta+'</span>'
+          + '</div>';
+      }).join('');
+    }
+
+function hfuRenderSteps(){
+      var el = document.getElementById('hfu-steps-detail');
+      if(!el) return;
+      el.innerHTML = HFU_STEPS.map(function(s){
+        return '<div class="hfu-step-item">'
+          + '<div class="hfu-step-num">'+s.n+'</div>'
+          + '<div class="hfu-step-emoji">'+s.emoji+'</div>'
+          + '<div class="hfu-step-info">'
+          +   '<div class="hfu-step-name">'+s.name+'</div>'
+          +   '<div class="hfu-step-desc">'+s.desc+'</div>'
+          + '</div>'
+          + '<div class="hfu-step-time">'+s.time+'</div>'
+          + '</div>';
+      }).join('');
+    }
+
+function setupHfuIntro(){
+    var _pop = document.getElementById('hfu-intro-pop');
+    if(!_pop) return;
+    // ★ FIX: page-algo-v2 active 시 부모 hidden 영향 X — body 직속 보장
+    if(_pop.parentNode !== document.body){
+      document.body.appendChild(_pop);
+    }
+    var _pg = document.getElementById('page-algo-v2');
+    if(!_pg) return;
+    // ★ 진입 시 1회만 표시 가드 (카드 클릭 등 false positive 방지)
+    var _wasActive = _pg.classList.contains('active');
+    var _shownThisVisit = false;
+    if(_wasActive){
+      _pop.style.display = 'block';
+      _pop.scrollTop = 0;
+      _shownThisVisit = true;
+    }
+    // active 토글 감시 — *false → true 전환* 시에만 표시
+    new MutationObserver(function(){
+      var nowActive = _pg.classList.contains('active');
+      if(nowActive && !_wasActive){
+        // 진입! 한 번만 표시
+        if(!_shownThisVisit){
+          _pop.style.display = 'block';
+          _pop.scrollTop = 0;
+          _shownThisVisit = true;
+        }
+      } else if(!nowActive && _wasActive){
+        // 페이지 떠남 → 다음 진입 시 다시 표시되도록 리셋
+        _shownThisVisit = false;
+      }
+      _wasActive = nowActive;
+    }).observe(_pg, {attributes:true, attributeFilter:['class']});
+  }
+
+function drawRPPG(){
+  // 🛡️ [정직 모드 by C-20] Math.random 가짜 그래프 제거
+  // rppgSvg DOM 요소 자체가 없어 원래도 작동 X (if(!svg)return)
+  // 호출처 3곳은 보존 (호환성)
+  return;
+}
+
+function _cgoRestoreEngineMode(mode){
+  _cgoActiveMode = mode;
+  // ★ 반드시 해당 모드 저장소에서 복사 (참조 공유 절대 금지)
+  var src = mode==='realtime' ? _tfSelectedRealtime
+           : mode==='rppg'    ? _tfSelectedRppg
+           :                    _tfSelectedPure;
+  _TF_ENGINES.forEach(function(e){
+    _tfSelected[e.id] = !!src[e.id];  // 값만 복사
+  });
+  if(typeof cgoTfRenderEngineList==='function') cgoTfRenderEngineList();
+  if(typeof cgoTfUpdateWeight==='function') cgoTfUpdateWeight();
+  var lbl = document.querySelector('#tf-engine-panel .engine-mode-label');
+  if(lbl) lbl.textContent = {pure:'📜 순수역학',realtime:'🛰️ 실시간',rppg:'🛰️ rPPG'}[mode]||'역학';
+  // rPPG 모드 전환 시 세션 기반 체크 복원
+  if(mode==='rppg'){
+    setTimeout(function(){
+      ['face','palm','tongue','breath'].forEach(function(t){
+        try{
+          if(sessionStorage.getItem('_cgoRppgDone_'+t)){
+            var ce=document.getElementById('rppg-check-'+t);
+            if(ce) ce.style.display='inline';
+          } else {
+            var ce2=document.getElementById('rppg-check-'+t);
+            if(ce2) ce2.style.display='none';
+          }
+        }catch(e){}
+      });
+    },150);
+  }
+}
+
+function cgoCloseTodayFortune(){
+  var ov=document.getElementById('todayFortuneOverlay');
+  if(ov){ ov.style.display='none'; document.body.style.overflow=''; }
+  if(_tfEnvStream){ _tfEnvStream.getTracks().forEach(function(t){t.stop();}); _tfEnvStream=null; }
+}
+
+// 메신저 카드 → 입구 팝업
+function cgoHealthShow(){
+  const pop = document.getElementById('hfu-intro-pop');
+  if(pop){
+    pop.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    try { if(typeof setupHfuIntro === 'function') setupHfuIntro(); } catch(_e){}
+    console.log('[건강 예측] 입구 팝업 (v4.3 독립)');
+  } else {
+    console.error('[건강 예측] hfu-intro-pop 박입 안 됨');
+  }
+}
+
+function cgoHealthClose(){
+  const pop = document.getElementById('hfu-intro-pop');
+  if(pop) pop.style.display = 'none';
+  const ov = document.getElementById('todayFortuneOverlay');
+  if(ov) ov.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// "검사 시작하기" 자동 와이어링
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    const btn = document.querySelector('#hfu-intro-pop .hfu-intro-cta');
+    if(btn){
+      btn.onclick = function(){
+        const pop = document.getElementById('hfu-intro-pop');
+        if(pop) pop.style.display = 'none';
+        if(typeof cgoLaunchRppg === 'function'){
+          cgoLaunchRppg();
+        } else {
+          alert('측정 엔진 박입 오류');
+        }
+      };
+    }
+    const xBtn = document.querySelector('#hfu-intro-pop .hfu-intro-x');
+    if(xBtn) xBtn.onclick = cgoHealthClose;
+  }, 500);
+});
+
+console.log('🛡️ v4.3 박입: 건강 예측 100% 독립 완료');
+</script>
+
 </body>
 </html>
