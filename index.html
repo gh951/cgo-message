@@ -2268,6 +2268,53 @@ let _authReady = false;    // Auth 초기화 완료 플래그
           _cgoAuth = firebase.auth();
           console.log('[CGM] Firebase DB + Auth 연결 완료');
 
+          // ★ C-40 박입 ⑩ — 대장님 명령 v40: Firebase 접속 불안정 해결 ⭐
+          // 진단: 접속이 됐다 안 됐다 (.info/connected 모니터링 없음 + 재시도 로직 없음)
+          // 해결: 실시간 연결 상태 감지 + 끊김 시 listener 자동 재등록 + 사용자 상태 배지
+          try {
+            var _c40_fbState = window._c40_fbState = { connected: false, reconnectCount: 0, lastDisconnectAt: 0 };
+            db.ref('.info/connected').on('value', function(snap){
+              var isConnected = snap.val() === true;
+              var wasConnected = _c40_fbState.connected;
+              _c40_fbState.connected = isConnected;
+
+              // 우상단 상태 배지 업데이트 (8px 작은 점)
+              try {
+                var badge = document.getElementById('c40-fb-status');
+                if(!badge){
+                  badge = document.createElement('div');
+                  badge.id = 'c40-fb-status';
+                  badge.style.cssText = 'position:fixed;top:10px;right:10px;width:8px;height:8px;border-radius:50%;z-index:99999;transition:all .3s ease;pointer-events:none;';
+                  document.body.appendChild(badge);
+                }
+                badge.style.background = isConnected ? '#10b981' : '#ef4444';
+                badge.style.boxShadow = isConnected ? '0 0 8px rgba(16,185,129,.6)' : '0 0 8px rgba(239,68,68,.6)';
+                badge.title = isConnected ? '🟢 서버 연결됨' : '🔴 서버 끊김 — 자동 재연결 중';
+              } catch(_be){}
+
+              if(isConnected && !wasConnected){
+                if(_c40_fbState.reconnectCount > 0){
+                  // 재연결 성공 → listener 자동 재등록 (끊긴 사이 놓친 이벤트 회복)
+                  console.log('[C-40 박입 ⑩] 🟢 Firebase 재연결 성공 (총 ' + _c40_fbState.reconnectCount + '회)');
+                  if(typeof showToast === 'function') showToast('🟢 서버 재연결됨');
+                  try { if(typeof listenInvites === 'function') listenInvites(); } catch(_e){}
+                  try { if(typeof listenIncomingCalls === 'function') listenIncomingCalls(); } catch(_e){}
+                  try { if(typeof registerToFirebase === 'function' && _myCode && _myNick) registerToFirebase(); } catch(_e){}
+                } else {
+                  console.log('[C-40 박입 ⑩] 🟢 Firebase 최초 연결');
+                }
+              } else if(!isConnected && wasConnected){
+                _c40_fbState.lastDisconnectAt = Date.now();
+                _c40_fbState.reconnectCount++;
+                console.warn('[C-40 박입 ⑩] 🔴 Firebase 연결 끊김 — 자동 재시도 대기 (Firebase SDK 자체 재시도)');
+                if(typeof showToast === 'function') showToast('🔴 서버 끊김 — 자동 재연결 중...');
+              }
+            });
+            console.log('[C-40 박입 ⑩] Firebase 연결 모니터링 시작');
+          } catch(_he){
+            console.warn('[C-40 박입 ⑩] 연결 모니터링 박입 실패:', _he);
+          }
+
           // 🔐 익명 로그인 자동 실행
           // 기기에 이미 Auth 세션 있으면 그대로 재사용 (localStorage에 토큰 저장됨)
           // 없으면 새로 익명 로그인
