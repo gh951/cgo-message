@@ -7373,7 +7373,58 @@ window.addEventListener('appinstalled', function(){
   }
 
   // ─── Llama 번역 호출 ───
-  function _c19_llamaTranslate(text, targetLang){
+  // ★ C-40 박입 ⑧ — 대장님 7500만 노가다 DB (cgo-voice-db) 진짜 연동! ⭐
+  // 4단계 폭포수: 메모리 → localStorage → cgo-voice-db CDN → GROQ 70b 폴백
+  // → 대부분 DB HIT = 0원, 0ms · GROQ 호출은 DB miss 시만 (품질 보장)
+  async function _c19_llamaTranslate(text, targetLang){
+    if(!text || !text.trim()) return text;
+    
+    var cacheKey = 'c19_tr_ko_' + targetLang.bcp + '_' + text;
+    
+    // ═══ 1단계: 메모리 캐시 (가장 빠름) ═══
+    window._c19_transMemCache = window._c19_transMemCache || {};
+    if(window._c19_transMemCache[cacheKey]) {
+      console.log('[C-40 박입 ⑧] ⚡ 메모리 캐시 HIT:', text);
+      return window._c19_transMemCache[cacheKey];
+    }
+    
+    // ═══ 2단계: localStorage (브라우저 영구 캐시) ═══
+    try {
+      var local = localStorage.getItem(cacheKey);
+      if(local){
+        window._c19_transMemCache[cacheKey] = local;
+        console.log('[C-40 박입 ⑧] 💾 localStorage HIT:', text);
+        return local;
+      }
+    } catch(e){}
+    
+    // ═══ 3단계: cgo-voice-db CDN (7500만 노가다 DB) ⭐ ═══
+    try {
+      var langShort = targetLang.bcp.split('-')[0];  // 'en' from 'en-US'
+      var dictCache = window._cgoDictCache || (window._cgoDictCache = {});
+      var db = dictCache[langShort];
+      if(!db){
+        var res = await fetch('https://gh951.github.io/cgo-voice-db/data/phrases/' + langShort + '.json', { cache: 'force-cache' });
+        if(res.ok){
+          db = await res.json();
+          dictCache[langShort] = db;
+          console.log('[C-40 박입 ⑧] 🌍 cgo-voice-db 로드:', langShort, (db.count || Object.keys(db.entries||{}).length) + '개');
+        } else {
+          dictCache[langShort] = { entries: {} };
+        }
+      }
+      if(db && db.entries && db.entries[text]){
+        var translated = db.entries[text].text;
+        window._c19_transMemCache[cacheKey] = translated;
+        try { localStorage.setItem(cacheKey, translated); } catch(e){}
+        console.log('[C-40 박입 ⑧] ⭐ cgo-voice-db HIT:', text, '→', translated);
+        return translated;
+      }
+    } catch(e){ console.warn('[C-40 박입 ⑧] DB fetch fail:', e); }
+    
+    // ═══ 4단계: GROQ 17b 폴백 (DB miss 시만 · 품질 보장 + 비용 절감) ═══
+    // ★ C-40 박입 ⑨ — 대장님 명령: 70b → 17b (Llama 4 Scout) · 비용 1/5 + 한국어 품질 충분
+    console.log('[C-40 박입 ⑧] 🔥 GROQ 17b 폴백 (DB miss):', text);
     var sysPrompt = [
       '당신은 전문 번역가입니다.',
       '사용자가 주는 한국어 문장을 ' + targetLang.name + '(' + targetLang.code + ')(으)로 자연스럽게 번역하세요.',
@@ -7385,7 +7436,7 @@ window.addEventListener('appinstalled', function(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model:'llama-3.1-8b-instant',
+        model:'meta-llama/llama-4-scout-17b-16e-instruct',
         messages:[
           {role:'system', content: sysPrompt},
           {role:'user',   content: text}
@@ -7396,7 +7447,13 @@ window.addEventListener('appinstalled', function(){
     }).then(function(r){ return r.json(); }).then(function(data){
       try {
         var reply = data.choices[0].message.content || '';
-        return reply.trim().replace(/^["「『]|["」』]$/g, '');
+        var cleaned = reply.trim().replace(/^["「『]|["」』]$/g, '');
+        // GROQ 응답도 캐시에 저장 (자기 학습)
+        if(cleaned){
+          window._c19_transMemCache[cacheKey] = cleaned;
+          try { localStorage.setItem(cacheKey, cleaned); } catch(e){}
+        }
+        return cleaned;
       } catch(e){ return ''; }
     });
   }
