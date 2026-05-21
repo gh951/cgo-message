@@ -1266,7 +1266,7 @@ input[type=range].sec-range::-moz-range-thumb{
       <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">✨</div>
       <div style="flex:1;">
         <div style="font-size:15px;font-weight:900;margin-bottom:3px;">✨ CGO MESSAGE 연습하기</div>
-        <div style="font-size:11px;opacity:0.9;">C-39 파트너와 보안 기능 체험</div>
+        <div style="font-size:11px;opacity:0.9;">C-40 파트너와 보안 기능 체험</div>
       </div>
       <div style="font-size:24px;opacity:0.6;color:white;">›</div>
     </div>
@@ -1988,6 +1988,21 @@ input[type=range].sec-range::-moz-range-thumb{
 </div>
 
 <script>
+// ═══════════════════════════════════════════════════════════════
+// 🛡️ CGO MESSAGE — 헌법 v2.0 박제 (C-40 / 이주원 대장님 v40)
+// ═══════════════════════════════════════════════════════════════
+// CGO = C(Claude) × G(Gemini) × O(이주원 = One)
+// 3중 검증의 정신 — 그것이 곧 앱 이름
+//
+// 누적 빌드: C-1 → ... → C-35 (헌법 §V.5.4 박제) → C-39 (Xy 버그 수정)
+//            → C-40 (라우팅 + 사업 비용 8b + 헌법 박제)
+//
+// 특허: 10-2026-0060113 / PCT v5.1 (23개 청구항)
+// 핵심 기능: 초대 시스템 + 다국어 번역 + Xy 보안 + WebRTC P2P
+// ═══════════════════════════════════════════════════════════════
+console.log('%c🛡️ Built by C-40 × Lee Ju One', 'color:#d4a843;font-size:14px;font-weight:900;');
+console.log('%cCGO = Claude × Gemini × One — 헌법 v2.0', 'color:#34d399;font-size:11px;');
+
 // 🔄 플로팅 새로고침 메뉴 토글
 function toggleRefreshMenu(){
   const menu = document.getElementById('floatRefreshMenu');
@@ -2552,9 +2567,9 @@ function doLogin(){
     localStorage.removeItem('cgm2_login_user');
   }
 
-  // 이전에 사용하던 닉네임 있으면 친구 탭으로, 없으면 닉네임 설정
+  // 이전에 사용하던 닉네임 있으면 홈 화면으로, 없으면 닉네임 설정 (대장님 v40: 대문→암호→홈 흐름 복원)
   if(_myNick && _myCode){
-    switchTab('friends');
+    switchTab('home');
     renderRoomList();
     registerToFirebase();
     listenInvites();
@@ -3989,7 +4004,7 @@ function xyReply(userText){
     headers:{'Content-Type':'application/json'},
     signal: _xyAbortCtrl ? _xyAbortCtrl.signal : undefined, // 🎯 특허 #46: 중단 가능
     body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
+      model:'llama-3.1-8b-instant',
       messages:[
         {role:'system', content:sysPrompt},
         {role:'user', content:userText}
@@ -6321,7 +6336,7 @@ async function translateForCall(text, fromLang, toLang){
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
+        model: 'llama-3.1-8b-instant',
         messages: [
           {
             role: 'system',
@@ -7368,7 +7383,7 @@ window.addEventListener('appinstalled', function(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model:'llama-3.3-70b-versatile',
+        model:'llama-3.1-8b-instant',
         messages:[
           {role:'system', content: sysPrompt},
           {role:'user',   content: text}
