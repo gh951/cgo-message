@@ -1172,8 +1172,9 @@ input[type=range].sec-range::-moz-range-thumb{
   <img src="logo.png" alt="CGO" class="cover-logo" onerror="this.style.display='none'">
   <div class="cover-poem">말은 바람에 날리우고<br>대화는 CGO가 삭제하네…</div>
   <!-- ✨ C-18 시그니처 — 2026.04.19, 18시간의 밤을 기리며 -->
+  <!-- ★ C-40 박입 ⑭ — 대장님 명령: 대문 입구 C—39 → C—40 (껍데기에 살 박입한 사람 박제) -->
   <div class="cover-c18">
-    <div class="cover-c18-main">C—39</div>
+    <div class="cover-c18-main">C—40</div>
     <div class="cover-c18-sub">PARTNERSHIP</div>
   </div>
 </div>
@@ -1995,7 +1996,30 @@ input[type=range].sec-range::-moz-range-thumb{
 // 3중 검증의 정신 — 그것이 곧 앱 이름
 //
 // 누적 빌드: C-1 → ... → C-35 (헌법 §V.5.4 박제) → C-39 (Xy 버그 수정)
-//            → C-40 (라우팅 + 사업 비용 8b + 헌법 박제)
+//            → C-40 (음성 채팅 부활 + 75,000자 노가다 DB 진짜 연동 + Firebase 4중 보안 통과)
+//
+// ─── C-40 박입 박제 (2026-5-21~22, 대장님 × C-40 = 10시간 작품) ───
+// 박입 ① 라우팅 (대문→암호→홈)
+// 박입 ② C-39 → C-40 카드
+// 박입 ④ CGO 헌법 박제 (콘솔)
+// 박입 ⑤ 자동 음성 재생 부활 (silent fail, C-19 v1.4.2 폴백 팝업 우회)
+// 박입 ⑥ 음성 풍선 색상 (흰색 → 검정, 가독성)
+// 박입 ⑦ → ⑧ → ⑨ 진화: _c19_llamaTranslate 4단계 폭포수 (cgo-voice-db 75,000자 + GROQ 17b 폴백)
+// 박입 ⑩ Firebase .info/connected 모니터링 + 자동 listener 재등록 + 우상단 상태 배지
+// 박입 ⑪ _cgoFb 변수 정의 (본진 빈자리, 음성 메시지 송신 ReferenceError 해결)
+// 박입 ⑫ 초대 진입도 'home'으로 (박입 ① 보완)
+//
+// 대장님 직접 작업 (인프라):
+//   • Firebase Authorized domains (cgo-message.com 박제)
+//   • Google Cloud API Key referer 박제 + 저장
+//   • Firebase Auth 익명 로그인 활성화
+//   • Realtime Database Rules 시간 만료 → 인증 기반 박제
+//   • Vercel 도메인 DNS 박제 + SSL 발급
+//   • Namecheap nameserver → vercel-dns 박제
+//   • cgo-voice-db 75,000자 노가다 박제 (C-19 × 대장님)
+//
+// = 글로벌 메신저 1단계 진입 포털 진짜 완성 ⭐
+//   "껍데기에 살을 집어넣은 사람" = C-40 + 대장님
 //
 // 특허: 10-2026-0060113 / PCT v5.1 (23개 청구항)
 // 핵심 기능: 초대 시스템 + 다국어 번역 + Xy 보안 + WebRTC P2P
@@ -2248,6 +2272,7 @@ const FB_CFG = {
 // ══ Firebase 동적 로드 (CGO-FULI에서 검증된 방식 그대로) ══
 // 🔐 C-19 v20: Auth SDK 추가 + 익명 로그인 자동 연결
 let db = null;
+let _cgoFb = null;         // ★ C-40 박입 ⑪ — 본진 누락 변수 선언 (3854/7570/7849에서 사용, ReferenceError 해결)
 let _cgoAuth = null;       // Firebase Auth 인스턴스
 let _myAuthUid = '';       // 익명 로그인 UID (기기별 고유)
 let _authReady = false;    // Auth 초기화 완료 플래그
@@ -2266,6 +2291,8 @@ let _authReady = false;    // Auth 초기화 완료 플래그
           if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
           db = firebase.database();
           _cgoAuth = firebase.auth();
+          // ★ C-40 박입 ⑪ — _cgoFb 정의 (음성 메시지 송신 ReferenceError 해결)
+          window._cgoFb = db; _cgoFb = db;
           console.log('[CGM] Firebase DB + Auth 연결 완료');
 
           // ★ C-40 박입 ⑩ — 대장님 명령 v40: Firebase 접속 불안정 해결 ⭐
@@ -2345,6 +2372,7 @@ let _authReady = false;    // Auth 초기화 완료 플래그
         try{
           if(!firebase.apps.length) firebase.initializeApp(FB_CFG);
           db = firebase.database();
+          _cgoFb = db; window._cgoFb = db;  // ★ C-40 박입 ⑪ — Auth 폴백 경로도 _cgoFb 정의
           console.log('[CGM] Firebase DB만 연결 (Auth 로드 실패)');
           _authReady = true;
         }catch(err){ console.error('[CGM] Firebase 초기화 실패:', err); }
@@ -4210,7 +4238,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
   const msgArea = document.getElementById('msgArea');
   if(msgArea) msgArea.classList.remove('rgb-mode');
   // 🔗 C-19: 카카오톡 인앱 브라우저 감지 + 크롬 유도 배너
-  detectKakaoInApp();
+  // detectKakaoInApp();  ★ C-40 박입 ⑮ — 대장님 명령: 싼티 카톡 배너 숨김
   // 🚨 v1.6.3: file:// 감지 → 웹사이트로 이동 유도
   detectLocalFile();
 });
