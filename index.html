@@ -1163,8 +1163,6 @@ input[type=range].sec-range::-moz-range-thumb{
 /* 화면에 탭바 있을 때 내용 영역 여백 */
 .has-tabbar{display:flex;flex-direction:column;height:100%;}
 </style>
-<!-- ★ C-40 박입 ⑯ — Puter.js TTS SDK (스마트폰 음성팩 없어도 작동, 무료, 14개국어) -->
-<script src="https://js.puter.com/v2/" async></script>
 </head>
 <body>
 
@@ -7603,25 +7601,16 @@ window.addEventListener('appinstalled', function(){
         //          → 사용자가 🔊 버튼 누르면 정상 폴백 (그건 그대로)
         setTimeout(function(){
           try {
-            if(!('speechSynthesis' in window)) {
-              _c40_puterTTS(translated, targetLang);  // ★ 박입 ⑯ Puter 폴백
-              return;
-            }
+            if(!('speechSynthesis' in window)) return;
             var voices = window.speechSynthesis.getVoices();
-            if(!voices || voices.length === 0) {
-              _c40_puterTTS(translated, targetLang);  // ★ 박입 ⑯ Puter 폴백
-              return;
-            }
+            if(!voices || voices.length === 0) return;
             var langCode = targetLang.bcp.split('-')[0];
             var match = null;
             for(var i=0; i<voices.length; i++){
               if(voices[i].lang === targetLang.bcp){ match = voices[i]; break; }
               if(!match && voices[i].lang.split('-')[0] === langCode){ match = voices[i]; }
             }
-            if(!match) {
-              _c40_puterTTS(translated, targetLang);  // ★ 박입 ⑯ Puter 폴백 (음성팩 없음)
-              return;
-            }
+            if(!match) return;  // 매칭 음성팩 없음 = silent (폴백 X)
             window.speechSynthesis.cancel();
             var u = new SpeechSynthesisUtterance(translated);
             u.voice = match;
@@ -7630,8 +7619,7 @@ window.addEventListener('appinstalled', function(){
             window.speechSynthesis.speak(u);
             console.log('[C-40 박입 ⑤] 🌍 자동 음성 재생:', targetLang.flag, targetLang.name, '— ' + match.name);
           } catch(_e){
-            console.log('[C-40 박입 ⑤] TTS 자동 재생 silent fail — Puter 폴백 시도');
-            _c40_puterTTS(translated, targetLang);  // ★ 박입 ⑯ Puter 폴백
+            console.log('[C-40 박입 ⑤] TTS 자동 재생 silent fail — 사용자가 🔊 직접 탭 가능');
           }
         }, 300);
         if(typeof showToast === 'function') showToast('🌍 ' + targetLang.flag + ' 번역 전송 완료');
@@ -7639,36 +7627,6 @@ window.addEventListener('appinstalled', function(){
       };
       reader.readAsDataURL(origBlob);
     });
-  }
-
-  // ★ C-40 박입 ⑯ — Puter.js TTS 폴백 (스마트폰 음성팩 없을 때, 무료, 14개국어)
-  //   대장님 정직 정답: "GROQ Whisper TTS를 다른 앱으로 만들어 연동"
-  //   → C-40 박입: Puter.js (User-Pays 모델, 대장님 0원, API 키 X)
-  //   → 호출: AWS Polly + ElevenLabs + Gemini + xAI 자동 선택
-  function _c40_puterTTS(text, targetLang){
-    try {
-      if(typeof puter === 'undefined' || !puter.ai || !puter.ai.txt2speech){
-        console.log('[C-40 박입 ⑯] Puter SDK 미로드 — silent (사용자 🔊 탭 가능)');
-        return;
-      }
-      console.log('[C-40 박입 ⑯] 🌍 Puter TTS 호출:', targetLang.flag, targetLang.name);
-      puter.ai.txt2speech(text, { language: targetLang.bcp || 'en-US' })
-        .then(function(audio){
-          if(audio && audio.play){
-            audio.play();
-            console.log('[C-40 박입 ⑯] ✓ Puter TTS 재생 성공');
-          } else if(audio && audio.src){
-            var a = new Audio(audio.src);
-            a.play();
-            console.log('[C-40 박입 ⑯] ✓ Puter TTS Audio 객체 재생');
-          }
-        })
-        .catch(function(err){
-          console.warn('[C-40 박입 ⑯] Puter TTS 실패:', err && err.message);
-        });
-    } catch(e){
-      console.warn('[C-40 박입 ⑯] Puter 호출 예외:', e && e.message);
-    }
   }
 
   // 인라인 음성 재생 (renderMessages가 data-src로 음성 URL 저장)
