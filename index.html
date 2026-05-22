@@ -1285,7 +1285,7 @@ input[type=range].sec-range::-moz-range-thumb{
       </div>
       
       <!-- 2. ⏳ 피부 나이 -->
-      <div onclick="cgoFeature('skinage')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('⏳ 피부 나이 기능은 곧 박입됩니다!')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">⏳</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 피부 나이</div>
@@ -1293,14 +1293,14 @@ input[type=range].sec-range::-moz-range-thumb{
       </div>
       
       <!-- 3. 💆 두피 -->
-      <div onclick="cgoFeature('scalp')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('💆 두피 케어 기능은 곧 박입됩니다!')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💆</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 두피 케어</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">STP Score</div>
       </div>
       
       <!-- 4. 🧠 치매 -->
-      <div onclick="cgoFeature('dementia')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('🧠 치매 예방 체크 기능은 곧 박입됩니다!')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🧠</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">치매 예방 체크</div>
@@ -1308,7 +1308,7 @@ input[type=range].sec-range::-moz-range-thumb{
       </div>
       
       <!-- 5. 🎯 AQ -->
-      <div onclick="cgoFeature('aq')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('🎯 나의 AQ 기능은 곧 박입됩니다!\n\n현재 IQ 카드는 작동 중입니다.')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🎯</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 AQ</div>
@@ -1316,12 +1316,31 @@ input[type=range].sec-range::-moz-range-thumb{
       </div>
       
       <!-- ★ C-40 박입 ⑯ — 나의 IQ (메신저 박입) -->
-      <div onclick="goScreen('scrIQ');setTimeout(function(){var _seen=localStorage.getItem('iq_intro_seen');var p=document.getElementById('iq-intro-pop');if(p && !_seen){p.style.display='block';}},350);" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="window.iqOpenFromHome()" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <span style="position:absolute;top:8px;right:8px;background:#d4a843;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
         <div style="font-size:36px;margin-bottom:8px;">🧠</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 아이큐</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">5영역 + rPPG 융합</div>
       </div>
+      <script>
+        // ★ C-40 박입 ㉒ — IQ 진입 함수 (모바일 호환 박제)
+        window.iqOpenFromHome = function(){
+          console.log('[IQ] 홈에서 진입');
+          if(typeof goScreen === 'function'){
+            goScreen('scrIQ');
+            setTimeout(function(){
+              try {
+                var _seen = localStorage.getItem('iq_intro_seen');
+                var p = document.getElementById('iq-intro-pop');
+                if(p && !_seen){ p.style.display = 'block'; }
+                if(typeof window.iqGoCover === 'function') window.iqGoCover();
+              } catch(e){ console.warn('[IQ] 인트로 박제 실패:', e); }
+            }, 350);
+          } else {
+            alert('goScreen 함수 박혀있지 않음 - 새로고침 필요');
+          }
+        };
+      </script>
       
     </div>
     
@@ -1330,25 +1349,25 @@ input[type=range].sec-range::-moz-range-thumb{
     
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:0 16px 30px;">
       
-      <div onclick="cgoFeature('makeup')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('💄 AR 메이크업 기능은 곧 박입됩니다!')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💄</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">AR 메이크업</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">3D 랜드마크</div>
       </div>
       
-      <div onclick="cgoFeature('music')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('🎵 주파수 음악 기능은 곧 박입됩니다!')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">🎵</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 주파수 음악</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">환각 0%</div>
       </div>
       
-      <div onclick="cgoFeature('food')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('🥗 음식 궁합 기능은 곧 박입됩니다!')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">🥗</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">음식 궁합</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">영양×약리</div>
       </div>
       
-      <div onclick="cgoFeature('couple')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+      <div onclick="alert('💑 커플 궁합 기능은 곧 박입됩니다!')" style="background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
         <div style="font-size:36px;margin-bottom:8px;">💑</div>
         <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">커플 궁합</div>
         <div style="font-size:11px;color:rgba(13,58,58,.7);">듀얼 rPPG</div>
