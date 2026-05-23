@@ -2598,6 +2598,9 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 </style>
 
+<!-- C-41 페이즈 1.5 — MediaPipe 얼굴 감지 (cgo-fuli 동일 CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -10037,11 +10040,11 @@ var Q_POOL = {
     };
 
     window.hfuStartScan = function(){
-      // page-algo가 모달 모드 — _c24CompStart가 자동으로 모달 열고 카메라 시작
-      if(typeof _c24CompStart === 'function'){
-        try { _c24CompStart(); } catch(e){ console.log('[hfu] _c24CompStart err:', e); }
+      // C-41 페이즈 1: 새 측정 엔진 (cgo-fuli 구조 참고, cgo-message 독립 작성)
+      if(typeof window.c41hStart === 'function'){
+        c41hStart();
       } else {
-        alert('측정 시스템 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+        alert('측정 엔진 로딩 중입니다. 잠시 후 다시 시도해주세요.');
       }
     };
 
@@ -22481,6 +22484,532 @@ function _cgoSviIntroPopup(){
     };
     console.log('[C-41] goScreen 강화 후킹 완료 (이중 안전 모드)');
   }
+})();
+</script>
+
+
+<!-- ════ C-41 박입 ⑬ — 2단계: SVI 카메라 작동 (cgoCameraCheck 누락 함수 박입) ════ -->
+<script>
+// FULI 본진에 있던 cgoCameraCheck 함수 (cgo-message에 빠져있었음)
+// SVI · 두피 · 메이크업 · 치매 등 카메라 사용 페이지 공통 진입점
+if(typeof window.cgoCameraCheck !== 'function'){
+  window.cgoCameraCheck = function(onReady){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert('⚠️ 이 브라우저는 카메라를 지원하지 않습니다.\n\nChrome · Safari · Edge 최신 버전을 사용해주세요.');
+      return;
+    }
+    // SSL/HTTPS 환경 확인 (file://은 카메라 권한이 일부 제한될 수 있음)
+    if(location.protocol === 'http:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'){
+      console.warn('[cgoCameraCheck] HTTPS 환경에서만 카메라가 안정적으로 작동합니다');
+    }
+    // 실제 카메라 요청은 sviStartScanCore에서 진행 (여기는 통과만)
+    if(typeof onReady === 'function'){
+      try { onReady(); } catch(e){ console.error('[cgoCameraCheck] callback err:', e); }
+    }
+  };
+  console.log('[C-41] cgoCameraCheck 박입 완료 — SVI 카메라 작동 가능');
+}
+</script>
+
+
+<!-- ════ C-41 박입 ⑭ 페이즈 1 — Health 카메라 측정 엔진 (얼굴 60초 rPPG · 독립 작성) ════ -->
+
+<!-- ▼ 측정 모달 HTML ▼ -->
+<div id="c41h-modal" style="display:none;position:fixed;inset:0;z-index:30000;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+
+  <!-- 닫기 버튼 -->
+  <button id="c41h-close" style="position:fixed;top:18px;right:18px;z-index:30001;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+
+  <!-- 상단: 단계 표시 -->
+  <div style="padding:80px 20px 20px;text-align:center;">
+    <div style="font-size:13px;font-weight:800;color:#059669;margin-bottom:8px;letter-spacing:.08em;">PHASE 1 · 6단계 종합 측정</div>
+    <div id="c41h-stage-name" style="font-size:24px;font-weight:900;color:#0d3a3a;margin-bottom:6px;">① 얼굴 측정 (60초)</div>
+    <div id="c41h-stage-desc" style="font-size:13px;color:rgba(13,58,58,0.7);">얼굴을 카메라 중앙에 두고 가만히 계세요</div>
+  </div>
+
+  <!-- 진행 바 -->
+  <div style="padding:0 20px 20px;max-width:600px;margin:0 auto;">
+    <div style="display:flex;gap:4px;margin-bottom:14px;">
+      <div id="c41h-pb-1" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);overflow:hidden;"><div style="width:0%;height:100%;background:linear-gradient(90deg,#059669,#10b981);transition:width .3s;"></div></div>
+      <div id="c41h-pb-2" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);"></div>
+      <div id="c41h-pb-3" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);"></div>
+      <div id="c41h-pb-4" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);"></div>
+      <div id="c41h-pb-5" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);"></div>
+      <div id="c41h-pb-6" style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.5);"></div>
+    </div>
+  </div>
+
+  <!-- 카메라 영상 -->
+  <div style="padding:0 20px;max-width:600px;margin:0 auto;">
+    <div style="position:relative;width:100%;aspect-ratio:4/3;background:#0d3a3a;border-radius:18px;overflow:hidden;border:2px solid rgba(255,255,255,0.5);box-shadow:0 8px 28px rgba(13,58,58,0.25);">
+      <video id="c41h-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
+      <canvas id="c41h-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+      
+      <!-- 안내 오버레이 -->
+      <div id="c41h-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;background:rgba(13,58,58,0.55);color:#fff;">
+        <div style="font-size:64px;margin-bottom:14px;">📷</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:10px;">카메라 시작 대기</div>
+        <button id="c41h-start-cam" style="padding:14px 28px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(5,150,105,0.4);">📷 카메라 시작</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 측정 라이브 데이터 -->
+  <div style="padding:20px;max-width:600px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;">
+      <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid rgba(13,58,58,0.12);">
+        <div style="font-size:10px;color:rgba(13,58,58,0.6);font-weight:700;margin-bottom:4px;">BPM</div>
+        <div id="c41h-bpm" style="font-size:22px;font-weight:900;color:#0d3a3a;">--</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid rgba(13,58,58,0.12);">
+        <div style="font-size:10px;color:rgba(13,58,58,0.6);font-weight:700;margin-bottom:4px;">HRV</div>
+        <div id="c41h-hrv" style="font-size:22px;font-weight:900;color:#0d3a3a;">--</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid rgba(13,58,58,0.12);">
+        <div style="font-size:10px;color:rgba(13,58,58,0.6);font-weight:700;margin-bottom:4px;">FCI</div>
+        <div id="c41h-fci" style="font-size:22px;font-weight:900;color:#0d3a3a;">--</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.6);border-radius:12px;padding:12px 6px;text-align:center;border:1px solid rgba(13,58,58,0.12);">
+        <div style="font-size:10px;color:rgba(13,58,58,0.6);font-weight:700;margin-bottom:4px;">남은 시간</div>
+        <div id="c41h-time" style="font-size:22px;font-weight:900;color:#059669;">60</div>
+      </div>
+    </div>
+
+    <!-- 신호 품질 표시 -->
+    <div style="background:rgba(255,255,255,0.5);border-radius:12px;padding:10px 14px;font-size:11px;color:rgba(13,58,58,0.75);text-align:center;">
+      <span id="c41h-quality">신호 품질: 측정 대기</span>
+    </div>
+  </div>
+
+  <!-- 정직 안내 -->
+  <div style="padding:14px 20px 40px;max-width:600px;margin:0 auto;">
+    <div style="background:rgba(255,255,255,0.4);border-radius:12px;padding:12px 14px;font-size:11px;color:rgba(13,58,58,0.7);text-align:center;">
+      💡 측정값은 의료 진단이 아닙니다. 의심 증상은 전문의 진료를 받으세요.
+    </div>
+  </div>
+</div>
+
+<script>
+// ▼▼▼ C-41 페이즈 1: 얼굴 60초 카메라 측정 엔진 ▼▼▼
+(function(){
+  'use strict';
+
+  // ━━━ BS 객체 (Body Scan 상태 — cgo-message 독립) ━━━
+  if(typeof window.BS === 'undefined'){
+    window.BS = {
+      on: false,           // 측정 중 플래그
+      sec: 0,              // 경과 초
+      TOTAL: 60,           // 1단계 총 시간 (얼굴 60초)
+      bpm: 0, hrv: 0, fci: 0,
+      timer: null
+    };
+  }
+
+  // ━━━ _rPPG 객체 (cgo-message에 정의 안 됨 → 박입) ━━━
+  if(typeof window._rPPG === 'undefined'){
+    window._rPPG = {
+      stream: null,
+      offCanvas: null,
+      offCtx: null,
+      rawSignal: [],
+      filteredSignal: [],
+      chromSignal: [],
+      timestamps: [],
+      peaks: [],
+      rriList: [],
+      sampleRate: 30,
+      rafId: null,
+      lastSampleTime: 0,
+      hasCamera: false,
+      lostCount: 0,
+      consecutiveLost: 0,
+      // CHROM 알고리즘용
+      Xs: [], Ys: [],
+      // 밴드패스 필터 (0.7~3.5Hz)
+      bpB: [0.0675, 0, -0.0675],
+      bpA: [1, -1.8454, 0.8650],
+      bpZ: [0, 0],
+      // 통계
+      bpm: 0, hrv: 0, fci: 0, snr: 0,
+      reset: function(){
+        this.rawSignal = []; this.filteredSignal = []; this.chromSignal = [];
+        this.timestamps = []; this.peaks = []; this.rriList = [];
+        this.Xs = []; this.Ys = []; this.bpZ = [0, 0];
+        this.lostCount = 0; this.consecutiveLost = 0;
+        this.bpm = 0; this.hrv = 0; this.fci = 0; this.snr = 0;
+      }
+    };
+  }
+
+  // ━━━ C-41 Health 측정 상태 머신 ━━━
+  window.c41hState = {
+    open: false,
+    phase: 0,            // 0=대기, 1=얼굴, 2=혀, 3=눈, 4=피부, 5=손등, 6=손바닥
+    measuring: false,
+    finished: false
+  };
+
+  // ━━━ UI 헬퍼 ━━━
+  function $(id){ return document.getElementById(id); }
+
+  function updateBar(phase, pct){
+    var bar = $('c41h-pb-' + phase);
+    if(!bar) return;
+    var inner = bar.querySelector('div');
+    if(inner){
+      inner.style.width = pct + '%';
+    } else {
+      bar.innerHTML = '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#059669,#10b981);transition:width .3s;"></div>';
+    }
+  }
+
+  function updateLive(){
+    var bpm = (_rPPG.bpm || 0).toFixed(0);
+    var hrv = (_rPPG.hrv || 0).toFixed(0);
+    var fci = (_rPPG.fci || 0).toFixed(0);
+    $('c41h-bpm').textContent = bpm > 0 ? bpm : '--';
+    $('c41h-hrv').textContent = hrv > 0 ? hrv : '--';
+    $('c41h-fci').textContent = fci > 0 ? fci : '--';
+    $('c41h-time').textContent = Math.max(0, BS.TOTAL - BS.sec);
+
+    // 품질 표시
+    var quality = '신호 품질: ';
+    if(!BS.on) quality += '측정 대기';
+    else if(_rPPG.consecutiveLost > 10) quality += '⚠️ 얼굴 추적 불가';
+    else if(_rPPG.chromSignal.length < 30) quality += '🟡 신호 수집 중...';
+    else if(bpm > 0) quality += '🟢 정상 (BPM: ' + bpm + ')';
+    else quality += '🟡 신호 처리 중';
+    $('c41h-quality').textContent = quality;
+  }
+
+  // ━━━ 카메라 시작 ━━━
+  function startCamera(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert('이 브라우저는 카메라를 지원하지 않습니다.\n\nChrome · Safari · Edge 최신 버전을 사용해주세요.');
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: { width: 640, height: 480, facingMode: 'user' },
+      audio: false
+    }).then(function(stream){
+      _rPPG.stream = stream;
+      _rPPG.hasCamera = true;
+      var v = $('c41h-video');
+      v.srcObject = stream;
+      v.onloadedmetadata = function(){
+        v.play();
+        // 오프스크린 캔버스
+        _rPPG.offCanvas = document.createElement('canvas');
+        _rPPG.offCanvas.width = 320;
+        _rPPG.offCanvas.height = 240;
+        _rPPG.offCtx = _rPPG.offCanvas.getContext('2d');
+        // MediaPipe 얼굴 감지 초기화
+        _c41hFD = initFaceDetection();
+        if(!_c41hFD){
+          alert('얼굴 감지 시스템 로딩 실패\n\n인터넷 연결을 확인하고 다시 시도하세요.\n(MediaPipe CDN 필요)');
+          return;
+        }
+        $('c41h-overlay').style.display = 'none';
+        // 측정 시작
+        beginMeasure();
+      };
+    }).catch(function(err){
+      console.error('[c41h] 카메라 실패:', err);
+      alert('카메라 권한이 거부되었습니다.\n\n브라우저 설정 → 카메라 허용 후 다시 시도하세요.');
+    });
+  }
+
+  // ━━━ 측정 시작 (얼굴 60초) ━━━
+  function beginMeasure(){
+    _rPPG.reset();
+    BS.on = true;
+    BS.sec = 0;
+    c41hState.phase = 1;
+    c41hState.measuring = true;
+
+    // rPPG 루프 시작
+    _rPPG.lastSampleTime = Date.now();
+    rppgLoop();
+
+    // 1초마다 시간 갱신
+    BS.timer = setInterval(function(){
+      if(!BS.on) return;
+
+      // ★ 정직 모드: 얼굴 안 보이면 시간 정지 (cgo-fuli의 정확성 정신)
+      if(!_c41hFaceDetected){
+        BS.faceLostSec = (BS.faceLostSec || 0) + 1;
+        $('c41h-quality').textContent = '⚠️ 얼굴이 안 보입니다 — 시간 정지 (' + BS.faceLostSec + '초 정지)';
+        // 시간 증가 안 함, 점수 계산 안 함
+        return;
+      }
+      BS.faceLostSec = 0;
+
+      // 얼굴 정상 → 시간 증가
+      BS.sec++;
+      var pct = Math.min(100, (BS.sec / BS.TOTAL) * 100);
+      updateBar(1, pct);
+
+      // CHROM 신호 처리 (매 1초)
+      if(typeof window._rPPGChromUpdate === 'function'){
+        try { _rPPGChromUpdate(); } catch(e){ console.warn('[c41h] chrom err:', e); }
+      }
+      // BPM/HRV 계산 (매 2초, 30개 이상 샘플 쌓이면)
+      if(BS.sec >= 10 && BS.sec % 2 === 0 && _rPPG.chromSignal.length >= 30){
+        if(typeof window._rPPGCalcVitals === 'function'){
+          try {
+            _rPPGCalcVitals();
+            BS.bpm = _rPPG.bpm;
+            BS.hrv = _rPPG.hrv;
+          } catch(e){ console.warn('[c41h] vitals err:', e); }
+        }
+        // FCI 계산
+        if(typeof window._rPPGCalcFCI === 'function'){
+          try {
+            _rPPGCalcFCI();
+            BS.fci = _rPPG.fci;
+          } catch(e){ console.warn('[c41h] fci err:', e); }
+        }
+      }
+
+      updateLive();
+
+      // 60초 도달 → 종료
+      if(BS.sec >= BS.TOTAL){
+        finishPhase1();
+      }
+    }, 1000);
+  }
+
+  // ━━━ rPPG 메인 루프 (카메라 영상에서 픽셀 샘플링) ━━━
+  function rppgLoop(){
+    if(!BS.on){ return; }
+    var now = Date.now();
+    var interval = 1000 / _rPPG.sampleRate;
+    if(now - _rPPG.lastSampleTime >= interval){
+      _rPPG.lastSampleTime = now;
+      // MediaPipe에 얼굴 감지 요청 + 신호 샘플링
+      feedFaceDetection();
+      sampleFromVideo();
+    }
+    _rPPG.rafId = requestAnimationFrame(rppgLoop);
+  }
+
+  // ━━━ MediaPipe 얼굴 감지 결과 저장 ━━━
+  window._c41hFaceBox = null;  // {xmin, ymin, width, height} 또는 null
+  window._c41hFaceDetected = false;  // 이번 프레임 얼굴 보임 여부
+
+  // ━━━ MediaPipe Face Detection 초기화 ━━━
+  function initFaceDetection(){
+    if(typeof FaceDetection === 'undefined'){
+      console.warn('[c41h] MediaPipe FaceDetection 미로드 — 폴백: 중앙 영역');
+      return null;
+    }
+    try {
+      var fd = new FaceDetection({
+        locateFile: function(file){
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/' + file;
+        }
+      });
+      fd.setOptions({
+        model: 'short',
+        minDetectionConfidence: 0.5
+      });
+      fd.onResults(function(results){
+        if(results.detections && results.detections.length > 0){
+          var d = results.detections[0];
+          if(d.boundingBox){
+            _c41hFaceBox = {
+              x: d.boundingBox.xCenter - d.boundingBox.width/2,
+              y: d.boundingBox.yCenter - d.boundingBox.height/2,
+              w: d.boundingBox.width,
+              h: d.boundingBox.height
+            };
+            _c41hFaceDetected = true;
+          }
+        } else {
+          _c41hFaceDetected = false;
+        }
+      });
+      return fd;
+    } catch(e){
+      console.error('[c41h] FaceDetection init err:', e);
+      return null;
+    }
+  }
+
+  // ━━━ 비디오에서 얼굴 영역 RGB 샘플 추출 (얼굴 감지 결합) ━━━
+  function sampleFromVideo(){
+    try {
+      var v = $('c41h-video');
+      if(!v || v.videoWidth === 0) return false;
+      var ctx = _rPPG.offCtx;
+      var W = _rPPG.offCanvas.width;
+      var H = _rPPG.offCanvas.height;
+      ctx.drawImage(v, 0, 0, W, H);
+
+      // 얼굴 감지 결과로 영역 결정
+      var x, y, w, h;
+      if(_c41hFaceDetected && _c41hFaceBox){
+        // 얼굴 영역 사용 (정규화 좌표 → 픽셀)
+        x = Math.floor(_c41hFaceBox.x * W);
+        y = Math.floor((_c41hFaceBox.y + _c41hFaceBox.h * 0.2) * H);  // 이마/볼 영역
+        w = Math.floor(_c41hFaceBox.w * W);
+        h = Math.floor(_c41hFaceBox.h * 0.5 * H);
+        // 경계 보정
+        x = Math.max(0, Math.min(W-1, x));
+        y = Math.max(0, Math.min(H-1, y));
+        w = Math.max(10, Math.min(W-x, w));
+        h = Math.max(10, Math.min(H-y, h));
+      } else {
+        // 얼굴 감지 안 됨 → 신호 추출 안 함 (정직 모드)
+        _rPPG.consecutiveLost = (_rPPG.consecutiveLost || 0) + 1;
+        return false;  // ★ 핵심: false 반환 → 시간 카운터에서 정지 처리
+      }
+
+      var data = ctx.getImageData(x, y, w, h).data;
+      var r = 0, g = 0, b = 0, count = 0;
+      for(var i = 0; i < data.length; i += 4){
+        var pr = data[i], pg = data[i+1], pb = data[i+2];
+        // 피부톤 필터
+        if(pr > 70 && pg > 40 && pb > 30 && pr > pb && (pr - pb) > 10){
+          r += pr; g += pg; b += pb; count++;
+        }
+      }
+      if(count < 50){
+        _rPPG.consecutiveLost = (_rPPG.consecutiveLost || 0) + 1;
+        return false;  // 피부 픽셀 부족 → 정지
+      }
+
+      // 얼굴 + 피부 정상 → 신호 저장
+      _rPPG.consecutiveLost = 0;
+      r /= count; g /= count; b /= count;
+
+      _rPPG.rawSignal.push(g);
+      _rPPG.timestamps.push(Date.now());
+      _rPPG.Xs.push(r - g);
+      _rPPG.Ys.push(0.5 * (r + g) - b);
+
+      // 최근 10초 버퍼 유지
+      var MAX = _rPPG.sampleRate * 10;
+      if(_rPPG.rawSignal.length > MAX){
+        _rPPG.rawSignal.shift();
+        _rPPG.timestamps.shift();
+        _rPPG.Xs.shift();
+        _rPPG.Ys.shift();
+      }
+      return true;
+    } catch(e){
+      console.warn('[c41h] sample err:', e);
+      return false;
+    }
+  }
+
+  // ━━━ MediaPipe에 매 프레임 비디오 전송 ━━━
+  var _c41hFD = null;
+  function feedFaceDetection(){
+    var v = $('c41h-video');
+    if(!v || v.videoWidth === 0 || !_c41hFD) return;
+    try {
+      _c41hFD.send({image: v});
+    } catch(e){ console.warn('[c41h] FD send err:', e); }
+  }
+
+  // ━━━ 페이즈 1 완료 (얼굴 60초 끝) ━━━
+  function finishPhase1(){
+    BS.on = false;
+    if(BS.timer){ clearInterval(BS.timer); BS.timer = null; }
+    if(_rPPG.rafId){ cancelAnimationFrame(_rPPG.rafId); _rPPG.rafId = null; }
+
+    c41hState.measuring = false;
+    c41hState.finished = true;
+
+    // 결과를 _bioFinalData에 저장 (hfuRefreshScores가 읽음)
+    if(!window._bioFinalData) window._bioFinalData = {};
+    window._bioFinalData.bpm = _rPPG.bpm || 0;
+    window._bioFinalData.hrv = _rPPG.hrv || 0;
+    window._bioFinalData.fci = _rPPG.fci || 0;
+    window._bioFinalData.faceScore = _rPPG.bpm > 0 ? 75 : 0;
+    window._bioFinalData.measureTime = Date.now();
+    window._bioFinalData.phase = 1;
+
+    // 카메라 끄기
+    if(_rPPG.stream){
+      _rPPG.stream.getTracks().forEach(function(t){ t.stop(); });
+      _rPPG.stream = null;
+      _rPPG.hasCamera = false;
+    }
+
+    // 완료 메시지
+    var msg = '✅ 페이즈 1 완료!\n\n' +
+              'BPM: ' + (_rPPG.bpm || 0).toFixed(0) + '\n' +
+              'HRV: ' + (_rPPG.hrv || 0).toFixed(0) + ' ms\n' +
+              'FCI: ' + (_rPPG.fci || 0).toFixed(0) + '\n\n' +
+              '※ 페이즈 2 (혀·눈·피부·손) 작업 진행 중';
+    
+    setTimeout(function(){
+      alert(msg);
+      closeModal();
+      // hfu 점수 갱신
+      if(typeof window.hfuRefreshScores === 'function'){
+        try { hfuRefreshScores(); } catch(e){ console.warn('[c41h] refresh err:', e); }
+      }
+    }, 500);
+  }
+
+  // ━━━ 모달 닫기 ━━━
+  function closeModal(){
+    BS.on = false;
+    if(BS.timer){ clearInterval(BS.timer); BS.timer = null; }
+    if(_rPPG.rafId){ cancelAnimationFrame(_rPPG.rafId); _rPPG.rafId = null; }
+    if(_rPPG.stream){
+      _rPPG.stream.getTracks().forEach(function(t){ t.stop(); });
+      _rPPG.stream = null;
+    }
+    $('c41h-modal').style.display = 'none';
+    c41hState.open = false;
+    c41hState.measuring = false;
+  }
+
+  // ━━━ 외부 진입점 ━━━
+  window.c41hStart = function(){
+    if(c41hState.open) return;
+    c41hState.open = true;
+    c41hState.phase = 1;
+    c41hState.measuring = false;
+    c41hState.finished = false;
+
+    // 모달 열기 + 초기화
+    $('c41h-modal').style.display = 'block';
+    $('c41h-overlay').style.display = 'flex';
+    $('c41h-bpm').textContent = '--';
+    $('c41h-hrv').textContent = '--';
+    $('c41h-fci').textContent = '--';
+    $('c41h-time').textContent = '60';
+    $('c41h-quality').textContent = '신호 품질: 측정 대기';
+    updateBar(1, 0);
+    for(var p = 2; p <= 6; p++){
+      var bar = $('c41h-pb-' + p);
+      if(bar) bar.innerHTML = '';
+    }
+  };
+
+  // ━━━ 이벤트 바인딩 ━━━
+  document.addEventListener('DOMContentLoaded', function(){
+    var closeBtn = $('c41h-close');
+    if(closeBtn) closeBtn.onclick = closeModal;
+    var startBtn = $('c41h-start-cam');
+    if(startBtn) startBtn.onclick = startCamera;
+  });
+  // DOMContentLoaded 이미 지났을 수도 있어서 한 번 더
+  setTimeout(function(){
+    var closeBtn = $('c41h-close');
+    if(closeBtn && !closeBtn.onclick) closeBtn.onclick = closeModal;
+    var startBtn = $('c41h-start-cam');
+    if(startBtn && !startBtn.onclick) startBtn.onclick = startCamera;
+  }, 1000);
+
+  console.log('[C-41 페이즈 1] Health 측정 엔진 박입 완료. c41hStart() 호출 시 작동.');
 })();
 </script>
 
