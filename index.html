@@ -1168,6 +1168,1436 @@ input[type=range].sec-range::-moz-range-thumb{
 /* 화면에 탭바 있을 때 내용 영역 여백 */
 .has-tabbar{display:flex;flex-direction:column;height:100%;}
 </style>
+
+<!-- ════ C-41 박입 ⑤ — scrSkinage 톤 통일 (메인 화면 민트 톤과 동일) ════ -->
+<style>
+/* ─── 1. 화면 배경: 메인 화면과 동일한 민트 그라데이션 ─── */
+#scrSkinage {
+  background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
+  color: #0d3a3a !important;
+}
+
+/* ─── 2. 헤더 (제일 위 SVI 로고 영역) — 흰색 프레임 ─── */
+#scrSkinage > div > div:nth-of-type(1) {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #0d3a3a !important;
+}
+/* 헤더 내부 글씨 진하게 */
+#scrSkinage > div > div:nth-of-type(1) * {
+  color: #0d3a3a !important;
+}
+#scrSkinage > div > div:nth-of-type(1) b {
+  color: #075050 !important;
+}
+
+/* ─── 3. 모든 내부 패널 → 흰색 프레임 카드 ─── */
+#scrSkinage > div > div {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* ─── 4. 텍스트 색 강제 진한 청록 (회색 글씨 모두 진하게) ─── */
+#scrSkinage div,
+#scrSkinage span,
+#scrSkinage p {
+  color: #0d3a3a;
+}
+#scrSkinage b {
+  color: #075050 !important;
+}
+
+/* ─── 5. 카메라 스캔 영역만 어둡게 유지 (영상 잘 보이게) ─── */
+#scrSkinage #svi-cam-wrap,
+#scrSkinage #svi-placeholder {
+  background: rgba(13,58,58,0.85) !important;
+  color: #f0f9ff !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
+}
+#scrSkinage #svi-placeholder div {
+  color: #b8f0f0 !important;
+}
+
+/* ─── 6. 작은 점수 박스들 (svi-luster, svi-elastic 등) ─── */
+#scrSkinage [id^="svi-zone-"],
+#scrSkinage #svi-luster,
+#scrSkinage #svi-elastic,
+#scrSkinage #svi-texture,
+#scrSkinage #svi-vitality,
+#scrSkinage #svi-collagen,
+#scrSkinage #svi-rppg-bpm,
+#scrSkinage #svi-rppg-hrv,
+#scrSkinage #svi-rppg-stress,
+#scrSkinage #svi-rppg-age,
+#scrSkinage #svi-skin-age-val,
+#scrSkinage #svi-real-age-val,
+#scrSkinage #svi-age-delta,
+#scrSkinage #svi-asym-score,
+#scrSkinage #svi-asym-yinyang,
+#scrSkinage #svi-zone-avg {
+  color: #0d3a3a !important;
+  font-weight: 900;
+}
+
+/* 점수 라벨 (작은 회색 글씨들) — 진하게 */
+#scrSkinage [style*="font-size:9px"],
+#scrSkinage [style*="font-size:10px"],
+#scrSkinage [style*="font-size:11px"] {
+  color: rgba(13,58,58,0.85) !important;
+}
+
+/* 강조 색은 살짝 톤 다운 (밝은 배경에서 잘 보이게) */
+#scrSkinage [style*="color:#38bdf8"] { color: #0284c7 !important; }
+#scrSkinage [style*="color:#34d399"] { color: #059669 !important; }
+#scrSkinage [style*="color:#f472b6"] { color: #be185d !important; }
+#scrSkinage [style*="color:#c084fc"] { color: #7c3aed !important; }
+#scrSkinage [style*="color:#fbbf24"] { color: #b45309 !important; }
+#scrSkinage [style*="color:#a78bfa"] { color: #6d28d9 !important; }
+#scrSkinage [style*="color:#818cf8"] { color: #4338ca !important; }
+#scrSkinage [style*="color:#f87171"] { color: #b91c1c !important; }
+#scrSkinage [style*="color:#f0f9ff"] { color: #0d3a3a !important; }
+#scrSkinage [style*="color:#fff"] { color: #0d3a3a !important; }
+#scrSkinage [style*="color:#f0e0a8"] { color: #075050 !important; }
+
+/* 옅은 카드 배경(rgba 어두운 톤)을 흰색으로 강제 */
+#scrSkinage [style*="background:rgba(0,0,0"] { background: rgba(255,255,255,0.5) !important; }
+#scrSkinage [style*="background:rgba(255,255,255,.04)"],
+#scrSkinage [style*="background:rgba(255,255,255,.06)"],
+#scrSkinage [style*="background:rgba(255,255,255,.03)"],
+#scrSkinage [style*="background:rgba(255,255,255,.05)"] {
+  background: rgba(255,255,255,0.5) !important;
+}
+
+/* ─── 7. 측정 시작 버튼 (분홍색 메인 버튼은 그대로 두기 — 사진에서 본 톤) ─── */
+#scrSkinage #svi-btn {
+  background: linear-gradient(135deg, #ff88bb, #ffb3d4) !important;
+  color: #111 !important;
+  border: none !important;
+}
+
+/* ─── 8. 입력 필드 (피부 나이 입력) ─── */
+#scrSkinage input {
+  background: rgba(255,255,255,0.85) !important;
+  color: #0d3a3a !important;
+  border: 1px solid rgba(13,58,58,0.2) !important;
+}
+
+/* ─── 9. AI 챗 메시지 영역 — 어두운 톤에서 밝은 톤으로 ─── */
+#scrSkinage #svi-chat-messages {
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.1);
+}
+
+/* ─── 10. 누르기 영역 (콜라겐 측정) ─── */
+#scrSkinage #svi-press-area {
+  background: linear-gradient(135deg, rgba(255,136,187,0.15), rgba(184,240,240,0.4)) !important;
+  border: 2px dashed rgba(13,58,58,0.3) !important;
+}
+
+/* ─── 11. 사용법 단계 카드들 (① ② ③ ④) ─── */
+#scrSkinage [style*="background:rgba(56,189,248,.06)"],
+#scrSkinage [style*="background:rgba(52,211,153,.06)"],
+#scrSkinage [style*="background:rgba(56,189,248,.05)"],
+#scrSkinage [style*="background:rgba(52,211,153,.05)"],
+#scrSkinage [style*="background:rgba(56,189,248,.08)"],
+#scrSkinage [style*="background:rgba(244,114,182,.08)"],
+#scrSkinage [style*="background:rgba(168,85,247,.08)"],
+#scrSkinage [style*="background:rgba(99,102,241,.08)"],
+#scrSkinage [style*="background:rgba(16,185,129,.08)"] {
+  background: rgba(255,255,255,0.55) !important;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑥ — 전 페이지 톤 통일 (메인 화면 민트 톤) ════ -->
+<!-- scrHealth · scrDementia · scrScalp · scrIQ · scrMakeup · scrMusic · scrFood · scrCouple -->
+<style>
+/* ─── 1. 모든 페이지 배경: 메인 화면과 동일 민트 그라데이션 ─── */
+#scrHealth,
+#scrDementia,
+#scrScalp,
+#scrIQ,
+#scrMakeup,
+#scrMusic,
+#scrFood,
+#scrCouple {
+  background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
+  color: #0d3a3a !important;
+}
+
+/* ─── 2. 모든 페이지의 텍스트 기본 색 ─── */
+#scrHealth div, #scrHealth span, #scrHealth p, #scrHealth h1, #scrHealth h2, #scrHealth h3, #scrHealth h4, #scrHealth label,
+#scrDementia div, #scrDementia span, #scrDementia p, #scrDementia h1, #scrDementia h2, #scrDementia h3, #scrDementia h4, #scrDementia label,
+#scrScalp div, #scrScalp span, #scrScalp p, #scrScalp h1, #scrScalp h2, #scrScalp h3, #scrScalp h4, #scrScalp label,
+#scrIQ div, #scrIQ span, #scrIQ p, #scrIQ h1, #scrIQ h2, #scrIQ h3, #scrIQ h4, #scrIQ label,
+#scrMakeup div, #scrMakeup span, #scrMakeup p, #scrMakeup h1, #scrMakeup h2, #scrMakeup h3, #scrMakeup h4, #scrMakeup label,
+#scrMusic div, #scrMusic span, #scrMusic p, #scrMusic h1, #scrMusic h2, #scrMusic h3, #scrMusic h4, #scrMusic label,
+#scrFood div, #scrFood span, #scrFood p, #scrFood h1, #scrFood h2, #scrFood h3, #scrFood h4, #scrFood label,
+#scrCouple div, #scrCouple span, #scrCouple p, #scrCouple h1, #scrCouple h2, #scrCouple h3, #scrCouple h4, #scrCouple label {
+  color: #0d3a3a;
+}
+
+/* 굵은 글씨는 더 진하게 */
+#scrHealth b, #scrDementia b, #scrScalp b, #scrIQ b, #scrMakeup b, #scrMusic b, #scrFood b, #scrCouple b {
+  color: #075050 !important;
+}
+
+/* ─── 3. 어두운 배경/카드 → 반투명 흰색 카드로 일괄 변환 ─── */
+#scrHealth [style*="background:rgba(0,0,0"],
+#scrDementia [style*="background:rgba(0,0,0"],
+#scrScalp [style*="background:rgba(0,0,0"],
+#scrIQ [style*="background:rgba(0,0,0"],
+#scrMakeup [style*="background:rgba(0,0,0"],
+#scrMusic [style*="background:rgba(0,0,0"],
+#scrFood [style*="background:rgba(0,0,0"],
+#scrCouple [style*="background:rgba(0,0,0"] {
+  background: rgba(255,255,255,0.5) !important;
+}
+
+#scrHealth [style*="background:rgba(255,255,255,.04)"],
+#scrHealth [style*="background:rgba(255,255,255,.05)"],
+#scrHealth [style*="background:rgba(255,255,255,.06)"],
+#scrHealth [style*="background:rgba(255,255,255,.03)"],
+#scrHealth [style*="background:rgba(255,255,255,.08)"],
+#scrDementia [style*="background:rgba(255,255,255,.04)"],
+#scrDementia [style*="background:rgba(255,255,255,.05)"],
+#scrDementia [style*="background:rgba(255,255,255,.06)"],
+#scrDementia [style*="background:rgba(255,255,255,.03)"],
+#scrDementia [style*="background:rgba(255,255,255,.08)"],
+#scrScalp [style*="background:rgba(255,255,255,.04)"],
+#scrScalp [style*="background:rgba(255,255,255,.05)"],
+#scrScalp [style*="background:rgba(255,255,255,.06)"],
+#scrScalp [style*="background:rgba(255,255,255,.03)"],
+#scrScalp [style*="background:rgba(255,255,255,.08)"],
+#scrIQ [style*="background:rgba(255,255,255,.04)"],
+#scrIQ [style*="background:rgba(255,255,255,.05)"],
+#scrIQ [style*="background:rgba(255,255,255,.06)"],
+#scrIQ [style*="background:rgba(255,255,255,.03)"],
+#scrIQ [style*="background:rgba(255,255,255,.08)"],
+#scrMakeup [style*="background:rgba(255,255,255,.04)"],
+#scrMakeup [style*="background:rgba(255,255,255,.05)"],
+#scrMakeup [style*="background:rgba(255,255,255,.06)"],
+#scrMakeup [style*="background:rgba(255,255,255,.03)"],
+#scrMakeup [style*="background:rgba(255,255,255,.08)"],
+#scrMusic [style*="background:rgba(255,255,255,.04)"],
+#scrMusic [style*="background:rgba(255,255,255,.05)"],
+#scrMusic [style*="background:rgba(255,255,255,.06)"],
+#scrMusic [style*="background:rgba(255,255,255,.03)"],
+#scrMusic [style*="background:rgba(255,255,255,.08)"],
+#scrFood [style*="background:rgba(255,255,255,.04)"],
+#scrFood [style*="background:rgba(255,255,255,.05)"],
+#scrFood [style*="background:rgba(255,255,255,.06)"],
+#scrFood [style*="background:rgba(255,255,255,.03)"],
+#scrFood [style*="background:rgba(255,255,255,.08)"],
+#scrCouple [style*="background:rgba(255,255,255,.04)"],
+#scrCouple [style*="background:rgba(255,255,255,.05)"],
+#scrCouple [style*="background:rgba(255,255,255,.06)"],
+#scrCouple [style*="background:rgba(255,255,255,.03)"],
+#scrCouple [style*="background:rgba(255,255,255,.08)"] {
+  background: rgba(255,255,255,0.55) !important;
+  border-color: rgba(255,255,255,0.6) !important;
+}
+
+/* ─── 4. 흰색·금색·옅은 글씨 → 진한 청록으로 일괄 변환 ─── */
+#scrHealth [style*="color:#fff"], #scrHealth [style*="color:white"], #scrHealth [style*="color:#f0e0a8"], #scrHealth [style*="color:#f0f9ff"], #scrHealth [style*="color:#e8eaf0"],
+#scrDementia [style*="color:#fff"], #scrDementia [style*="color:white"], #scrDementia [style*="color:#f0e0a8"], #scrDementia [style*="color:#f0f9ff"], #scrDementia [style*="color:#e8eaf0"],
+#scrScalp [style*="color:#fff"], #scrScalp [style*="color:white"], #scrScalp [style*="color:#f0e0a8"], #scrScalp [style*="color:#f0f9ff"], #scrScalp [style*="color:#e8eaf0"],
+#scrIQ [style*="color:#fff"], #scrIQ [style*="color:white"], #scrIQ [style*="color:#f0e0a8"], #scrIQ [style*="color:#f0f9ff"], #scrIQ [style*="color:#e8eaf0"],
+#scrMakeup [style*="color:#fff"], #scrMakeup [style*="color:white"], #scrMakeup [style*="color:#f0e0a8"], #scrMakeup [style*="color:#f0f9ff"], #scrMakeup [style*="color:#e8eaf0"],
+#scrMusic [style*="color:#fff"], #scrMusic [style*="color:white"], #scrMusic [style*="color:#f0e0a8"], #scrMusic [style*="color:#f0f9ff"], #scrMusic [style*="color:#e8eaf0"],
+#scrFood [style*="color:#fff"], #scrFood [style*="color:white"], #scrFood [style*="color:#f0e0a8"], #scrFood [style*="color:#f0f9ff"], #scrFood [style*="color:#e8eaf0"],
+#scrCouple [style*="color:#fff"], #scrCouple [style*="color:white"], #scrCouple [style*="color:#f0e0a8"], #scrCouple [style*="color:#f0f9ff"], #scrCouple [style*="color:#e8eaf0"] {
+  color: #0d3a3a !important;
+}
+
+/* 옅은 회색 글씨들도 진하게 (rgba 텍스트 패턴) */
+#scrHealth [style*="color:rgba(255,255,255"], #scrHealth [style*="color:rgba(240,236,224"], #scrHealth [style*="color:rgba(245,230,175"], #scrHealth [style*="color:rgba(240,230,200"], #scrHealth [style*="color:rgba(220,240,255"],
+#scrDementia [style*="color:rgba(255,255,255"], #scrDementia [style*="color:rgba(240,236,224"], #scrDementia [style*="color:rgba(245,230,175"], #scrDementia [style*="color:rgba(240,230,200"], #scrDementia [style*="color:rgba(220,240,255"],
+#scrScalp [style*="color:rgba(255,255,255"], #scrScalp [style*="color:rgba(240,236,224"], #scrScalp [style*="color:rgba(245,230,175"], #scrScalp [style*="color:rgba(240,230,200"], #scrScalp [style*="color:rgba(220,240,255"],
+#scrIQ [style*="color:rgba(255,255,255"], #scrIQ [style*="color:rgba(240,236,224"], #scrIQ [style*="color:rgba(245,230,175"], #scrIQ [style*="color:rgba(240,230,200"], #scrIQ [style*="color:rgba(220,240,255"],
+#scrMakeup [style*="color:rgba(255,255,255"], #scrMakeup [style*="color:rgba(240,236,224"], #scrMakeup [style*="color:rgba(245,230,175"], #scrMakeup [style*="color:rgba(240,230,200"], #scrMakeup [style*="color:rgba(220,240,255"],
+#scrMusic [style*="color:rgba(255,255,255"], #scrMusic [style*="color:rgba(240,236,224"], #scrMusic [style*="color:rgba(245,230,175"], #scrMusic [style*="color:rgba(240,230,200"], #scrMusic [style*="color:rgba(220,240,255"],
+#scrFood [style*="color:rgba(255,255,255"], #scrFood [style*="color:rgba(240,236,224"], #scrFood [style*="color:rgba(245,230,175"], #scrFood [style*="color:rgba(240,230,200"], #scrFood [style*="color:rgba(220,240,255"],
+#scrCouple [style*="color:rgba(255,255,255"], #scrCouple [style*="color:rgba(240,236,224"], #scrCouple [style*="color:rgba(245,230,175"], #scrCouple [style*="color:rgba(240,230,200"], #scrCouple [style*="color:rgba(220,240,255"] {
+  color: rgba(13,58,58,0.85) !important;
+}
+
+/* ─── 5. 강조 색 변환 (밝은 톤 → 진한 톤, 밝은 배경에서 보이게) ─── */
+#scrHealth [style*="color:#38bdf8"], #scrDementia [style*="color:#38bdf8"], #scrScalp [style*="color:#38bdf8"], #scrIQ [style*="color:#38bdf8"], #scrMakeup [style*="color:#38bdf8"], #scrMusic [style*="color:#38bdf8"], #scrFood [style*="color:#38bdf8"], #scrCouple [style*="color:#38bdf8"] { color: #0284c7 !important; }
+
+#scrHealth [style*="color:#34d399"], #scrDementia [style*="color:#34d399"], #scrScalp [style*="color:#34d399"], #scrIQ [style*="color:#34d399"], #scrMakeup [style*="color:#34d399"], #scrMusic [style*="color:#34d399"], #scrFood [style*="color:#34d399"], #scrCouple [style*="color:#34d399"] { color: #059669 !important; }
+
+#scrHealth [style*="color:#f472b6"], #scrDementia [style*="color:#f472b6"], #scrScalp [style*="color:#f472b6"], #scrIQ [style*="color:#f472b6"], #scrMakeup [style*="color:#f472b6"], #scrMusic [style*="color:#f472b6"], #scrFood [style*="color:#f472b6"], #scrCouple [style*="color:#f472b6"] { color: #be185d !important; }
+
+#scrHealth [style*="color:#c084fc"], #scrDementia [style*="color:#c084fc"], #scrScalp [style*="color:#c084fc"], #scrIQ [style*="color:#c084fc"], #scrMakeup [style*="color:#c084fc"], #scrMusic [style*="color:#c084fc"], #scrFood [style*="color:#c084fc"], #scrCouple [style*="color:#c084fc"] { color: #7c3aed !important; }
+
+#scrHealth [style*="color:#fbbf24"], #scrDementia [style*="color:#fbbf24"], #scrScalp [style*="color:#fbbf24"], #scrIQ [style*="color:#fbbf24"], #scrMakeup [style*="color:#fbbf24"], #scrMusic [style*="color:#fbbf24"], #scrFood [style*="color:#fbbf24"], #scrCouple [style*="color:#fbbf24"] { color: #b45309 !important; }
+
+#scrHealth [style*="color:#a78bfa"], #scrDementia [style*="color:#a78bfa"], #scrScalp [style*="color:#a78bfa"], #scrIQ [style*="color:#a78bfa"], #scrMakeup [style*="color:#a78bfa"], #scrMusic [style*="color:#a78bfa"], #scrFood [style*="color:#a78bfa"], #scrCouple [style*="color:#a78bfa"] { color: #6d28d9 !important; }
+
+#scrHealth [style*="color:#818cf8"], #scrDementia [style*="color:#818cf8"], #scrScalp [style*="color:#818cf8"], #scrIQ [style*="color:#818cf8"], #scrMakeup [style*="color:#818cf8"], #scrMusic [style*="color:#818cf8"], #scrFood [style*="color:#818cf8"], #scrCouple [style*="color:#818cf8"] { color: #4338ca !important; }
+
+#scrHealth [style*="color:#f87171"], #scrDementia [style*="color:#f87171"], #scrScalp [style*="color:#f87171"], #scrIQ [style*="color:#f87171"], #scrMakeup [style*="color:#f87171"], #scrMusic [style*="color:#f87171"], #scrFood [style*="color:#f87171"], #scrCouple [style*="color:#f87171"] { color: #b91c1c !important; }
+
+#scrHealth [style*="color:#d4a843"], #scrDementia [style*="color:#d4a843"], #scrScalp [style*="color:#d4a843"], #scrIQ [style*="color:#d4a843"], #scrMakeup [style*="color:#d4a843"], #scrMusic [style*="color:#d4a843"], #scrFood [style*="color:#d4a843"], #scrCouple [style*="color:#d4a843"] { color: #b8922f !important; }
+
+#scrHealth [style*="color:#d4a843"], #scrDementia [style*="color:#d4a843"], #scrScalp [style*="color:#d4a843"], #scrIQ [style*="color:#d4a843"], #scrMakeup [style*="color:#d4a843"], #scrMusic [style*="color:#d4a843"], #scrFood [style*="color:#d4a843"], #scrCouple [style*="color:#d4a843"] { color: #b8922f !important; }
+
+/* ─── 6. 카메라 영역은 어둡게 유지 (영상 잘 보이게) ─── */
+#scrIQ video, #scrIQ canvas,
+#scrScalp video, #scrScalp canvas,
+#scrDementia video, #scrDementia canvas,
+#scrMakeup video, #scrMakeup canvas,
+#scrCouple video, #scrCouple canvas {
+  background: #000 !important;
+}
+
+/* 카메라 placeholder 영역 (영상 영역만) */
+#scrIQ [id*="cam"], #scrIQ [id*="video"],
+#scrScalp [id*="cam"], #scrScalp [id*="video"],
+#scrDementia [id*="cam"], #scrDementia [id*="video"],
+#scrMakeup [id*="cam"], #scrMakeup [id*="video"] {
+  background: rgba(13,58,58,0.85);
+}
+
+/* ─── 7. 입력 필드 (input, textarea, select) ─── */
+#scrHealth input, #scrHealth textarea, #scrHealth select,
+#scrDementia input, #scrDementia textarea, #scrDementia select,
+#scrScalp input, #scrScalp textarea, #scrScalp select,
+#scrIQ input, #scrIQ textarea, #scrIQ select,
+#scrMakeup input, #scrMakeup textarea, #scrMakeup select,
+#scrMusic input, #scrMusic textarea, #scrMusic select,
+#scrFood input, #scrFood textarea, #scrFood select,
+#scrCouple input, #scrCouple textarea, #scrCouple select {
+  background: rgba(255,255,255,0.85) !important;
+  color: #0d3a3a !important;
+  border: 1px solid rgba(13,58,58,0.2) !important;
+}
+
+/* ─── 8. scrHealth 전용 미세 조정 (이미 연한 톤이라 가벼운 보정만) ─── */
+#scrHealth .hfu-top { background: rgba(255,255,255,0.55) !important; backdrop-filter: blur(10px); }
+#scrHealth .hfu-logo { color: #0d3a3a !important; }
+#scrHealth .hfu-hero-title { color: #0d3a3a !important; }
+#scrHealth .hfu-hero-sub { color: rgba(13,58,58,0.7) !important; }
+
+/* ─── 9. scrHealth의 hfu-sec/card도 흰 카드 ─── */
+#scrHealth .hfu-sec, #scrHealth .hfu-disease-card, #scrHealth .hfu-step-item, #scrHealth .hfu-ind-item, #scrHealth .hfu-metric-card, #scrHealth .hfu-start-card {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ─── 10. scrMusic 차트/리스트 영역도 통일 ─── */
+#scrMusic [class*="mfu-"] {
+  color: #0d3a3a;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑦ — scrHealth 간격 정리 (빈 섹션 안내 + padding 조정) ════ -->
+<style>
+/* ─── 1. .hfu-sec padding 줄이기 (원래 32px → 16px) ─── */
+#scrHealth .hfu-sec {
+  padding: 18px 16px !important;
+  margin: 12px 12px !important;
+  border-radius: 18px !important;
+}
+
+#scrHealth .hfu-sec-head {
+  margin-bottom: 12px !important;
+}
+
+#scrHealth .hfu-sec-title {
+  font-size: 15px !important;
+}
+
+/* ─── 2. 양호/주의 항목 영역 정리 ─── */
+#scrHealth .hfu-ind-section {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin-top: 10px;
+}
+
+#scrHealth .hfu-ind-block {
+  background: rgba(255,255,255,0.5) !important;
+  border-radius: 12px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+#scrHealth .hfu-ind-block-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #0d3a3a !important;
+  margin-bottom: 8px;
+}
+
+#scrHealth .hfu-ind-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-height: 40px;
+}
+
+/* 빈 .hfu-ind-list 안내 표시 (데이터가 없을 때) */
+#scrHealth .hfu-ind-list:empty::before {
+  content: "측정 후 표시";
+  color: rgba(13,58,58,0.45);
+  font-size: 11px;
+  font-style: italic;
+  text-align: center;
+  padding: 6px 0;
+  display: block;
+}
+
+/* ─── 3. 5부위 종합 건강 분석 빈 박스 padding 줄이기 ─── */
+#scrHealth #hfu-6part-empty {
+  padding: 14px 12px !important;
+}
+
+/* ─── 4. AI 건강 카드 padding 정리 ─── */
+#scrHealth .hfu-ai-card {
+  padding: 16px !important;
+  border-radius: 14px;
+}
+
+/* ─── 5. 주의 질병 리포트 빈 상태 박스 ─── */
+#scrHealth #hfu-disease-empty {
+  padding: 16px 14px !important;
+}
+
+/* ─── 6. 히어로 영역 (제일 위 측정 시작 카드) padding 정리 ─── */
+#scrHealth .hfu-hero {
+  padding: 24px 16px 18px !important;
+  margin: 0 12px 8px !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(255,255,255,0.6) !important;
+}
+
+#scrHealth .hfu-hero-title {
+  font-size: 22px !important;
+  margin-bottom: 6px !important;
+}
+
+#scrHealth .hfu-start-card {
+  margin-top: 14px !important;
+  padding: 14px !important;
+  background: rgba(255,255,255,0.55) !important;
+  border-radius: 14px !important;
+}
+
+/* ─── 7. 6단계 미리보기 그리드 ─── */
+#scrHealth .hfu-stages {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 6px !important;
+  margin: 12px 0;
+}
+
+#scrHealth .hfu-stage {
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 8px;
+  text-align: center;
+}
+
+#scrHealth .hfu-stage-icon { font-size: 18px; }
+#scrHealth .hfu-stage-name { font-size: 10px; font-weight: 700; color: #0d3a3a !important; }
+#scrHealth .hfu-stage-time { font-size: 9px; color: rgba(13,58,58,0.6) !important; }
+
+/* ─── 8. 핵심 지표 4종 카드 (BPM/HRV/FCI/RSI) ─── */
+#scrHealth .hfu-metric-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+}
+
+#scrHealth .hfu-metric-card {
+  padding: 12px 6px !important;
+  text-align: center;
+  border-radius: 12px;
+}
+
+#scrHealth .hfu-metric-icon { font-size: 22px; margin-bottom: 4px; }
+#scrHealth .hfu-metric-key { font-size: 13px; font-weight: 900; margin-bottom: 2px; }
+#scrHealth .hfu-metric-name { font-size: 11px; font-weight: 700; color: #0d3a3a !important; }
+#scrHealth .hfu-metric-desc { font-size: 9px; color: rgba(13,58,58,0.6) !important; margin-top: 3px; line-height: 1.5; }
+
+/* ─── 9. 질환 그리드 ─── */
+#scrHealth .hfu-disease-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 6px !important;
+}
+
+#scrHealth .hfu-disease-card {
+  padding: 10px 4px !important;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* ─── 10. 6단계 측정 상세 ─── */
+#scrHealth .hfu-steps-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#scrHealth .hfu-step-item {
+  padding: 10px 12px !important;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ─── 11. 의료 면책 영역 padding 줄이기 ─── */
+#scrHealth .hfu-honest {
+  margin: 12px 12px !important;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  background: rgba(255,255,255,0.4) !important;
+  font-size: 11px;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑧ — scrMusic 카드 선·글씨 모두 보이게 (mfu-* 정밀 처리) ════ -->
+<style>
+/* ─── 1. 18개 역학 카드 그리드 (6×3) ─── */
+#scrMusic .mfu-yk-grid {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 8px !important;
+}
+
+#scrMusic .mfu-yk-card {
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.18) !important;
+  border-radius: 12px !important;
+  padding: 12px 6px !important;
+  box-shadow: 0 2px 8px rgba(0,80,80,0.08);
+}
+
+#scrMusic .mfu-yk-card.bio {
+  background: rgba(255,255,255,0.75) !important;
+  border-color: #059669 !important;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.15);
+}
+
+#scrMusic .mfu-yk-card .mfu-yk-name,
+#scrMusic .mfu-yk-card div[style*="font-size"]:not([class*="mfu-yk-meta"]) {
+  color: #0d3a3a !important;
+  font-weight: 700;
+}
+
+#scrMusic .mfu-yk-card.bio .mfu-yk-name {
+  color: #059669 !important;
+}
+
+#scrMusic .mfu-yk-meta {
+  color: rgba(13,58,58,0.6) !important;
+}
+
+#scrMusic .mfu-yk-card:hover {
+  background: rgba(255,255,255,0.85) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2,132,199,0.2);
+}
+
+/* 큰 점수 숫자 (81, 80, 71, 76 등) */
+#scrMusic .mfu-yk-card > div:nth-child(3),
+#scrMusic .mfu-yk-card [style*="font-size:20"],
+#scrMusic .mfu-yk-card [style*="font-size:22"],
+#scrMusic .mfu-yk-card [style*="font-size:24"] {
+  color: #0d3a3a !important;
+  font-weight: 900 !important;
+}
+
+/* ─── 2. Bio Sensor 안내 메시지 ─── */
+#scrMusic .mfu-yk-bio-note {
+  background: rgba(255,255,255,0.5) !important;
+  border: 1px solid rgba(5,150,105,0.3) !important;
+  color: #0d3a3a !important;
+  padding: 10px 12px !important;
+  border-radius: 10px !important;
+  font-size: 11px !important;
+  margin-top: 8px;
+}
+
+/* ─── 3. 오늘의 추천 음악 — AI 블록 ─── */
+#scrMusic .mfu-ai-block {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+  margin-bottom: 10px;
+}
+
+#scrMusic .mfu-ai-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+#scrMusic .mfu-ai-dot {
+  color: #dc2626 !important;
+  animation: c41pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes c41pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+#scrMusic .mfu-ai-title {
+  color: #0d3a3a !important;
+  font-weight: 800;
+}
+
+#scrMusic .mfu-ai-meta,
+#scrMusic .mfu-ai-live {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+#scrMusic .mfu-ai-list {
+  margin-top: 8px;
+}
+
+#scrMusic .mfu-ai-loading {
+  color: rgba(13,58,58,0.5) !important;
+  font-size: 12px;
+  text-align: center;
+  padding: 14px;
+}
+
+/* ─── 4. 솔페지오 카드 그리드 ─── */
+#scrMusic .mfu-sol-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 8px !important;
+}
+
+#scrMusic .mfu-sol-card {
+  background: rgba(255,255,255,0.6) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  border-radius: 12px !important;
+  padding: 12px 8px !important;
+}
+
+#scrMusic .mfu-sol-name {
+  color: #0d3a3a !important;
+  font-weight: 800;
+}
+
+#scrMusic .mfu-sol-hz {
+  color: #0284c7 !important;
+  font-weight: 900;
+}
+
+#scrMusic .mfu-sol-effect {
+  color: rgba(13,58,58,0.65) !important;
+}
+
+/* ─── 5. 시진·계절 버튼들 ─── */
+#scrMusic .mfu-sj-btn,
+#scrMusic .mfu-ss-btn {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  color: #0d3a3a !important;
+}
+
+#scrMusic .mfu-sj-btn.active,
+#scrMusic .mfu-ss-btn.active {
+  background: rgba(2,132,199,0.15) !important;
+  border-color: #0284c7 !important;
+  color: #0284c7 !important;
+  font-weight: 800;
+}
+
+#scrMusic .mfu-sj-emoji {
+  font-size: 16px;
+}
+
+#scrMusic .mfu-sj-time {
+  color: rgba(13,58,58,0.6) !important;
+  font-size: 9px;
+}
+
+/* ─── 6. 오행별 처방 주파수 (mfu-oh-*) ─── */
+#scrMusic .mfu-oh-card {
+  background: rgba(255,255,255,0.6) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  border-radius: 12px !important;
+  padding: 12px !important;
+  margin-bottom: 8px;
+}
+
+#scrMusic .mfu-oh-emoji {
+  font-size: 22px;
+}
+
+#scrMusic .mfu-oh-name {
+  color: #0d3a3a !important;
+  font-weight: 800;
+}
+
+#scrMusic .mfu-oh-hz {
+  color: #0284c7 !important;
+  font-weight: 900;
+}
+
+#scrMusic .mfu-oh-bpm {
+  color: rgba(13,58,58,0.65) !important;
+}
+
+/* ─── 7. 음악 리스트 카드 (mfu-track 같은 곳) ─── */
+#scrMusic .mfu-play {
+  background: linear-gradient(135deg, #0284c7, #059669) !important;
+  color: #fff !important;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 음악 리스트 행 (이미지 + 제목 + 재생 버튼) — 일반 div 패턴 */
+#scrMusic [class*="track"], #scrMusic [class*="song"], #scrMusic [class*="music-item"] {
+  background: rgba(255,255,255,0.6) !important;
+  border: 1px solid rgba(13,58,58,0.12) !important;
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+
+/* ─── 8. 현재 재생 중 영역 (mfu-now) ─── */
+#scrMusic .mfu-now {
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  border-radius: 14px !important;
+  padding: 14px !important;
+}
+
+#scrMusic .mfu-now-label {
+  color: rgba(13,58,58,0.6) !important;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#scrMusic .mfu-now-value,
+#scrMusic .mfu-now-info {
+  color: #0d3a3a !important;
+  font-weight: 800;
+}
+
+#scrMusic .mfu-now-oh {
+  color: #0284c7 !important;
+}
+
+#scrMusic .mfu-now-dot {
+  color: #059669 !important;
+}
+
+/* ─── 9. 컨트롤 영역 (.mfu-control) ─── */
+#scrMusic .mfu-control {
+  background: rgba(255,255,255,0.5) !important;
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* ─── 10. 히어로 영역 ─── */
+#scrMusic .mfu-hero {
+  background: linear-gradient(135deg, rgba(255,255,255,0.6), rgba(184,240,240,0.4)) !important;
+  border-radius: 18px !important;
+  padding: 24px 16px !important;
+  margin: 12px !important;
+  border: 1px solid rgba(255,255,255,0.6);
+}
+
+#scrMusic .mfu-hero-title {
+  color: #0d3a3a !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+}
+
+#scrMusic .mfu-hero-sub {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+#scrMusic .mfu-grad {
+  background: linear-gradient(135deg, #0284c7, #059669) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+#scrMusic .mfu-badge {
+  background: rgba(255,255,255,0.5) !important;
+  border: 1px solid rgba(13,58,58,0.2) !important;
+  color: #0d3a3a !important;
+  border-radius: 100px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ─── 11. 모든 mfu-sec 흰 카드 ─── */
+#scrMusic .mfu-sec {
+  background: rgba(255,255,255,0.45) !important;
+  border: 1px solid rgba(255,255,255,0.5) !important;
+  border-radius: 16px !important;
+  padding: 16px !important;
+  margin: 12px !important;
+  backdrop-filter: blur(8px);
+}
+
+#scrMusic .mfu-sec-title {
+  color: #0d3a3a !important;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+#scrMusic .mfu-acc-text,
+#scrMusic .mfu-acc {
+  color: #059669 !important;
+  font-size: 10px;
+}
+
+/* ─── 12. 정직 안내(.mfu-honest) ─── */
+#scrMusic .mfu-honest {
+  background: rgba(255,255,255,0.4) !important;
+  border: 1px solid rgba(13,58,58,0.1) !important;
+  color: rgba(13,58,58,0.75) !important;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  margin: 12px !important;
+  font-size: 11px;
+}
+
+#scrMusic .mfu-lbl {
+  color: #b45309 !important;
+  font-weight: 800;
+}
+
+/* ─── 13. 옅은 회색·흰색 글씨들 모두 진한 청록으로 ─── */
+#scrMusic [style*="rgba(232,234,240"],
+#scrMusic [style*="rgba(255,255,255,.35)"],
+#scrMusic [style*="rgba(255,255,255,.5)"],
+#scrMusic [style*="rgba(255,255,255,.6)"],
+#scrMusic [style*="rgba(255,255,255,.7)"],
+#scrMusic [style*="rgba(255,255,255,.8)"],
+#scrMusic [style*="rgba(255,255,255,.85)"] {
+  color: rgba(13,58,58,0.85) !important;
+}
+
+/* ─── 14. 옅은 카드 배경(.025, .03 등 더 옅은 값들) ─── */
+#scrMusic [style*="background:rgba(255,255,255,.02"],
+#scrMusic [style*="background:rgba(255,255,255,.07"],
+#scrMusic [style*="background:rgba(255,255,255,.1)"] {
+  background: rgba(255,255,255,0.6) !important;
+  border-color: rgba(13,58,58,0.15) !important;
+}
+
+/* ─── 15. 음악 리스트 안 글씨들 (제목·정보) ─── */
+#scrMusic li, #scrMusic li *,
+#scrMusic [class*="-item"] {
+  color: #0d3a3a !important;
+}
+
+/* ─── 16. 모든 a 태그 (링크) ─── */
+#scrMusic a {
+  color: #0284c7 !important;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑨ — scrMusic 음악 카드 글씨 진하게 (mfu-track-* 정밀 처리) ════ -->
+<style>
+/* ─── 1. 음악 카드 wrapper ─── */
+#scrMusic .mfu-track {
+  background: rgba(255,255,255,0.7) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+  border-radius: 14px !important;
+  padding: 12px 14px !important;
+  box-shadow: 0 2px 8px rgba(0,80,80,0.05);
+}
+
+#scrMusic .mfu-track:hover {
+  background: rgba(255,255,255,0.9) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2,132,199,0.18) !important;
+}
+
+/* ─── 2. 노래 제목 — 진한 청록으로 잘 보이게 ─── */
+#scrMusic .mfu-track-title {
+  color: #0d3a3a !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+}
+
+/* ─── 3. 아티스트 이름 — 진한 회색 청록 ─── */
+#scrMusic .mfu-track-artist {
+  color: rgba(13,58,58,0.7) !important;
+  font-size: 11px !important;
+}
+
+/* ─── 4. Hz · 오행 (노란색이었던 강조) — 진한 황금/주황으로 ─── */
+#scrMusic .mfu-track-hz {
+  color: #b45309 !important;
+  font-weight: 800 !important;
+  font-size: 10px !important;
+}
+
+/* ─── 5. 추천 사유 (보라색 박스) ─── */
+#scrMusic .mfu-track-reason {
+  color: #6d28d9 !important;
+  background: rgba(167,139,250,0.12) !important;
+  border-left: 2px solid #7c3aed !important;
+  font-size: 10px !important;
+}
+
+/* ─── 6. 음악 커버 배경 (이모지 들어가는 원형) ─── */
+#scrMusic .mfu-track-cover {
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  box-shadow: 0 2px 6px rgba(0,80,80,0.1);
+}
+
+/* ─── 7. 재생 버튼 ▶ (이미 색은 좋은데 더 또렷하게) ─── */
+#scrMusic .mfu-track-play {
+  background: linear-gradient(135deg, #0284c7, #059669) !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  box-shadow: 0 3px 10px rgba(2,132,199,0.3);
+}
+
+/* ─── 8. 음악 리스트 컨테이너 ─── */
+#scrMusic .mfu-tracks {
+  gap: 10px !important;
+}
+
+/* ─── 9. 탭 버튼 (KR 기본 5 / 외국 5 / 솔페지오 6) ─── */
+#scrMusic .mfu-grid-label {
+  color: rgba(13,58,58,0.65) !important;
+  font-weight: 700 !important;
+}
+#scrMusic .mfu-grid-label .mfu-acc {
+  color: #0284c7 !important;
+}
+
+/* ─── 10. 옅은 흰색 글씨가 클래스에 정의된 경우 일괄 변환 (안전망) ─── */
+#scrMusic *[class*="mfu-"] {
+  /* 강제 변환은 위에서 했고, 여기는 fallback */
+}
+/* e8eaf0 흰색 톤을 진한 청록으로 (CSS 정의에 박힌 것) */
+</style>
+
+
+<!-- ════ C-41 박입 ⑩ — scrFood 인트로 팝업 톤 통일 + 5단계 색 정리 ════ -->
+<style>
+/* ─── 인트로 팝업 배경: 어두운 → 밝은 민트 톤 ─── */
+#fc-intro-pop {
+  background: linear-gradient(135deg, #9fe8e8 0%, #b8f0f0 50%, #a0e8e0 100%) !important;
+}
+
+#fc-intro-pop .fci-top {
+  background: rgba(159,232,232,0.95) !important;
+  backdrop-filter: blur(10px);
+}
+
+#fc-intro-pop .fci-x {
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.2) !important;
+  color: #0d3a3a !important;
+}
+
+/* ─── 히어로 (제목 영역) ─── */
+#fc-intro-pop .fci-hero-icon { /* 🍱 이모지 그대로 */ }
+
+#fc-intro-pop .fci-hero-title {
+  color: #059669 !important;
+  font-weight: 900 !important;
+}
+
+#fc-intro-pop .fci-hero-sub {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+#fc-intro-pop .fci-hero-tag {
+  background: rgba(5,150,105,0.15) !important;
+  border: 1px solid #059669 !important;
+  color: #059669 !important;
+}
+
+/* ─── 섹션 카드들 (① ② ③ ④ ⑤) ─── */
+#fc-intro-pop .fci-sec {
+  background: rgba(255,255,255,0.6) !important;
+  border: 1px solid rgba(255,255,255,0.7) !important;
+  backdrop-filter: blur(8px);
+}
+
+#fc-intro-pop .fci-lbl {
+  color: rgba(13,58,58,0.7) !important;
+  border-bottom: 1px solid rgba(13,58,58,0.12) !important;
+}
+
+#fc-intro-pop .fci-sec p {
+  color: rgba(13,58,58,0.9) !important;
+}
+
+#fc-intro-pop .fci-sec p b[style*="#34d399"] {
+  color: #059669 !important;
+}
+
+#fc-intro-pop .fci-sec p b[style*="#f0e0a8"] {
+  color: #b45309 !important;
+}
+
+/* ─── 5단계 사용법 (Step) ─── */
+#fc-intro-pop .fci-step-tit {
+  color: #0d3a3a !important;
+  font-weight: 800 !important;
+}
+
+#fc-intro-pop .fci-step-desc {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+#fc-intro-pop .fci-step-n {
+  background: rgba(5,150,105,0.2) !important;
+  color: #059669 !important;
+}
+
+/* ─── ③ 5단계 MEDICAL RECORD 영역 ─── */
+#fc-intro-pop .fci-chart {
+  border-bottom: 1px solid rgba(13,58,58,0.1) !important;
+}
+
+#fc-intro-pop .fci-chart-tit {
+  color: #0d3a3a !important;
+  font-weight: 800 !important;
+}
+
+#fc-intro-pop .fci-chart-desc {
+  color: rgba(13,58,58,0.7) !important;
+}
+
+/* 5개 단계 라벨 색 (진한 톤으로 잘 보이게) */
+#fc-intro-pop .fci-chart-c1 {
+  background: rgba(2,132,199,0.18) !important;
+  color: #0284c7 !important;
+  border: 1px solid #0284c7 !important;
+  font-weight: 900 !important;
+}
+#fc-intro-pop .fci-chart-c2 {
+  background: rgba(180,83,9,0.18) !important;
+  color: #b45309 !important;
+  border: 1px solid #b45309 !important;
+  font-weight: 900 !important;
+}
+#fc-intro-pop .fci-chart-c3 {
+  background: rgba(185,28,28,0.18) !important;
+  color: #b91c1c !important;
+  border: 1px solid #b91c1c !important;
+  font-weight: 900 !important;
+}
+#fc-intro-pop .fci-chart-c4 {
+  background: rgba(124,58,237,0.18) !important;
+  color: #7c3aed !important;
+  border: 1px solid #7c3aed !important;
+  font-weight: 900 !important;
+}
+#fc-intro-pop .fci-chart-c5 {
+  background: rgba(5,150,105,0.18) !important;
+  color: #059669 !important;
+  border: 1px solid #059669 !important;
+  font-weight: 900 !important;
+}
+
+/* ─── 특징 카드 (fci-feat) ─── */
+#fc-intro-pop .fci-feat-item {
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.15) !important;
+}
+
+#fc-intro-pop .fci-feat-t {
+  color: #0d3a3a !important;
+}
+
+#fc-intro-pop .fci-feat-d {
+  color: rgba(13,58,58,0.65) !important;
+}
+
+/* ─── 오행 (fci-oh) ─── */
+#fc-intro-pop .fci-oh {
+  border-bottom: 1px solid rgba(13,58,58,0.1) !important;
+}
+
+#fc-intro-pop .fci-oh-name {
+  color: #0d3a3a !important;
+  font-weight: 800;
+}
+
+#fc-intro-pop .fci-oh-meta {
+  color: rgba(13,58,58,0.65) !important;
+}
+
+/* ─── 팁/경고 박스 ─── */
+#fc-intro-pop .fci-tip {
+  background: rgba(5,150,105,0.1) !important;
+  border-left: 3px solid #059669 !important;
+  color: rgba(13,58,58,0.85) !important;
+}
+
+#fc-intro-pop .fci-warn {
+  background: rgba(180,83,9,0.1) !important;
+  border-left: 3px solid #b45309 !important;
+  color: rgba(13,58,58,0.85) !important;
+}
+
+/* ─── 시작 버튼 ─── */
+#fc-intro-pop .fci-btn {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  border: 2px solid #059669 !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(5,150,105,0.3);
+}
+
+#fc-intro-pop .fci-credit {
+  color: rgba(13,58,58,0.45) !important;
+}
+
+/* ─── 보너스: 사용법 + 단계 옅은 회색 글씨도 진하게 ─── */
+#fc-intro-pop * {
+  /* 위에서 직접 명시한 것 외 fallback */
+}
+#fc-intro-pop [style*="color:rgba(240,230,200"] {
+  color: rgba(13,58,58,0.8) !important;
+}
+#fc-intro-pop [style*="color:#34d399"] {
+  color: #059669 !important;
+}
+#fc-intro-pop [style*="color:#f0e0a8"] {
+  color: #b45309 !important;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑪ — scrFood 메인 헤더 + MEDICAL RECORD 카드 톤 통일 ════ -->
+<style>
+/* ─── MEDICAL RECORD 카드 배경 (어두운 그라데이션 → 흰 카드) ─── */
+#food-profile-card {
+  background: rgba(255,255,255,0.6) !important;
+  border: 1px solid #059669 !important;
+  box-shadow: 0 4px 16px rgba(5,150,105,0.15) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* 헤더 영역 (탭하여 입력 영역) */
+#food-profile-card > div:first-child {
+  background: linear-gradient(90deg, rgba(5,150,105,0.12), rgba(5,150,105,0.04)) !important;
+  border-bottom: 1px solid rgba(5,150,105,0.25) !important;
+}
+#food-profile-card > div:first-child:hover {
+  background: linear-gradient(90deg, rgba(5,150,105,0.18), rgba(5,150,105,0.06)) !important;
+}
+
+/* 🏥 아이콘 박스 */
+#food-profile-card > div:first-child > div:first-child {
+  background: rgba(255,255,255,0.7) !important;
+  border: 1.5px solid #059669 !important;
+}
+
+/* "CGO-FULI MEDICAL RECORD" 큰 글씨 */
+#food-profile-card [style*="font-weight:900"][style*="#34d399"] {
+  color: #059669 !important;
+}
+
+/* 부제 "실시간 개인 건강 진료 차트" */
+#food-profile-card [style*="color:rgba(52,211,153,.65)"] {
+  color: rgba(13,58,58,0.75) !important;
+}
+
+/* 5단계 라벨 색 (밝은 배경용 진한 톤) */
+#food-profile-card [style*="background:rgba(96,165,250,.12)"] {
+  background: rgba(2,132,199,0.18) !important;
+  border-color: #0284c7 !important;
+}
+#food-profile-card [style*="color:#60a5fa"] {
+  color: #0284c7 !important;
+  font-weight: 900;
+}
+
+#food-profile-card [style*="background:rgba(251,191,36,.12)"] {
+  background: rgba(180,83,9,0.18) !important;
+  border-color: #b45309 !important;
+}
+#food-profile-card [style*="color:#fbbf24"] {
+  color: #b45309 !important;
+  font-weight: 900;
+}
+
+#food-profile-card [style*="background:rgba(248,113,113,.12)"] {
+  background: rgba(185,28,28,0.18) !important;
+  border-color: #b91c1c !important;
+}
+#food-profile-card [style*="color:#f87171"] {
+  color: #b91c1c !important;
+  font-weight: 900;
+}
+
+#food-profile-card [style*="background:rgba(167,139,250,.12)"] {
+  background: rgba(124,58,237,0.18) !important;
+  border-color: #7c3aed !important;
+}
+#food-profile-card [style*="color:#a78bfa"] {
+  color: #7c3aed !important;
+  font-weight: 900;
+}
+
+#food-profile-card [style*="background:rgba(52,211,153,.12)"] {
+  background: rgba(5,150,105,0.18) !important;
+  border-color: #059669 !important;
+}
+#food-profile-card [style*="color:#34d399"] {
+  color: #059669 !important;
+  font-weight: 900;
+}
+
+/* 우측 "탭하여 입력 ▼" */
+#food-profile-card [style*="color:rgba(52,211,153,.6)"] {
+  color: rgba(13,58,58,0.6) !important;
+}
+
+#food-profile-arrow {
+  color: #059669 !important;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑫ — scrCouple 히어로 배너 + 폭 + 시작 버튼 ════ -->
+<style>
+/* ─── 히어로 배너 (이미지 위 글씨 구조) ─── */
+#scrCouple .cpl-hero-banner {
+  margin: 0 0 20px 0;
+  padding: 0;
+}
+
+#scrCouple .cpl-hero-img {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 0 0 24px 24px;
+  overflow: hidden;
+  background: 
+    radial-gradient(ellipse at 30% 40%, rgba(244,114,182,0.55), transparent 55%),
+    radial-gradient(ellipse at 70% 60%, rgba(167,139,250,0.5), transparent 55%),
+    radial-gradient(ellipse at 50% 80%, rgba(56,189,248,0.4), transparent 60%),
+    linear-gradient(135deg, #4c1d95 0%, #831843 50%, #1e3a8a 100%);
+  box-shadow: 0 8px 28px rgba(76,29,149,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 별·반짝임 패턴 (실제 이미지 없을 때 우주 분위기) */
+#scrCouple .cpl-hero-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#scrCouple .cpl-hero-stars span {
+  position: absolute;
+  color: rgba(255,255,255,0.6);
+  font-size: 14px;
+  animation: cplTwinkle 3s ease-in-out infinite;
+}
+#scrCouple .cpl-hero-stars span:nth-child(1) { top: 15%; left: 12%; animation-delay: 0s; font-size: 12px; }
+#scrCouple .cpl-hero-stars span:nth-child(2) { top: 22%; left: 78%; animation-delay: 0.4s; font-size: 18px; }
+#scrCouple .cpl-hero-stars span:nth-child(3) { top: 65%; left: 8%; animation-delay: 0.8s; font-size: 10px; }
+#scrCouple .cpl-hero-stars span:nth-child(4) { top: 78%; left: 88%; animation-delay: 1.2s; font-size: 14px; }
+#scrCouple .cpl-hero-stars span:nth-child(5) { top: 8%; left: 55%; animation-delay: 1.6s; font-size: 16px; }
+#scrCouple .cpl-hero-stars span:nth-child(6) { top: 45%; left: 92%; animation-delay: 0.2s; font-size: 11px; }
+#scrCouple .cpl-hero-stars span:nth-child(7) { top: 88%; left: 35%; animation-delay: 0.6s; font-size: 13px; }
+#scrCouple .cpl-hero-stars span:nth-child(8) { top: 35%; left: 30%; animation-delay: 1.0s; font-size: 9px; }
+#scrCouple .cpl-hero-stars span:nth-child(9) { top: 55%; left: 65%; animation-delay: 1.4s; font-size: 12px; }
+#scrCouple .cpl-hero-stars span:nth-child(10) { top: 18%; left: 42%; animation-delay: 1.8s; font-size: 8px; }
+
+@keyframes cplTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* 어두운 오버레이 (글씨 가독성) */
+#scrCouple .cpl-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.15), rgba(0,0,0,0.45));
+}
+
+/* 글씨 영역 */
+#scrCouple .cpl-hero-text {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  padding: 0 20px;
+}
+
+#scrCouple .cpl-hero-icon {
+  font-size: 44px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 4px 14px rgba(244,114,182,0.6));
+}
+
+#scrCouple .cpl-hero-title {
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin: 0 0 6px 0;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4), 0 0 24px rgba(244,114,182,0.5);
+  letter-spacing: -0.02em;
+}
+
+#scrCouple .cpl-hero-sub {
+  font-size: 13px !important;
+  color: rgba(255,255,255,0.92) !important;
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+#scrCouple .cpl-hero-tag {
+  font-size: 11px !important;
+  color: #fbbf24 !important;
+  margin: 0 !important;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+/* PC에서 더 크게 */
+@media (min-width: 768px) {
+  #scrCouple .cpl-hero-img { height: 280px; }
+  #scrCouple .cpl-hero-icon { font-size: 56px; }
+  #scrCouple .cpl-hero-title { font-size: 34px !important; }
+  #scrCouple .cpl-hero-sub { font-size: 16px !important; }
+  #scrCouple .cpl-hero-tag { font-size: 13px !important; }
+}
+
+/* ─── 시작 버튼 (세련된 디자인) ─── */
+#scrCouple .cpl-start-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #f472b6 0%, #a78bfa 50%, #38bdf8 100%);
+  background-size: 200% 100%;
+  border: none;
+  border-radius: 18px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: inherit;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 4px 14px rgba(244,114,182,0.35),
+    0 8px 28px rgba(167,139,250,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+  animation: cplBtnShine 4s ease-in-out infinite;
+}
+
+@keyframes cplBtnShine {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+#scrCouple .cpl-start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 18px rgba(244,114,182,0.45),
+    0 12px 36px rgba(167,139,250,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.4);
+}
+
+#scrCouple .cpl-start-btn:active {
+  transform: translateY(0);
+}
+
+/* 버튼 빛 효과 */
+#scrCouple .cpl-start-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: cplBtnSweep 3s ease-in-out infinite;
+}
+
+@keyframes cplBtnSweep {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
+
+#scrCouple .cpl-start-icon {
+  font-size: 22px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+}
+
+#scrCouple .cpl-start-text {
+  font-size: 16px;
+}
+
+#scrCouple .cpl-start-arrow {
+  font-size: 20px;
+  font-weight: 900;
+  transition: transform 0.3s ease;
+}
+
+#scrCouple .cpl-start-btn:hover .cpl-start-arrow {
+  transform: translateX(4px);
+}
+
+/* PC에서 더 크게 */
+@media (min-width: 768px) {
+  #scrCouple .cpl-start-btn {
+    padding: 22px 32px;
+    font-size: 18px;
+    border-radius: 22px;
+  }
+  #scrCouple .cpl-start-icon { font-size: 26px; }
+  #scrCouple .cpl-start-text { font-size: 18px; }
+  #scrCouple .cpl-start-arrow { font-size: 24px; }
+}
+
+/* ─── 폼/필드 영역 PC 폭 활용 ─── */
+@media (min-width: 768px) {
+  #scrCouple #cpl-section-input {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -5158,7 +6588,7 @@ var Q_POOL = {
     <!-- 히어로 -->
     <div class="fci-hero">
       <div class="fci-hero-icon">🍱</div>
-      <div class="fci-hero-title">음식 궁합 C-11</div>
+      <div class="fci-hero-title">음식 궁합</div>
       <div class="fci-hero-sub">FOOD × BIO × FIVE-ELEMENTS FUSION</div>
       <div class="fci-hero-tag">✦ 세계 최초 음식-생체 융합 시스템 ✦</div>
     </div>
@@ -5280,7 +6710,7 @@ var Q_POOL = {
     </div>
 
     <div class="fci-btn-wrap">
-      <button class="fci-btn" onclick="document.getElementById('fc-intro-pop').style.display='none';">🍱 음식 궁합 C-11 시작하기</button>
+      <button class="fci-btn" onclick="document.getElementById('fc-intro-pop').style.display='none';">🍱 음식 궁합 시작하기</button>
       <div class="fci-credit">음식 궁합 (C-11) · CGO-FULI · 특허 10-2026-0060113</div>
     </div>
   </div></div>
@@ -5300,8 +6730,8 @@ var Q_POOL = {
     <!-- 타이틀 -->
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:32px;margin-bottom:8px;">🍱</div>
-      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#f0ece0;margin-bottom:4px;">음식 궁합 <span style="font-family:'Orbitron',monospace;color:#34d399;font-size:18px;letter-spacing:.05em;">C-11</span></div>
-      <div style="font-size:12px;color:rgba(212,168,67,.7);">rPPG × 오행 × 생체 에너지 — 세계 최초 음식-생체 융합 · C-11</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#059669;font-weight:900;margin-bottom:4px;">음식 궁합</div>
+      <div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;">rPPG × 오행 × 생체 에너지 — 세계 최초 음식-생체 융합</div>
     </div>
 
     <!-- ══ CGO-FULI 실시간 진료 차트 (5단계) ══ -->
@@ -5694,11 +7124,24 @@ var Q_POOL = {
 
     <div class="screen" id="scrCouple" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
   <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
-      <div class="section-head">
-        <h2>💑 커플 궁합 정밀 분석</h2>
-        <p>4,500년 역학 × NASA × 실시간 생체 파동 — 세계 최초 우주적 궁합</p>
+      <!-- ★ C-41 박입 ⑫ — 커플 궁합 히어로 배너 (이미지 위 글씨 구조) -->
+      <div class="cpl-hero-banner">
+        <div class="cpl-hero-img" id="cpl-hero-img">
+          <!-- 배경 그라데이션 위에 별·하트 패턴 (실제 이미지로 교체 가능) -->
+          <div class="cpl-hero-stars">
+            <span>✦</span><span>✧</span><span>⋆</span><span>✦</span><span>✧</span>
+            <span>⋆</span><span>✦</span><span>✧</span><span>⋆</span><span>✦</span>
+          </div>
+          <div class="cpl-hero-overlay"></div>
+          <div class="cpl-hero-text">
+            <div class="cpl-hero-icon">💑</div>
+            <h2 class="cpl-hero-title">커플 궁합 정밀 분석</h2>
+            <p class="cpl-hero-sub">4,500년 역학 × NASA × 실시간 생체 파동</p>
+            <p class="cpl-hero-tag">— 세계 최초 우주적 궁합 —</p>
+          </div>
+        </div>
       </div>
-      <div style="padding:0 16px 40px;max-width:640px;margin:0 auto;">
+      <div style="padding:0 20px 40px;max-width:1100px;margin:0 auto;">
 
         <!-- ══ 암호 방 시스템 ══ -->
         <div id="cpl-room-section" style="margin-bottom:20px;">
@@ -5911,9 +7354,10 @@ var Q_POOL = {
             </div>
           </div>
 
-          <button onclick="cplStartAnalysis()"
-            style="width:100%;padding:16px;background:linear-gradient(135deg,rgba(212,168,67,.2),rgba(244,114,182,.1));border:1px solid rgba(212,168,67,.4);border-radius:14px;color:#d4a843;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:.05em;margin-bottom:16px;">
-            💑 궁합 정밀 분석 시작
+          <button onclick="cplStartAnalysis()" class="cpl-start-btn">
+            <span class="cpl-start-icon">💑</span>
+            <span class="cpl-start-text">궁합 정밀 분석 시작</span>
+            <span class="cpl-start-arrow">→</span>
           </button>
         </div>
 
