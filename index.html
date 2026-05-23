@@ -2601,6 +2601,219 @@ input[type=range].sec-range::-moz-range-thumb{
 <!-- C-41 페이즈 1.5 — MediaPipe 얼굴 감지 (cgo-fuli 동일 CDN) -->
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+
+<!-- ════ C-41 박입 ⑮ — scrHealth PC 웅장 레이아웃 + 히어로 + 카메라 보안 ════ -->
+<style>
+/* ─── 1. PC 폭 확장 (560 → 1200) ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-wrap {
+    max-width: 1200px !important;
+    padding: 0 24px 100px !important;
+  }
+}
+
+/* ─── 2. 상단 히어로 배너 (이미지 자리 + 글씨 오버레이) ─── */
+#scrHealth .hfu-c41-hero {
+  margin: 0 0 24px 0;
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: 0 0 28px 28px;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 25% 35%, rgba(244,114,182,0.35), transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(56,189,248,0.45), transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(52,211,153,0.4), transparent 55%),
+    linear-gradient(135deg, #134e4a 0%, #1e3a8a 45%, #831843 100%);
+  box-shadow: 0 8px 32px rgba(13,58,58,0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 별·심박 패턴 애니메이션 */
+#scrHealth .hfu-c41-hero-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#scrHealth .hfu-c41-hero-pattern span {
+  position: absolute;
+  color: rgba(255,255,255,0.7);
+  animation: c41hHeroFloat 3s ease-in-out infinite;
+}
+#scrHealth .hfu-c41-hero-pattern span:nth-child(1) { top: 12%; left: 8%; font-size: 22px; animation-delay: 0s; }
+#scrHealth .hfu-c41-hero-pattern span:nth-child(2) { top: 18%; right: 12%; font-size: 16px; animation-delay: 0.5s; }
+#scrHealth .hfu-c41-hero-pattern span:nth-child(3) { bottom: 22%; left: 14%; font-size: 18px; animation-delay: 1.0s; }
+#scrHealth .hfu-c41-hero-pattern span:nth-child(4) { bottom: 18%; right: 8%; font-size: 24px; animation-delay: 1.5s; }
+#scrHealth .hfu-c41-hero-pattern span:nth-child(5) { top: 38%; left: 35%; font-size: 14px; animation-delay: 2.0s; }
+#scrHealth .hfu-c41-hero-pattern span:nth-child(6) { top: 50%; right: 28%; font-size: 12px; animation-delay: 0.3s; }
+
+@keyframes c41hHeroFloat {
+  0%, 100% { opacity: 0.4; transform: translateY(0) scale(1); }
+  50% { opacity: 1; transform: translateY(-6px) scale(1.2); }
+}
+
+#scrHealth .hfu-c41-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.1), rgba(0,0,0,0.35));
+}
+
+#scrHealth .hfu-c41-hero-text {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  color: #fff;
+  padding: 0 24px;
+}
+
+#scrHealth .hfu-c41-hero-icon {
+  font-size: 48px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 16px rgba(52,211,153,0.6));
+}
+
+#scrHealth .hfu-c41-hero-title {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 0 0 6px 0;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.4), 0 0 28px rgba(52,211,153,0.5);
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+#scrHealth .hfu-c41-hero-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.92);
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+}
+
+#scrHealth .hfu-c41-hero-tag {
+  font-size: 11px;
+  color: #fbbf24;
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+}
+
+@media (min-width: 768px) {
+  #scrHealth .hfu-c41-hero { height: 320px; border-radius: 0 0 36px 36px; }
+  #scrHealth .hfu-c41-hero-icon { font-size: 64px; }
+  #scrHealth .hfu-c41-hero-title { font-size: 38px; }
+  #scrHealth .hfu-c41-hero-sub { font-size: 16px; }
+  #scrHealth .hfu-c41-hero-tag { font-size: 13px; }
+}
+
+/* ─── 3. 상위 12카드 그리드 (FULI · 신비/한방/검안선/장-남남/양음맥장 등) PC에서 6열 ─── */
+@media (min-width: 768px) {
+  #scrHealth .hfu-card-grid,
+  #scrHealth div[style*="grid-template-columns: repeat(6, 1fr)"],
+  #scrHealth div[style*="grid-template-columns:repeat(6,1fr)"] {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* ─── 4. 6단계 측정 그리드 (PC 6열, 모바일 3열) ─── */
+#scrHealth .hfu-stages {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+}
+@media (min-width: 768px) {
+  #scrHealth .hfu-stages {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* ─── 5. 핵심 지표 4종 (BPM·HRV·FCI·RSI) PC에서 4열 ─── */
+#scrHealth .hfu-metric-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+}
+@media (min-width: 768px) {
+  #scrHealth .hfu-metric-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+  }
+  #scrHealth .hfu-metric-card {
+    padding: 18px 12px !important;
+  }
+  #scrHealth .hfu-metric-icon { font-size: 32px !important; }
+  #scrHealth .hfu-metric-key { font-size: 18px !important; }
+  #scrHealth .hfu-metric-name { font-size: 14px !important; }
+  #scrHealth .hfu-metric-desc { font-size: 11px !important; }
+}
+
+/* ─── 6. 5부위 종합 박스 PC에서 넓게 ─── */
+@media (min-width: 768px) {
+  #scrHealth #hfu-6part-empty {
+    padding: 28px 24px !important;
+    font-size: 13px !important;
+  }
+}
+
+/* ─── 7. 질병 그리드 ─── */
+#scrHealth .hfu-disease-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+}
+@media (min-width: 768px) {
+  #scrHealth .hfu-disease-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* ─── 8. 양호/주의 항목 2열 그리드 ─── */
+#scrHealth .hfu-ind-section {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+@media (min-width: 768px) {
+  #scrHealth .hfu-ind-section {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px !important;
+  }
+  #scrHealth .hfu-ind-block {
+    padding: 18px !important;
+  }
+}
+
+/* ─── 9. AI 카드 영역 PC에서 넓게 ─── */
+@media (min-width: 768px) {
+  #scrHealth .hfu-ai-card,
+  #scrHealth .hfu-honest {
+    padding: 22px 28px !important;
+  }
+}
+
+/* ─── 10. 모달 PC에서 더 크게 ─── */
+@media (min-width: 768px) {
+  #c41h-modal > div:nth-of-type(3),
+  #c41h-modal > div:nth-of-type(4),
+  #c41h-modal > div:nth-of-type(5),
+  #c41h-modal > div:nth-of-type(6) {
+    max-width: 900px !important;
+  }
+  #c41h-modal #c41h-video,
+  #c41h-modal #c41h-canvas {
+    /* 비디오 영역 PC에서 더 크게 */
+  }
+  #c41h-modal #c41h-stage-name {
+    font-size: 32px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -12872,6 +13085,21 @@ var Q_POOL = {
   </style>
 
   <div class="hfu-wrap">
+      <!-- ★ C-41 페이즈 1.7 — 건강 예측 히어로 배너 (이미지 자리 + 글씨 오버레이) -->
+      <div class="hfu-c41-hero" id="hfu-c41-hero">
+        <div class="hfu-c41-hero-pattern">
+          <span>❤️</span><span>✦</span><span>🫀</span><span>✧</span><span>⋆</span><span>💗</span>
+        </div>
+        <div class="hfu-c41-hero-overlay"></div>
+        <div class="hfu-c41-hero-text">
+          <div class="hfu-c41-hero-icon">❤️</div>
+          <h2 class="hfu-c41-hero-title">나의 건강 예측</h2>
+          <p class="hfu-c41-hero-sub">rPPG × CHROM × 6부위 종합 측정</p>
+          <p class="hfu-c41-hero-tag">— 세계 최초 카메라 종합 진단 —</p>
+        </div>
+      </div>
+      <!-- ★ 히어로 끝 -->
+
 
     <!-- 상단 헤더 -->
     <div class="hfu-top">
@@ -22933,12 +23161,28 @@ if(typeof window.cgoCameraCheck !== 'function'){
     window._bioFinalData.measureTime = Date.now();
     window._bioFinalData.phase = 1;
 
-    // 카메라 끄기
+    // ★ 보안: 측정 후 카메라 완전 해제 (개인보호법)
     if(_rPPG.stream){
-      _rPPG.stream.getTracks().forEach(function(t){ t.stop(); });
+      _rPPG.stream.getTracks().forEach(function(t){
+        try { t.stop(); } catch(e){}
+      });
       _rPPG.stream = null;
       _rPPG.hasCamera = false;
     }
+    // MediaPipe 얼굴 감지도 종료
+    if(_c41hFD){
+      try { _c41hFD.close && _c41hFD.close(); } catch(e){}
+      _c41hFD = null;
+    }
+    _c41hFaceDetected = false;
+    _c41hFaceBox = null;
+    // 비디오 엘리먼트 stream 끊기 (브라우저 표시줄 빨간 점 제거)
+    var vEl = $('c41h-video');
+    if(vEl){
+      vEl.srcObject = null;
+      vEl.pause();
+    }
+    console.log('[c41h] 카메라 완전 해제 — 다음 측정 시 권한 재요청 필요');
 
     // 완료 메시지
     var msg = '✅ 페이즈 1 완료!\n\n' +
@@ -22962,31 +23206,63 @@ if(typeof window.cgoCameraCheck !== 'function'){
     BS.on = false;
     if(BS.timer){ clearInterval(BS.timer); BS.timer = null; }
     if(_rPPG.rafId){ cancelAnimationFrame(_rPPG.rafId); _rPPG.rafId = null; }
+    // ★ 보안: 모든 미디어 stream 완전 해제
     if(_rPPG.stream){
-      _rPPG.stream.getTracks().forEach(function(t){ t.stop(); });
+      _rPPG.stream.getTracks().forEach(function(t){
+        try { t.stop(); } catch(e){}
+      });
       _rPPG.stream = null;
+      _rPPG.hasCamera = false;
+    }
+    if(_c41hFD){
+      try { _c41hFD.close && _c41hFD.close(); } catch(e){}
+      _c41hFD = null;
+    }
+    _c41hFaceDetected = false;
+    _c41hFaceBox = null;
+    var vEl = $('c41h-video');
+    if(vEl){
+      vEl.srcObject = null;
+      vEl.pause();
     }
     $('c41h-modal').style.display = 'none';
     c41hState.open = false;
     c41hState.measuring = false;
+    console.log('[c41h] 모달 닫힘 — 카메라 완전 해제');
   }
 
   // ━━━ 외부 진입점 ━━━
   window.c41hStart = function(){
     if(c41hState.open) return;
+
+    // ★ 보안: 매번 카메라 stream 완전 초기화 (개인보호법)
+    if(_rPPG.stream){
+      try { _rPPG.stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+      _rPPG.stream = null;
+      _rPPG.hasCamera = false;
+    }
+    if(_c41hFD){
+      try { _c41hFD.close && _c41hFD.close(); } catch(e){}
+      _c41hFD = null;
+    }
+    _c41hFaceDetected = false;
+    _c41hFaceBox = null;
+
     c41hState.open = true;
     c41hState.phase = 1;
     c41hState.measuring = false;
     c41hState.finished = false;
 
-    // 모달 열기 + 초기화
+    // 모달 열기 + UI 초기화
     $('c41h-modal').style.display = 'block';
     $('c41h-overlay').style.display = 'flex';
+    var videoEl = $('c41h-video');
+    if(videoEl) videoEl.srcObject = null;  // 이전 stream 잔재 제거
     $('c41h-bpm').textContent = '--';
     $('c41h-hrv').textContent = '--';
     $('c41h-fci').textContent = '--';
     $('c41h-time').textContent = '60';
-    $('c41h-quality').textContent = '신호 품질: 측정 대기';
+    $('c41h-quality').textContent = '신호 품질: 측정 대기 (카메라 권한 요청 예정)';
     updateBar(1, 0);
     for(var p = 2; p <= 6; p++){
       var bar = $('c41h-pb-' + p);
