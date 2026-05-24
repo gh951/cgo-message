@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-makeup-full-115colors-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-camera-restore-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28268,6 +28268,77 @@ window.rmaiArCapture = function(){
   // 모든 옛 wrap 보다 늦게 (박입 6 = 2300ms 보다 더 늦게)
   setTimeout(injectColors, 2500);
   setTimeout(liberateCategories, 2600);
+})();
+</script>
+
+<!-- ════ C-42 박입 8 (정식 카메라 권한 체크) — 본진 cgoCameraCheck 복원 ════ -->
+<!--    문제: 동생 cgoCameraCheck = C-41 폴리필 10줄 (그냥 onReady 즉시 호출)   -->
+<!--          → 권한 거부 시 처리 X + _cgoCameraGranted 변수 없음 + stream 충돌 -->
+<!--    해법: 본진 FULI 의 정식 cgoCameraCheck (행 92195~92228) 그대로 박입     -->
+<!--    효과: 권한 한 번만 요청 / 거부 시 안내 / SVI ↔ 메이크업 stream 재사용    -->
+<!--    범위: C-41 폴리필은 안 지움 (typeof 체크라 자동 무시). 정식 함수만 활성  -->
+<script>
+(function(){
+  'use strict';
+
+  // ─── 상태 변수 (동생엔 없었음, 박입 ) ───
+  if(typeof window._cgoCameraGranted === 'undefined')    window._cgoCameraGranted = false;
+  if(typeof window._cgoCameraAlertShown === 'undefined') window._cgoCameraAlertShown = false;
+
+  function injectFullCameraCheck(){
+    // _cgoCameraAlert 가 있어야 함 (동생에 이미 정의됨: 행 24903)
+    if(typeof window._cgoCameraAlert !== 'function'){
+      setTimeout(injectFullCameraCheck, 300);
+      return;
+    }
+    if(window._cgoCameraCheckFullInjected) return;
+
+    // 본진 정식 함수 (행 92195~92228) 1:1 박입
+    window.cgoCameraCheck = function(onGranted, opts){
+      opts = opts || {};
+      // 이미 권한 받았고 stream 요청 아니면 즉시 콜백
+      if(window._cgoCameraGranted && !opts.constraints){
+        onGranted();
+        return;
+      }
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+        window._cgoCameraAlert('이 브라우저는 카메라를 지원하지 않습니다.');
+        return;
+      }
+      // constraints 지정 → stream 재사용 모드 (SVI ↔ 메이크업 공유)
+      var constraints = opts.constraints || {video:true};
+      navigator.mediaDevices.getUserMedia(constraints)
+        .then(function(s){
+          window._cgoCameraGranted = true;
+          if(opts.constraints){
+            // ★ stream 재사용 모드 — stop 하지 않고 콜백에 전달
+            onGranted(s);
+          } else {
+            // 기존 모드 — 권한만 확인하고 stop
+            s.getTracks().forEach(function(t){t.stop();});
+            onGranted();
+          }
+        })
+        .catch(function(){
+          window._cgoCameraGranted = false;
+          if(!window._cgoCameraAlertShown){
+            window._cgoCameraAlertShown = true;
+            window._cgoCameraAlert('카메라 접근이 거부됐습니다.<br><br>브라우저 주소창 옆 🔒 클릭<br>→ 카메라 → <b style="color:#34d399;">허용</b>으로 변경해 주세요.');
+          }
+        });
+    };
+    window._cgoCameraCheckFullInjected = true;
+
+    // 외부 노출 — 상태 확인 + 권한 리셋
+    window._cameraCheckControl = {
+      isGranted: function(){ return window._cgoCameraGranted; },
+      resetGranted: function(){ window._cgoCameraGranted = false; window._cgoCameraAlertShown = false; },
+      forceGranted: function(){ window._cgoCameraGranted = true; }  // 디버깅용
+    };
+  }
+
+  // 박입 7 (2600ms) 보다 늦게
+  setTimeout(injectFullCameraCheck, 2700);
 })();
 </script>
 
