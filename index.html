@@ -24346,8 +24346,18 @@ if(typeof window.cgoCameraCheck !== 'function'){
     // 로딩 표시
     resultEl.innerHTML = '<div style="text-align:center;padding:30px 14px;color:rgba(13,58,58,0.6);"><div style="font-size:14px;font-weight:700;margin-bottom:8px;">🤖 AI 분석 중...</div><div style="font-size:11px;">한의학·양의학 융합 알고리즘 적용 중</div></div>';
 
-    var sysPrompt =
-      '당신은 한의학(망진·체질·기혈·음양)과 양의학(rPPG·HRV·자율신경)을 융합한 통합 건강 분석 AI입니다.\n' +
+    // ★ C-42 — SVI 모드면 피부 분석, 아니면 건강 분석 (모드 분기)
+    var isSviMode = (typeof c41hState !== 'undefined') && c41hState.mode === 'svi';
+    var sysPrompt = isSviMode ?
+      ('당신은 SVI(피부 활력 지수) 분석 AI입니다. 카메라 측정값(BPM/HRV/FCI)을 \"피부 관점\"으로 재해석하여 자세히 답변합니다.\n' +
+      '짧고 형식적 답변 금지. 깊이 있고 따뜻하게.\n\n' +
+      '# 응답 형식 (정확히 4개 영역, 빈 줄 구분)\n\n' +
+      '✨ 피부 활력 종합\n[BPM/HRV/FCI를 피부 관점에서 4~6문장으로. 혈색·기력·재생력·생기. 점수 단순 반복 X, 피부 상태 의미·진단까지]\n\n' +
+      '💧 수분·탄력\n[FCI 기반 혈색·콜라겐 추정 4~6문장. 건조도, 탄력 회복력, 수분 보충 조언]\n\n' +
+      '🌸 혈색·생기\n[BPM·HRV 기반 안색 4~6문장. 혈류 순환이 피부에 미치는 영향, 안색 개선 방법]\n\n' +
+      '💪 피부 케어 권고\n[측정값 기반 5~7문장 실천 조언: 스킨케어 순서, 추천 성분, 생활 습관, 식이. 마지막에 \"피부과 진단 대체 X\" 한 줄]\n\n' +
+      '# 규칙\n- 한국어 100%. 한자·중국어·영어 금지.\n- 친근하고 따뜻한 톤.\n- 모든 답변은 \"피부\" 관점.\n- 각 영역 4~7문장.') :
+      ('당신은 한의학(망진·체질·기혈·음양)과 양의학(rPPG·HRV·자율신경)을 융합한 통합 건강 분석 AI입니다.\n' +
       '깊이 있고 자세한 분석을 제공하는 것이 핵심입니다. 짧고 형식적인 답변 금지.\n\n' +
       '# 응답 형식 (정확히 4개 영역, 각 영역 빈 줄로 구분)\n\n' +
       '🔍 핵심 발견\n' +
@@ -24364,7 +24374,7 @@ if(typeof window.cgoCameraCheck !== 'function'){
       '- 측정값을 의미·맥락·개선 방안까지 깊이 있게 풀어서 설명.\n' +
       '- 한방 관점(체질·기혈·정·신·음양)을 자연스럽게 녹여서.\n' +
       '- 각 영역 4~7문장. 짧고 형식적인 답변 절대 금지.\n' +
-      '- 영역 사이는 빈 줄 한 개로 명확히 구분.';
+      '- 영역 사이는 빈 줄 한 개로 명확히 구분.');
 
     var userPrompt =
       '측정 결과:\n- BPM: ' + bpm.toFixed(0) + ' 회/분\n- HRV: ' + hrv.toFixed(0) + ' ms\n- FCI: ' + fci.toFixed(0) + '\n\n' +
@@ -24910,7 +24920,7 @@ var _rmaiAr = {
   lastResults: null
 };
 
-// ★ 무지개 7색 라이브러리 (빨주노초파남보 — 모든 카테고리 공통)
+// ★ 베이직 컬러 라이브러리 (모든 카테고리 공통)
 var _rmaiArRainbowSet = [
   {n:'빨강', c:'#dc2626'},
   {n:'주황', c:'#f97316'},
@@ -26766,7 +26776,7 @@ function _rmaiArInitColorPicker(){
   var palOhActive = (_rmaiAr.currentPalette === 'oheng');
   var palRbActive = (_rmaiAr.currentPalette === 'rainbow');
   paletteToggle += '<button onclick="rmaiArSetPalette(\'oheng\')" style="flex:1;padding:6px 8px;background:'+(palOhActive?'linear-gradient(135deg,#fbbf24,#f59e0b)':'#f3f4f6')+';border:none;border-radius:8px;color:'+(palOhActive?'#1a1408':'#888')+';font-size:10px;font-weight:'+(palOhActive?'900':'700')+';cursor:pointer;font-family:inherit;">🎨 사주 추천 ('+(ohNames[oh]||oh)+')</button>';
-  paletteToggle += '<button onclick="rmaiArSetPalette(\'rainbow\')" style="flex:1;padding:6px 8px;background:'+(palRbActive?'linear-gradient(90deg,#dc2626,#f97316,#eab308,#16a34a,#2563eb,#9333ea)':'#f3f4f6')+';border:none;border-radius:8px;color:'+(palRbActive?'#fff':'#888')+';font-size:10px;font-weight:'+(palRbActive?'900':'700')+';cursor:pointer;font-family:inherit;text-shadow:'+(palRbActive?'0 1px 2px rgba(0,0,0,.4)':'none')+';">🌈 무지개 7색</button>';
+  paletteToggle += '<button onclick="rmaiArSetPalette(\'rainbow\')" style="flex:1;padding:6px 8px;background:'+(palRbActive?'linear-gradient(90deg,#dc2626,#f97316,#eab308,#16a34a,#2563eb,#9333ea)':'#f3f4f6')+';border:none;border-radius:8px;color:'+(palRbActive?'#fff':'#888')+';font-size:10px;font-weight:'+(palRbActive?'900':'700')+';cursor:pointer;font-family:inherit;text-shadow:'+(palRbActive?'0 1px 2px rgba(0,0,0,.4)':'none')+';">🎨 베이직 컬러</button>';
   paletteToggle += '</div>';
 
   // 현재 카테고리 + 현재 팔레트에 따른 색 배열
@@ -26775,7 +26785,7 @@ function _rmaiArInitColorPicker(){
   // 현재 카테고리 + 현재 팔레트에 따른 색 배열 (4 카테고리만)
   var currentColors = (_rmaiAr.currentPalette === 'rainbow') ? _rmaiArRainbowSet : (currentCat.pal || []);
   var appliedHex = _rmaiAr.appliedColors[currentCat.key];
-  var paletteLabel = (_rmaiAr.currentPalette === 'rainbow') ? '🌈 무지개 7색' : (currentCat.icon + ' ' + currentCat.subtitle + ' · 명품 7색');
+  var paletteLabel = (_rmaiAr.currentPalette === 'rainbow') ? '🎨 베이직 컬러' : (currentCat.icon + ' ' + currentCat.subtitle + ' · 명품 7색');
 
   var swatchHtml = '<div style="font-size:11px;font-weight:800;color:#1a1408;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">'
     + '<span>'+paletteLabel+'</span>'
@@ -27429,6 +27439,56 @@ window.rmaiArCapture = function(){
   setTimeout(wrapApplyColor, 200);
   setTimeout(wrapSetCategory, 250);
   setTimeout(injectIntensityCard, 300);
+})();
+</script>
+
+
+<!-- ════ C-42 박입 (정밀 수정 2) — palette 토글 + 카드 접고 펴기 + SVI 결과 카드 톤 ════ -->
+<script>
+(function(){
+  'use strict';
+
+  // ★ rmaiArSetPalette 토글 (같은 버튼 두 번 누르면 접힘)
+  function wrapSetPalette(){
+    if(typeof window.rmaiArSetPalette !== 'function'){ setTimeout(wrapSetPalette, 300); return; }
+    if(window._sviPaletteToggleWrapped) return;
+    var orig = window.rmaiArSetPalette;
+    window.rmaiArSetPalette = function(pal){
+      // 같은 팔레트 다시 누르면 토글 — 명품(luxury)으로 복귀
+      if(_rmaiAr.currentPalette === pal && pal === 'rainbow'){
+        _rmaiAr.currentPalette = 'luxury';
+        console.log('[c42] 베이직 컬러 접음 → 명품 복귀');
+      } else {
+        _rmaiAr.currentPalette = pal;
+        console.log('[c42] 팔레트 변경:', pal);
+      }
+      if(typeof _rmaiArInitColorPicker === 'function') _rmaiArInitColorPicker();
+    };
+    window._sviPaletteToggleWrapped = true;
+    console.log('[c42] rmaiArSetPalette 토글 wrap 완료');
+  }
+
+  // ★ rmaiArSetCardMode 토글 (같은 카드 다시 누르면 접힘)
+  function wrapSetCardMode(){
+    if(typeof window.rmaiArSetCardMode !== 'function'){ setTimeout(wrapSetCardMode, 300); return; }
+    if(window._sviCardModeToggleWrapped) return;
+    var orig = window.rmaiArSetCardMode;
+    window.rmaiArSetCardMode = function(cardKey){
+      if(_rmaiAr.cardMode === cardKey && _rmaiAr.cardExpanded[cardKey]){
+        // 같은 카드 다시 누르면 접힘
+        _rmaiAr.cardExpanded[cardKey] = false;
+        console.log('[c42] 카드 접음:', cardKey);
+        if(typeof _rmaiArInitColorPicker === 'function') _rmaiArInitColorPicker();
+      } else {
+        orig.apply(this, arguments);
+      }
+    };
+    window._sviCardModeToggleWrapped = true;
+    console.log('[c42] rmaiArSetCardMode 토글 wrap 완료');
+  }
+
+  setTimeout(wrapSetPalette, 200);
+  setTimeout(wrapSetCardMode, 250);
 })();
 </script>
 
