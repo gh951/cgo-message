@@ -3959,6 +3959,28 @@ input[type=range].sec-range::-moz-range-thumb{
   display: none !important;
 }
 </style>
+
+<!-- ════ C-42 박입 (사용자 요청) — HSL 미세조정 카드 + 베이직 컬러 토글 제거 ════ -->
+<style>
+/* 1) HSL 미세조정 카드 (12만색 바 + 물광 바) — 사용자가 활용 원함 (명품 색 ↔ HSL 동기화) */
+/* CSS 숨김 제거 — 카드 표시 유지 */
+
+/* 2) 베이직 컬러 7색 토글 버튼 숨김 — 명품 럭셔리만 사용 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetPalette('rainbow')"] {
+  display: none !important;
+}
+
+/* 3) "오행 보너스 100색 + 현실 500색" 안내 문구도 숨김 (베이스만 사용) */
+#rmai-ar-color-picker div[style*="font-size:9px"][style*="margin-top:6px"] {
+  display: none !important;
+}
+
+/* 4) "베이직 컬러" 영역(7색 swatch)도 숨김 — 명품 색상만 표시 */
+#rmai-ar-color-picker div:has(> div[style*="font-weight:800"]):has-text("베이직 컬러") {
+  display: none !important;
+}
+</style>
+
 </head>
 <body>
 <!-- ══ SCREEN COVER: 표지 (파트너 작품) ══ -->
@@ -26336,13 +26358,9 @@ function _rmaiArOnResults(results){
     // 4. 립 (가장 위)
     if(ac.lip) _rmaiArDrawLip(ctx, canvas, landmarks, ac.lip);
 
-    // ★ 468 랜드마크 점 (옅게)
-    ctx.fillStyle = 'rgba(255, 80, 80, 0.35)';
-    landmarks.forEach(function(lm){
-      ctx.beginPath();
-      ctx.arc(lm.x * canvas.width, lm.y * canvas.height, 0.8, 0, Math.PI * 2);
-      ctx.fill();
-    });
+    // ★ C-42 — 빨간 478점 시각화 제거 (사용자 요청 — 사진 보기 흉함)
+    // 원본 cgo-fuli 디버그용 코드. 메신저에서는 숨김.
+    // landmarks 478점 추적은 그대로 — 시각화만 제거.
 
     _rmaiAr.frameCount++;
     if(_rmaiAr.frameCount % 30 === 0){
@@ -27212,7 +27230,7 @@ window.rmaiArCapture = function(){
     var hrv = (typeof BS !== 'undefined' && BS.hrv) ? BS.hrv : 40;
     var bpmHz = bpm / 60;
     var t = (Date.now() / 1000) - window._fresnelT0;
-    var pulse = 0.85 + 0.15 * Math.sin(2 * Math.PI * bpmHz * t);
+    var pulse = 0.95 + 0.05 * Math.sin(2 * Math.PI * (bpmHz/2.5) * t);  // ★ 진폭 0.05 (3배↓) + 주기 2.5배↓ — 깜박깜박 제거
     var glossiness = 0.4 + Math.min(1, hrv / 80) * 0.6;
 
     // ═══ MediaPipe FaceMesh 얼굴 윤곽 36점 (FACE_OVAL) ═══
@@ -27561,6 +27579,118 @@ window.rmaiArCapture = function(){
 
   setTimeout(wrapSetPalette, 200);
   setTimeout(wrapSetCardMode, 250);
+})();
+</script>
+
+
+<!-- ════ C-42 박입 — currentPalette = 'luxury' 강제 (베이직 7색 안 보이게) ════ -->
+<script>
+(function(){
+  'use strict';
+  function forceLuxuryPalette(){
+    if(typeof _rmaiAr === 'undefined'){ setTimeout(forceLuxuryPalette, 300); return; }
+    // 현재 팔레트가 'rainbow'면 강제로 'luxury'로 (베이직 컬러 안 보이게)
+    if(_rmaiAr.currentPalette === 'rainbow'){
+      _rmaiAr.currentPalette = 'luxury';
+      console.log('[c42] currentPalette rainbow → luxury 강제 전환');
+      if(typeof _rmaiArInitColorPicker === 'function') _rmaiArInitColorPicker();
+    }
+    // 매 3초마다 체크 (혹시 토글되면 다시 luxury로)
+    setTimeout(forceLuxuryPalette, 3000);
+  }
+  setTimeout(forceLuxuryPalette, 1500);
+})();
+</script>
+
+
+<!-- ════ C-42 박입 (step55) — 명품 색 ↔ HSL 슬라이더 자동 동기화 ════ -->
+<script>
+(function(){
+  'use strict';
+
+  // ★ hex → HSL 변환 (사용자 요청: 명품 색 클릭 → 슬라이더 자동 박힘)
+  window.hexToHSL = function(hex){
+    hex = (hex || '').replace('#', '');
+    if(hex.length === 3) hex = hex.split('').map(function(c){return c+c;}).join('');
+    if(hex.length !== 6) return {h:0, s:0, l:50};
+    var r = parseInt(hex.substr(0,2), 16) / 255;
+    var g = parseInt(hex.substr(2,2), 16) / 255;
+    var b = parseInt(hex.substr(4,2), 16) / 255;
+    var max = Math.max(r,g,b), min = Math.min(r,g,b);
+    var h, s, l = (max+min)/2;
+    if(max === min){ h = s = 0; }
+    else {
+      var d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max){
+        case r: h = (g-b)/d + (g<b?6:0); break;
+        case g: h = (b-r)/d + 2; break;
+        case b: h = (r-g)/d + 4; break;
+      }
+      h /= 6;
+    }
+    return {h: Math.round(h*360), s: Math.round(s*100), l: Math.round(l*100)};
+  };
+
+  // ★ 명품 색 클릭 시 HSL 슬라이더 자동 박힘 + sviUpdateHsl 호출
+  window.sviSyncHslFromHex = function(hex){
+    if(!hex) return;
+    var hsl = window.hexToHSL(hex);
+    var hueBar = document.getElementById('svi-hue-bar');
+    var satBar = document.getElementById('svi-sat-bar');
+    var lightBar = document.getElementById('svi-light-bar');
+    if(hueBar) hueBar.value = hsl.h;
+    if(satBar) satBar.value = hsl.s;
+    if(lightBar) lightBar.value = hsl.l;
+    // 미리보기 라벨 업데이트
+    var hueVal = document.getElementById('svi-hue-val');
+    var satVal = document.getElementById('svi-sat-val');
+    var lightVal = document.getElementById('svi-light-val');
+    if(hueVal) hueVal.textContent = hsl.h + '°';
+    if(satVal) satVal.textContent = hsl.s + '%';
+    if(lightVal) lightVal.textContent = hsl.l + '%';
+    var preview = document.getElementById('svi-hsl-preview');
+    var hexLabel = document.getElementById('svi-hsl-hex');
+    if(preview) preview.style.background = hex;
+    if(hexLabel) hexLabel.textContent = hex.toUpperCase();
+    console.log('[c42] HSL 동기화:', hex, '→ H='+hsl.h+'°, S='+hsl.s+'%, L='+hsl.l+'%');
+  };
+
+  // ★ rmaiArApplyColor wrap — 명품 색 클릭 시 HSL 슬라이더 자동 동기화
+  function wrapApplyColorHsl(){
+    if(typeof window.rmaiArApplyColor !== 'function'){ setTimeout(wrapApplyColorHsl, 300); return; }
+    if(window._sviHslSyncWrapped) return;
+    var orig = window.rmaiArApplyColor;
+    window.rmaiArApplyColor = function(hex, btn){
+      orig.apply(this, arguments);
+      // HSL 슬라이더 자동 박힘
+      try { window.sviSyncHslFromHex(hex); } catch(e){}
+    };
+    window._sviHslSyncWrapped = true;
+    console.log('[c42] rmaiArApplyColor → HSL 자동 동기화 wrap 완료');
+  }
+
+  // ★ sviUpdateHsl wrap — 슬라이더 변경 시 자동 적용 (즉시 효과)
+  function wrapUpdateHsl(){
+    if(typeof window.sviUpdateHsl !== 'function'){ setTimeout(wrapUpdateHsl, 300); return; }
+    if(window._sviUpdateHslWrapped) return;
+    var orig = window.sviUpdateHsl;
+    window.sviUpdateHsl = function(){
+      orig.apply(this, arguments);
+      // 슬라이더 변경 시 즉시 적용 (✓적용 버튼 안 눌러도 됨)
+      var hexLabel = document.getElementById('svi-hsl-hex');
+      if(hexLabel && _rmaiAr && _rmaiAr.currentCategory === 'base'){
+        var newHex = hexLabel.textContent.toLowerCase();
+        _rmaiAr.appliedColors.base = newHex;
+        _rmaiAr.currentColor = newHex;
+      }
+    };
+    window._sviUpdateHslWrapped = true;
+    console.log('[c42] sviUpdateHsl → 즉시 적용 wrap 완료');
+  }
+
+  setTimeout(wrapApplyColorHsl, 200);
+  setTimeout(wrapUpdateHsl, 250);
 })();
 </script>
 
