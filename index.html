@@ -27198,43 +27198,115 @@ window.rmaiArCapture = function(){
     console.log('[c42] _rmaiAr 초기화 보강:', _rmaiAr.cardMode, _rmaiAr.currentPalette);
   }
 
-  // ★ 물광 셰이더 — 막둥이 의사코드 (Canvas 2D screen 합성)
+  // ★★★ Step B-A+ — 얼굴 전체 물광 (FaceOval 클리핑 + N·V 12점 highlight)
+  //     얼굴 영역 안에 부드러운 광 + 핵심 12점에 진짜 N·V 프레넬
+  //     1) FaceOval 36점으로 얼굴 영역 클리핑 → 배경 안 나옴
+  //     2) 얼굴 전체 큰 radial grad (부드러운 광택 베이스)
+  //     3) 12 핵심 highlight에 N·V Cross product fresnel
+  //     4) BS.bpm 펄스 + BS.hrv glossy mix + glossLevel slider
   window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
     if(!ctx || !canvas || !landmarks || glossLevel <= 0) return;
 
-    // 핵심 광 위치 — 광대(좌/우) + 콧대 + 이마 + 윗입술
-    var glowPoints = [
-      {idx:117, radius:38, alphaMul:1.0},  // 좌측 광대
-      {idx:346, radius:38, alphaMul:1.0},  // 우측 광대
-      {idx:6,   radius:22, alphaMul:0.9},  // 콧대 중간
-      {idx:4,   radius:18, alphaMul:0.85}, // 코끝
-      {idx:10,  radius:32, alphaMul:0.7},  // 이마 중앙
-      {idx:0,   radius:20, alphaMul:0.95}  // 윗입술 중앙
-    ];
+    // ─── BS 측정값 → 셰이더 uniform 변수 ───
+    var bpm = (typeof BS !== 'undefined' && BS.bpm) ? BS.bpm : 75;
+    var hrv = (typeof BS !== 'undefined' && BS.hrv) ? BS.hrv : 40;
+    var bpmHz = bpm / 60;
+    var t = (Date.now() / 1000) - window._fresnelT0;
+    var pulse = 0.85 + 0.15 * Math.sin(2 * Math.PI * bpmHz * t);
+    var glossiness = 0.4 + Math.min(1, hrv / 80) * 0.6;
+
+    // ═══ MediaPipe FaceMesh 얼굴 윤곽 36점 (FACE_OVAL) ═══
+    var FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
+                     397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
+                     172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
 
     ctx.save();
+
+    // ─── ① 얼굴 영역 클리핑 (배경에 광 새지 않게) ───
+    ctx.beginPath();
+    var first = true;
+    for(var i=0; i<FACE_OVAL.length; i++){
+      var lmO = landmarks[FACE_OVAL[i]];
+      if(!lmO) continue;
+      var ox = lmO.x * canvas.width;
+      var oy = lmO.y * canvas.height;
+      if(first){ ctx.moveTo(ox, oy); first = false; }
+      else ctx.lineTo(ox, oy);
+    }
+    ctx.closePath();
+    ctx.clip();
+
+    // ─── ② 얼굴 전체 큰 radial grad (부드러운 광택 베이스) ───
     ctx.globalCompositeOperation = 'screen';
+    var noseCenter = landmarks[1];
+    var foreheadTop = landmarks[10];
+    var chinBottom = landmarks[152];
+    if(noseCenter && foreheadTop && chinBottom){
+      var cx = noseCenter.x * canvas.width;
+      var cy = noseCenter.y * canvas.height;
+      var faceH = Math.abs((chinBottom.y - foreheadTop.y) * canvas.height);
+      var baseAlpha = glossLevel * glossiness * pulse * 0.32;
+      var gradBase = ctx.createRadialGradient(cx, cy*0.92, 0, cx, cy, faceH * 0.75);
+      gradBase.addColorStop(0,    'rgba(255,250,240,' + baseAlpha + ')');
+      gradBase.addColorStop(0.45, 'rgba(255,250,240,' + (baseAlpha*0.6) + ')');
+      gradBase.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = gradBase;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
 
-    glowPoints.forEach(function(p){
-      var lm = landmarks[p.idx];
-      if(!lm) return;
-      var x = lm.x * canvas.width;
-      var y = lm.y * canvas.height;
-      var alpha = glossLevel * p.alphaMul * 0.75; // 0~1 → 0~0.75
+    // ─── ③ 12 핵심 highlight (N·V 프레넬 cross product) ───
+    var glowAreas = [
+      {c: 117, n1: 50,  n2: 187, r: 48},   // 좌측 광대
+      {c: 346, n1: 280, n2: 411, r: 48},   // 우측 광대
+      {c: 50,  n1: 117, n2: 36,  r: 36},   // 광대-볼 좌
+      {c: 280, n1: 346, n2: 266, r: 36},   // 광대-볼 우
+      {c: 6,   n1: 197, n2: 4,   r: 30},   // 콧대 중
+      {c: 4,   n1: 1,   n2: 19,  r: 24},   // 코끝
+      {c: 10,  n1: 338, n2: 109, r: 40},   // 이마 중앙
+      {c: 67,  n1: 109, n2: 103, r: 30},   // 이마 좌
+      {c: 297, n1: 338, n2: 332, r: 30},   // 이마 우
+      {c: 0,   n1: 13,  n2: 17,  r: 24},   // 윗입술
+      {c: 17,  n1: 314, n2: 84,  r: 22},   // 아랫입술
+      {c: 175, n1: 152, n2: 199, r: 28}    // 턱 중앙
+    ];
 
-      var grad = ctx.createRadialGradient(x, y, 0, x, y, p.radius);
-      grad.addColorStop(0, 'rgba(255,255,255,' + alpha + ')');
-      grad.addColorStop(0.4, 'rgba(255,255,255,' + (alpha*0.5) + ')');
-      grad.addColorStop(1, 'rgba(255,255,255,0)');
+    glowAreas.forEach(function(area){
+      var p0 = landmarks[area.c];
+      var p1 = landmarks[area.n1];
+      var p2 = landmarks[area.n2];
+      if(!p0 || !p1 || !p2) return;
 
+      // Cross product 법선
+      var v1x = p1.x - p0.x, v1y = p1.y - p0.y, v1z = (p1.z || 0) - (p0.z || 0);
+      var v2x = p2.x - p0.x, v2y = p2.y - p0.y, v2z = (p2.z || 0) - (p0.z || 0);
+      var nx = v1y * v2z - v1z * v2y;
+      var ny = v1z * v2x - v1x * v2z;
+      var nz = v1x * v2y - v1y * v2x;
+      var len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+      if(len < 0.0001) return;
+      var Nz = Math.abs(nz / len);
+
+      // 프레넬 pow(1-N·V, 3)
+      var fresnel = Math.pow(1.0 - Nz, 3.0);
+      var intensity = fresnel * glossiness * pulse * glossLevel;
+      var alpha = Math.min(1, intensity * 1.6);
+      if(alpha < 0.015) return;
+
+      var x = p0.x * canvas.width;
+      var y = p0.y * canvas.height;
+      var grad = ctx.createRadialGradient(x, y, 0, x, y, area.r);
+      grad.addColorStop(0,    'rgba(255,255,255,' + alpha + ')');
+      grad.addColorStop(0.45, 'rgba(255,250,240,' + (alpha*0.55) + ')');
+      grad.addColorStop(1,    'rgba(255,255,255,0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(x, y, p.radius, 0, Math.PI*2);
+      ctx.arc(x, y, area.r, 0, Math.PI*2);
       ctx.fill();
     });
 
     ctx.restore();
   };
+  if(!window._fresnelT0) window._fresnelT0 = Date.now() / 1000;
 
   // ★ onResults wrap — rmaiArStart 호출 후 FaceMesh 등장하면 후크
   function tryFresnelHook(){
