@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-paper-singlepass-v13" name="c41-version"/>
+<meta content="2026-05-24-c42-eye-fix-nose-clip-v14" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28375,31 +28375,29 @@ window.rmaiArCapture = function(){
         });
         ctx.closePath();
 
-        // ③ 내부 천공 #2: 좌안
-        if(typeof _rmaiArEyeLeft !== 'undefined'){
-          _rmaiArEyeLeft.forEach(function(idx, i){
-            var lm = landmarks[idx];
-            if(!lm) return;
-            var x = lm.x * canvas.width;
-            var y = lm.y * canvas.height;
-            if(i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          });
-          ctx.closePath();
-        }
+        // ③ 내부 천공 #2: 좌안 (MediaPipe 468 진짜 눈 윤곽 16점 — 눈썹 제외)
+        var _eyeLeftReal = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
+        _eyeLeftReal.forEach(function(idx, i){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
 
-        // ④ 내부 천공 #3: 우안
-        if(typeof _rmaiArEyeRight !== 'undefined'){
-          _rmaiArEyeRight.forEach(function(idx, i){
-            var lm = landmarks[idx];
-            if(!lm) return;
-            var x = lm.x * canvas.width;
-            var y = lm.y * canvas.height;
-            if(i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          });
-          ctx.closePath();
-        }
+        // ④ 내부 천공 #3: 우안 (MediaPipe 468 진짜 눈 윤곽 16점)
+        var _eyeRightReal = [263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466];
+        _eyeRightReal.forEach(function(idx, i){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
 
         // ⑤ 단일 fill — evenodd winding rule (외부 채움 + 내부 천공)
         ctx.globalCompositeOperation = 'soft-light';
@@ -28445,6 +28443,97 @@ window.rmaiArCapture = function(){
 
   // 모든 옛 박입 후 (박입 10 = 2800ms, watchdog = 5000ms)
   setTimeout(applyPaper, 3000);
+})();
+</script>
+
+<!-- ════ C-42 박입 14 (물광 코 반짝임 제거) ════ -->
+<!--    문제: drawFresnelWaterGlow 의 6점 highlight 중 코끝/콧대 2점이              -->
+<!--          AR 메이크업 시 정적 반짝임으로 나타남 (사진 확인됨)                   -->
+<!--    해법: drawFresnelWaterGlow wrap → 코 영역에 clip rect 적용 후 호출         -->
+<!--          → 코 highlight 만 잘리고 나머지 4점 (이마/광대/턱) 그대로            -->
+<!--    범위: drawFresnelWaterGlow wrap (옛 함수 보존)                              -->
+<!--    토글: window._noseGlossControl.enable() / disable() — 기본 ON              -->
+<script>
+(function(){
+  'use strict';
+
+  function wrapNoseGloss(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapNoseGloss, 300); return;
+    }
+    if(window._noseGlossWrapped) return;
+
+    var origGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._noseGlossClipEnabled){
+        return origGlow(ctx, canvas, landmarks, glossLevel);  // 기능 OFF: 옛 그대로
+      }
+      if(!landmarks || !ctx || !canvas){
+        return origGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // 코끝(1) + 콧대중(6) 좌표 추출
+        var noseTip = landmarks[1];
+        var noseBridge = landmarks[6];
+        if(!noseTip || !noseBridge){
+          return origGlow(ctx, canvas, landmarks, glossLevel);
+        }
+
+        var tipX = noseTip.x * canvas.width;
+        var tipY = noseTip.y * canvas.height;
+        var brX  = noseBridge.x * canvas.width;
+        var brY  = noseBridge.y * canvas.height;
+
+        // 코 영역 박스 (코끝 ~ 콧대중 사이 + 양쪽 여유)
+        var minX = Math.min(tipX, brX) - 40;
+        var maxX = Math.max(tipX, brX) + 40;
+        var minY = Math.min(tipY, brY) - 25;
+        var maxY = Math.max(tipY, brY) + 25;
+        var boxW = maxX - minX;
+        var boxH = maxY - minY;
+
+        // 코 영역을 제외한 마스크 영역에만 물광 그리기
+        ctx.save();
+
+        // 캔버스 전체 → 코 박스 제외한 영역만 clip
+        ctx.beginPath();
+        // 캔버스 외곽 (외부 path)
+        ctx.rect(0, 0, canvas.width, canvas.height);
+        // 코 박스 (내부 path = 천공)
+        ctx.rect(minX, minY, boxW, boxH);
+        ctx.clip('evenodd');  // ★ 코 영역만 clip 으로 제외
+
+        // 옛 물광 호출 (코 영역은 자동으로 차단됨)
+        origGlow(ctx, canvas, landmarks, glossLevel);
+
+        ctx.restore();
+      } catch(e){
+        // 실패 시 옛 함수 폴백
+        origGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._noseGlossClipEnabled = true;
+    window._noseGlossWrapped = true;
+
+    window._noseGlossControl = {
+      enable:  function(){ window._noseGlossClipEnabled = true; },
+      disable: function(){ window._noseGlossClipEnabled = false; },
+      status:  function(){ return !!window._noseGlossClipEnabled; },
+      info:    function(){
+        return {
+          enabled: !!window._noseGlossClipEnabled,
+          mode:    'nose-clip-rect',
+          desc:    '코끝(1) + 콧대중(6) 주변 박스 영역 clip → 물광 차단'
+        };
+      }
+    };
+  }
+
+  // 박입 6 (2300ms) + 박입 13 (3000ms) 후
+  setTimeout(wrapNoseGloss, 3200);
 })();
 </script>
 
