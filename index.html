@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-waterglow-lerp-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-base-glow-attenuate-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27777,6 +27777,75 @@ window.rmaiArCapture = function(){
 
   // rmaiArStart 이후 1.5초 뒤 wrap 시도 (원 함수 박입 완료 후)
   setTimeout(wrapWaterGlow, 1500);
+})();
+</script>
+
+<!-- ════ C-42 박입 (베이스 광량 약화) — 얼굴 전체 떠보이는 현상 해결 ════ -->
+<!--    문제: 물광 슬라이더 높일수록 베이스 그라디언트가 얼굴 전체에 깔려 떠보임 -->
+<!--    원인: drawFresnelWaterGlow 안 baseAlpha = glossLevel × ... × 0.32 → 강함 -->
+<!--    수식: ctx.fillRect 호출 시 globalAlpha × 0.3 (70% 약화)                  -->
+<!--    효과: 12점 highlight 광은 그대로, 얼굴 전체 막은 약해짐 → 자연스러움      -->
+<!--    범위: Lerp wrap 위에 한 겹 더 (원 함수는 여전히 손 안 댐)                 -->
+<script>
+(function(){
+  'use strict';
+
+  // 베이스 그라디언트 약화 계수 (0 = 완전 끔, 1 = 그대로, 0.3 = 70% 약화)
+  var BASE_ALPHA_FACTOR = 0.3;
+
+  // ctx 를 Proxy 로 감싸서 fillRect (= 베이스 그라디언트) 만 globalAlpha 약화
+  // ctx.fill (= 12점 highlight) 은 통과 그대로
+  function makeProxyCtx(realCtx){
+    return new Proxy(realCtx, {
+      get: function(target, prop){
+        if(prop === 'fillRect'){
+          // 베이스 그라디언트가 fillRect 로 그려짐 → 여기서 약화
+          return function(x, y, w, h){
+            var origAlpha = target.globalAlpha;
+            target.globalAlpha = origAlpha * BASE_ALPHA_FACTOR;
+            target.fillRect(x, y, w, h);
+            target.globalAlpha = origAlpha;
+          };
+        }
+        var v = target[prop];
+        return (typeof v === 'function') ? v.bind(target) : v;
+      },
+      set: function(target, prop, value){
+        target[prop] = value;
+        return true;
+      }
+    });
+  }
+
+  function wrapBaseAlpha(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapBaseAlpha, 300);
+      return;
+    }
+    if(window._baseGlowWrapped) return;
+
+    var origFunc = window.drawFresnelWaterGlow;
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!ctx || !canvas) return origFunc.call(this, ctx, canvas, landmarks, glossLevel);
+      // Proxy ctx 만들어서 원 함수에 전달 — fillRect 만 약화
+      var proxyCtx = makeProxyCtx(ctx);
+      return origFunc.call(this, proxyCtx, canvas, landmarks, glossLevel);
+    };
+    window._baseGlowWrapped = true;
+
+    // 외부 노출 — 실시간 조정 + ON/OFF
+    window._baseGlowControl = {
+      setLevel: function(v){
+        BASE_ALPHA_FACTOR = Math.max(0, Math.min(1, v));
+      },
+      disable: function(){ BASE_ALPHA_FACTOR = 0; },   // 베이스 완전 끔 (12점만 남음)
+      enable:  function(){ BASE_ALPHA_FACTOR = 0.3; }, // 다시 약화 상태로
+      original:function(){ BASE_ALPHA_FACTOR = 1; }    // 원본 강도로 복귀
+    };
+  }
+
+  // Lerp wrap (1500ms) 보다 늦게 — 후행 wrap 이 바깥쪽 layer
+  setTimeout(wrapBaseAlpha, 1700);
 })();
 </script>
 
