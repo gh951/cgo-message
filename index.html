@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-revert-inj11-svi-restore" name="c41-version"/>
+<meta content="2026-05-24-c42-revert-inj7-hsl-restore" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28165,111 +28165,7 @@ window.rmaiArCapture = function(){
 </script>
 
 <!-- ════ C-42 박입 7 (메이크업 전체 활성화) — 본진 115 색상 이식 ════ -->
-<!--    문제: 동생 _maiColors = 빈 배열 + 옛 박입이 무조건 base 만 적용         -->
-<!--    해법: ① 본진 FULI 115 색상 데이터 박입 (5행 × lip/cheek/eye/base)      -->
-<!--          ② rmaiArSetCategory / rmaiArApplyColor 새 wrap → base 강제 해제   -->
-<!--    효과: 입술/볼/눈/피부 4개 카테고리 모두 자유 사용 (루즈 평가 가능)       -->
-<script>
-(function(){
-  'use strict';
-
-  // ─── 본진 FULI 의 _maiColors 데이터 (5행 × 4 카테고리 = 115 색상) ───
-  var FULL_COLORS = {
-    '목': {
-      lip:  [{c:'#FF6B9D',n:'로즈핑크'},{c:'#E8A87C',n:'코랄베이지'},{c:'#C9A96E',n:'테라코타'},{c:'#FF8C69',n:'살몬코랄'},{c:'#D4778A',n:'더스티로즈'},{c:'#B5541B',n:'번트오렌지'},{c:'#E07B54',n:'피치코랄'},{c:'#C85250',n:'딥로즈'}],
-      cheek:[{c:'#FFB7C5',n:'베이비핑크'},{c:'#FFAA80',n:'피치'},{c:'#F4A7B9',n:'로즈'},{c:'#FFD1A9',n:'아프리코트'},{c:'#E8B4A0',n:'누드코랄'},{c:'#F9C6C9',n:'소프트핑크'}],
-      eye:  [{c:'#8B4513',n:'초코브라운'},{c:'#556B2F',n:'올리브그린'},{c:'#4A7C59',n:'포레스트'},{c:'#8FBC8F',n:'세이지그린'},{c:'#6B8E23',n:'모스그린'}],
-      base: [{c:'#F5DEB3',n:'웜아이보리'},{c:'#DEB887',n:'버프베이지'},{c:'#D2B48C',n:'탄'},{c:'#C4A882',n:'웜베이지'}]
-    },
-    '화': {
-      lip:  [{c:'#DC143C',n:'크림슨레드'},{c:'#FF0000',n:'퓨어레드'},{c:'#C41E3A',n:'카디널레드'},{c:'#B22222',n:'파이어브릭'},{c:'#FF4500',n:'오렌지레드'},{c:'#E34234',n:'버밀리언'},{c:'#FF6347',n:'토마토레드'},{c:'#CD5C5C',n:'인디안레드'}],
-      cheek:[{c:'#FF7F7F',n:'라이트코랄'},{c:'#FA8072',n:'살몬'},{c:'#FF6B6B',n:'코랄레드'},{c:'#E88080',n:'소프트레드'},{c:'#FFB6C1',n:'라이트핑크'},{c:'#FF9999',n:'핑크'}],
-      eye:  [{c:'#8B0000',n:'다크레드'},{c:'#A0522D',n:'시에나'},{c:'#800020',n:'버건디'},{c:'#722F37',n:'와인'},{c:'#4A0404',n:'딥레드'}],
-      base: [{c:'#FFE4E1',n:'미스티로즈'},{c:'#FFDAB9',n:'피치퍼프'},{c:'#FFD700',n:'골드틴트'},{c:'#F0E68C',n:'카키베이지'}]
-    },
-    '토': {
-      lip:  [{c:'#D4A843',n:'골드베이지'},{c:'#C9956C',n:'카멜'},{c:'#B87333',n:'카퍼'},{c:'#A0785A',n:'모카브라운'},{c:'#C8A96E',n:'허니누드'},{c:'#D2691E',n:'초콜렛'},{c:'#CD853F',n:'페루'},{c:'#8B6914',n:'다크골드'}],
-      cheek:[{c:'#F5DEB3',n:'위트'},{c:'#DEB887',n:'버프'},{c:'#D2B48C',n:'탄핑크'},{c:'#C4A882',n:'샌드'},{c:'#E8C99A',n:'누드베이지'},{c:'#F0D090',n:'웜옐로우'}],
-      eye:  [{c:'#8B4513',n:'새들브라운'},{c:'#6B3A2A',n:'다크테라코타'},{c:'#A0522D',n:'시에나'},{c:'#704214',n:'세피아'},{c:'#5C4827',n:'다크모카'}],
-      base: [{c:'#FFF8DC',n:'코른실크'},{c:'#FAEBD7',n:'앤틱화이트'},{c:'#F5F5DC',n:'베이지'},{c:'#FAF0E6',n:'리넨'}]
-    },
-    '금': {
-      lip:  [{c:'#E8E8E8',n:'누드화이트'},{c:'#C0C0C0',n:'실버누드'},{c:'#D4C5B0',n:'그레이지'},{c:'#B8B8B8',n:'쿨그레이'},{c:'#E0D5C8',n:'웜베이지'},{c:'#A8A8A8',n:'미디엄그레이'},{c:'#F0EBE3',n:'오이스터'},{c:'#D6CFC7',n:'그레이베이지'}],
-      cheek:[{c:'#E8E8E8',n:'펄화이트'},{c:'#D0D0D0',n:'실버핑크'},{c:'#C8BEB2',n:'그레이지핑크'},{c:'#DDD5CC',n:'쿨베이지'},{c:'#E5DDD5',n:'오이스터핑크'},{c:'#F0E8E0',n:'소프트베이지'}],
-      eye:  [{c:'#808080',n:'미디엄그레이'},{c:'#A9A9A9',n:'다크그레이'},{c:'#696969',n:'딤그레이'},{c:'#708090',n:'슬레이트그레이'},{c:'#2F4F4F',n:'다크슬레이트'}],
-      base: [{c:'#F8F8FF',n:'고스트화이트'},{c:'#F0F0F0',n:'쿨화이트'},{c:'#E8E8E8',n:'실버화이트'},{c:'#DCDCDC',n:'게인스보로'}]
-    },
-    '수': {
-      lip:  [{c:'#4B0082',n:'인디고'},{c:'#6A0DAD',n:'퍼플'},{c:'#800080',n:'마젠타퍼플'},{c:'#8B008B',n:'다크마젠타'},{c:'#9400D3',n:'다크바이올렛'},{c:'#702963',n:'비잔틴'},{c:'#7B2D8B',n:'딥퍼플'},{c:'#4B0082',n:'로얄퍼플'}],
-      cheek:[{c:'#DDA0DD',n:'플럼'},{c:'#EE82EE',n:'바이올렛핑크'},{c:'#DA70D6',n:'오키드'},{c:'#C71585',n:'미디엄바이올렛'},{c:'#FF69B4',n:'핫핑크'},{c:'#DB7093',n:'페일바이올렛레드'}],
-      eye:  [{c:'#191970',n:'미드나잇블루'},{c:'#003153',n:'프러시안블루'},{c:'#4B0082',n:'인디고'},{c:'#36013F',n:'딥퍼플'},{c:'#2C0040',n:'다크퍼플'}],
-      base: [{c:'#E6E6FA',n:'라벤더'},{c:'#D8BFD8',n:'씨슬'},{c:'#DDA0DD',n:'플럼화이트'},{c:'#C8A8D8',n:'소프트퍼플'}]
-    }
-  };
-
-  // ① 색상 데이터 박입 (옛 빈 배열 덮어쓰기, 안 지움)
-  function injectColors(){
-    if(typeof window._maiColors !== 'object'){ setTimeout(injectColors, 300); return; }
-    if(window._fullColorsInjected) return;
-    window._maiColors = FULL_COLORS;
-    window._fullColorsInjected = true;
-  }
-
-  // ② base 강제 wrap 해제 — 호출된 카테고리 그대로 적용
-  function liberateCategories(){
-    if(typeof window.rmaiArSetCategory !== 'function' || typeof window.rmaiArApplyColor !== 'function'){
-      setTimeout(liberateCategories, 300); return;
-    }
-    if(window._categoriesLiberated) return;
-
-    // setCategory 새 wrap: 옛 wrap (강제 base) 위에 덮어쓰기
-    window.rmaiArSetCategory = function(cat){
-      if(typeof _rmaiAr === 'undefined') return;
-      _rmaiAr.currentCategory = cat;  // 그대로 적용 (강제 base 해제)
-      if(typeof _rmaiArInitColorPicker === 'function'){
-        _rmaiArInitColorPicker();
-      }
-    };
-
-    // applyColor 새 wrap: 현재 카테고리에 색 적용 (강제 base 해제)
-    window.rmaiArApplyColor = function(hex, btn){
-      if(typeof _rmaiAr === 'undefined') return;
-      var cat = _rmaiAr.currentCategory || 'base';
-      _rmaiAr.appliedColors = _rmaiAr.appliedColors || {lip:null, cheek:null, eye:null, base:null};
-      _rmaiAr.appliedColors[cat] = hex;
-      _rmaiAr.currentColor = hex;
-      if(typeof _rmaiArInitColorPicker === 'function'){
-        _rmaiArInitColorPicker();
-      }
-      if(typeof window.sviUpdateBrandInfo === 'function'){
-        window.sviUpdateBrandInfo(hex, null);
-      }
-    };
-
-    window._categoriesLiberated = true;
-
-    // 외부 노출 — 토글 (base only 잠금 등)
-    window._makeupFullControl = {
-      getPalettes: function(){ return Object.keys(window._maiColors || {}); },
-      getCategories: function(){ return ['lip','cheek','eye','base']; },
-      getColors: function(palette, category){
-        if(!window._maiColors || !window._maiColors[palette]) return [];
-        return window._maiColors[palette][category] || [];
-      },
-      lockBase: function(){
-        // 다시 base 만 잠그기 (디버깅용)
-        window.rmaiArSetCategory = function(){
-          if(typeof _rmaiAr !== 'undefined') _rmaiAr.currentCategory = 'base';
-        };
-      }
-    };
-  }
-
-  // 모든 옛 wrap 보다 늦게 (박입 6 = 2300ms 보다 더 늦게)
-  setTimeout(injectColors, 2500);
-  setTimeout(liberateCategories, 2600);
-})();
-</script>
+<!--    ★ 제거됨 (옛 HSL wrap 연동 깨뜨림 — 베이스 + 미세 색상 조정 연동 복원)    -->
 
 <!-- ════ C-42 박입 8 (정식 카메라 권한 체크) — 본진 cgoCameraCheck 복원 ════ -->
 <!--    문제: 동생 cgoCameraCheck = C-41 폴리필 10줄 (그냥 onReady 즉시 호출)   -->
