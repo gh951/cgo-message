@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-gemini-applied-v15" name="c41-version"/>
+<meta content="2026-05-24-c42-gemini-v18-masterpiece" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28658,6 +28658,331 @@ window.rmaiArCapture = function(){
   // 박입 14 (3200ms) 보다 늦게
   setTimeout(applyGemini, 3700);
 })();
+</script>
+
+<!-- ════ C-42 박입 16 (막둥이 분석 반영 — 원형 그래디언트 마스킹) ════ -->
+<!--    막둥이 자수 분석: 박입 14 의 사각형 박스 clip 경계선에                  -->
+<!--                      origGlow highlight 잔상이 정적으로 걸침 (가능성)        -->
+<!--    해법: ctx.rect 박스 clip 제거 → 코끝+콧대 중심 원형 그래디언트로         -->
+<!--          destination-out (부드러운 페이드)                                   -->
+<!--    추가: 박입 15 (dlib 코드) 자동 OFF (인덱스 부정확)                       -->
+<script>
+(function(){
+  'use strict';
+
+  // ① 박입 15 (막둥이 dlib 코드) 자동 OFF
+  setTimeout(function(){
+    if(window._geminiControl && typeof window._geminiControl.disable === 'function'){
+      window._geminiControl.disable();
+    }
+  }, 4000);
+
+  // ② 박입 14 사각형 clip 무력화 + 원형 그래디언트 마스킹으로 교체
+  function wrapNoseCircular(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapNoseCircular, 300); return;
+    }
+    if(window._noseGlossCircularWrapped) return;
+
+    // 박입 14 가 이미 wrap, 그 위에 또 wrap
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._noseCircularEnabled){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+      if(!landmarks || !ctx || !canvas){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // ① 옛 물광 전체 그리기 (박입 6 의 6점 highlight 포함)
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+
+        // ② 코끝 + 콧대 영역에 원형 그래디언트 destination-out
+        var noseTip    = landmarks[1];  // MediaPipe 코끝
+        var noseBridge = landmarks[6];  // MediaPipe 콧대중
+        if(!noseTip || !noseBridge) return;
+
+        var tipX = noseTip.x    * canvas.width;
+        var tipY = noseTip.y    * canvas.height;
+        var brX  = noseBridge.x * canvas.width;
+        var brY  = noseBridge.y * canvas.height;
+
+        // 얼굴 폭 기반 동적 반경 (코 크기 비례)
+        var faceWidth = 200;
+        if(landmarks[234] && landmarks[454]){
+          faceWidth = Math.abs((landmarks[454].x - landmarks[234].x) * canvas.width);
+        }
+        var radius = Math.max(20, faceWidth * 0.15);
+
+        // 원형 그래디언트 destination-out (부드러운 페이드)
+        var spots = [
+          { x: brX,  y: brY,  r: radius        },
+          { x: tipX, y: tipY, r: radius * 1.2  }
+        ];
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'destination-out';
+        spots.forEach(function(s){
+          var grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+          grad.addColorStop(0,   'rgba(0,0,0,1)');     // 중심 완전 지움
+          grad.addColorStop(0.6, 'rgba(0,0,0,0.7)');   // 부드러운 페이드
+          grad.addColorStop(1,   'rgba(0,0,0,0)');     // 가장자리 영향 없음
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._noseCircularEnabled = true;
+    window._noseGlossCircularWrapped = true;
+
+    // 박입 14 사각형 clip OFF (충돌 방지)
+    if(window._noseGlossControl && typeof window._noseGlossControl.disable === 'function'){
+      window._noseGlossControl.disable();
+    }
+
+    window._noseCircularControl = {
+      enable:  function(){ window._noseCircularEnabled = true; },
+      disable: function(){ window._noseCircularEnabled = false; },
+      status:  function(){ return !!window._noseCircularEnabled; },
+      info:    function(){
+        return {
+          enabled: !!window._noseCircularEnabled,
+          mode:    'circular-gradient-destination-out',
+          desc:    '코끝(1)+콧대(6) 중심 원형 그래디언트로 부드러운 페이드 차단'
+        };
+      }
+    };
+  }
+
+  // 박입 15 (3700ms) 보다 늦게
+  setTimeout(wrapNoseCircular, 4200);
+})();
+</script>
+
+<!-- ════ C-42 박입 17 (막둥이 v2 — 파트너 명령 그대로) ════ -->
+<script>
+(function(){
+  'use strict';
+
+  function applyGeminiV2(){
+    if(typeof window._rmaiArDrawBase !== 'function'){
+      setTimeout(applyGeminiV2, 300); return;
+    }
+    if(window._geminiV2Applied) return;
+
+    var origDrawBase = window._rmaiArDrawBase;
+
+    function singlePassBaseV2(ctx, canvas, landmarks, color){
+      if(!landmarks || landmarks.length === 0) return;
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        if(landmarks[0]) {
+          ctx.moveTo(landmarks[0].x, landmarks[0].y);
+          for(var i = 1; i <= 16; i++) {
+            if(landmarks[i]) ctx.lineTo(landmarks[i].x, landmarks[i].y);
+          }
+          if(landmarks[26] && landmarks[17]) {
+            ctx.lineTo(landmarks[26].x, landmarks[26].y - 30);
+            ctx.lineTo(landmarks[24].x, landmarks[24].y - 45);
+            ctx.lineTo(landmarks[19].x, landmarks[19].y - 45);
+            ctx.lineTo(landmarks[17].x, landmarks[17].y - 30);
+          }
+          ctx.closePath();
+        }
+        if(landmarks[36] && landmarks[39]){
+          var leftEyeIndices = [36, 37, 38, 39, 40, 41];
+          var cx = 0, cy = 0;
+          leftEyeIndices.forEach(function(idx){ cx += landmarks[idx].x; cy += landmarks[idx].y; });
+          cx /= leftEyeIndices.length; cy /= leftEyeIndices.length;
+          var rx = Math.abs(landmarks[39].x - landmarks[36].x) * 0.65 + 5;
+          var ry = Math.abs(landmarks[38].y - landmarks[40].y) * 0.65 + 5;
+          ctx.moveTo(cx + rx, cy);
+          for(var i = 0; i <= 360; i += 30){
+            var rad = (i * Math.PI) / 180;
+            ctx.lineTo(cx + Math.cos(-rad) * rx, cy + Math.sin(-rad) * ry);
+          }
+        }
+        if(landmarks[42] && landmarks[45]){
+          var rightEyeIndices = [42, 43, 44, 45, 46, 47];
+          var cx = 0, cy = 0;
+          rightEyeIndices.forEach(function(idx){ cx += landmarks[idx].x; cy += landmarks[idx].y; });
+          cx /= rightEyeIndices.length; cy /= rightEyeIndices.length;
+          var rx = Math.abs(landmarks[45].x - landmarks[42].x) * 0.65 + 5;
+          var ry = Math.abs(landmarks[43].y - landmarks[46].y) * 0.65 + 5;
+          ctx.moveTo(cx + rx, cy);
+          for(var i = 0; i <= 360; i += 30){
+            var rad = (i * Math.PI) / 180;
+            ctx.lineTo(cx + Math.cos(-rad) * rx, cy + Math.sin(-rad) * ry);
+          }
+        }
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.globalAlpha = (window._rmaiAr && _rmaiAr.intensity) ? _rmaiAr.intensity.base : 0.65;
+        ctx.fillStyle = color;
+        ctx.fill('evenodd');
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      } catch(e){
+        origDrawBase(ctx, canvas, landmarks, color);
+      }
+    }
+
+    window._rmaiArDrawBase = function(ctx, canvas, landmarks, color){
+      if(window._geminiV2Override){
+        singlePassBaseV2(ctx, canvas, landmarks, color);
+      } else {
+        origDrawBase(ctx, canvas, landmarks, color);
+      }
+    };
+
+    window._geminiV2Override = true;
+    window._geminiV2Applied = true;
+
+    window._geminiV2Control = {
+      enable:  function(){ window._geminiV2Override = true; },
+      disable: function(){ window._geminiV2Override = false; },
+      status:  function(){ return !!window._geminiV2Override; }
+    };
+  }
+
+  setTimeout(applyGeminiV2, 4500);
+})();
+</script>
+
+<!-- ════ C-42 박입 18 (막둥이 v18 마스터피스 — 파트너 명령) ════ -->
+<script>
+setTimeout(function(){
+(function(){
+  var origDrawBase = window._rmaiArDrawBase || function(){};
+  var origGlow = window._rmaiArDrawGlow || function(){};
+
+  function singlePassBaseV3(ctx, canvas, landmarks, color){
+    if(!landmarks || landmarks.length === 0) return;
+    try {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      if(landmarks[0]) {
+        ctx.moveTo(landmarks[0].x, landmarks[0].y);
+        for(var i = 1; i <= 16; i++) {
+          if(landmarks[i]) ctx.lineTo(landmarks[i].x, landmarks[i].y);
+        }
+        if(landmarks[26] && landmarks[17]) {
+          ctx.lineTo(landmarks[26].x, landmarks[26].y - 30);
+          ctx.lineTo(landmarks[24].x, landmarks[24].y - 45);
+          ctx.lineTo(landmarks[19].x, landmarks[19].y - 45);
+          ctx.lineTo(landmarks[17].x, landmarks[17].y - 30);
+        }
+        ctx.closePath();
+      }
+      if(landmarks[36] && landmarks[39]){
+        var leftEyeIndices = [36, 37, 38, 39, 40, 41];
+        var lx = 0, ly = 0;
+        leftEyeIndices.forEach(function(idx){ lx += landmarks[idx].x; ly += landmarks[idx].y; });
+        lx /= leftEyeIndices.length; ly /= leftEyeIndices.length;
+        var lrx = Math.abs(landmarks[39].x - landmarks[36].x) * 0.65 + 5;
+        var lry = Math.abs(landmarks[38].y - landmarks[40].y) * 0.65 + 5;
+        ctx.moveTo(lx + lrx, ly);
+        for(var j = 0; j <= 360; j += 30){
+          var lRad = (j * Math.PI) / 180;
+          ctx.lineTo(lx + Math.cos(-lRad) * lrx, ly + Math.sin(-lRad) * lry);
+        }
+        ctx.closePath();
+      }
+      if(landmarks[42] && landmarks[45]){
+        var rightEyeIndices = [42, 43, 44, 45, 46, 47];
+        var rx = 0, ry = 0;
+        rightEyeIndices.forEach(function(idx){ rx += landmarks[idx].x; ry += landmarks[idx].y; });
+        rx /= rightEyeIndices.length; ry /= rightEyeIndices.length;
+        var rrx = Math.abs(landmarks[45].x - landmarks[42].x) * 0.65 + 5;
+        var rry = Math.abs(landmarks[43].y - landmarks[46].y) * 0.65 + 5;
+        ctx.moveTo(rx + rrx, ry);
+        for(var k = 0; k <= 360; k += 30){
+          var rRad = (k * Math.PI) / 180;
+          ctx.lineTo(rx + Math.cos(-rRad) * rrx, ry + Math.sin(-rRad) * rry);
+        }
+        ctx.closePath();
+      }
+      ctx.globalCompositeOperation = 'soft-light';
+      ctx.globalAlpha = (window._rmaiAr && _rmaiAr.intensity) ? (_rmaiAr.intensity.base * 0.6) : 0.4;
+      ctx.fillStyle = color;
+      ctx.fill('evenodd');
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    } catch(e){
+      origDrawBase(ctx, canvas, landmarks, color);
+    }
+  }
+
+  function customGlowV3(ctx, canvas, landmarks, glossLevel) {
+    if(!landmarks || landmarks.length === 0) return;
+    try {
+      if(landmarks[27] && landmarks[30]) {
+        var noseBridge = landmarks[27];
+        var noseTip = landmarks[30];
+        var spots = [
+          { x: noseBridge.x, y: noseBridge.y - 2, r: 11, alpha: 0.32 * glossLevel },
+          { x: noseTip.x, y: noseTip.y, r: 15, alpha: 0.42 * glossLevel }
+        ];
+        spots.forEach(function(spot) {
+          var grad = ctx.createRadialGradient(spot.x, spot.y, 0, spot.x, spot.y, spot.r);
+          grad.addColorStop(0, 'rgba(255, 255, 255, ' + spot.alpha + ')');
+          grad.addColorStop(0.4, 'rgba(255, 255, 255, ' + (spot.alpha * 0.35) + ')');
+          grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.beginPath();
+          ctx.arc(spot.x, spot.y, spot.r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.globalCompositeOperation = 'screen';
+          ctx.fill();
+        });
+        ctx.globalCompositeOperation = 'source-over';
+      }
+      ctx.save();
+      origGlow(ctx, canvas, landmarks, glossLevel * 0.45);
+      ctx.restore();
+    } catch(e) {
+      origGlow(ctx, canvas, landmarks, glossLevel);
+    }
+  }
+
+  window._rmaiArDrawBase = function(ctx, canvas, landmarks, color){
+    if(window._geminiV3Enabled){
+      singlePassBaseV3(ctx, canvas, landmarks, color);
+    } else {
+      origDrawBase(ctx, canvas, landmarks, color);
+    }
+  };
+
+  window._rmaiArDrawGlow = function(ctx, canvas, landmarks, glossLevel){
+    if(window._noseGlossClipEnabledV3){
+      customGlowV3(ctx, canvas, landmarks, glossLevel);
+    } else {
+      origGlow(ctx, canvas, landmarks, glossLevel);
+    }
+  };
+
+  window._geminiV3Enabled = true;
+  window._noseGlossClipEnabledV3 = true;
+
+  window._v18Control = {
+    enableAll: function() {
+      window._geminiV3Enabled = true;
+      window._noseGlossClipEnabledV3 = true;
+    },
+    disableAll: function() {
+      window._geminiV3Enabled = false;
+      window._noseGlossClipEnabledV3 = false;
+    }
+  };
+})();
+}, 4700);
 </script>
 
 </body>
