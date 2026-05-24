@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-capture-btn-restore-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-ui-restore-watchdog-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28352,6 +28352,84 @@ window.rmaiArCapture = function(){
   display: block !important;
 }
 </style>
+
+<!-- ════ C-42 박입 10 (AR UI 자동 복원 watchdog) ════ -->
+<!--    문제: 카메라 실패 시 _rmaiArStartCore 의 catch 블록이 alert만 띄우고 끝   -->
+<!--          → rmai-ar-section 펼친 상태 + 시작 버튼 숨김 상태로 영구 고정       -->
+<!--          → 사용자가 시작 버튼을 다시 못 봄                                    -->
+<!--    해법: ① _cgoCameraAlert wrap → 실패 신호 시 즉시 UI 복원                  -->
+<!--          ② Watchdog → 10초마다 "꼬인 상태" 자동 감지 + 복원                  -->
+<!--    범위: _cgoCameraAlert wrap (다른 곳 영향 X)                                -->
+<script>
+(function(){
+  'use strict';
+
+  // 핵심: UI 가 꼬인 상태인지 확인 + 복원
+  function restoreUIIfStuck(){
+    var section = document.getElementById('rmai-ar-section');
+    var btn = document.getElementById('rmai-ar-start-btn');
+    if(!section || !btn) return false;
+
+    var sectionOpen = (section.style.display === 'block');
+    var btnHidden   = (btn.style.display === 'none');
+    var notRunning  = (typeof _rmaiAr === 'undefined' || !_rmaiAr.running);
+
+    // 꼬인 상태: section 펼침 + 버튼 숨김 + 실행 X
+    if(sectionOpen && btnHidden && notRunning){
+      if(typeof window.rmaiArStop === 'function'){
+        window.rmaiArStop();  // 정식 정지 (모든 상태 리셋)
+      } else {
+        section.style.display = 'none';
+        btn.style.display = 'block';
+      }
+      return true;  // 복원 발생
+    }
+    return false;
+  }
+
+  // ① _cgoCameraAlert wrap — 카메라 실패 신호 시 0.5초 후 복원
+  function wrapAlert(){
+    if(typeof window._cgoCameraAlert !== 'function'){
+      setTimeout(wrapAlert, 300);
+      return;
+    }
+    if(window._uiRestoreOnAlertWrapped) return;
+
+    var origAlert = window._cgoCameraAlert;
+    window._cgoCameraAlert = function(msg){
+      origAlert(msg);  // 원래 alert 동작
+      setTimeout(restoreUIIfStuck, 500);  // 0.5초 후 UI 복원
+    };
+    window._uiRestoreOnAlertWrapped = true;
+  }
+
+  // ② Watchdog — 10초마다 꼬인 상태 자동 감지 (catch 누락 케이스 보완)
+  function startWatchdog(){
+    if(window._arUIWatchdogStarted) return;
+    setInterval(restoreUIIfStuck, 10000);
+    window._arUIWatchdogStarted = true;
+  }
+
+  // 외부 디버깅 도구
+  window._arUIControl = {
+    restore: restoreUIIfStuck,
+    status: function(){
+      var section = document.getElementById('rmai-ar-section');
+      var btn = document.getElementById('rmai-ar-start-btn');
+      return {
+        sectionOpen: section ? (section.style.display === 'block') : null,
+        btnHidden:   btn ? (btn.style.display === 'none') : null,
+        running:     typeof _rmaiAr !== 'undefined' ? _rmaiAr.running : null,
+        stuck:       section && btn && (section.style.display === 'block') && (btn.style.display === 'none') && (typeof _rmaiAr === 'undefined' || !_rmaiAr.running)
+      };
+    }
+  };
+
+  // 박입 8 (2700ms) 보다 늦게
+  setTimeout(wrapAlert, 2800);
+  setTimeout(startWatchdog, 5000);  // 5초 후 watchdog 시작
+})();
+</script>
 
 </body>
 </html>
