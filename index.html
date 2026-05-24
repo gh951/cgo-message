@@ -3746,6 +3746,46 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 </style>
 
+
+<!-- ════ C-41 박입 ㉘ — scrSkinage 옛 영역 정리 (RMAI·svi-cam-wrap·옛 결과) ════ -->
+<style>
+/* RMAI 메이크업 AR 전체 숨김 (피부 탄력과 무관) */
+#scrSkinage #rmai-oh-card,
+#scrSkinage #rmai-ar-section,
+#scrSkinage #rmai-capture-section,
+#scrSkinage button#rmai-ar-start-btn,
+#scrSkinage #rmai-chat-fab,
+#scrSkinage #rmai-chat-fab-close,
+#scrSkinage #rmai-chat-bubble,
+#scrSkinage #rmai-chat-restore-btn,
+#scrSkinage #rmai-chat-modal,
+#scrSkinage [id^="rmai-"] {
+  display: none !important;
+}
+
+/* SVI 옛 인라인 카메라 영역 숨김 (c41h 풀스크린 모달로 대체) */
+#scrSkinage #svi-cam-wrap,
+#scrSkinage #svi-press-hint,
+#scrSkinage #svi-score-live,
+#scrSkinage #svi-zones-section,
+#scrSkinage #svi-rppg-section,
+#scrSkinage #svi-asymmetry-section,
+#scrSkinage #svi-history-section,
+#scrSkinage #svi-chat-fab,
+#scrSkinage #svi-chat-modal,
+#scrSkinage [id^="svi-zone-"],
+#scrSkinage [id^="svi-history-"] {
+  display: none !important;
+}
+
+/* 빈 컨테이너(자식 모두 숨김된 부모) 마진 제거 */
+#scrSkinage section:empty,
+#scrSkinage div:empty {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -13479,6 +13519,16 @@ var Q_POOL = {
       </div>
     </div>
     <!-- ★ 히어로 끝 -->
+
+    <!-- ★ C-41 박입 ㉗ — 메인 피부 측정 시작 카드 -->
+    <div style="background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.08);border-radius:18px;padding:22px 24px;margin-bottom:18px;text-align:center;box-shadow:0 4px 18px rgba(5,150,105,0.1);">
+      <div style="font-size:14px;font-weight:900;color:#059669;letter-spacing:.05em;margin-bottom:8px;">✦ SVI 30초 종합 측정</div>
+      <div style="font-size:13px;color:rgba(13,58,58,0.7);margin-bottom:16px;line-height:1.6;">카메라 한 대로 광학 점탄성·콜라겐·혈색까지 — 30초 종합 분석</div>
+      <button onclick="if(typeof window.c41hStart==='function'){c41hStart('svi');}else{alert('측정 엔진 로딩 중...');}" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#7c3aed 0%,#ec4899 50%,#f59e0b 100%);background-size:200% 100%;border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(124,58,237,0.35),inset 0 1px 0 rgba(255,255,255,0.3);animation:c41sShine 4s ease-in-out infinite;">
+        💪 지금 피부 측정 시작 (30초)
+      </button>
+      <style>@keyframes c41sShine{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}</style>
+    </div>
 
     <!-- 헤더 -->
     <div style="background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(52,211,153,.08));border:1px solid rgba(56,189,248,.3);border-radius:20px;padding:22px 20px;margin-bottom:18px;position:relative;overflow:hidden;">
@@ -23850,8 +23900,15 @@ if(typeof window.cgoCameraCheck !== 'function'){
 (function(){
   'use strict';
 
-  // ━━━ 6단계 구조 (cgo-fuli와 동일) ━━━
-  var STAGES = [
+  // ━━━ SVI(피부 탄력) 모드: 1단계 30초 ━━━
+  var STAGES_SVI = [
+    {key:'svi-skin', icon:'💪', label:'피부 탄력 측정', total:30, camera:'user',
+     manual:['밝은 곳에서 정면 응시', '카메라 30~50cm 거리', '세안 후 30분 경과 권장', '안경·마스크 제거', '무표정 유지 + 미세하게 볼 누르기'],
+     useFace:true, useBreath:false}
+  ];
+
+  // ━━━ 건강 예측 6단계 구조 (cgo-fuli와 동일) ━━━
+  var STAGES_HEALTH = [
     {key:'face',      icon:'👤', label:'얼굴', total:60, camera:'user',
      manual:[
        '밝은 곳에서 정면을 바라봐 주세요',
@@ -23899,6 +23956,9 @@ if(typeof window.cgoCameraCheck !== 'function'){
      ], useFace:false, useBreath:false}
   ];
 
+  // ━━━ 기본 모드: HEALTH (c41hStart 호출 시 동적 변경 가능) ━━━
+  var STAGES = STAGES_HEALTH;
+
   // ━━━ BS 객체 ━━━
   window.BS = window.BS || {on:false, sec:0, TOTAL:60, bpm:0, hrv:0, fci:0, timer:null, faceLostSec:0};
 
@@ -23923,7 +23983,7 @@ if(typeof window.cgoCameraCheck !== 'function'){
   }
 
   // ━━━ 상태 ━━━
-  window.c41hState = {open:false, stage:0, measuring:false, finished:false, results:[]};
+  window.c41hState = {open:false, stage:0, measuring:false, finished:false, results:[], mode:'health'};
   window._c41hFaceBox = null;
   window._c41hFaceDetected = false;
   var _c41hFD = null;
@@ -24762,8 +24822,18 @@ if(typeof window.cgoCameraCheck !== 'function'){
   }
 
   // ━━━ 외부 진입점 ━━━
-  window.c41hStart = function(){
+  window.c41hStart = function(mode){
     if(c41hState.open) return;
+    // ★ mode 분기: 'svi' = 피부 탄력 1단계 / 기본 = 건강 6단계
+    if(mode === 'svi'){
+      STAGES = STAGES_SVI;
+      c41hState.mode = 'svi';
+      console.log('[c41h] SVI 모드 시작 (1단계 30초)');
+    } else {
+      STAGES = STAGES_HEALTH;
+      c41hState.mode = 'health';
+      console.log('[c41h] HEALTH 모드 시작 (6단계 160초)');
+    }
     // 완전 초기화 (보안)
     releaseCamera();
     c41hState.open = true; c41hState.stage = 0; c41hState.measuring = false;
