@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-camera-restore-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-capture-btn-restore-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28341,6 +28341,17 @@ window.rmaiArCapture = function(){
   setTimeout(injectFullCameraCheck, 2700);
 })();
 </script>
+
+<!-- ════ C-42 박입 9 (AR 메이크업 캡처 버튼 복원) ════ -->
+<!--    문제: C-41 박입 ㉘ 가 #rmai-ar-capture-btn 도 숨김                       -->
+<!--          (의도: 옛 RMAI 캡처만 / 결과: 새 AR 메이크업 캡처+저장도 숨김)      -->
+<!--    해법: 같은 specificity + 더 늦은 정의 → CSS cascade 로 자연 override     -->
+<!--    범위: 박입 ㉘ 안 지움. 캡처 버튼만 복원. 챗봇 fab 은 그대로 숨김 유지     -->
+<style>
+#scrSkinage #rmai-ar-capture-btn {
+  display: block !important;
+}
+</style>
 
 </body>
 </html>
