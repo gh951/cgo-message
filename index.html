@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-FINAL-clean-v19" name="c41-version"/>
+<meta content="2026-05-24-c42-temporal-damping-v22" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28726,8 +28726,8 @@ window.rmaiArCapture = function(){
         ctx.globalCompositeOperation = 'destination-out';
         spots.forEach(function(s){
           var grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
-          grad.addColorStop(0,   'rgba(0,0,0,1)');     // 중심 완전 지움
-          grad.addColorStop(0.6, 'rgba(0,0,0,0.7)');   // 부드러운 페이드
+          grad.addColorStop(0,   'rgba(0,0,0,0.4)');   // 중심 40% 만 지움 (60% 베이스 보존)
+          grad.addColorStop(0.6, 'rgba(0,0,0,0.25)');  // 25% 부드러운 페이드
           grad.addColorStop(1,   'rgba(0,0,0,0)');     // 가장자리 영향 없음
           ctx.fillStyle = grad;
           ctx.beginPath();
@@ -29025,6 +29025,224 @@ setTimeout(function(){
     }
   };
 }, 5500);  // 박입 18 (4700ms) 후
+</script>
+
+<!-- ════ C-42 박입 21 (광대 전용 sharp specular — GPT 단계 2) ════ -->
+<!--    GPT 분석: 광대 = 평면 + 안정 + 넓은 area = Canvas 2D 에서 자연스러움    -->
+<!--    원리: drawFresnelWaterGlow 호출 후 광대 양쪽에 sharp small highlight    -->
+<!--    인덱스: MediaPipe 468 (좌광대 5점 + 우광대 5점, 동생 행 22394 와 일치) -->
+<script>
+(function(){
+  'use strict';
+
+  function wrapCheekHighlight(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapCheekHighlight, 300); return;
+    }
+    if(window._cheekHighlightWrapped) return;
+
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // ① 옛 물광 호출 (박입 6 + 박입 16/20 마스킹)
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._cheekHighlightEnabled || !landmarks) return;
+
+      try {
+        // ② MediaPipe 468 광대 인덱스 (GPT 분석 + 동생 코드 일치)
+        var lcheekIdx = [116, 117, 118, 100, 207];
+        var rcheekIdx = [345, 346, 347, 329, 427];
+
+        // 좌광대 중심
+        var lx = 0, ly = 0, lcount = 0;
+        lcheekIdx.forEach(function(idx){
+          if(landmarks[idx]){ lx += landmarks[idx].x; ly += landmarks[idx].y; lcount++; }
+        });
+        if(lcount === 0) return;
+        lx = (lx / lcount) * canvas.width;
+        ly = (ly / lcount) * canvas.height;
+
+        // 우광대 중심
+        var rx = 0, ry = 0, rcount = 0;
+        rcheekIdx.forEach(function(idx){
+          if(landmarks[idx]){ rx += landmarks[idx].x; ry += landmarks[idx].y; rcount++; }
+        });
+        if(rcount === 0) return;
+        rx = (rx / rcount) * canvas.width;
+        ry = (ry / rcount) * canvas.height;
+
+        // glossLevel 비례 + 토글 가능
+        var alpha  = (window._cheekHighlightAlpha  || 0.5) * (glossLevel || 0.5);
+        var radius = (window._cheekHighlightRadius || 10);
+
+        // ③ Sharp highlight (GPT 요청 = blur 최소화 + screen 합성)
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        [[lx, ly], [rx, ry]].forEach(function(p){
+          var grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], radius);
+          grad.addColorStop(0,   'rgba(255,255,255,' + alpha + ')');
+          grad.addColorStop(0.4, 'rgba(255,255,255,' + (alpha * 0.3) + ')');
+          grad.addColorStop(1,   'rgba(255,255,255,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.restore();
+      } catch(e){}
+    };
+
+    window._cheekHighlightEnabled = true;
+    window._cheekHighlightWrapped = true;
+
+    window._cheekHighlightControl = {
+      enable:    function(){ window._cheekHighlightEnabled = true; },
+      disable:   function(){ window._cheekHighlightEnabled = false; },
+      status:    function(){ return !!window._cheekHighlightEnabled; },
+      setRadius: function(r){ window._cheekHighlightRadius = r; },  // 크기 조절
+      setAlpha:  function(a){ window._cheekHighlightAlpha  = a; },  // 강도 조절
+      info:      function(){
+        return {
+          enabled: !!window._cheekHighlightEnabled,
+          radius:  window._cheekHighlightRadius || 10,
+          alpha:   window._cheekHighlightAlpha  || 0.5,
+          desc:    'GPT 단계 2 — MediaPipe 광대 sharp specular (r=10, screen)'
+        };
+      }
+    };
+  }
+
+  // 박입 19 (5500ms) 보다 늦게
+  setTimeout(wrapCheekHighlight, 5800);
+})();
+</script>
+
+<!-- ════ C-42 박입 22 (GPT 단계 4 — 광대 좌표 smoothing + velocity clamp) ════ -->
+<!--    GPT 추천:                                                              -->
+<!--      ① Temporal damping: prev*0.8 + new*0.2 → 미세 떨림 감소               -->
+<!--      ② Velocity clamp: |delta| > 12px 차단 → 고개 빠른 회전 시 jump 방지   -->
+<!--    원리: drawFresnelWaterGlow 호출 전 광대 landmark 좌표 smoothing         -->
+<!--          박입 21 의 광대 highlight 가 smooth 좌표 사용 → 잔상 약화          -->
+<script>
+(function(){
+  'use strict';
+
+  var prevLx = null, prevLy = null, prevRx = null, prevRy = null;
+  var DAMP = 0.8;
+  var MAX_DELTA = 12;
+
+  function smoothCoord(prev, current){
+    if(prev === null) return current;
+    var delta = current - prev;
+    if(delta > MAX_DELTA) delta = MAX_DELTA;
+    else if(delta < -MAX_DELTA) delta = -MAX_DELTA;
+    return prev * DAMP + (prev + delta) * (1 - DAMP);
+  }
+
+  function wrapCheekSmoothing(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapCheekSmoothing, 300); return;
+    }
+    if(window._cheekSmoothingWrapped) return;
+
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._cheekSmoothingEnabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        var lcheekIdx = [116, 117, 118, 100, 207];
+        var rcheekIdx = [345, 346, 347, 329, 427];
+
+        // 광대 중심 (정규화 좌표)
+        var lx = 0, ly = 0, lc = 0;
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i]){ lx += landmarks[i].x; ly += landmarks[i].y; lc++; }
+        });
+        var rx = 0, ry = 0, rc = 0;
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i]){ rx += landmarks[i].x; ry += landmarks[i].y; rc++; }
+        });
+
+        if(lc === 0 || rc === 0){
+          return prevGlow(ctx, canvas, landmarks, glossLevel);
+        }
+
+        // 픽셀 좌표로 변환 후 smoothing
+        var pLx = (lx / lc) * canvas.width;
+        var pLy = (ly / lc) * canvas.height;
+        var pRx = (rx / rc) * canvas.width;
+        var pRy = (ry / rc) * canvas.height;
+
+        var sLx = smoothCoord(prevLx, pLx);
+        var sLy = smoothCoord(prevLy, pLy);
+        var sRx = smoothCoord(prevRx, pRx);
+        var sRy = smoothCoord(prevRy, pRy);
+
+        prevLx = sLx; prevLy = sLy;
+        prevRx = sRx; prevRy = sRy;
+
+        // 광대 landmark 임시 교체 (smooth 좌표로) — 박입 21 이 그 좌표 사용
+        var origCoords = {};
+        var deltaLx = sLx - pLx, deltaLy = sLy - pLy;
+        var deltaRx = sRx - pRx, deltaRy = sRy - pRy;
+
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i]){
+            origCoords[i] = { x: landmarks[i].x, y: landmarks[i].y };
+            landmarks[i].x += deltaLx / canvas.width;
+            landmarks[i].y += deltaLy / canvas.height;
+          }
+        });
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i]){
+            origCoords[i] = { x: landmarks[i].x, y: landmarks[i].y };
+            landmarks[i].x += deltaRx / canvas.width;
+            landmarks[i].y += deltaRy / canvas.height;
+          }
+        });
+
+        // 박입 21 호출 (smooth 좌표로 광대 그리기)
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+
+        // landmark 좌표 복원 (다른 함수 영향 X)
+        Object.keys(origCoords).forEach(function(i){
+          if(landmarks[i]){
+            landmarks[i].x = origCoords[i].x;
+            landmarks[i].y = origCoords[i].y;
+          }
+        });
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._cheekSmoothingEnabled = true;
+    window._cheekSmoothingWrapped = true;
+
+    window._cheekSmoothingControl = {
+      enable:   function(){ window._cheekSmoothingEnabled = true; },
+      disable:  function(){ window._cheekSmoothingEnabled = false; },
+      setDamp:  function(d){ DAMP = d; },
+      setClamp: function(c){ MAX_DELTA = c; },
+      info:     function(){
+        return {
+          enabled:  !!window._cheekSmoothingEnabled,
+          damp:     DAMP,
+          maxDelta: MAX_DELTA,
+          desc:     'GPT 단계 4 — temporal damping 0.8 + velocity clamp 12px'
+        };
+      }
+    };
+  }
+
+  setTimeout(wrapCheekSmoothing, 6000);
+})();
 </script>
 
 </body>
