@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-highlight-alpha-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-single-mask-v6-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28004,6 +28004,163 @@ window.rmaiArCapture = function(){
 
   // 박입 4 (1900ms) 보다 늦게 — 가장 바깥 layer
   setTimeout(wrapHighlightAlpha, 2100);
+})();
+</script>
+
+<!-- ════ C-42 박입 (단일 마스크 + 6점 하이라이트) — 5층 한계 돌파 ════ -->
+<!--    문제: screen 합성 모드 + 13번 누적 → alpha 약화로도 가면 못 막음        -->
+<!--    해법: 함수 자체를 새 함수로 교체 (5층은 박제로 남되 실행 X)             -->
+<!--    구조: 단일 마스크 (눈/코/입 구멍) + 단일 베이스 + 6점 약화 highlight     -->
+<!--    그리기: 13번 → 7번 (45% 감소)                                            -->
+<!--    토글: 콘솔 _finalControl.use_v5() 로 이전 5층 복원 가능                  -->
+<script>
+(function(){
+  'use strict';
+
+  // ─── 좌표 인덱스 (MediaPipe FaceMesh 468 표준) ───
+  var FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288,
+                   397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136,
+                   172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+  // 눈/입 구멍 (winding rule 컷아웃용)
+  var LEFT_EYE   = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
+  var RIGHT_EYE  = [362, 382, 381, 380, 374, 373, 372, 263, 466, 388, 387, 386, 385, 384, 398, 341];
+  var INNER_LIPS = [78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308, 415, 310, 311, 312, 13, 82, 81, 80, 191];
+
+  // 6점 핵심 highlight (12점의 절반, 입/턱 제거 — 단일 마스크가 입 가림)
+  var CORE_HIGHLIGHTS = [
+    {c: 117, n1: 50,  n2: 187, r: 36},   // 좌 광대 (입체감 핵심)
+    {c: 346, n1: 280, n2: 411, r: 36},   // 우 광대
+    {c: 6,   n1: 197, n2: 4,   r: 24},   // 콧대 중
+    {c: 4,   n1: 1,   n2: 19,  r: 20},   // 코끝
+    {c: 10,  n1: 338, n2: 109, r: 30},   // 이마 중
+    {c: 67,  n1: 109, n2: 103, r: 22}    // 이마 좌측 (보조)
+  ];
+
+  // 모드 토글
+  var MODE = 'v6';  // 'v6' = 단일마스크, 'v5' = 이전 5층, 'off' = 끔
+
+  // 핵심: 새 그리기 함수 (단일 마스크 + 6점)
+  function drawSingleMaskGlow(ctx, canvas, landmarks, glossLevel){
+    if(!ctx || !canvas || !landmarks || landmarks.length < 468 || glossLevel <= 0) return;
+
+    // BS 측정값
+    var bpm = (typeof BS !== 'undefined' && BS.bpm) ? BS.bpm : 75;
+    var hrv = (typeof BS !== 'undefined' && BS.hrv) ? BS.hrv : 40;
+    var t0 = window._fresnelT0 || (window._fresnelT0 = Date.now()/1000);
+    var t  = (Date.now() / 1000) - t0;
+    var pulse = 0.95 + 0.05 * Math.sin(2 * Math.PI * (bpm/150) * t);
+    var glossiness = 0.4 + Math.min(1, hrv / 80) * 0.6;
+
+    ctx.save();
+
+    // ─── ① 단일 마스크 패스 빌드 (눈/코/입 구멍) ───
+    ctx.beginPath();
+    addPath(ctx, canvas, landmarks, FACE_OVAL, false);    // 외곽선 시계방향
+    addPath(ctx, canvas, landmarks, LEFT_EYE,  true);     // 왼눈 반시계 → 구멍
+    addPath(ctx, canvas, landmarks, RIGHT_EYE, true);     // 오른눈 반시계 → 구멍
+    addPath(ctx, canvas, landmarks, INNER_LIPS,true);     // 입 반시계 → 구멍
+
+    // ─── ② 단일 베이스 그라디언트 (alpha 최대 0.25, 가면 차단) ───
+    ctx.globalCompositeOperation = 'screen';
+    var nose = landmarks[4] || landmarks[1];
+    var forehead = landmarks[10];
+    var chin = landmarks[152];
+    if(nose && forehead && chin){
+      var cx = nose.x * canvas.width;
+      var cy = nose.y * canvas.height;
+      var faceH = Math.abs((chin.y - forehead.y) * canvas.height);
+      // 핵심: alpha 최대 0.25 — 100% 만땅에서도 흰 가면 못 만듦
+      var baseAlpha = Math.min(0.25, glossLevel * glossiness * pulse * 0.25);
+      var gradBase = ctx.createRadialGradient(cx, cy*0.92, 0, cx, cy, faceH * 0.6);
+      gradBase.addColorStop(0,    'rgba(255,250,240,' + baseAlpha + ')');
+      gradBase.addColorStop(0.5,  'rgba(255,250,240,' + (baseAlpha*0.5) + ')');
+      gradBase.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = gradBase;
+      ctx.fill('evenodd');  // ★ winding rule = 눈/코/입 구멍 자동 빠짐
+    }
+
+    // ─── ③ 6점 highlight (alpha 최대 0.35, 입체감 보존) ───
+    // 마스크 영향 없이 별도 그리기 (6점 모두 눈/입 영역 밖 = 안전)
+    CORE_HIGHLIGHTS.forEach(function(area){
+      var p0 = landmarks[area.c];
+      var p1 = landmarks[area.n1];
+      var p2 = landmarks[area.n2];
+      if(!p0 || !p1 || !p2) return;
+
+      // Cross product 법선
+      var v1x=p1.x-p0.x, v1y=p1.y-p0.y, v1z=(p1.z||0)-(p0.z||0);
+      var v2x=p2.x-p0.x, v2y=p2.y-p0.y, v2z=(p2.z||0)-(p0.z||0);
+      var nx = v1y*v2z - v1z*v2y;
+      var ny = v1z*v2x - v1x*v2z;
+      var nz = v1x*v2y - v1y*v2x;
+      var len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+      if(len < 0.0001) return;
+      var Nz = Math.abs(nz / len);
+
+      var fresnel = Math.pow(1.0 - Nz, 3.0);
+      var intensity = fresnel * glossiness * pulse * glossLevel;
+      // ★ alpha 최대 0.35 (이전 1.0 → 65% 약화)
+      var alpha = Math.min(0.35, intensity * 0.8);
+      if(alpha < 0.01) return;
+
+      var x = p0.x * canvas.width;
+      var y = p0.y * canvas.height;
+      var grad = ctx.createRadialGradient(x, y, 0, x, y, area.r);
+      grad.addColorStop(0,    'rgba(255,255,255,' + alpha + ')');
+      grad.addColorStop(0.5,  'rgba(255,250,240,' + (alpha*0.5) + ')');
+      grad.addColorStop(1,    'rgba(255,255,255,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, area.r, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+  }
+
+  // path 헬퍼 (reverse=true → 반시계방향 = winding rule 컷아웃)
+  function addPath(ctx, canvas, landmarks, indices, reverse){
+    var arr = reverse ? indices.slice().reverse() : indices;
+    var first = true;
+    for(var i=0; i<arr.length; i++){
+      var p = landmarks[arr[i]];
+      if(!p) continue;
+      var x = p.x * canvas.width;
+      var y = p.y * canvas.height;
+      if(first){ ctx.moveTo(x, y); first = false; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+  }
+
+  // wrap: 5층 chain 의 마지막 wrap 으로 함수 교체
+  function wrapFinalRewrite(){
+    if(typeof window.drawFresnelWaterGlow !== 'function' || !window._highlightAlphaControl){
+      setTimeout(wrapFinalRewrite, 300);
+      return;
+    }
+    if(window._finalRewriteWrapped) return;
+
+    var prev5LayerFunc = window.drawFresnelWaterGlow;  // 5층 chain 저장 (복원용)
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(MODE === 'v5') return prev5LayerFunc.call(this, ctx, canvas, landmarks, glossLevel);
+      if(MODE === 'off') return;
+      return drawSingleMaskGlow(ctx, canvas, landmarks, glossLevel);
+    };
+    window._finalRewriteWrapped = true;
+
+    // 외부 토글
+    window._finalControl = {
+      use_v6: function(){ MODE = 'v6'; return '단일 마스크 + 6점 (현재 박입)'; },
+      use_v5: function(){ MODE = 'v5'; return '5층 박입 (이전 빌드)'; },
+      use_off:function(){ MODE = 'off'; return '물광 완전 끔'; },
+      getMode:function(){ return MODE; }
+    };
+  }
+
+  setTimeout(wrapFinalRewrite, 2300);
 })();
 </script>
 
