@@ -3378,6 +3378,143 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 </style>
 
+
+<!-- ════ C-41 박입 ㉓ — scrHealth 위치 정확도 (6단계 카드 + 정밀 정렬) ════ -->
+<style>
+/* ─── 1. 6단계 측정 흐름 컨테이너 (.hfu-steps-detail) ─── */
+#scrHealth .hfu-steps-detail {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+}
+@media (min-width: 600px){
+  #scrHealth .hfu-steps-detail {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+@media (min-width: 1200px){
+  #scrHealth .hfu-steps-detail {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 14px !important;
+  }
+}
+
+/* ─── 2. 6단계 카드 자체 (.hfu-step-item) 정밀 정렬 ─── */
+#scrHealth .hfu-step-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  padding: 18px 12px !important;
+  background: rgba(255,255,255,0.7) !important;
+  border: 1px solid rgba(13,58,58,0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 4px rgba(13,58,58,0.04) !important;
+  min-height: 160px !important;
+  gap: 0 !important;
+  transition: all 0.2s ease;
+}
+#scrHealth .hfu-step-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13,58,58,0.1) !important;
+  background: rgba(255,255,255,0.9) !important;
+}
+
+/* 번호 동그라미 */
+#scrHealth .hfu-step-num {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  font-weight: 900 !important;
+  margin-bottom: 10px !important;
+  box-shadow: 0 2px 6px rgba(5,150,105,0.3);
+  flex-shrink: 0;
+}
+
+/* 이모지 */
+#scrHealth .hfu-step-emoji {
+  font-size: 32px !important;
+  line-height: 1 !important;
+  margin-bottom: 8px !important;
+  flex-shrink: 0;
+}
+
+/* 정보 영역 */
+#scrHealth .hfu-step-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  width: 100%;
+}
+
+/* 이름 */
+#scrHealth .hfu-step-name {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0d3a3a !important;
+  margin: 0 !important;
+}
+
+/* 부제 */
+#scrHealth .hfu-step-desc {
+  font-size: 10px !important;
+  color: rgba(13,58,58,0.6) !important;
+  line-height: 1.4 !important;
+  margin: 0 !important;
+}
+
+/* 시간 (하단 고정) */
+#scrHealth .hfu-step-time {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #059669 !important;
+  padding: 4px 10px !important;
+  background: rgba(5,150,105,0.1) !important;
+  border-radius: 100px !important;
+  margin-top: 10px !important;
+  flex-shrink: 0;
+}
+
+/* ─── 3. 모바일 PC 일관 — flex가 옛 CSS 덮지 못해서 정밀 강제 ─── */
+@media (max-width: 767px){
+  #scrHealth .hfu-step-item {
+    padding: 14px 8px !important;
+    min-height: 140px !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  #scrHealth .hfu-step-emoji { font-size: 26px !important; }
+  #scrHealth .hfu-step-name { font-size: 12px !important; }
+  #scrHealth .hfu-step-desc { font-size: 9px !important; }
+}
+
+/* ─── 4. 양호/주의 항목 (.hfu-ind-item) 정밀 정렬 ─── */
+#scrHealth .hfu-ind-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  background: rgba(255,255,255,0.55) !important;
+  border: 1px solid rgba(13,58,58,0.06) !important;
+  border-radius: 10px !important;
+  margin-bottom: 6px !important;
+}
+#scrHealth .hfu-ind-emoji { font-size: 18px !important; flex-shrink: 0; }
+#scrHealth .hfu-ind-name { font-size: 12px !important; font-weight: 700 !important; color: #0d3a3a !important; flex: 1; }
+#scrHealth .hfu-ind-meta { font-size: 10px !important; color: rgba(13,58,58,0.55) !important; font-weight: 600; }
+</style>
+
 </head>
 <body>
 
@@ -23781,18 +23918,16 @@ if(typeof window.cgoCameraCheck !== 'function'){
       var pct = Math.min(100, (BS.sec / BS.TOTAL) * 100);
       updateBar(stageIdx + 1, pct);
 
-      // CHROM + vitals (얼굴 단계만)
+      // ★ c41h 자체 CHROM Vitals — cgo-fuli 동일 알고리즘 (BPM/HRV/FCI)
       if(stage.useFace){
-        if(typeof window._rPPGChromUpdate === 'function'){
-          try { _rPPGChromUpdate(); } catch(e){}
-        }
-        if(BS.sec >= 10 && BS.sec % 2 === 0 && _rPPG.chromSignal && _rPPG.chromSignal.length >= 30){
-          if(typeof window._rPPGCalcVitals === 'function'){
-            try { _rPPGCalcVitals(); BS.bpm = _rPPG.bpm; BS.hrv = _rPPG.hrv; } catch(e){}
-          }
-          if(typeof window._rPPGCalcFCI === 'function'){
-            try { _rPPGCalcFCI(); BS.fci = _rPPG.fci; } catch(e){}
-          }
+        // 매 1초 계산 (5초 이상 + Xs 60개 이상)
+        if(BS.sec >= 5 && _rPPG.Xs && _rPPG.Xs.length >= 60){
+          try {
+            c41hCalcVitals();
+            BS.bpm = _rPPG.bpm;
+            BS.hrv = _rPPG.hrv;
+            BS.fci = _rPPG.fci;
+          } catch(e){ console.warn('[c41h] vitals err:', e); }
         }
         var bpm = (_rPPG.bpm||0).toFixed(0);
         var hrv = (_rPPG.hrv||0).toFixed(0);
@@ -23814,6 +23949,94 @@ if(typeof window.cgoCameraCheck !== 'function'){
   }
 
   // ━━━ rPPG 루프 ━━━
+  // ━━━ ★ c41h 자체 BPM/HRV/FCI 계산기 (CHROM 알고리즘 — cgo-fuli 동일) ━━━
+  //  cgo-message의 _rPPGCalcVitals는 rawR/G/B 속성 필요 → 호환 안 됨
+  //  → 자체 구현: Xs/Ys 사용 (이미 sampleFromVideo에서 채움)
+  function c41hCalcVitals(){
+    var Xs = _rPPG.Xs, Ys = _rPPG.Ys;
+    if(!Xs || Xs.length < 60){ return; } // 2초 미만 데이터 부족
+
+    // 1. CHROM 합성: 평균 제거 + α 계산
+    var n = Xs.length;
+    var meanX = 0, meanY = 0;
+    for(var i = 0; i < n; i++){ meanX += Xs[i]; meanY += Ys[i]; }
+    meanX /= n; meanY /= n;
+
+    var varX = 0, varY = 0;
+    for(var i = 0; i < n; i++){
+      varX += (Xs[i] - meanX) * (Xs[i] - meanX);
+      varY += (Ys[i] - meanY) * (Ys[i] - meanY);
+    }
+    var stdX = Math.sqrt(varX / n);
+    var stdY = Math.sqrt(varY / n);
+    var alpha = (stdY > 0.001) ? (stdX / stdY) : 1;
+
+    // 2. 합성 신호 S = (X - meanX) - α·(Y - meanY)
+    var S = new Array(n);
+    for(var i = 0; i < n; i++){
+      S[i] = (Xs[i] - meanX) - alpha * (Ys[i] - meanY);
+    }
+
+    // 3. 고주파 통과 (이동평균 차분 — 0.7~3.5Hz 근사)
+    var Sf = new Array(n);
+    var W = 5; // 0.17초 윈도우
+    for(var i = 0; i < n; i++){
+      var sum = 0, cnt = 0;
+      for(var j = Math.max(0, i - W); j <= Math.min(n - 1, i + W); j++){
+        sum += S[j]; cnt++;
+      }
+      Sf[i] = S[i] - sum / cnt;
+    }
+
+    // 4. 피크 검출 (인접보다 크고, 최소 거리 15 샘플 = 0.5초 = BPM 120 이하)
+    var minDist = 15;
+    var peaks = [];
+    for(var i = 3; i < n - 3; i++){
+      if(Sf[i] > 0 && Sf[i] > Sf[i-1] && Sf[i] > Sf[i+1] && Sf[i] > Sf[i-2] && Sf[i] > Sf[i+2]){
+        if(peaks.length === 0 || (i - peaks[peaks.length-1]) >= minDist){
+          peaks.push(i);
+        }
+      }
+    }
+    if(peaks.length < 3){
+      _rPPG.bpm = 0; _rPPG.hrv = 0; _rPPG.fci = 0;
+      return;
+    }
+
+    // 5. RR 간격 (ms) — 정상 범위 40~200 BPM
+    var rr = [];
+    for(var i = 1; i < peaks.length; i++){
+      var dtMs = ((peaks[i] - peaks[i-1]) / _rPPG.sampleRate) * 1000;
+      if(dtMs >= 300 && dtMs <= 1500){ rr.push(dtMs); }
+    }
+    if(rr.length < 2){
+      _rPPG.bpm = 0; _rPPG.hrv = 0; _rPPG.fci = 0;
+      return;
+    }
+
+    // 6. BPM = 60000 / avg(RR)
+    var avgRR = 0;
+    for(var i = 0; i < rr.length; i++){ avgRR += rr[i]; }
+    avgRR /= rr.length;
+    _rPPG.bpm = Math.round(60000 / avgRR);
+
+    // 7. HRV (RMSSD) = sqrt(mean(diff(RR)^2))
+    var sumSq = 0;
+    for(var i = 1; i < rr.length; i++){
+      var d = rr[i] - rr[i-1];
+      sumSq += d * d;
+    }
+    _rPPG.hrv = Math.round(Math.sqrt(sumSq / Math.max(1, rr.length - 1)));
+
+    // 8. FCI (안면혈류지수) — 신호 진폭 평균 ×1000
+    var amp = 0;
+    for(var i = 0; i < n; i++){ amp += Math.abs(Sf[i]); }
+    _rPPG.fci = Math.round((amp / n) * 1000);
+
+    // 9. 비정상 값 거부 (40~200 BPM 외)
+    if(_rPPG.bpm < 40 || _rPPG.bpm > 200){ _rPPG.bpm = 0; _rPPG.hrv = 0; }
+  }
+
   function rppgLoop(){
     if(!BS.on) return;
     var now = Date.now();
@@ -23991,76 +24214,127 @@ if(typeof window.cgoCameraCheck !== 'function'){
   // ━━━ AI 종합 분석 (cgo-message /api/groq 직접 호출 — xyReply 동일 패턴) ━━━
   function callAIAnalysis(){
     var bpm = BS.bpm || 0, hrv = BS.hrv || 0, fci = BS.fci || 0;
+    var resultEl = $('c41h-result-text');
+    if(!resultEl) return;
 
-    // 룰베이스 폴백 (API 실패 시)
-    var fallbackText = '🔍 핵심 발견\n' +
-      'BPM ' + bpm.toFixed(0) + ', HRV ' + hrv.toFixed(0) + 'ms, FCI ' + fci.toFixed(0) + '로 측정되었습니다. ' +
-      '얼굴·혀·눈·피부·손등·손바닥 6부위 종합 측정이 완료되었습니다.\n\n' +
-      '❤️ 심혈관\n' +
-      (bpm > 90 ? '심박이 다소 높은 편이니 충분한 휴식과 스트레스 관리를 권장합니다.' :
-       bpm > 60 ? '심박이 정상 범위입니다. 현재 컨디션은 안정적으로 보입니다.' :
-       '심박이 매우 낮거나 측정되지 않았습니다. 측정 환경(조명·자세)을 확인 후 재측정해보세요.') + '\n\n' +
-      '🩺 자율신경\n' +
-      (hrv > 50 ? 'HRV가 양호하여 부교감신경이 잘 작동 중입니다. 회복력이 좋은 상태입니다.' :
-       hrv > 30 ? 'HRV가 보통 수준입니다. 478 호흡법·명상으로 자율신경 안정을 권장합니다.' :
-       'HRV가 낮습니다. 스트레스·피로 누적 가능성. 충분한 수면을 권장합니다.') + '\n\n' +
-      '💪 종합 권고\n' +
-      '규칙적 운동·균형 잡힌 식단·충분한 수면을 유지하세요. 이상 증상이 지속되면 전문의 진료를 받으시기 바랍니다.\n\n' +
-      '⚠️ 본 결과는 의료 진단이 아닌 참고용 자가 측정입니다.';
+    // 측정값 모두 0 → AI 호출 안 함, 재측정 안내
+    if(bpm === 0 && hrv === 0 && fci === 0){
+      resultEl.innerHTML =
+        '<div style="background:rgba(180,83,9,0.08);border-left:4px solid #b45309;border-radius:12px;padding:16px 18px;margin-bottom:10px;">'
+        + '<div style="font-size:15px;font-weight:900;color:#b45309;margin-bottom:8px;">⚠️ 측정 데이터 부족</div>'
+        + '<div style="font-size:13px;color:rgba(13,58,58,0.85);line-height:1.7;">이번 측정에서 생체 신호가 충분히 수집되지 않았습니다. 의학적 이상이 아니라 <b>측정 환경</b>의 문제일 가능성이 높습니다.</div>'
+        + '</div>'
+        + '<div style="background:rgba(255,255,255,0.55);border-radius:12px;padding:14px 16px;margin-bottom:10px;">'
+        + '<div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:8px;">📋 재측정 권장 사항</div>'
+        + '<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.9;">'
+        + '• 밝은 조명 (자연광·LED) 에서 측정<br>'
+        + '• 얼굴을 카메라 정중앙에 30~50cm 정면 응시<br>'
+        + '• 60초간 움직임 없이 자세 유지<br>'
+        + '• 안경·모자·마스크 제거<br>'
+        + '• 478 호흡법을 천천히 따라하기'
+        + '</div></div>'
+        + '<div style="text-align:center;font-size:11px;color:rgba(13,58,58,0.55);padding:8px 0;">측정 사진(6장)은 정상 캡처되었습니다. 위 사항 확인 후 재시도해 주세요.</div>';
+      $('c41h-stage-desc').textContent = '⚠️ 재측정 권장';
+      console.warn('[c41h] 측정값 0 — AI 호출 생략');
+      return;
+    }
 
-    // 시스템 프롬프트 (cgo-fuli의 c24 챗봇과 동일 톤)
+    // 로딩 표시
+    resultEl.innerHTML = '<div style="text-align:center;padding:30px 14px;color:rgba(13,58,58,0.6);"><div style="font-size:14px;font-weight:700;margin-bottom:8px;">🤖 AI 분석 중...</div><div style="font-size:11px;">한의학·양의학 융합 알고리즘 적용 중</div></div>';
+
     var sysPrompt =
-      '당신은 한의학과 양의학을 융합한 통합 건강 분석 AI입니다.\n' +
-      '카메라 rPPG(원격 광용적맥파)로 측정된 6부위 데이터를 한방 망진(望診) 관점과 함께 종합 분석합니다.\n\n' +
-      '## 응답 규칙\n' +
-      '- 한국어로만 답변. 한자 절대 금지.\n' +
-      '- 영어 단어 사용 금지 (furthermore, however 등).\n' +
-      '- 친근하고 따뜻한 톤. 초등학생도 이해할 수 있도록 쉽게.\n' +
-      '- 4개 영역으로 구조화: 🔍 핵심 발견 / ❤️ 심혈관 / 🩺 자율신경 / 💪 종합 권고\n' +
-      '- 각 영역 2~3문장. 줄바꿈으로 구분.\n' +
-      '- 측정값이 정상/주의/낮음 등에 따라 다른 조언.\n' +
-      '- 마지막에 "⚠️ 본 결과는 의료 진단이 아닙니다" 한 줄 추가.';
+      '당신은 한의학(망진·체질·오행)과 양의학(rPPG·HRV·자율신경)을 융합한 건강 분석 AI입니다.\n\n' +
+      '# 응답 형식 (정확히 4개 영역)\n' +
+      '다음 4개 영역을 정확히 이 순서로, 각 영역마다 빈 줄로 구분하여 답변하세요.\n\n' +
+      '🔍 핵심 발견\n[측정 결과의 종합적 의미 2~3문장]\n\n' +
+      '❤️ 심혈관\n[BPM 기반 분석. 60~100 정상. 명확하게 2~3문장]\n\n' +
+      '🩺 자율신경\n[HRV 기반 분석. 50ms 이상 양호. 명확하게 2~3문장]\n\n' +
+      '💪 종합 권고\n[실천 가능한 조언 2~3문장 + 의료 면책 한 줄]\n\n' +
+      '# 응답 규칙\n- 한국어 100%. 한자·중국어·영어 단어 절대 금지.\n' +
+      '- 친근하고 따뜻한 톤. 초등학생도 이해할 수 있게.\n' +
+      '- 측정값이 0이거나 매우 낮으면 측정 부족이라 솔직히 명시.\n' +
+      '- 영역 사이는 빈 줄로 명확히 구분.';
 
     var userPrompt =
-      '6부위 종합 건강 측정 결과를 분석해 주세요:\n\n' +
-      '- BPM (심박수): ' + bpm.toFixed(0) + '\n' +
-      '- HRV (심박변이도): ' + hrv.toFixed(0) + ' ms\n' +
-      '- FCI (안면혈류지수): ' + fci.toFixed(0) + '\n' +
-      '- 측정 부위: 얼굴 60초, 혀 20초, 눈 20초, 피부 30초, 손등 15초, 손바닥 15초 (총 160초)\n\n' +
-      '한의학·양의학 융합 관점에서 4개 영역 (핵심 발견 · 심혈관 · 자율신경 · 종합 권고)을 분석해 주세요.';
+      '측정 결과:\n- BPM: ' + bpm.toFixed(0) + ' 회/분\n- HRV: ' + hrv.toFixed(0) + ' ms\n- FCI: ' + fci.toFixed(0) + '\n\n' +
+      '측정 시간: 얼굴 60초 + 혀 20초 + 눈 20초 + 피부 30초 + 손등 15초 + 손바닥 15초 (총 160초)\n\n' +
+      '위 4개 영역으로 분석해 주세요.';
 
-    // /api/groq 직접 호출 (cgo-message의 xyReply와 동일 패턴)
     fetch('/api/groq', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
         model: 'llama-3.1-8b-instant',
         max_tokens: 1200,
-        temperature: 0.6,
-        messages: [
-          {role: 'system', content: sysPrompt},
-          {role: 'user', content: userPrompt}
-        ]
+        temperature: 0.5,
+        messages: [{role:'system', content:sysPrompt}, {role:'user', content:userPrompt}]
       })
     })
     .then(function(r){ return r.json(); })
     .then(function(data){
       var aiText = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
       if(aiText && aiText.length > 50){
-        $('c41h-result-text').textContent = aiText;
+        resultEl.innerHTML = renderAIResult(aiText);
         $('c41h-stage-desc').textContent = '✅ AI 통합 의학 분석 완료';
-        console.log('[c41h] AI 분석 성공');
       } else {
-        $('c41h-result-text').textContent = fallbackText;
+        resultEl.innerHTML = renderFallback(bpm, hrv, fci);
         $('c41h-stage-desc').textContent = '✅ 측정 완료 (기본 분석)';
-        console.warn('[c41h] AI 응답 짧음, fallback 사용');
       }
     })
     .catch(function(err){
-      console.error('[c41h] /api/groq 호출 실패:', err);
-      $('c41h-result-text').textContent = fallbackText;
-      $('c41h-stage-desc').textContent = '✅ 측정 완료 (오프라인 분석)';
+      console.error('[c41h] /api/groq 실패:', err);
+      resultEl.innerHTML = renderFallback(bpm, hrv, fci);
+      $('c41h-stage-desc').textContent = '✅ 측정 완료 (오프라인)';
     });
+  }
+
+  // AI 응답을 영역 카드로 파싱·렌더링
+  function renderAIResult(text){
+    var sections = text.split(/(?=🔍|❤️|🩺|💪|⚠️)/);
+    var html = '';
+    var colors = {
+      '🔍': {bg:'rgba(2,132,199,0.08)', border:'#0284c7', title:'#0284c7'},
+      '❤️': {bg:'rgba(185,28,28,0.08)', border:'#b91c1c', title:'#b91c1c'},
+      '🩺': {bg:'rgba(124,58,237,0.08)', border:'#7c3aed', title:'#7c3aed'},
+      '💪': {bg:'rgba(5,150,105,0.08)', border:'#059669', title:'#059669'},
+      '⚠️': {bg:'rgba(180,83,9,0.08)', border:'#b45309', title:'#b45309'}
+    };
+    sections.forEach(function(s){
+      s = s.trim();
+      if(!s) return;
+      var m = s.match(/^(🔍|❤️|🩺|💪|⚠️)/);
+      var color = (m && colors[m[1]]) || colors['💪'];
+      var lines = s.split(/\n+/);
+      var title = lines[0].trim();
+      var body = lines.slice(1).join('<br>').trim();
+      if(!body) return;
+      html += '<div style="background:' + color.bg + ';border-left:4px solid ' + color.border + ';border-radius:12px;padding:14px 16px;margin-bottom:10px;">'
+            + '<div style="font-size:14px;font-weight:900;color:' + color.title + ';margin-bottom:8px;letter-spacing:.02em;">' + title + '</div>'
+            + '<div style="font-size:13px;color:rgba(13,58,58,0.88);line-height:1.75;">' + body + '</div>'
+            + '</div>';
+    });
+    if(!text.includes('의료') || !text.includes('진단이 아닙니다')){
+      html += '<div style="margin-top:10px;padding:10px 14px;background:rgba(255,255,255,0.4);border-radius:10px;font-size:11px;color:rgba(13,58,58,0.6);text-align:center;">⚠️ 본 결과는 의료 진단이 아닌 참고용 자가 측정입니다.</div>';
+    }
+    return html;
+  }
+
+  // API 실패 시 룰베이스 fallback
+  function renderFallback(bpm, hrv, fci){
+    var bpmMsg = bpm >= 60 && bpm <= 100 ? '심박이 정상 범위입니다. 현재 컨디션은 안정적으로 보입니다.' :
+                 bpm > 100 ? '심박이 다소 높은 편입니다. 충분한 휴식을 권장합니다.' :
+                 bpm > 0 ? '심박이 낮은 편입니다. 측정 환경을 확인 후 재측정해 보세요.' :
+                 '심박 측정값이 부족합니다. 재측정을 권장합니다.';
+    var hrvMsg = hrv >= 50 ? 'HRV가 양호하여 자율신경 균형이 안정적입니다.' :
+                 hrv >= 30 ? 'HRV가 보통 수준입니다. 478 호흡법으로 안정을 권장합니다.' :
+                 hrv > 0 ? 'HRV가 낮습니다. 스트레스 관리와 충분한 수면을 권장합니다.' :
+                 'HRV 측정값이 부족합니다. 재측정을 권장합니다.';
+    var aiText =
+      '🔍 핵심 발견\nBPM ' + bpm.toFixed(0) + ', HRV ' + hrv.toFixed(0) + 'ms, FCI ' + fci.toFixed(0) + '로 측정되었습니다. 6부위 종합 측정이 완료되었습니다.\n\n' +
+      '❤️ 심혈관\n' + bpmMsg + '\n\n' +
+      '🩺 자율신경\n' + hrvMsg + '\n\n' +
+      '💪 종합 권고\n규칙적 운동·균형 잡힌 식단·충분한 수면을 유지하세요. 이상 증상이 지속되면 전문의 진료를 받으시기 바랍니다.';
+    return renderAIResult(aiText);
   }
 
   // ━━━ 진행 바 ━━━
