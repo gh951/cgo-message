@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-hero-signature-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-waterglow-lerp-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27708,6 +27708,77 @@ window.rmaiArCapture = function(){
     0 0 30px rgba(255,255,255,0.25) !important;
 }
 </style>
+
+<!-- ════ C-42 박입 (물광 안정화) — Lerp 보간 필터 (Gemini 막둥이 진단 박입) ════ -->
+<!--    문제: FaceMesh 좌표 1픽셀 jitter → "틱-틱" 깜빡임 잔상                  -->
+<!--    수식: 안정값 = 이전값 × 0.9 + 신규값 × 0.1  (전형적 EMA/Lerp)            -->
+<!--    효과: 좌표가 매 프레임 미세하게 흔들려도 광점이 젤리처럼 묵직 고정      -->
+<!--    범위: drawFresnelWaterGlow 만 wrap (다른 AR 메이크업에 무영향)          -->
+<script>
+(function(){
+  'use strict';
+
+  var LERP_PREV = 0.9;   // 이전 프레임 비중 (막둥이 제안 비율)
+  var LERP_NEW  = 0.1;   // 신규 프레임 비중
+
+  // 이전 프레임 좌표 캐시 (FaceMesh 인덱스 → {x,y,z})
+  var lmCache = {};
+
+  // 단일 landmark 안정화 — 캐시 없으면 신규 채움
+  function lerpLandmark(idx, lm){
+    if(!lm) return lm;
+    if(!lmCache[idx]){
+      lmCache[idx] = { x: lm.x, y: lm.y, z: lm.z || 0 };
+      return lmCache[idx];
+    }
+    var c = lmCache[idx];
+    c.x = c.x * LERP_PREV + lm.x * LERP_NEW;
+    c.y = c.y * LERP_PREV + lm.y * LERP_NEW;
+    c.z = c.z * LERP_PREV + (lm.z || 0) * LERP_NEW;
+    return c;
+  }
+
+  // 468개 전체 안정화 (cheap operation: 곱+덧셈 4*468 = 2,000/frame)
+  function buildStableLandmarks(landmarks){
+    if(!landmarks) return landmarks;
+    var stable = new Array(landmarks.length);
+    for(var i=0; i<landmarks.length; i++){
+      if(landmarks[i]){
+        stable[i] = lerpLandmark(i, landmarks[i]);
+      }
+    }
+    return stable;
+  }
+
+  // drawFresnelWaterGlow 만 wrap (원 함수는 손 안 댐)
+  function wrapWaterGlow(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapWaterGlow, 300);
+      return;
+    }
+    if(window._fresnelLerpWrapped) return;
+
+    var origFunc = window.drawFresnelWaterGlow;
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // ★ Lerp 박입: 좌표 안정화 → 원 함수에 안정화된 좌표 전달
+      var stable = buildStableLandmarks(landmarks);
+      return origFunc.call(this, ctx, canvas, stable, glossLevel);
+    };
+    window._fresnelLerpWrapped = true;
+    // 외부 노출 (필요 시 비율 조정 가능)
+    window._fresnelLerpControl = {
+      setRatio: function(prev){
+        LERP_PREV = Math.max(0, Math.min(0.98, prev));
+        LERP_NEW  = 1 - LERP_PREV;
+      },
+      clearCache: function(){ lmCache = {}; }
+    };
+  }
+
+  // rmaiArStart 이후 1.5초 뒤 wrap 시도 (원 함수 박입 완료 후)
+  setTimeout(wrapWaterGlow, 1500);
+})();
+</script>
 
 </body>
 </html>
