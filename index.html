@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-eye-fix-nose-clip-v14" name="c41-version"/>
+<meta content="2026-05-24-c42-gemini-applied-v15" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28534,6 +28534,129 @@ window.rmaiArCapture = function(){
 
   // 박입 6 (2300ms) + 박입 13 (3000ms) 후
   setTimeout(wrapNoseGloss, 3200);
+})();
+</script>
+
+<!-- ════ C-42 박입 15 (막둥이 명세서 코드 그대로 — 파트너 명령) ════ -->
+<!--    원본: 막둥이 → "[C-41] 단일 패스 보정 엔진 (dlib 68 인덱스)"             -->
+<!--    정직 자수:                                                              -->
+<!--      ① dlib 68 인덱스 → MediaPipe 468 에서 위치 잘못됨                    -->
+<!--      ② ctx.clearRect 포함 → 비디오 영상 지울 가능성                       -->
+<!--    토글: window._geminiControl.disable() 로 즉시 옛 박입 13/14 복귀        -->
+<script>
+(function(){
+  'use strict';
+
+  function applyGemini(){
+    if(typeof window._rmaiArDrawBase !== 'function'){
+      setTimeout(applyGemini, 300); return;
+    }
+    if(window._geminiCodeApplied) return;
+
+    var origDrawBase = window._rmaiArDrawBase;  // 박입 13/14 보존
+
+    // 막둥이 원본 코드 (dlib 68 인덱스 그대로)
+    function geminiBase(ctx, canvas, landmarks, color){
+      if(!landmarks || landmarks.length === 0) return;
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(canvas.width, 0);
+        ctx.lineTo(canvas.width, canvas.height);
+        ctx.lineTo(0, canvas.height);
+        ctx.closePath();
+
+        if(landmarks[36] && landmarks[39]){
+          var lE = [36, 37, 38, 39, 40, 41];
+          var cx = 0, cy = 0;
+          lE.forEach(function(i){ if(landmarks[i]){ cx += landmarks[i].x; cy += landmarks[i].y; } });
+          cx = (cx / lE.length) * canvas.width;
+          cy = (cy / lE.length) * canvas.height;
+          var rx = Math.abs((landmarks[39].x - landmarks[36].x) * canvas.width) * 0.65 + 5;
+          var ry = Math.abs((landmarks[38].y - landmarks[40].y) * canvas.height) * 0.65 + 5;
+          ctx.moveTo(cx + rx, cy);
+          for(var i = 0; i <= 360; i += 30){
+            var rad = (i * Math.PI) / 180;
+            ctx.lineTo(cx + Math.cos(-rad) * rx, cy + Math.sin(-rad) * ry);
+          }
+        }
+
+        if(landmarks[42] && landmarks[45]){
+          var rE = [42, 43, 44, 45, 46, 47];
+          var cx = 0, cy = 0;
+          rE.forEach(function(i){ if(landmarks[i]){ cx += landmarks[i].x; cy += landmarks[i].y; } });
+          cx = (cx / rE.length) * canvas.width;
+          cy = (cy / rE.length) * canvas.height;
+          var rx = Math.abs((landmarks[45].x - landmarks[42].x) * canvas.width) * 0.65 + 5;
+          var ry = Math.abs((landmarks[43].y - landmarks[46].y) * canvas.height) * 0.65 + 5;
+          ctx.moveTo(cx + rx, cy);
+          for(var i = 0; i <= 360; i += 30){
+            var rad = (i * Math.PI) / 180;
+            ctx.lineTo(cx + Math.cos(-rad) * rx, cy + Math.sin(-rad) * ry);
+          }
+        }
+
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.globalAlpha = (window._rmaiAr && _rmaiAr.intensity) ? _rmaiAr.intensity.base : 0.6;
+        ctx.fillStyle = color;
+        ctx.fill('evenodd');
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+
+        if(landmarks[27] && landmarks[30]){
+          var nb = landmarks[27], nt = landmarks[30];
+          var targets = [
+            { x: nb.x * canvas.width, y: nb.y * canvas.height - 3, r: 8, alpha: 0.35 },
+            { x: nt.x * canvas.width, y: nt.y * canvas.height,      r: 12, alpha: 0.45 }
+          ];
+          targets.forEach(function(s){
+            var grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.r);
+            grad.addColorStop(0,   'rgba(255,255,255,' + s.alpha + ')');
+            grad.addColorStop(0.3, 'rgba(255,255,255,' + (s.alpha * 0.4) + ')');
+            grad.addColorStop(1,   'rgba(255,255,255,0)');
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fill();
+          });
+          ctx.globalCompositeOperation = 'source-over';
+        }
+      } catch(e){
+        origDrawBase(ctx, canvas, landmarks, color);
+      }
+    }
+
+    // _rmaiArDrawBase 추가 wrap (박입 13/14 위에)
+    window._rmaiArDrawBase = function(ctx, canvas, landmarks, color){
+      if(window._geminiOverride){
+        geminiBase(ctx, canvas, landmarks, color);
+      } else {
+        origDrawBase(ctx, canvas, landmarks, color);  // 박입 13/14 그대로
+      }
+    };
+
+    window._geminiOverride = true;  // 기본 ON (파트너 명령)
+    window._geminiCodeApplied = true;
+
+    window._geminiControl = {
+      enable:  function(){ window._geminiOverride = true; },
+      disable: function(){ window._geminiOverride = false; },
+      status:  function(){ return !!window._geminiOverride; },
+      info:    function(){
+        return {
+          enabled: !!window._geminiOverride,
+          source:  '막둥이 명세서 (dlib 68 인덱스)',
+          warning: 'MediaPipe 468 시스템 → 인덱스 위치 부정확 + clearRect 영상 차단 위험'
+        };
+      }
+    };
+  }
+
+  // 박입 14 (3200ms) 보다 늦게
+  setTimeout(applyGemini, 3700);
 })();
 </script>
 
