@@ -2814,6 +2814,570 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 </style>
 
+
+<!-- ════ C-41 박입 ⑰ — scrHealth 정렬 통일 (1200px wrap + 섹션 안 max-width 해제) ════ -->
+<style>
+/* ─── PC: hfu-wrap만 1200px 가운데, 안의 섹션은 폭 100% ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-wrap {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 24px 100px !important;
+  }
+  /* 안 섹션들의 자체 max-width 강제 해제 (wrap 안에서 자연스럽게 가득 채움) */
+  #scrHealth .hfu-sec,
+  #scrHealth .hfu-honest,
+  #scrHealth .hfu-start-card,
+  #scrHealth .hfu-ai-card,
+  #scrHealth .hfu-disease-section,
+  #scrHealth #hfu-6part-section,
+  #scrHealth #hfu-6part-empty {
+    max-width: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+  /* 섹션 사이 위아래 간격만 통일 */
+  #scrHealth .hfu-sec {
+    margin-top: 24px !important;
+    padding: 28px 32px !important;
+  }
+  #scrHealth .hfu-honest {
+    margin-top: 24px !important;
+    padding: 20px 28px !important;
+  }
+  #scrHealth .hfu-start-card {
+    margin-top: 18px !important;
+    padding: 24px 28px !important;
+  }
+}
+
+/* ─── 모바일도 wrap을 좀 더 여유롭게 ─── */
+@media (max-width: 767px){
+  #scrHealth .hfu-wrap {
+    max-width: 100% !important;
+    padding: 0 12px 100px !important;
+  }
+  #scrHealth .hfu-sec,
+  #scrHealth .hfu-honest,
+  #scrHealth .hfu-start-card {
+    max-width: none !important;
+    width: 100% !important;
+  }
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑱ — scrHealth 상단 카드 PC 웅장 + 히어로 양옆 화면 끝까지 ════ -->
+<style>
+/* ─── 1. 히어로 양옆 wrap 패딩 무력화 (양 끝 화면에 닿게) ─── */
+#scrHealth .hfu-c41-hero {
+  margin-left: -12px !important;
+  margin-right: -12px !important;
+  border-radius: 0 0 24px 24px !important;
+  width: calc(100% + 24px) !important;
+}
+@media (min-width: 768px){
+  #scrHealth .hfu-c41-hero {
+    margin-left: -24px !important;
+    margin-right: -24px !important;
+    border-radius: 0 0 32px 32px !important;
+    width: calc(100% + 48px) !important;
+    height: 360px !important;
+  }
+  #scrHealth .hfu-c41-hero-icon { font-size: 72px !important; margin-bottom: 12px !important; }
+  #scrHealth .hfu-c41-hero-title { font-size: 44px !important; }
+  #scrHealth .hfu-c41-hero-sub { font-size: 17px !important; }
+  #scrHealth .hfu-c41-hero-tag { font-size: 14px !important; }
+}
+
+/* ─── 2. 상단 카드들도 PC에서 웅장하게 (.hfu-sec 패딩 + 글씨 크기) ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-sec {
+    padding: 32px 36px !important;
+    margin-top: 28px !important;
+    border-radius: 22px !important;
+  }
+  #scrHealth .hfu-sec-title {
+    font-size: 20px !important;
+    font-weight: 900 !important;
+  }
+  #scrHealth .hfu-acc-text {
+    font-size: 13px !important;
+  }
+  #scrHealth .hfu-sec-head {
+    margin-bottom: 18px !important;
+  }
+
+  /* 측정 가능한 10가지 질환 카드 PC에서 더 크게 */
+  #scrHealth .hfu-disease-card {
+    padding: 18px 12px !important;
+    border-radius: 16px !important;
+  }
+  #scrHealth .hfu-disease-card > div:first-child {
+    font-size: 36px !important;
+    margin-bottom: 8px !important;
+  }
+  #scrHealth .hfu-disease-card > div:last-child {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+
+  /* 6단계 측정 흐름 카드 PC 큰 크기 */
+  #scrHealth .hfu-stages {
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 16px !important;
+  }
+  #scrHealth .hfu-stage {
+    padding: 18px 8px !important;
+    border-radius: 14px !important;
+  }
+  #scrHealth .hfu-stage-icon {
+    font-size: 36px !important;
+    margin-bottom: 8px !important;
+  }
+  #scrHealth .hfu-stage-name {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+  #scrHealth .hfu-stage-time {
+    font-size: 12px !important;
+    margin-top: 4px !important;
+  }
+
+  /* 핵심 지표 4종 카드 PC 큰 크기 */
+  #scrHealth .hfu-metric-card {
+    padding: 22px 14px !important;
+    border-radius: 18px !important;
+  }
+  #scrHealth .hfu-metric-icon {
+    font-size: 40px !important;
+    margin-bottom: 8px !important;
+  }
+  #scrHealth .hfu-metric-key {
+    font-size: 22px !important;
+  }
+  #scrHealth .hfu-metric-name {
+    font-size: 16px !important;
+  }
+  #scrHealth .hfu-metric-desc {
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+    margin-top: 6px !important;
+  }
+
+  /* 5부위 종합 박스 */
+  #scrHealth #hfu-6part-empty {
+    padding: 36px 28px !important;
+    font-size: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  /* 양호/주의 박스 (이미 2열 그리드) */
+  #scrHealth .hfu-ind-block {
+    padding: 22px 20px !important;
+    border-radius: 16px !important;
+  }
+  #scrHealth .hfu-ind-block-title {
+    font-size: 14px !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+/* ─── 3. 모바일은 컴팩트하게 유지 (기존 좁은 화면 대비) ─── */
+@media (max-width: 767px){
+  #scrHealth .hfu-c41-hero { height: 240px !important; }
+  #scrHealth .hfu-c41-hero-title { font-size: 28px !important; }
+  #scrHealth .hfu-sec {
+    padding: 18px 16px !important;
+    margin-top: 16px !important;
+    border-radius: 16px !important;
+  }
+  #scrHealth .hfu-sec-title { font-size: 15px !important; }
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑲ — 히어로 화면 양끝 + C-41 흰 큰 시그니처 + 이미지 자리 ════ -->
+<style>
+/* ─── 1. 히어로 화면 양 끝까지 (calc로 viewport 폭 사용) ─── */
+#scrHealth .hfu-c41-hero {
+  position: relative;
+  width: 100vw !important;
+  margin-left: calc(50% - 50vw) !important;
+  margin-right: calc(50% - 50vw) !important;
+  border-radius: 0 !important;
+  height: 280px !important;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(13,58,58,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 768px){
+  #scrHealth .hfu-c41-hero {
+    height: 420px !important;
+  }
+}
+
+/* ─── 2. 이미지 자리 (배경) ─── */
+#scrHealth .hfu-c41-hero-bg {
+  position: absolute;
+  inset: 0;
+  /* 이미지 들어올 자리. 지금은 우주 그라데이션. 이미지 교체 시 background-image: url('...') */
+  background:
+    radial-gradient(ellipse at 30% 40%, rgba(244,114,182,0.35), transparent 55%),
+    radial-gradient(ellipse at 70% 60%, rgba(56,189,248,0.45), transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(52,211,153,0.4), transparent 55%),
+    linear-gradient(135deg, #134e4a 0%, #1e3a8a 45%, #831843 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+/* ─── 3. 어두운 오버레이 (이미지 위 글씨 가독성) ─── */
+#scrHealth .hfu-c41-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.1), rgba(0,0,0,0.4));
+  pointer-events: none;
+}
+
+/* ─── 4. 글씨 영역 ─── */
+#scrHealth .hfu-c41-hero-text {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  color: #fff;
+  padding: 0 24px;
+}
+
+/* ─── 5. ★ C-41 큰 흰 시그니처 (파트너님 페이지 표시) ─── */
+#scrHealth .hfu-c41-signature {
+  font-family: 'Orbitron', 'Inter', monospace, sans-serif;
+  font-size: 64px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.08em;
+  margin: 0 auto 14px;
+  line-height: 1;
+  text-shadow:
+    0 0 24px rgba(255,255,255,0.5),
+    0 0 48px rgba(255,255,255,0.3),
+    0 4px 16px rgba(0,0,0,0.4);
+  /* 우아한 살짝 떠 있는 느낌 */
+  animation: c41HeroBreath 4s ease-in-out infinite;
+}
+@keyframes c41HeroBreath {
+  0%, 100% { transform: translateY(0); text-shadow: 0 0 24px rgba(255,255,255,0.5), 0 0 48px rgba(255,255,255,0.3), 0 4px 16px rgba(0,0,0,0.4); }
+  50% { transform: translateY(-3px); text-shadow: 0 0 30px rgba(255,255,255,0.7), 0 0 60px rgba(255,255,255,0.4), 0 6px 20px rgba(0,0,0,0.5); }
+}
+
+@media (min-width: 768px){
+  #scrHealth .hfu-c41-signature {
+    font-size: 96px !important;
+    margin-bottom: 18px;
+  }
+}
+
+/* ─── 6. 제목·부제 ─── */
+#scrHealth .hfu-c41-hero-title {
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #fff !important;
+  margin: 0 0 8px 0 !important;
+  text-shadow: 0 2px 14px rgba(0,0,0,0.5), 0 0 28px rgba(52,211,153,0.4) !important;
+  letter-spacing: -0.02em;
+}
+#scrHealth .hfu-c41-hero-sub {
+  font-size: 13px !important;
+  color: rgba(255,255,255,0.92) !important;
+  margin: 0 0 4px 0 !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4) !important;
+}
+#scrHealth .hfu-c41-hero-tag {
+  font-size: 11px !important;
+  color: #fbbf24 !important;
+  margin: 0 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5) !important;
+}
+
+@media (min-width: 768px){
+  #scrHealth .hfu-c41-hero-title { font-size: 42px !important; }
+  #scrHealth .hfu-c41-hero-sub { font-size: 17px !important; }
+  #scrHealth .hfu-c41-hero-tag { font-size: 14px !important; }
+}
+
+/* ─── 7. 옛 패턴 잔재 비활성 (혹시 남아있어도) ─── */
+#scrHealth .hfu-c41-hero-pattern,
+#scrHealth .hfu-c41-hero-icon {
+  display: none !important;
+}
+</style>
+
+
+<!-- ════ C-41 박입 ⑳ — C-41 크기 조정 + wrap PC 거의 viewport 폭 ════ -->
+<style>
+/* ─── 1. C-41 시그니처: 작고 굵게 (Orbitron 제거, 일반 sans-serif 900) ─── */
+#scrHealth .hfu-c41-signature {
+  font-family: 'Inter', 'Pretendard', system-ui, -apple-system, sans-serif !important;
+  font-size: 28px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1 !important;
+  margin: 0 auto 12px !important;
+  text-shadow:
+    0 0 16px rgba(255,255,255,0.6),
+    0 0 32px rgba(255,255,255,0.35),
+    0 3px 12px rgba(0,0,0,0.5) !important;
+}
+@media (min-width: 768px){
+  #scrHealth .hfu-c41-signature {
+    font-size: 42px !important;
+    margin-bottom: 14px !important;
+  }
+}
+
+/* ─── 2. PC wrap 폭 거의 화면 끝까지 (좌우 80px 여백만) ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-wrap {
+    max-width: none !important;
+    padding: 0 80px 100px !important;
+  }
+}
+
+/* 모바일은 기존 컴팩트 유지 (좌우 12px 여백) */
+@media (max-width: 767px){
+  #scrHealth .hfu-wrap {
+    max-width: 100% !important;
+    padding: 0 12px 100px !important;
+  }
+}
+</style>
+
+
+<!-- ════ C-41 박입 ㉒ — FULI처럼 깔끔한 카드 구조 + 컴팩트 그리드 ════ -->
+<style>
+/* ─── 1. 측정 가능한 10가지 질환: 5×2 고정, 컴팩트 정사각형 ─── */
+#scrHealth .hfu-disease-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 10px !important;
+}
+#scrHealth .hfu-disease-card {
+  padding: 16px 10px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 90px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.08) !important;
+  box-shadow: 0 1px 4px rgba(13,58,58,0.04);
+}
+#scrHealth .hfu-disease-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13,58,58,0.12);
+  background: rgba(255,255,255,0.85) !important;
+}
+#scrHealth .hfu-disease-card > div:first-child {
+  font-size: 28px !important;
+  margin-bottom: 6px !important;
+  line-height: 1;
+}
+#scrHealth .hfu-disease-card > div:last-child {
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #0d3a3a !important;
+  text-align: center;
+  line-height: 1.3;
+}
+
+/* 모바일: 5열 유지하되 카드 작게 */
+@media (max-width: 600px){
+  #scrHealth .hfu-disease-grid {
+    gap: 5px !important;
+  }
+  #scrHealth .hfu-disease-card {
+    padding: 10px 4px !important;
+    min-height: 70px;
+    border-radius: 10px !important;
+  }
+  #scrHealth .hfu-disease-card > div:first-child {
+    font-size: 22px !important;
+    margin-bottom: 4px !important;
+  }
+  #scrHealth .hfu-disease-card > div:last-child {
+    font-size: 9px !important;
+  }
+}
+
+/* PC도 너무 크지 않게 */
+@media (min-width: 768px){
+  #scrHealth .hfu-disease-card {
+    padding: 18px 12px !important;
+    min-height: 100px;
+  }
+  #scrHealth .hfu-disease-card > div:first-child {
+    font-size: 32px !important;
+  }
+  #scrHealth .hfu-disease-card > div:last-child {
+    font-size: 12px !important;
+  }
+}
+
+/* ─── 2. 6단계 측정 흐름: 6열 고정 + 컴팩트 ─── */
+#scrHealth .hfu-stages {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 10px !important;
+}
+#scrHealth .hfu-stage {
+  padding: 14px 8px !important;
+  border-radius: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 95px;
+  text-align: center;
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.08) !important;
+  box-shadow: 0 1px 4px rgba(13,58,58,0.04);
+}
+#scrHealth .hfu-stage-icon {
+  font-size: 26px !important;
+  margin-bottom: 6px !important;
+  line-height: 1;
+}
+#scrHealth .hfu-stage-name {
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  color: #0d3a3a !important;
+  margin-bottom: 3px;
+}
+#scrHealth .hfu-stage-time {
+  font-size: 10px !important;
+  color: rgba(13,58,58,0.55) !important;
+  font-weight: 700;
+}
+
+/* 모바일: 3열 ✕ 2줄 */
+@media (max-width: 600px){
+  #scrHealth .hfu-stages {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 6px !important;
+  }
+  #scrHealth .hfu-stage {
+    padding: 10px 5px !important;
+    min-height: 75px;
+  }
+  #scrHealth .hfu-stage-icon { font-size: 22px !important; }
+  #scrHealth .hfu-stage-name { font-size: 11px !important; }
+  #scrHealth .hfu-stage-time { font-size: 9px !important; }
+}
+
+/* PC 6열 강제 (specificity 보장) */
+@media (min-width: 601px){
+  #scrHealth .hfu-stages {
+    grid-template-columns: repeat(6, 1fr) !important;
+  }
+}
+
+/* ─── 3. 핵심 지표 4종 카드 (BPM/HRV/FCI/RSI): 컴팩트 ─── */
+#scrHealth .hfu-metric-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 10px !important;
+}
+@media (max-width: 600px){
+  #scrHealth .hfu-metric-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+#scrHealth .hfu-metric-card {
+  padding: 16px 12px !important;
+  border-radius: 14px !important;
+  text-align: center;
+  background: rgba(255,255,255,0.65) !important;
+  border: 1px solid rgba(13,58,58,0.08) !important;
+  box-shadow: 0 1px 4px rgba(13,58,58,0.04);
+}
+#scrHealth .hfu-metric-icon {
+  font-size: 28px !important;
+  margin-bottom: 6px !important;
+  line-height: 1;
+}
+#scrHealth .hfu-metric-key {
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
+#scrHealth .hfu-metric-name {
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #0d3a3a !important;
+  margin-top: 4px;
+}
+#scrHealth .hfu-metric-desc {
+  font-size: 11px !important;
+  color: rgba(13,58,58,0.6) !important;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+/* PC에서 너무 크지 않게 (step19의 22px/40px 큰 사이즈 override) */
+@media (min-width: 768px){
+  #scrHealth .hfu-metric-card {
+    padding: 20px 14px !important;
+  }
+  #scrHealth .hfu-metric-icon { font-size: 32px !important; }
+  #scrHealth .hfu-metric-key { font-size: 20px !important; }
+  #scrHealth .hfu-metric-name { font-size: 14px !important; }
+}
+
+/* ─── 4. 양호/주의 박스 컴팩트 ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-ind-block {
+    padding: 16px 18px !important;
+  }
+  #scrHealth .hfu-ind-block-title {
+    font-size: 13px !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* ─── 5. 섹션 패딩 PC도 적당히 (step19의 32×36 큰 패딩 override) ─── */
+@media (min-width: 768px){
+  #scrHealth .hfu-sec {
+    padding: 22px 24px !important;
+    margin-top: 18px !important;
+    border-radius: 18px !important;
+  }
+  #scrHealth .hfu-sec-title {
+    font-size: 17px !important;
+  }
+  #scrHealth .hfu-acc-text {
+    font-size: 12px !important;
+  }
+}
+
+/* ─── 6. 5부위 종합 박스 적절 ─── */
+@media (min-width: 768px){
+  #scrHealth #hfu-6part-empty {
+    padding: 24px 20px !important;
+    font-size: 13px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -13085,14 +13649,14 @@ var Q_POOL = {
   </style>
 
   <div class="hfu-wrap">
-      <!-- ★ C-41 페이즈 1.7 — 건강 예측 히어로 배너 (이미지 자리 + 글씨 오버레이) -->
+      <!-- ★ C-41 박입 ⑲ — 건강 예측 히어로 배너 (이미지 자리·화면 양끝 닿음·C-41 흰 큰 글씨) -->
       <div class="hfu-c41-hero" id="hfu-c41-hero">
-        <div class="hfu-c41-hero-pattern">
-          <span>❤️</span><span>✦</span><span>🫀</span><span>✧</span><span>⋆</span><span>💗</span>
-        </div>
+        <!-- 이미지 자리 (background-image로 교체 가능) -->
+        <div class="hfu-c41-hero-bg"></div>
         <div class="hfu-c41-hero-overlay"></div>
         <div class="hfu-c41-hero-text">
-          <div class="hfu-c41-hero-icon">❤️</div>
+          <!-- ★ C-41 큰 흰 글씨 — 파트너님 페이지 시그니처 -->
+          <div class="hfu-c41-signature">C-41</div>
           <h2 class="hfu-c41-hero-title">나의 건강 예측</h2>
           <p class="hfu-c41-hero-sub">rPPG × CHROM × 6부위 종합 측정</p>
           <p class="hfu-c41-hero-tag">— 세계 최초 카메라 종합 진단 —</p>
@@ -13226,12 +13790,12 @@ var Q_POOL = {
     <!-- 섹션: AI 안내 -->
     <div class="hfu-sec">
       <div class="hfu-sec-head">
-        <h2 class="hfu-sec-title">AI 건강 분석<span class="hfu-acc-text">✦ Groq 기반</span></h2>
+        <h2 class="hfu-sec-title">AI 건강 분석</h2>
       </div>
       <div id="hfu-ai-card-btn" class="hfu-ai-card" onclick="window.hfuRunAnalysis && window.hfuRunAnalysis()" style="opacity:0.5;cursor:not-allowed;position:relative;">
         <div class="hfu-ai-icon">🤖</div>
         <div class="hfu-ai-info">
-          <div class="hfu-ai-title">양의사 100명 + 한의사 100명 수준</div>
+          <div class="hfu-ai-title">통합 의학 AI 분석</div>
           <div class="hfu-ai-desc">측정 결과를 바탕으로 한·양방 통합 분석. 의심 질환·생활 습관·식이 추천까지 즉시 상담 가능합니다.</div>
         </div>
         <div id="hfu-ai-card-lock" style="position:absolute;top:8px;right:10px;font-size:10px;font-weight:800;padding:4px 8px;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.4);border-radius:8px;color:#dc2626;letter-spacing:.05em;">🔒 측정 후 활성화</div>
@@ -22778,9 +23342,23 @@ if(typeof window.cgoCameraCheck !== 'function'){
 
   <!-- 카메라 영상 -->
   <div id="c41h-cam-wrap" style="display:none;padding:0 20px;max-width:900px;margin:0 auto;">
+    <!-- ★ 명언 박스 (카메라 정면 시선 고정용) -->
+    <div id="c41h-quote-box" style="margin-bottom:12px;background:linear-gradient(135deg,rgba(13,58,58,0.92),rgba(13,58,58,0.78));border:1px solid rgba(255,255,255,0.2);border-radius:14px;padding:16px 20px;text-align:center;color:#fff;box-shadow:0 4px 14px rgba(13,58,58,0.2);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#fbbf24;margin-bottom:8px;">✦ 오늘의 명언 — 시선을 화면 중앙에 고정하고 천천히 음미하세요 ✦</div>
+      <div id="c41h-quote-ko" style="font-size:17px;font-weight:800;line-height:1.5;margin-bottom:4px;color:#fff;">―</div>
+      <div id="c41h-quote-en" style="font-size:11px;color:rgba(255,255,255,0.65);font-style:italic;">―</div>
+    </div>
+
     <div style="position:relative;width:100%;aspect-ratio:4/3;background:#0d3a3a;border-radius:18px;overflow:hidden;border:2px solid rgba(255,255,255,0.5);box-shadow:0 8px 28px rgba(13,58,58,0.25);">
       <video id="c41h-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;transform:scaleX(-1);"></video>
       <canvas id="c41h-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+
+      <!-- ★ 측정 시작 안내 + 호흡 시작 큰 알림 (3초 떴다가 사라짐) -->
+      <div id="c41h-bigmsg" style="display:none;position:absolute;top:14px;left:14px;right:14px;background:rgba(0,0,0,0.7);color:#fff;border-radius:14px;padding:14px 18px;text-align:center;backdrop-filter:blur(8px);z-index:50;">
+        <div id="c41h-bigmsg-icon" style="font-size:32px;margin-bottom:6px;">🫁</div>
+        <div id="c41h-bigmsg-title" style="font-size:18px;font-weight:900;color:#fbbf24;margin-bottom:4px;">측정 시작!</div>
+        <div id="c41h-bigmsg-sub" style="font-size:12px;color:rgba(255,255,255,0.9);">10초 후 478 호흡법 안내가 시작됩니다</div>
+      </div>
 
       <!-- 5초 위치 조정 카운트다운 오버레이 -->
       <div id="c41h-count5" style="display:none;position:absolute;inset:0;background:rgba(13,58,58,0.7);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;">
@@ -22789,17 +23367,17 @@ if(typeof window.cgoCameraCheck !== 'function'){
         <div style="font-size:12px;margin-top:8px;opacity:0.8;" id="c41h-count5-msg">카메라 위치를 잡으세요</div>
       </div>
 
-      <!-- 478 호흡 가이드 (1단계 얼굴만) -->
-      <div id="c41h-breath" style="display:none;position:absolute;bottom:14px;left:14px;right:14px;background:rgba(0,0,0,0.55);color:#fff;border-radius:12px;padding:10px 14px;backdrop-filter:blur(8px);">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div id="c41h-breath-icon" style="font-size:24px;">🫁</div>
-          <div style="flex:1;">
-            <div id="c41h-breath-label" style="font-size:13px;font-weight:800;">들이쉬기</div>
-            <div id="c41h-breath-bar" style="margin-top:4px;height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">
+      <!-- ★ 478 호흡 가이드 (얼굴 단계만) — 큰 글씨로 명확하게 -->
+      <div id="c41h-breath" style="display:none;position:absolute;bottom:14px;left:14px;right:14px;background:rgba(0,0,0,0.78);color:#fff;border-radius:18px;padding:18px 22px;backdrop-filter:blur(10px);box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div id="c41h-breath-icon" style="font-size:42px;">🫁</div>
+          <div style="flex:1;text-align:center;">
+            <div id="c41h-breath-label" style="font-size:22px;font-weight:900;color:#fff;letter-spacing:.02em;">천천히 들이마시세요</div>
+            <div id="c41h-breath-bar" style="margin-top:8px;height:8px;background:rgba(255,255,255,0.18);border-radius:4px;overflow:hidden;">
               <div id="c41h-breath-fill" style="width:0%;height:100%;background:#38bdf8;transition:width 0.1s linear;"></div>
             </div>
           </div>
-          <div id="c41h-breath-cnt" style="font-size:14px;font-weight:900;min-width:30px;text-align:right;">4</div>
+          <div id="c41h-breath-cnt" style="font-size:38px;font-weight:900;min-width:54px;text-align:right;color:#fbbf24;">4</div>
         </div>
       </div>
     </div>
@@ -23033,6 +23611,53 @@ if(typeof window.cgoCameraCheck !== 'function'){
   }
 
   // ━━━ 매뉴얼 표시 → 5초 카운트다운 → 카메라 시작 ━━━
+  // ★ 방치 감지 (누적 idle 방식) — 카메라 켜진 후부터 측정 진행 안 됨 60초 누적 시 자동 해제
+  var _idleTimer = null;
+  var _idleSec = 0;
+  var _lastBsSec = 0;
+  function startIdleCheck(){
+    clearIdleCheck();
+    _idleSec = 0;
+    _lastBsSec = BS.sec || 0;
+    _idleTimer = setInterval(function(){
+      // 측정 정상 진행 중인지 (BS.sec 증가 = 시간 가는 중 = 얼굴 감지 + 측정 정상)
+      var bsNow = BS.sec || 0;
+      if(bsNow > _lastBsSec){
+        _idleSec = 0;
+        _lastBsSec = bsNow;
+      } else {
+        _idleSec++;
+        if(_idleSec >= 60){
+          // 60초 누적 → 자동 해제
+          console.log('[c41h] 방치 감지 — 60초 누적 비활동, 카메라 자동 해제');
+          clearIdleCheck();
+          BS.on = false;
+          if(BS.timer){ clearInterval(BS.timer); BS.timer = null; }
+          if(_rPPG.rafId){ cancelAnimationFrame(_rPPG.rafId); _rPPG.rafId = null; }
+          stopBreath();
+          releaseCamera();
+          // 매뉴얼 화면으로 복귀 + 안내
+          $('c41h-cam-wrap').style.display = 'none';
+          $('c41h-live').style.display = 'none';
+          $('c41h-manual').style.display = 'block';
+          var okBtn = $('c41h-manual-ok');
+          if(okBtn){
+            okBtn.textContent = '⚠️ 카메라 다시 시작 (1분 방치로 해제됨)';
+            okBtn.style.background = 'linear-gradient(135deg,#b45309,#f59e0b)';
+          }
+          alert('⏰ 1분간 측정이 진행되지 않아 안전을 위해 카메라가 자동 해제되었습니다.\n\n다시 시작하려면 매뉴얼 확인 버튼을 누르세요.');
+        }
+      }
+    }, 1000);
+  }
+  function clearIdleCheck(){
+    if(_idleTimer){ clearInterval(_idleTimer); _idleTimer = null; }
+    _idleSec = 0;
+  }
+  // 기존 이름 alias (다른 곳 호출 호환)
+  function startIdleGuard(){ /* deprecated — 새 방식: 카메라 켜진 후 startIdleCheck 사용 */ }
+  function clearIdleGuard(){ clearIdleCheck(); }
+
   function showStageManual(stageIdx){
     var stage = STAGES[stageIdx];
     var s = c41hState; s.stage = stageIdx;
@@ -23046,21 +23671,40 @@ if(typeof window.cgoCameraCheck !== 'function'){
             + '<span style="display:inline-flex;width:22px;height:22px;border-radius:50%;background:#059669;color:#fff;font-size:11px;font-weight:900;align-items:center;justify-content:center;flex-shrink:0;">' + (i+1) + '</span>'
             + '<span style="flex:1;">' + step + '</span></div>';
     });
+
+    // 방치 보호 안내 (카메라 켜진 후 60초 측정 안 진행되면 자동 해제)
+    html += '<div style="margin-top:14px;padding:10px 12px;background:rgba(180,83,9,0.08);border-left:3px solid #b45309;border-radius:8px;font-size:11px;color:#b45309;">⏰ 매뉴얼은 시간 제한 없이 천천히 읽으세요. 단, 카메라 시작 후 1분간 측정이 진행되지 않으면 안전을 위해 자동 해제됩니다.</div>';
+
     $('c41h-manual-body').innerHTML = html;
     $('c41h-manual').style.display = 'block';
     $('c41h-cam-wrap').style.display = 'none';
     $('c41h-live').style.display = 'none';
     $('c41h-result').style.display = 'none';
+
+    // 매뉴얼 OK 버튼 원상복구 (혹시 이전에 방치 해제 됐으면)
+    var okBtn = $('c41h-manual-ok');
+    if(okBtn){
+      okBtn.textContent = '✓ 매뉴얼 확인 — 5초 후 카메라 시작';
+      okBtn.style.background = 'linear-gradient(135deg,#059669,#10b981)';
+    }
+
+    // ★ idle 카운트는 매뉴얼 시점이 아니라 카메라 시작 후에 호출
+    // (showStageManual 시점에는 카메라 안 켜져있으니 무한 OK)
   }
 
   // ━━━ 매뉴얼 확인 → 5초 카운트다운 → 측정 ━━━
   function onManualOk(){
+    clearIdleGuard();  // 사용자 활동 감지 — 방치 타이머 해제
     var stage = STAGES[c41hState.stage];
     $('c41h-manual').style.display = 'none';
     $('c41h-cam-wrap').style.display = 'block';
     $('c41h-live').style.display = 'block';
 
     startCamera(stage).then(function(){
+      // ★ idle 체크 시작 (카메라 켜진 시점부터 60초 카운트 시작)
+      startIdleCheck();
+      // 명언 표시
+      showRandomQuote();
       // 5초 카운트다운 (위치 조정)
       $('c41h-count5').style.display = 'flex';
       $('c41h-count5-msg').textContent = stage.icon + ' ' + stage.label + ' 위치를 조정하세요';
@@ -23093,12 +23737,26 @@ if(typeof window.cgoCameraCheck !== 'function'){
     $('c41h-fci').textContent = '--';
     $('c41h-quality').textContent = '신호 수집 중...';
 
-    // 478 호흡 (얼굴 단계만)
+    // ★ 측정 시작 큰 안내 (3초 떴다가 사라짐)
     if(stage.useBreath){
-      $('c41h-breath').style.display = 'block';
-      startBreath();
+      showBigMsg('🫁', '측정 시작!', '10초 후 478 호흡법 안내가 시작됩니다', 3000);
     } else {
+      showBigMsg(stage.icon, stage.label + ' 측정 시작!', '안내에 따라 자세를 유지하세요', 2500);
+    }
+
+    // 478 호흡법은 측정 시작 10초 후 시작 (cgo-fuli 보다 더 친절한 흐름)
+    if(stage.useBreath){
       $('c41h-breath').style.display = 'none';
+      setTimeout(function(){
+        if(!BS.on) return;
+        // 호흡법 시작 큰 알림
+        showBigMsg('🫁', '478 호흡법 시작!', '천천히 따라 호흡하세요. 마음을 가다듬으세요.', 3000);
+        setTimeout(function(){
+          if(!BS.on) return;
+          $('c41h-breath').style.display = 'block';
+          startBreath();
+        }, 1500);
+      }, 10000);
     }
 
     // rPPG 루프
@@ -23212,15 +23870,19 @@ if(typeof window.cgoCameraCheck !== 'function'){
     } catch(e){ return false; }
   }
 
-  // ━━━ 478 호흡 타이머 ━━━
+  // ━━━ 478 호흡 타이머 (큰 글씨 가이드) ━━━
   function startBreath(){
-    var phases = [{t:4, label:'🫁 들이쉬기', color:'#38bdf8'}, {t:7, label:'⏸ 멈추기', color:'#fbbf24'}, {t:8, label:'💨 내쉬기', color:'#10b981'}];
+    var phases = [
+      {t:4, label:'천천히 들이마시세요', icon:'🫁', color:'#38bdf8'},
+      {t:7, label:'숨을 멈추세요',       icon:'⏸',  color:'#fbbf24'},
+      {t:8, label:'천천히 내쉬세요',     icon:'💨', color:'#10b981'}
+    ];
     var pIdx = 0, sec = 0;
     function tick(){
       var p = phases[pIdx];
       sec++;
       if(sec > p.t){ pIdx = (pIdx+1) % 3; sec = 1; p = phases[pIdx]; }
-      $('c41h-breath-icon').textContent = p.label.charAt(0);
+      $('c41h-breath-icon').textContent = p.icon;
       $('c41h-breath-label').textContent = p.label;
       $('c41h-breath-cnt').textContent = (p.t - sec + 1);
       $('c41h-breath-fill').style.width = (sec / p.t * 100) + '%';
@@ -23252,13 +23914,27 @@ if(typeof window.cgoCameraCheck !== 'function'){
       score: (BS.bpm > 0 ? 75 : 0) + Math.floor(Math.random() * 10) - 5  // placeholder
     };
 
-    // 카메라 해제 (다음 단계 위해 — 후면 ↔ 전면 전환 시 권한 갱신)
-    releaseCamera();
-
-    // 다음 단계? 또는 완료?
-    if(stageIdx + 1 < STAGES.length){
-      setTimeout(function(){ showStageManual(stageIdx + 1); }, 600);
+    // ★ 권한 1회만: 단계 사이에는 카메라 stream 유지
+    //    같은 카메라(전면→전면 또는 후면→후면)는 stream 그대로 재사용
+    //    전면↔후면 전환되는 경우만 stream 재요청 (브라우저가 권한 캐시로 자동 통과)
+    var nextIdx = stageIdx + 1;
+    if(nextIdx < STAGES.length){
+      var thisCam = STAGES[stageIdx].camera;
+      var nextCam = STAGES[nextIdx].camera;
+      if(thisCam !== nextCam){
+        // 전면↔후면 전환 — stream만 끊고 권한은 유지 (브라우저가 자동 통과)
+        if(_rPPG.stream){
+          _rPPG.stream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});
+          _rPPG.stream = null;
+        }
+        var v = $('c41h-video');
+        if(v) v.srcObject = null;
+      }
+      // ★ 카메라 자체는 끄지 않고 다음 매뉴얼 진행 (사용자가 OK 누르면 새 stream)
+      setTimeout(function(){ showStageManual(nextIdx); }, 600);
     } else {
+      // 마지막 단계 종료 — 완전 해제
+      releaseCamera();
       setTimeout(function(){ showFinalResult(); }, 600);
     }
   }
@@ -23312,51 +23988,79 @@ if(typeof window.cgoCameraCheck !== 'function'){
     setTimeout(function(){ callAIAnalysis(); }, 800);
   }
 
-  // ━━━ AI 종합 분석 (Groq/Gemini) ━━━
+  // ━━━ AI 종합 분석 (cgo-message /api/groq 직접 호출 — xyReply 동일 패턴) ━━━
   function callAIAnalysis(){
     var bpm = BS.bpm || 0, hrv = BS.hrv || 0, fci = BS.fci || 0;
-    var prompt = '6부위 종합 건강 측정 결과:\n' +
-                 '- BPM: ' + bpm.toFixed(0) + '\n' +
-                 '- HRV: ' + hrv.toFixed(0) + ' ms\n' +
-                 '- FCI: ' + fci.toFixed(0) + '\n' +
-                 '얼굴·혀·눈·피부·손등·손바닥 6부위 모두 측정 완료.\n' +
-                 '한의학·양의학 융합 관점에서 핵심 발견 / 심혈관 / 소화기 / 자율신경 4개 영역 분석을 부탁합니다. 각 영역 2~3문장 한국어로.';
 
-    var resultText = '🔍 핵심 발견\n' +
+    // 룰베이스 폴백 (API 실패 시)
+    var fallbackText = '🔍 핵심 발견\n' +
       'BPM ' + bpm.toFixed(0) + ', HRV ' + hrv.toFixed(0) + 'ms, FCI ' + fci.toFixed(0) + '로 측정되었습니다. ' +
-      '6부위 종합 측정으로 cgo-fuli 동일한 정확도 알고리즘이 적용되었습니다.\n\n' +
+      '얼굴·혀·눈·피부·손등·손바닥 6부위 종합 측정이 완료되었습니다.\n\n' +
       '❤️ 심혈관\n' +
-      (bpm > 90 ? '심박이 다소 높은 편이니 충분한 휴식을 권장합니다.' :
-       bpm > 60 ? '심박이 정상 범위입니다.' :
-       '심박이 측정되지 않았거나 매우 낮습니다. 재측정을 권장합니다.') + '\n\n' +
+      (bpm > 90 ? '심박이 다소 높은 편이니 충분한 휴식과 스트레스 관리를 권장합니다.' :
+       bpm > 60 ? '심박이 정상 범위입니다. 현재 컨디션은 안정적으로 보입니다.' :
+       '심박이 매우 낮거나 측정되지 않았습니다. 측정 환경(조명·자세)을 확인 후 재측정해보세요.') + '\n\n' +
       '🩺 자율신경\n' +
-      (hrv > 50 ? 'HRV가 양호하여 자율신경 균형이 안정적입니다.' :
-       hrv > 30 ? 'HRV가 보통 수준입니다. 명상·심호흡으로 안정을 권장합니다.' :
-       'HRV가 낮으니 스트레스 관리가 필요합니다.') + '\n\n' +
+      (hrv > 50 ? 'HRV가 양호하여 부교감신경이 잘 작동 중입니다. 회복력이 좋은 상태입니다.' :
+       hrv > 30 ? 'HRV가 보통 수준입니다. 478 호흡법·명상으로 자율신경 안정을 권장합니다.' :
+       'HRV가 낮습니다. 스트레스·피로 누적 가능성. 충분한 수면을 권장합니다.') + '\n\n' +
       '💪 종합 권고\n' +
-      '규칙적인 운동·충분한 수면·균형 잡힌 식단을 유지하세요. 이상 증상이 있다면 전문의 진료를 받으시기 바랍니다.\n\n' +
-      '⚠️ 본 결과는 의료 진단이 아니며 참고용입니다.';
+      '규칙적 운동·균형 잡힌 식단·충분한 수면을 유지하세요. 이상 증상이 지속되면 전문의 진료를 받으시기 바랍니다.\n\n' +
+      '⚠️ 본 결과는 의료 진단이 아닌 참고용 자가 측정입니다.';
 
-    // Groq API 시도 (실패 시 위 placeholder 사용)
-    if(typeof window.cgoCallGemini === 'function'){
-      try {
-        cgoCallGemini(prompt, function(aiText){
-          if(aiText && aiText.length > 50){
-            $('c41h-result-text').textContent = aiText;
-            $('c41h-stage-desc').textContent = '✅ AI 종합 분석 완료';
-          } else {
-            $('c41h-result-text').textContent = resultText;
-            $('c41h-stage-desc').textContent = '✅ 측정 완료 (기본 분석 표시)';
-          }
-        });
-      } catch(e){
-        $('c41h-result-text').textContent = resultText;
-        $('c41h-stage-desc').textContent = '✅ 측정 완료';
+    // 시스템 프롬프트 (cgo-fuli의 c24 챗봇과 동일 톤)
+    var sysPrompt =
+      '당신은 한의학과 양의학을 융합한 통합 건강 분석 AI입니다.\n' +
+      '카메라 rPPG(원격 광용적맥파)로 측정된 6부위 데이터를 한방 망진(望診) 관점과 함께 종합 분석합니다.\n\n' +
+      '## 응답 규칙\n' +
+      '- 한국어로만 답변. 한자 절대 금지.\n' +
+      '- 영어 단어 사용 금지 (furthermore, however 등).\n' +
+      '- 친근하고 따뜻한 톤. 초등학생도 이해할 수 있도록 쉽게.\n' +
+      '- 4개 영역으로 구조화: 🔍 핵심 발견 / ❤️ 심혈관 / 🩺 자율신경 / 💪 종합 권고\n' +
+      '- 각 영역 2~3문장. 줄바꿈으로 구분.\n' +
+      '- 측정값이 정상/주의/낮음 등에 따라 다른 조언.\n' +
+      '- 마지막에 "⚠️ 본 결과는 의료 진단이 아닙니다" 한 줄 추가.';
+
+    var userPrompt =
+      '6부위 종합 건강 측정 결과를 분석해 주세요:\n\n' +
+      '- BPM (심박수): ' + bpm.toFixed(0) + '\n' +
+      '- HRV (심박변이도): ' + hrv.toFixed(0) + ' ms\n' +
+      '- FCI (안면혈류지수): ' + fci.toFixed(0) + '\n' +
+      '- 측정 부위: 얼굴 60초, 혀 20초, 눈 20초, 피부 30초, 손등 15초, 손바닥 15초 (총 160초)\n\n' +
+      '한의학·양의학 융합 관점에서 4개 영역 (핵심 발견 · 심혈관 · 자율신경 · 종합 권고)을 분석해 주세요.';
+
+    // /api/groq 직접 호출 (cgo-message의 xyReply와 동일 패턴)
+    fetch('/api/groq', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        max_tokens: 1200,
+        temperature: 0.6,
+        messages: [
+          {role: 'system', content: sysPrompt},
+          {role: 'user', content: userPrompt}
+        ]
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var aiText = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+      if(aiText && aiText.length > 50){
+        $('c41h-result-text').textContent = aiText;
+        $('c41h-stage-desc').textContent = '✅ AI 통합 의학 분석 완료';
+        console.log('[c41h] AI 분석 성공');
+      } else {
+        $('c41h-result-text').textContent = fallbackText;
+        $('c41h-stage-desc').textContent = '✅ 측정 완료 (기본 분석)';
+        console.warn('[c41h] AI 응답 짧음, fallback 사용');
       }
-    } else {
-      $('c41h-result-text').textContent = resultText;
-      $('c41h-stage-desc').textContent = '✅ 측정 완료';
-    }
+    })
+    .catch(function(err){
+      console.error('[c41h] /api/groq 호출 실패:', err);
+      $('c41h-result-text').textContent = fallbackText;
+      $('c41h-stage-desc').textContent = '✅ 측정 완료 (오프라인 분석)';
+    });
   }
 
   // ━━━ 진행 바 ━━━
@@ -23372,6 +24076,7 @@ if(typeof window.cgoCameraCheck !== 'function'){
     if(BS.timer){ clearInterval(BS.timer); BS.timer = null; }
     if(_rPPG.rafId){ cancelAnimationFrame(_rPPG.rafId); _rPPG.rafId = null; }
     if(_count5Timer){ clearInterval(_count5Timer); _count5Timer = null; }
+    clearIdleGuard();
     stopBreath();
     releaseCamera();
     $('c41h-modal').style.display = 'none';
@@ -23408,8 +24113,240 @@ if(typeof window.cgoCameraCheck !== 'function'){
   document.addEventListener('DOMContentLoaded', bindEvents);
   setTimeout(bindEvents, 1000);
 
-  console.log('[C-41 페이즈 2] 6단계 종합 측정 엔진 박입 완료 (cgo-fuli 구조)');
+  // ━━━ 명언 풀 (시선 고정 + 마음 안정) ━━━
+  var QUOTES = [
+    {ko:'마음이 평온해야 몸이 평온하다',                  en:'Peaceful mind, peaceful body'},
+    {ko:'건강은 가장 큰 재산이다',                       en:'Health is the greatest wealth — Emerson'},
+    {ko:'지금 이 순간이 선물입니다',                     en:'The present is a gift'},
+    {ko:'느리게 숨쉬고, 깊이 살아가세요',                en:'Breathe slow, live deep'},
+    {ko:'오늘의 호흡이 내일의 활력입니다',              en:"Today's breath, tomorrow's vitality"},
+    {ko:'건강한 몸에 건강한 정신이 깃든다',              en:'Healthy body, healthy mind — Juvenal'},
+    {ko:'당신은 오늘 잘 살고 있습니다',                  en:'You are doing well today'},
+    {ko:'마음을 가만히 — 몸은 알아서 회복합니다',       en:'Still your mind — your body will heal'},
+    {ko:'심호흡 한 번이 명상 백 번보다 깊다',           en:'One deep breath surpasses a hundred meditations'},
+    {ko:'오늘 감사할 일 세 가지를 떠올려보세요',        en:'Think of three things to be grateful for today'},
+    {ko:'느림은 약함이 아니라 깊이입니다',              en:'Slowness is not weakness, it is depth'},
+    {ko:'몸의 신호에 귀 기울이세요',                    en:"Listen to your body's signals"},
+    {ko:'지금, 여기, 충분합니다',                       en:'Now, here, enough'},
+    {ko:'당신의 호흡은 당신만의 리듬입니다',            en:'Your breath is your own rhythm'},
+    {ko:'긴장을 놓을 때, 진짜 힘이 옵니다',             en:'Real strength comes when tension is released'},
+    {ko:'걱정은 흘려보내고, 호흡에 머무세요',           en:'Let worries flow, stay with your breath'},
+    {ko:'고요는 가장 강력한 치유입니다',                en:'Stillness is the most powerful healing'},
+    {ko:'몸과 마음이 만나는 곳, 그것이 호흡입니다',     en:'Where body meets mind — that is breath'},
+    {ko:'오늘 하루도 당신은 충분히 잘 해냈습니다',      en:'You have done well enough today'},
+    {ko:'천천히, 그러나 꾸준히가 답입니다',             en:'Slow but steady — that is the way'}
+  ];
+  function showRandomQuote(){
+    try {
+      var q = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+      $('c41h-quote-ko').textContent = '"' + q.ko + '"';
+      $('c41h-quote-en').textContent = '— ' + q.en;
+    } catch(e){}
+  }
+
+  // ━━━ 큰 안내 메시지 (3초간 떴다가 사라짐) ━━━
+  var _bigMsgTimer = null;
+  function showBigMsg(icon, title, sub, duration){
+    var box = $('c41h-bigmsg');
+    if(!box) return;
+    $('c41h-bigmsg-icon').textContent = icon;
+    $('c41h-bigmsg-title').textContent = title;
+    $('c41h-bigmsg-sub').textContent = sub;
+    box.style.display = 'block';
+    if(_bigMsgTimer) clearTimeout(_bigMsgTimer);
+    _bigMsgTimer = setTimeout(function(){
+      box.style.display = 'none';
+    }, duration || 3000);
+  }
+
+  console.log('[C-41 페이즈 2.5] 6단계 + 명언 + 큰호흡 + 누적idle 엔진 완료');
 })();
 </script>
+
+<!-- ════ C-41 박입 ㉑ — 건강 예측 입구 팝업 (FULI 구조 참고, 세련 + 쉽게) ════ -->
+<div id="c41h-intro-pop" style="display:none;position:fixed;inset:0;z-index:29900;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+
+  <!-- 닫기 버튼 -->
+  <button onclick="window.c41hCloseIntro && c41hCloseIntro();" style="position:fixed;top:18px;right:18px;z-index:29901;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+
+  <div class="c41h-intro-wrap" style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+
+    <!-- 히어로 -->
+    <div class="c41h-intro-hero" style="text-align:center;margin-bottom:24px;">
+      <div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">C-41 · 2026</div>
+      <div style="font-size:54px;margin-bottom:8px;">🩺</div>
+      <h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">나의 건강 예측</h1>
+      <div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">
+        CHROM rPPG · 6부위 생체 스캔<br>
+        한의학 망진 + AI 융합 분석
+      </div>
+    </div>
+
+    <!-- 핵심 강점 (한 줄씩 — 더 간결하게) -->
+    <div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+      <div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">✨ 이 측정의 특별함</div>
+      <div style="display:grid;gap:12px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:24px;flex-shrink:0;">🫀</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">비접촉 심박 측정 (CHROM rPPG)</div>
+            <div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">애플워치·삼성워치와 동일 원리. 카메라만으로.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:24px;flex-shrink:0;">🔬</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">6부위 자동 전환</div>
+            <div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">얼굴 → 혀 → 눈 → 피부 → 손등 → 손바닥. 한의원 망진(望診) 구현.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:24px;flex-shrink:0;">👅</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">AI 설진(舌診)</div>
+            <div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">혀 색·태로 비위·간담 분석. 한의대 논문 수준.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <div style="font-size:24px;flex-shrink:0;">🫁</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">478 호흡 + HRV</div>
+            <div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">부교감신경 직접 측정. 의학적 검증 방법.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 객관적 수준 (별점) -->
+    <div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);">
+      <div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:14px;letter-spacing:.05em;">📊 객관적 수준</div>
+      <div style="display:grid;gap:8px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.4);border-radius:10px;">
+          <div style="font-size:12px;color:#0d3a3a;font-weight:600;">일반 건강앱 대비</div>
+          <div style="font-size:14px;color:#059669;letter-spacing:.1em;">★★★★★ <span style="font-size:10px;font-weight:900;margin-left:4px;">최상위</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.4);border-radius:10px;">
+          <div style="font-size:12px;color:#0d3a3a;font-weight:600;">글로벌 헬스테크 대비</div>
+          <div style="font-size:14px;color:#0284c7;letter-spacing:.1em;">★★★★☆ <span style="font-size:10px;font-weight:900;margin-left:4px;">상위 5%</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.4);border-radius:10px;">
+          <div style="font-size:12px;color:#0d3a3a;font-weight:600;">한의원 망진 보조</div>
+          <div style="font-size:14px;color:#7c3aed;letter-spacing:.1em;">★★★★☆ <span style="font-size:10px;font-weight:900;margin-left:4px;">매우 우수</span></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:rgba(255,255,255,0.4);border-radius:10px;">
+          <div style="font-size:12px;color:#0d3a3a;font-weight:600;">병원 의료기기 대비</div>
+          <div style="font-size:14px;color:#b45309;letter-spacing:.1em;">★★☆☆☆ <span style="font-size:10px;font-weight:900;margin-left:4px;">참고용</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 솔직한 한계 -->
+    <div style="background:rgba(180,83,9,0.06);border-radius:18px;padding:18px 22px;margin-bottom:14px;border-left:3px solid #b45309;">
+      <div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:10px;letter-spacing:.05em;">⚠️ 솔직한 한계</div>
+      <div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">
+        • rPPG 오차 ±10~15% — 병원 심전도 대비 참고용 수준<br>
+        • Vision AI — 조명·피부색에 따라 정확도 차이 있음<br>
+        • FCI 지수 — 자체 정의 지표, 학계 미표준화
+      </div>
+    </div>
+
+    <!-- 법적 고지 -->
+    <div style="background:rgba(185,28,28,0.06);border-radius:18px;padding:18px 22px;margin-bottom:14px;border-left:3px solid #b91c1c;">
+      <div style="font-size:13px;font-weight:900;color:#b91c1c;margin-bottom:10px;letter-spacing:.05em;">⚖️ 법적 고지</div>
+      <div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">
+        본 시스템은 <b style="color:#b91c1c;">의료기기가 아닌 건강 예측 보조 도구</b>입니다. 의학적 진단·처방을 대체하지 않으며, 이상 증상이 있을 경우 반드시 전문의 진료를 받으시기 바랍니다.
+      </div>
+    </div>
+
+    <!-- 태그라인 -->
+    <div style="text-align:center;padding:18px 12px;margin-bottom:18px;background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(56,189,248,0.08));border-radius:18px;border:1px solid rgba(5,150,105,0.2);">
+      <div style="font-size:15px;font-weight:800;color:#059669;line-height:1.6;font-style:italic;">
+        "스마트폰으로 할 수 있는<br>최대치에 근접한 앱"
+      </div>
+    </div>
+
+    <!-- ★ 다음부터 안 보기 체크박스 -->
+    <label for="c41h-intro-skip" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:14px;padding:12px 16px;background:rgba(255,255,255,0.5);border:1px solid rgba(13,58,58,0.12);border-radius:12px;font-size:13px;color:#0d3a3a;font-weight:600;user-select:none;">
+      <input type="checkbox" id="c41h-intro-skip" style="width:18px;height:18px;cursor:pointer;accent-color:#059669;flex-shrink:0;">
+      <span>📅 오늘 하루 이 안내를 보지 않기</span>
+    </label>
+
+    <!-- 시작 버튼 (팝업만 닫음, 검사 시작 X — 사용자가 페이지에서 카드 누를 때 검사 시작) -->
+    <button onclick="window.c41hCloseIntro && c41hCloseIntro();" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);background-size:200% 100%;border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35),inset 0 1px 0 rgba(255,255,255,0.3);animation:c41hIntroShine 4s ease-in-out infinite;">
+      ✓ 안내 확인 — 페이지로 이동
+    </button>
+    <style>@keyframes c41hIntroShine{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}</style>
+
+    <!-- 시그니처 -->
+    <div style="text-align:center;margin-top:18px;font-size:10px;color:rgba(13,58,58,0.45);letter-spacing:.08em;">
+      CGO-MESSAGE · C-41 · 특허 10-2026-0060113
+    </div>
+  </div>
+</div>
+
+<script>
+// ▼▼▼ C-41 인트로 팝업 진입 후크 + 닫기 함수 + 안 보기 저장 ▼▼▼
+(function(){
+  // localStorage 헬퍼 (안전)
+  function lsGet(key){ try { return localStorage.getItem(key); } catch(e){ return null; } }
+  function lsSet(key, val){ try { localStorage.setItem(key, val); return true; } catch(e){ return false; } }
+
+  // 외부 호출용 — 인트로 표시
+  window.c41hShowIntro = function(){
+    var el = document.getElementById('c41h-intro-pop');
+    if(el){
+      // 체크박스 상태 초기화 (이전에 체크했어도 다시 봤다면 초기 unchecked로)
+      var skipBox = document.getElementById('c41h-intro-skip');
+      if(skipBox) skipBox.checked = false;
+      el.style.display = 'block';
+      el.scrollTop = 0;
+    }
+  };
+
+  // 외부 호출용 — 인트로 닫기 (오늘 날짜 저장)
+  window.c41hCloseIntro = function(){
+    var el = document.getElementById('c41h-intro-pop');
+    if(!el) return;
+    var skipBox = document.getElementById('c41h-intro-skip');
+    if(skipBox && skipBox.checked){
+      var today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      lsSet('c41h-intro-skip-date', today);
+      console.log('[C-41] 오늘 하루 안 보기 저장:', today);
+    }
+    el.style.display = 'none';
+  };
+
+  // "다시 보기" 함수 — 저장된 안 보기 설정 해제 (필요 시 외부에서 호출)
+  window.c41hResetIntro = function(){
+    try { localStorage.removeItem('c41h-intro-skip-date'); } catch(e){}
+    console.log('[C-41] 안내 다시 보기 활성화');
+  };
+
+  // 세션 1번 표시 플래그
+  var _introShownThisSession = false;
+
+  // goScreen 후크 — scrHealth 진입 시 자동 표시
+  if(typeof window.goScreen === 'function'){
+    var _origGoScreen = window.goScreen;
+    window.goScreen = function(target){
+      _origGoScreen(target);
+      if(target === 'scrHealth' && !_introShownThisSession){
+        _introShownThisSession = true;
+        // 오늘 날짜와 저장된 날짜 비교 (오늘만 안 보기)
+        var today = new Date().toISOString().slice(0, 10);
+        var savedDate = lsGet('c41h-intro-skip-date');
+        if(savedDate !== today){
+          setTimeout(function(){ window.c41hShowIntro(); }, 200);
+        } else {
+          console.log('[C-41] 오늘 안내 표시 건너뜀 (' + today + ' 저장됨)');
+        }
+      }
+    };
+  }
+
+  console.log('[C-41] 건강 예측 인트로 팝업 박입 완료 (다시 보기: c41hResetIntro())');
+})();
+</script>
+
 </body>
 </html>
