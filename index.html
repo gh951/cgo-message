@@ -26945,19 +26945,41 @@ window.rmaiArCapture = function(){
 (function(){
   'use strict';
 
-  // ─── 색상 → 브랜드 매핑 빠른 검색 ───
+  // ─── 색상 → 브랜드 매핑 (진짜 변수명: _rmaiArColorLibrary + _rmaiArOhengSet) ───
   function findBrandByHex(hex){
-    if(!hex || typeof _rmaiArColors === 'undefined') return null;
+    if(!hex) return null;
     var hexLow = hex.toLowerCase();
-    for(var cat in _rmaiArColors){
-      var arr = _rmaiArColors[cat];
-      if(!arr || !arr.length) continue;
-      for(var i=0; i<arr.length; i++){
-        if(arr[i].c && arr[i].c.toLowerCase() === hexLow){
-          return { name: arr[i].n, hex: arr[i].c, cat: cat };
+
+    // 1순위: _rmaiArColorLibrary (daily/luxury/oheng 3 모드 × 4 카테고리)
+    if(typeof _rmaiArColorLibrary !== 'undefined'){
+      for(var mode in _rmaiArColorLibrary){
+        var lib = _rmaiArColorLibrary[mode];
+        if(!lib) continue;
+        for(var cat in lib){
+          var arr = lib[cat];
+          if(!arr || !arr.length) continue;
+          for(var i=0; i<arr.length; i++){
+            if(arr[i].c && arr[i].c.toLowerCase() === hexLow){
+              return { name: arr[i].n, hex: arr[i].c, cat: cat, mode: mode };
+            }
+          }
         }
       }
     }
+
+    // 2순위: _rmaiArOhengSet (오행 명품 색상)
+    if(typeof _rmaiArOhengSet !== 'undefined'){
+      for(var cat2 in _rmaiArOhengSet){
+        var arr2 = _rmaiArOhengSet[cat2];
+        if(!arr2 || !arr2.length) continue;
+        for(var j=0; j<arr2.length; j++){
+          if(arr2[j].c && arr2[j].c.toLowerCase() === hexLow){
+            return { name: arr2[j].n, hex: arr2[j].c, cat: cat2, mode: 'oheng' };
+          }
+        }
+      }
+    }
+
     return null;
   }
 
@@ -26986,8 +27008,9 @@ window.rmaiArCapture = function(){
       '</div>';
 
     // 같은 카테고리 다른 추천 3개
-    if(sugg && typeof _rmaiArColors !== 'undefined' && _rmaiArColors[info.cat]){
-      var others = _rmaiArColors[info.cat].filter(function(x){
+    if(sugg && info.cat){
+      var libSrc = (info.mode && _rmaiArColorLibrary[info.mode]) ? _rmaiArColorLibrary[info.mode][info.cat] : (_rmaiArOhengSet ? _rmaiArOhengSet[info.cat] : null);
+      var others = (libSrc || []).filter(function(x){
         return x.c.toLowerCase() !== info.hex.toLowerCase();
       }).slice(0, 4);
       if(others.length){
@@ -27148,5 +27171,111 @@ window.rmaiArCapture = function(){
   console.log('[svi] Step A-3+4+5 통합 박입 완료 — 브랜드/HSL/AI 상담');
 })();
 </script>
+
+<!-- ════ C-42 박입 (긴급 수정) — _rmaiAr 초기 상태 보강 + 물광 셰이더 박입 ════ -->
+<script>
+(function(){
+  'use strict';
+
+  function ensureRmaiInit(){
+    if(typeof _rmaiAr === 'undefined'){ setTimeout(ensureRmaiInit, 300); return; }
+
+    // ★ 메신저는 명품(luxury) 카드 모드 기본 — 오행은 보너스 토글
+    if(!_rmaiAr.cardMode) _rmaiAr.cardMode = 'luxury';
+    if(!_rmaiAr.cardExpanded) _rmaiAr.cardExpanded = {oheng:false, daily:false, luxury:true};
+    if(!_rmaiAr.glossLevel) _rmaiAr.glossLevel = 0;
+
+    console.log('[c42] _rmaiAr 초기화 보강:', _rmaiAr.cardMode, _rmaiAr.currentPalette);
+  }
+
+  // ★ 물광 셰이더 — 막둥이 의사코드 (Canvas 2D screen 합성)
+  window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+    if(!ctx || !canvas || !landmarks || glossLevel <= 0) return;
+
+    // 핵심 광 위치 — 광대(좌/우) + 콧대 + 이마 + 윗입술
+    var glowPoints = [
+      {idx:117, radius:38, alphaMul:1.0},  // 좌측 광대
+      {idx:346, radius:38, alphaMul:1.0},  // 우측 광대
+      {idx:6,   radius:22, alphaMul:0.9},  // 콧대 중간
+      {idx:4,   radius:18, alphaMul:0.85}, // 코끝
+      {idx:10,  radius:32, alphaMul:0.7},  // 이마 중앙
+      {idx:0,   radius:20, alphaMul:0.95}  // 윗입술 중앙
+    ];
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+
+    glowPoints.forEach(function(p){
+      var lm = landmarks[p.idx];
+      if(!lm) return;
+      var x = lm.x * canvas.width;
+      var y = lm.y * canvas.height;
+      var alpha = glossLevel * p.alphaMul * 0.75; // 0~1 → 0~0.75
+
+      var grad = ctx.createRadialGradient(x, y, 0, x, y, p.radius);
+      grad.addColorStop(0, 'rgba(255,255,255,' + alpha + ')');
+      grad.addColorStop(0.4, 'rgba(255,255,255,' + (alpha*0.5) + ')');
+      grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, p.radius, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    ctx.restore();
+  };
+
+  // ★ onResults wrap — rmaiArStart 호출 후 FaceMesh 등장하면 후크
+  function tryFresnelHook(){
+    if(typeof _rmaiAr === 'undefined' || !_rmaiAr.running){
+      setTimeout(tryFresnelHook, 800);
+      return;
+    }
+    if(!_rmaiAr.faceMesh){
+      setTimeout(tryFresnelHook, 500);
+      return;
+    }
+    if(_rmaiAr._fresnelHooked) return;
+
+    // onResults 콜백 재등록 (원본 호출 + 물광 추가)
+    _rmaiAr.faceMesh.onResults(function(results){
+      if(typeof _rmaiArOnResults === 'function'){
+        _rmaiArOnResults(results);
+      }
+      // 물광 효과 추가 그리기
+      if(_rmaiAr.glossLevel > 0 && results.multiFaceLandmarks && results.multiFaceLandmarks[0]){
+        window.drawFresnelWaterGlow(_rmaiAr.ctx, _rmaiAr.canvas, results.multiFaceLandmarks[0], _rmaiAr.glossLevel);
+      }
+    });
+    _rmaiAr._fresnelHooked = true;
+    console.log('[c42] ✨ 물광 셰이더 후크 완료 (Canvas 2D screen 합성)');
+  }
+
+  // rmaiArStart 호출 직후 tryFresnelHook 시작
+  function wrapRmaiStart(){
+    if(typeof window.rmaiArStart !== 'function'){ setTimeout(wrapRmaiStart, 300); return; }
+    if(window._rmaiArStartWrapped) return;
+    var orig = window.rmaiArStart;
+    window.rmaiArStart = function(){
+      orig.apply(this, arguments);
+      setTimeout(tryFresnelHook, 1000);
+    };
+    window._rmaiArStartWrapped = true;
+    console.log('[c42] rmaiArStart wrapped — 시작 후 물광 자동 hook');
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      setTimeout(ensureRmaiInit, 100);
+      setTimeout(wrapRmaiStart, 200);
+    });
+  } else {
+    setTimeout(ensureRmaiInit, 100);
+    setTimeout(wrapRmaiStart, 200);
+  }
+})();
+</script>
+
 </body>
 </html>
