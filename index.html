@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-gemini-v18-masterpiece" name="c41-version"/>
+<meta content="2026-05-24-c42-FINAL-clean-v19" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28983,6 +28983,48 @@ setTimeout(function(){
   };
 })();
 }, 4700);
+</script>
+
+<!-- ════ C-42 박입 19 (GPT 정밀 분석 검증 — 최종 정리) ════ -->
+<!--    GPT 분석: MediaPipe FaceMesh 468 시스템 확정                              -->
+<!--    클로드 박입 13/14/16 = MediaPipe 인덱스 사용 → 정확                        -->
+<!--    막둥이 박입 15/17/18 = dlib 68 인덱스 사용 → 환각                          -->
+<!--    조치: 막둥이 dlib 박입 chain 전체 자동 OFF, 클로드 MediaPipe 박입 보장   -->
+<script>
+setTimeout(function(){
+  // 막둥이 dlib 인덱스 박입들 자동 OFF (위험 차단)
+  try { if(window._v18Control)      window._v18Control.disableAll(); } catch(e){}
+  try { if(window._geminiV2Control) window._geminiV2Control.disable(); } catch(e){}
+  try { if(window._geminiControl)   window._geminiControl.disable(); } catch(e){}
+
+  // 클로드 MediaPipe 박입들 활성화 보장
+  try { if(window._singlePassControl)    window._singlePassControl.enable(); } catch(e){}
+  try { if(window._noseCircularControl)  window._noseCircularControl.enable(); } catch(e){}
+
+  // 최종 상태 외부 노출
+  window._finalState = {
+    info: function(){
+      return {
+        active: {
+          base: window._singlePassEnabled ? '박입 13 (MediaPipe 눈 16점 + evenodd 천공)' : '옛 4번 패스',
+          glow: window._noseCircularEnabled ? '박입 16 (원형 그래디언트 페이드)' : '옛 6점 highlight'
+        },
+        disabled: {
+          inj15: window._geminiOverride === false   ? 'OFF ✓' : '활성 (위험)',
+          inj17: window._geminiV2Override === false ? 'OFF ✓' : '활성 (위험)',
+          inj18: window._geminiV3Enabled === false  ? 'OFF ✓' : '활성 (위험)'
+        },
+        verdict: 'MediaPipe 468 확정 (GPT 검증) — 클로드 박입 활성, 막둥이 dlib 박입 차단'
+      };
+    },
+    // 비상 — 만약 폰에서 다시 막둥이 코드로 돌리고 싶으면
+    enableGeminiAgain: function(){
+      if(window._v18Control)      window._v18Control.enableAll();
+      if(window._geminiV2Control) window._geminiV2Control.enable();
+      if(window._geminiControl)   window._geminiControl.enable();
+    }
+  };
+}, 5500);  // 박입 18 (4700ms) 후
 </script>
 
 </body>
