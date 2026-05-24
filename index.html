@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-revert-inj7-hsl-restore" name="c41-version"/>
+<meta content="2026-05-24-c42-paper-singlepass-v13" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -28324,6 +28324,127 @@ window.rmaiArCapture = function(){
   // 박입 8 (2700ms) 보다 늦게
   setTimeout(wrapAlert, 2800);
   setTimeout(startWatchdog, 5000);  // 5초 후 watchdog 시작
+})();
+</script>
+
+<!-- ════ C-42 박입 13 (단일 습자지 패러다임 — 단일 패스 천공 렌더링) ════ -->
+<!--    출처: 막둥이 명세서 — Single-Pass Perforation Rendering                  -->
+<!--    원리: 얼굴 전체 = 단일 path (외부 윤곽) + 입술/좌안/우안 = 내부 sub-path -->
+<!--          ctx.fill('evenodd') 한 번 호출 → winding rule 가 자동 천공          -->
+<!--    효과: 4번 별도 fill → 1번 단일 fill (베이스). 색 누적 0 = 흰가면 방지     -->
+<!--    범위: _rmaiArDrawBase 만 wrap (옛 함수 보존)                              -->
+<!--    토글: window._singlePassControl.disable() / enable() — 기본 ON           -->
+<script>
+(function(){
+  'use strict';
+
+  function applyPaper(){
+    if(typeof window._rmaiArDrawBase !== 'function' ||
+       typeof window._rmaiArFaceOval === 'undefined' ||
+       typeof window._rmaiArLipsOuter === 'undefined'){
+      setTimeout(applyPaper, 300); return;
+    }
+    if(window._singlePassApplied) return;
+
+    var origDrawBase = window._rmaiArDrawBase;
+
+    // 단일 패스 천공 함수 — 얼굴 윤곽 + 입술/좌안/우안 sub-path → 단일 fill('evenodd')
+    function singlePassBase(ctx, canvas, landmarks, color){
+      try {
+        ctx.beginPath();
+
+        // ① 외부: 얼굴 윤곽 (가득 채울 영역)
+        _rmaiArFaceOval.forEach(function(idx, i){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+
+        // ② 내부 천공 #1: 입술
+        _rmaiArLipsOuter.forEach(function(idx, i){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.closePath();
+
+        // ③ 내부 천공 #2: 좌안
+        if(typeof _rmaiArEyeLeft !== 'undefined'){
+          _rmaiArEyeLeft.forEach(function(idx, i){
+            var lm = landmarks[idx];
+            if(!lm) return;
+            var x = lm.x * canvas.width;
+            var y = lm.y * canvas.height;
+            if(i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.closePath();
+        }
+
+        // ④ 내부 천공 #3: 우안
+        if(typeof _rmaiArEyeRight !== 'undefined'){
+          _rmaiArEyeRight.forEach(function(idx, i){
+            var lm = landmarks[idx];
+            if(!lm) return;
+            var x = lm.x * canvas.width;
+            var y = lm.y * canvas.height;
+            if(i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.closePath();
+        }
+
+        // ⑤ 단일 fill — evenodd winding rule (외부 채움 + 내부 천공)
+        ctx.globalCompositeOperation = 'soft-light';
+        ctx.globalAlpha = _rmaiAr.intensity.base;
+        ctx.fillStyle = color;
+        ctx.fill('evenodd');  // ★ 핵심: 천공 자동
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+      } catch(e){
+        // 실패 시 옛 함수 폴백 (안전)
+        origDrawBase(ctx, canvas, landmarks, color);
+      }
+    }
+
+    // _rmaiArDrawBase wrap — 토글 가능
+    window._rmaiArDrawBase = function(ctx, canvas, landmarks, color){
+      if(window._singlePassEnabled){
+        singlePassBase(ctx, canvas, landmarks, color);
+      } else {
+        origDrawBase(ctx, canvas, landmarks, color);
+      }
+    };
+
+    // 기본 ON
+    window._singlePassEnabled = true;
+    window._singlePassApplied = true;
+
+    // 외부 토글
+    window._singlePassControl = {
+      enable:  function(){ window._singlePassEnabled = true; },
+      disable: function(){ window._singlePassEnabled = false; },
+      status:  function(){ return !!window._singlePassEnabled; },
+      info:    function(){
+        return {
+          enabled: !!window._singlePassEnabled,
+          applied: !!window._singlePassApplied,
+          mode:    'single-pass-perforation',
+          desc:    '베이스 = 얼굴 단일 path + 입술/좌안/우안 evenodd 천공'
+        };
+      }
+    };
+  }
+
+  // 모든 옛 박입 후 (박입 10 = 2800ms, watchdog = 5000ms)
+  setTimeout(applyPaper, 3000);
 })();
 </script>
 
