@@ -27277,5 +27277,160 @@ window.rmaiArCapture = function(){
 })();
 </script>
 
+
+<!-- ════ C-42 박입 (정밀 수정) — _maiColors 폴리필 + base 전용 + intensity ════ -->
+<style>
+/* 색상 picker 안 카테고리 탭 중 base만 보이게 (입술/볼/아이 X) */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('lip')"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('cheek')"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('eye')"] {
+  display: none !important;
+}
+
+/* 사주 추천 토글 버튼 숨김 (오행 X) */
+#rmai-ar-color-picker button[onclick*="rmaiArSetPalette('oheng')"] {
+  display: none !important;
+}
+
+/* base 버튼만 강조 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('base')"] {
+  flex: 1 1 100% !important;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1a1408 !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+}
+
+/* 카드 모드 oheng 버튼 숨김 (오행 X) — 일반/명품만 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCardMode('oheng')"] {
+  display: none !important;
+}
+
+/* Intensity 슬라이더 카드 */
+.svi-intensity-card {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(13,58,58,0.1);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+}
+#svi-intensity-bar {
+  background: linear-gradient(to right, #fef3c7, #b45309);
+  width: 100%; height: 10px; border-radius: 5px;
+  -webkit-appearance: none; appearance: none;
+}
+#svi-intensity-bar::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; border: 2px solid #b45309; cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+</style>
+<script>
+(function(){
+  'use strict';
+
+  // ★ _maiColors 폴리필 — cgo-fuli 라인 92153 누락분 (빈 객체로 통과만)
+  if(typeof window._maiColors === 'undefined'){
+    window._maiColors = {
+      '목': {lip:[], cheek:[], eye:[], base:[]},
+      '화': {lip:[], cheek:[], eye:[], base:[]},
+      '토': {lip:[], cheek:[], eye:[], base:[]},
+      '금': {lip:[], cheek:[], eye:[], base:[]},
+      '수': {lip:[], cheek:[], eye:[], base:[]}
+    };
+    console.log('[c42] _maiColors 폴리필 박입 (cgo-fuli 누락분)');
+  }
+
+  // ★ _rmaiAr 초기 상태 — base 카테고리 강제 + luxury 모드 + 명품 색상
+  function forceBaseMode(){
+    if(typeof _rmaiAr === 'undefined'){ setTimeout(forceBaseMode, 300); return; }
+    _rmaiAr.currentCategory = 'base';      // 베이스(피부)만
+    _rmaiAr.cardMode = 'luxury';            // 명품 색상
+    _rmaiAr.currentPalette = 'luxury';      // 사주 X
+    _rmaiAr.cardExpanded = {oheng:false, daily:false, luxury:true};
+    _rmaiAr.intensity = _rmaiAr.intensity || {};
+    if(!_rmaiAr.intensity.base) _rmaiAr.intensity.base = 0.5;
+    console.log('[c42] base 카테고리 강제 + luxury 모드');
+  }
+
+  // ★ rmaiArApplyColor wrap — 어떤 색을 클릭해도 base에만 적용 (입술/볼/아이 X)
+  function wrapApplyColor(){
+    if(typeof window.rmaiArApplyColor !== 'function'){ setTimeout(wrapApplyColor, 300); return; }
+    if(window._sviForceBaseWrapped) return;
+    window.rmaiArApplyColor = function(hex, btn){
+      // base 전용 적용
+      _rmaiAr.currentCategory = 'base';
+      _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base: hex };
+      _rmaiAr.currentColor = hex;
+      // picker 재렌더링
+      if(typeof _rmaiArInitColorPicker === 'function'){
+        _rmaiArInitColorPicker();
+      }
+      // 브랜드 정보 카드 업데이트
+      if(typeof window.sviUpdateBrandInfo === 'function'){
+        window.sviUpdateBrandInfo(hex, null);
+      }
+      console.log('[c42] base 색 적용:', hex);
+    };
+    window._sviForceBaseWrapped = true;
+    console.log('[c42] rmaiArApplyColor → base 전용 wrap');
+  }
+
+  // ★ rmaiArSetCategory wrap — 항상 base로 (다른 카테고리 호출 무시)
+  function wrapSetCategory(){
+    if(typeof window.rmaiArSetCategory !== 'function'){ setTimeout(wrapSetCategory, 300); return; }
+    var origFn = window.rmaiArSetCategory;
+    window.rmaiArSetCategory = function(cat){
+      // 무조건 base
+      _rmaiAr.currentCategory = 'base';
+      if(typeof _rmaiArInitColorPicker === 'function'){
+        _rmaiArInitColorPicker();
+      }
+    };
+    console.log('[c42] rmaiArSetCategory → base 고정 wrap');
+  }
+
+  // ★ Intensity 슬라이더 업데이트 함수
+  window.sviUpdateIntensity = function(){
+    var v = +document.getElementById('svi-intensity-bar').value;
+    document.getElementById('svi-intensity-val').textContent = v + '%';
+    if(typeof _rmaiAr !== 'undefined'){
+      _rmaiAr.intensity = _rmaiAr.intensity || {};
+      _rmaiAr.intensity.base = v / 100;
+    }
+  };
+
+  // ★ Intensity 카드 박입 — 색상 바 카드 다음에
+  function injectIntensityCard(){
+    var colorToolsCard = document.getElementById('svi-color-tools-card');
+    if(!colorToolsCard){ setTimeout(injectIntensityCard, 300); return; }
+    if(document.getElementById('svi-intensity-card-injected')) return;
+
+    var card = document.createElement('div');
+    card.id = 'svi-intensity-card-injected';
+    card.className = 'svi-intensity-card';
+    card.innerHTML =
+      '<div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:10px;display:flex;align-items:center;gap:8px;">' +
+        '💄 화장 강도 (연하게 ↔ 짙게) <span id="svi-intensity-val" style="color:#b45309;font-weight:900;margin-left:auto;">50%</span>' +
+      '</div>' +
+      '<input type="range" id="svi-intensity-bar" min="0" max="100" value="50" oninput="sviUpdateIntensity()">' +
+      '<div style="font-size:10px;color:rgba(13,58,58,0.55);margin-top:6px;line-height:1.5;">' +
+        '💡 슬라이더로 베이스 적용 강도 실시간 조절 (0% = 투명, 100% = 진하게)' +
+      '</div>';
+
+    // 색상 바 카드 다음에 박입
+    colorToolsCard.parentNode.insertBefore(card, colorToolsCard.nextSibling);
+    console.log('[c42] Intensity 슬라이더 박입 완료');
+  }
+
+  // 실행 순서
+  forceBaseMode();
+  setTimeout(wrapApplyColor, 200);
+  setTimeout(wrapSetCategory, 250);
+  setTimeout(injectIntensityCard, 300);
+})();
+</script>
+
 </body>
 </html>
