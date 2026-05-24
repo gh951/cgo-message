@@ -23874,7 +23874,10 @@ if(typeof window.cgoCameraCheck !== 'function'){
     $('c41h-fci').textContent = '--';
     $('c41h-quality').textContent = '신호 수집 중...';
 
-    // ★ 측정 시작 큰 안내 (3초 떴다가 사라짐)
+    // ★ 위치 잡힘 알림음 (모든 부위 — 5초 카운트 끝나고 측정 시작 시 "딸랑")
+    try { playStartDing(); } catch(e){}
+
+    // 측정 시작 큰 안내
     if(stage.useBreath){
       showBigMsg('🫁', '측정 시작!', '10초 후 478 호흡법 안내가 시작됩니다', 3000);
     } else {
@@ -23886,8 +23889,9 @@ if(typeof window.cgoCameraCheck !== 'function'){
       $('c41h-breath').style.display = 'none';
       setTimeout(function(){
         if(!BS.on) return;
-        // 호흡법 시작 큰 알림
-        showBigMsg('🫁', '478 호흡법 시작!', '천천히 따라 호흡하세요. 마음을 가다듬으세요.', 3000);
+        // 호흡법 시작 큰 알림 + 마이크 시작 (RSI 측정용)
+        showBigMsg('🫁', '478 호흡법 시작!', '천천히 따라 호흡하세요. 마이크 권한 허용 시 RSI 측정', 3000);
+        startBreathMic(); // ★ 마이크 stream + AudioContext 시작
         setTimeout(function(){
           if(!BS.on) return;
           $('c41h-breath').style.display = 'block';
@@ -23918,9 +23922,8 @@ if(typeof window.cgoCameraCheck !== 'function'){
       var pct = Math.min(100, (BS.sec / BS.TOTAL) * 100);
       updateBar(stageIdx + 1, pct);
 
-      // ★ c41h 자체 CHROM Vitals — cgo-fuli 동일 알고리즘 (BPM/HRV/FCI)
+      // ★ c41h 자체 CHROM Vitals (얼굴) — 매 초 BPM/HRV/FCI 계산
       if(stage.useFace){
-        // 매 1초 계산 (5초 이상 + Xs 60개 이상)
         if(BS.sec >= 5 && _rPPG.Xs && _rPPG.Xs.length >= 60){
           try {
             c41hCalcVitals();
@@ -23929,6 +23932,8 @@ if(typeof window.cgoCameraCheck !== 'function'){
             BS.fci = _rPPG.fci;
           } catch(e){ console.warn('[c41h] vitals err:', e); }
         }
+        // ★ 호흡 dB 샘플링 (얼굴 단계만, 478 호흡법 시작 후)
+        try { sampleBreathDb(); } catch(e){}
         var bpm = (_rPPG.bpm||0).toFixed(0);
         var hrv = (_rPPG.hrv||0).toFixed(0);
         var fci = (_rPPG.fci||0).toFixed(0);
@@ -23949,6 +23954,105 @@ if(typeof window.cgoCameraCheck !== 'function'){
   }
 
   // ━━━ rPPG 루프 ━━━
+  // ━━━ ★ 마이크 호흡 분석 (RSI 측정 — cgo-fuli 동일) ━━━
+  var _breathMicStream = null, _breathAnalyser = null;
+  var _breathAudioBuf = null, _breathAudioCtx = null;
+  var _breathDbHistory = [];
+
+  function startBreathMic(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+    navigator.mediaDevices.getUserMedia({audio:true, video:false}).then(function(stream){
+      _breathMicStream = stream;
+      var AC = window.AudioContext || window.webkitAudioContext;
+      var audioCtx = new AC();
+      var analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      var src = audioCtx.createMediaStreamSource(stream);
+      src.connect(analyser);
+      _breathAnalyser = analyser;
+      _breathAudioBuf = new Uint8Array(analyser.frequencyBinCount);
+      _breathAudioCtx = audioCtx;
+      _breathDbHistory = [];
+      console.log('[c41h] 🎤 마이크 호흡 분석 시작');
+    }).catch(function(err){
+      console.warn('[c41h] 마이크 권한 거부 (RSI 0)', err);
+    });
+  }
+
+  function stopBreathMic(){
+    if(_breathMicStream){
+      _breathMicStream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});
+      _breathMicStream = null;
+    }
+    if(_breathAudioCtx){ try { _breathAudioCtx.close(); } catch(e){} _breathAudioCtx = null; }
+    _breathAnalyser = null;
+    _breathAudioBuf = null;
+  }
+
+  function sampleBreathDb(){
+    if(!_breathAnalyser || !_breathAudioBuf) return null;
+    _breathAnalyser.getByteFrequencyData(_breathAudioBuf);
+    var sum = 0;
+    for(var i = 0; i < _breathAudioBuf.length; i++) sum += _breathAudioBuf[i];
+    var avg = sum / _breathAudioBuf.length;
+    var db = 20 * Math.log10((avg + 1) / 255);
+    _breathDbHistory.push(db);
+    return db;
+  }
+
+  // RSI 계산 — 호흡 사이클 안정도 (0~100, cgo-fuli 기준 dB > -38 = 호흡 감지)
+  function calcRSI(){
+    if(_breathDbHistory.length < 10) return 0;
+    var detected = 0;
+    for(var i = 0; i < _breathDbHistory.length; i++){
+      if(_breathDbHistory[i] > -38) detected++;
+    }
+    var ratio = detected / _breathDbHistory.length;
+    return Math.round(Math.min(100, ratio * 150)); // 67% 감지 = 100점
+  }
+
+  // ━━━ ★ 알림음 (Web Audio API — 위치 잡힘 + 측정 시작 + 단계 변경) ━━━
+  var _toneCtx = null;
+  function getToneCtx(){
+    if(!_toneCtx){
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        _toneCtx = new AC();
+      } catch(e){}
+    }
+    return _toneCtx;
+  }
+  function playDing(freq, dur, vol){
+    var ctx = getToneCtx();
+    if(!ctx) return;
+    try {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.frequency.value = freq || 880;
+      osc.type = 'sine';
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.value = vol || 0.25;
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (dur || 0.25));
+      osc.start();
+      osc.stop(ctx.currentTime + (dur || 0.25));
+    } catch(e){}
+  }
+  // 위치 잡힘 → 측정 시작 (도-솔 상승)
+  function playStartDing(){
+    playDing(523, 0.15, 0.25);
+    setTimeout(function(){ playDing(784, 0.20, 0.28); }, 130);
+  }
+  // 단계 완료 (간단 딩)
+  function playStageDing(){ playDing(659, 0.18, 0.22); }
+  // 6단계 모두 완료 (화음)
+  function playFinishDing(){
+    playDing(523, 0.15, 0.25);
+    setTimeout(function(){ playDing(659, 0.15, 0.25); }, 150);
+    setTimeout(function(){ playDing(784, 0.15, 0.25); }, 300);
+    setTimeout(function(){ playDing(1047, 0.35, 0.30); }, 450);
+  }
+
   // ━━━ ★ c41h 자체 BPM/HRV/FCI 계산기 (CHROM 알고리즘 — cgo-fuli 동일) ━━━
   //  cgo-message의 _rPPGCalcVitals는 rawR/G/B 속성 필요 → 호환 안 됨
   //  → 자체 구현: Xs/Ys 사용 (이미 sampleFromVideo에서 채움)
@@ -24128,13 +24232,25 @@ if(typeof window.cgoCameraCheck !== 'function'){
     stopBreath();
     updateBar(stageIdx + 1, 100);
 
+    // ★ RSI 계산 (얼굴 단계) + 마이크 종료
+    var stage = STAGES[stageIdx];
+    if(stage.useBreath){
+      try { BS.rsi = calcRSI(); _rPPG.rsi = BS.rsi; } catch(e){ BS.rsi = 0; }
+      stopBreathMic();
+    }
+
+    // ★ 단계 완료 알림음
+    try {
+      if(stageIdx + 1 >= STAGES.length){ playFinishDing(); }
+      else { playStageDing(); }
+    } catch(e){}
+
     // 이미지 캡처
     _stageCapture = captureFrame();
-    var stage = STAGES[stageIdx];
     c41hState.results[stageIdx] = {
       key: stage.key, label: stage.label, image: _stageCapture,
-      bpm: BS.bpm, hrv: BS.hrv, fci: BS.fci,
-      score: (BS.bpm > 0 ? 75 : 0) + Math.floor(Math.random() * 10) - 5  // placeholder
+      bpm: BS.bpm, hrv: BS.hrv, fci: BS.fci, rsi: BS.rsi || 0,
+      score: (BS.bpm > 0 ? 75 : 0) + Math.floor(Math.random() * 10) - 5
     };
 
     // ★ 권한 1회만: 단계 사이에는 카메라 stream 유지
@@ -24191,6 +24307,7 @@ if(typeof window.cgoCameraCheck !== 'function'){
     window._bioFinalData.bpm = BS.bpm || 0;
     window._bioFinalData.hrv = BS.hrv || 0;
     window._bioFinalData.fci = BS.fci || 0;
+    window._bioFinalData.rsi = BS.rsi || 0;
     window._bioFinalData.faceScore = c41hState.results[0] ? c41hState.results[0].score : 0;
     window._bioFinalData.tongueScore = c41hState.results[1] ? c41hState.results[1].score : 0;
     window._bioFinalData.eyeScore = c41hState.results[2] ? c41hState.results[2].score : 0;
@@ -24352,6 +24469,7 @@ if(typeof window.cgoCameraCheck !== 'function'){
     if(_count5Timer){ clearInterval(_count5Timer); _count5Timer = null; }
     clearIdleGuard();
     stopBreath();
+    stopBreathMic();
     releaseCamera();
     $('c41h-modal').style.display = 'none';
     c41hState.open = false;
