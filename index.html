@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-adaptive-lerp-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-highlight-alpha-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27936,6 +27936,74 @@ window.rmaiArCapture = function(){
   }
 
   setTimeout(wrapAdaptive, 1900);  // 이전 wrap (1500, 1700) 보다 늦게
+})();
+</script>
+
+<!-- ════ C-42 박입 (12점 광량 약화) — 물광 100% 흰 가면 해결 ════ -->
+<!--    문제: 물광 100% + 코끝/콧대 fresnel 강함 → alpha 1.0 도달               -->
+<!--          + ctx 'screen' 합성 → 흰색 누적 → 흰 가면                          -->
+<!--    수식: ctx.fill (=12점 highlight) 호출 시 globalAlpha × 0.5 약화          -->
+<!--    효과: 12점은 살아있되 alpha 최대 0.5 → 가면 해결 + 입체감 유지            -->
+<!--    범위: 12점 highlight 만 (베이스는 박입 3 BaseAlpha 가 별도 처리)         -->
+<script>
+(function(){
+  'use strict';
+
+  // 12점 highlight 약화 계수 (0 = 완전 끔, 1 = 그대로)
+  var HIGHLIGHT_ALPHA_FACTOR = 0.5;
+
+  // ctx Proxy — fill (= 12점) 가로채서 globalAlpha 약화
+  // fillRect (= 베이스) 는 박입 3 (BaseAlpha) 가 처리하므로 여기선 통과
+  function makeHighlightProxy(realCtx){
+    return new Proxy(realCtx, {
+      get: function(target, prop){
+        if(prop === 'fill'){
+          // 12점 highlight: ctx.beginPath() + ctx.arc() + ctx.fill() 패턴
+          return function(){
+            var origAlpha = target.globalAlpha;
+            target.globalAlpha = origAlpha * HIGHLIGHT_ALPHA_FACTOR;
+            target.fill.apply(target, arguments);
+            target.globalAlpha = origAlpha;
+          };
+        }
+        var v = target[prop];
+        return (typeof v === 'function') ? v.bind(target) : v;
+      },
+      set: function(target, prop, value){
+        target[prop] = value;
+        return true;
+      }
+    });
+  }
+
+  function wrapHighlightAlpha(){
+    if(typeof window.drawFresnelWaterGlow !== 'function' || !window._adaptiveLerpControl){
+      setTimeout(wrapHighlightAlpha, 300);
+      return;
+    }
+    if(window._highlightAlphaWrapped) return;
+
+    var origFunc = window.drawFresnelWaterGlow;
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!ctx || !canvas) return origFunc.call(this, ctx, canvas, landmarks, glossLevel);
+      var proxyCtx = makeHighlightProxy(ctx);
+      return origFunc.call(this, proxyCtx, canvas, landmarks, glossLevel);
+    };
+    window._highlightAlphaWrapped = true;
+
+    // 외부 노출
+    window._highlightAlphaControl = {
+      setLevel: function(v){
+        HIGHLIGHT_ALPHA_FACTOR = Math.max(0, Math.min(1, v));
+      },
+      disable: function(){ HIGHLIGHT_ALPHA_FACTOR = 0; },   // 12점 완전 끔 (베이스만)
+      enable:  function(){ HIGHLIGHT_ALPHA_FACTOR = 0.5; }, // 기본 약화
+      original:function(){ HIGHLIGHT_ALPHA_FACTOR = 1; }    // 원본 강도
+    };
+  }
+
+  // 박입 4 (1900ms) 보다 늦게 — 가장 바깥 layer
+  setTimeout(wrapHighlightAlpha, 2100);
 })();
 </script>
 
