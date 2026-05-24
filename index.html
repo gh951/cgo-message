@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-base-glow-attenuate-v1" name="c41-version"/>
+<meta content="2026-05-24-c42-adaptive-lerp-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27846,6 +27846,96 @@ window.rmaiArCapture = function(){
 
   // Lerp wrap (1500ms) 보다 늦게 — 후행 wrap 이 바깥쪽 layer
   setTimeout(wrapBaseAlpha, 1700);
+})();
+</script>
+
+<!-- ════ C-42 박입 (적응형 Lerp + 시각 마커) — 움직임 잔상 해결 ════ -->
+<!--    문제: Lerp 0.9 강함 → 정지 잔상 없으나 머리 돌리면 0.3초 뒤처짐         -->
+<!--    수식: 코끝 좌표 이동거리 측정 → Lerp 비율 자동 조정                     -->
+<!--          정지 (motion < 0.003)  → Lerp 0.92 (강함, jitter 흡수)            -->
+<!--          움직임 (motion > 0.04) → Lerp 0.30 (약함, 즉시 따라옴)            -->
+<!--          중간                   → 선형 보간                                 -->
+<!--    효과: 물광 100% 에서도 정지 안정 + 움직임 잔상 X                          -->
+<!--    부가: 우상단 작은 녹색 점 = 박입 적용 시각 확인 (콘솔 로그 대용)          -->
+<script>
+(function(){
+  'use strict';
+
+  // ─── 시각 마커: 박입 적용되면 우상단 작은 녹색 점 표시 ───
+  function showMarker(){
+    if(document.getElementById('c42_inject_dot')) return;
+    var dot = document.createElement('div');
+    dot.id = 'c42_inject_dot';
+    dot.style.cssText = 'position:fixed;top:30px;right:30px;width:8px;height:8px;border-radius:50%;background:#34d399;z-index:99999;box-shadow:0 0 6px rgba(52,211,153,0.6);opacity:0.55;pointer-events:none;transition:all 0.3s;';
+    dot.title = 'C-42 박입 적용됨 (탭하면 사라짐)';
+    document.body.appendChild(dot);
+  }
+
+  // ─── 적응형 Lerp 컨트롤러 ───
+  var lastNoseX = 0, lastNoseY = 0;
+  var LERP_STILL = 0.92;     // 정지 시 (jitter 흡수)
+  var LERP_MOVE  = 0.30;     // 빠른 움직임 시 (잔상 X)
+  var MOTION_MIN = 0.003;    // 정규화 좌표 단위 (얼굴 폭 = 1)
+  var MOTION_MAX = 0.04;
+  var smoothMotion = 0;      // 모션 평균 (튀는 값 완화)
+
+  function computeAdaptivePrev(landmarks){
+    if(!landmarks || !landmarks[1]) return LERP_STILL;
+    var n = landmarks[1];  // 코끝 (얼굴 중심 기준점)
+    var dx = n.x - lastNoseX;
+    var dy = n.y - lastNoseY;
+    var motion = Math.sqrt(dx*dx + dy*dy);
+    lastNoseX = n.x;
+    lastNoseY = n.y;
+
+    // 모션 자체도 EMA 로 완화 (한 프레임만 튀는 값에 과민 반응 X)
+    smoothMotion = smoothMotion * 0.6 + motion * 0.4;
+
+    if(smoothMotion < MOTION_MIN) return LERP_STILL;
+    if(smoothMotion > MOTION_MAX) return LERP_MOVE;
+    var t = (smoothMotion - MOTION_MIN) / (MOTION_MAX - MOTION_MIN);
+    return LERP_STILL - t * (LERP_STILL - LERP_MOVE);
+  }
+
+  function wrapAdaptive(){
+    if(typeof window.drawFresnelWaterGlow !== 'function' || !window._fresnelLerpControl){
+      setTimeout(wrapAdaptive, 300);
+      return;
+    }
+    if(window._adaptiveLerpWrapped) return;
+
+    var origFunc = window.drawFresnelWaterGlow;
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // 적응형: 움직임 측정 → Lerp 비율 동적 조정 → 원 호출
+      if(landmarks){
+        var adaptivePrev = computeAdaptivePrev(landmarks);
+        window._fresnelLerpControl.setRatio(adaptivePrev);
+      }
+      return origFunc.call(this, ctx, canvas, landmarks, glossLevel);
+    };
+    window._adaptiveLerpWrapped = true;
+    showMarker();
+
+    // 외부 노출 — 콘솔 실시간 조정
+    window._adaptiveLerpControl = {
+      setRange: function(stillVal, moveVal){
+        LERP_STILL = Math.max(0, Math.min(0.98, stillVal));
+        LERP_MOVE  = Math.max(0, Math.min(0.98, moveVal));
+      },
+      setThreshold: function(minM, maxM){
+        MOTION_MIN = Math.max(0, minM);
+        MOTION_MAX = Math.max(MOTION_MIN + 0.001, maxM);
+      },
+      disable: function(){
+        LERP_STILL = LERP_MOVE = 0;  // 적응 끔 (즉시 반영)
+      },
+      getMotion: function(){
+        return { smooth:smoothMotion, still:LERP_STILL, move:LERP_MOVE };
+      }
+    };
+  }
+
+  setTimeout(wrapAdaptive, 1900);  // 이전 wrap (1500, 1700) 보다 늦게
 })();
 </script>
 
