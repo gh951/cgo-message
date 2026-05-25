@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c43-v47-inj51-pincer" name="c41-version"/>
+<meta content="2026-05-26-c43-v47-instant-all" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30320,7 +30320,7 @@ setTimeout(function(){
   }
 
   setTimeout(wrapSpectrumGlow, 100);
-}, 8300);
+}, 0);
 </script>
 
 <!-- ════ C-42 박입 28 (구글 AI 추천 적용 + 흰점 영구 차단) ════ -->
@@ -31609,7 +31609,7 @@ setTimeout(function(){
       }
     }
   };
-}, 11500);
+}, 0);
 </script>
 
 <!-- ════ C-42 박입 46 (★ 파트너 천재 발상 — 마이크로 240점 + 0.5~1.2px) ════ -->
@@ -31734,7 +31734,7 @@ setTimeout(function(){
       }
     };
   }
-}, 12000);
+}, 0);
 </script>
 
 <!-- ════ C-42 박입 47 (3중 정밀 — 캔버스 복원 + 마이크로 절대 좌표 + 잠금 재박입) ════ -->
@@ -31891,7 +31891,7 @@ setTimeout(function(){
       absMicroCache = null;
     }
   };
-}, 12500);
+}, 0);
 </script>
 
 <!-- ════ C-43 박입 51 (★ 머리카락 픽셀 필터 — 핀셋 수정 / 구글 AI 권고 반영) ════ -->
@@ -31927,6 +31927,11 @@ setTimeout(function(){
       prevGlow51(ctx, canvas, landmarks, glossLevel);
 
       if(!window._inj51Enabled || !landmarks) return;
+
+      // ★ 파트너 명령 (핀셋): 피부 페이지 (scrSkinage) 에서는 작동 X
+      //   AR 메이크업 페이지 (scrMakeup) 에서만 머리카락 필터 작동
+      var scrMk = document.getElementById('scrMakeup');
+      if(!scrMk || !scrMk.classList.contains('active')) return;
 
       // ② 격프레임 (구글 AI 권고: 연산 지연형 잔상 방지)
       frameCount51++;
@@ -32016,12 +32021,16 @@ setTimeout(function(){
       enable:  function(){ window._inj51Enabled = true; },
       disable: function(){ window._inj51Enabled = false; },
       info:    function(){
+        var scrMk = document.getElementById('scrMakeup');
+        var inMk = !!(scrMk && scrMk.classList.contains('active'));
         return {
           on:        !!window._inj51Enabled,
+          activeNow: inMk,
+          page:      inMk ? 'scrMakeup ✅' : 'other ❌ (scrMakeup 만 작동)',
           filters:   '검은머리 / 금발 / 흰머리',
           microEdge: 'OFF (잔상 방지)',
           frameSkip: '2 frames per loop',
-          mode:      '핀셋 박입 — v47 단독'
+          mode:      '핀셋 — scrMakeup 전용'
         };
       }
     };
@@ -32030,7 +32039,7 @@ setTimeout(function(){
   }
 
   applyInj51();
-}, 14000);
+}, 0);
 </script>
 
 </body>
