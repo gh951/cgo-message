@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-FULL-makeup-tools-v40" name="c41-version"/>
+<meta content="2026-05-24-c42-CATEGORY-COLOR-UNLOCK-v42" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13529,22 +13529,66 @@ var Q_POOL = {
     }
   };
 
-  // HSL → HEX 변환 (헬퍼)
-  function hslToHex(h, s, l){
-    s /= 100; l /= 100;
-    var c = (1 - Math.abs(2*l-1)) * s;
-    var x = c * (1 - Math.abs((h/60) % 2 - 1));
-    var m = l - c/2;
-    var r=0, g=0, b=0;
-    if(h<60){ r=c; g=x; b=0; }
-    else if(h<120){ r=x; g=c; b=0; }
-    else if(h<180){ r=0; g=c; b=x; }
-    else if(h<240){ r=0; g=x; b=c; }
-    else if(h<300){ r=x; g=0; b=c; }
-    else { r=c; g=0; b=x; }
-    var R = Math.round((r+m)*255), G = Math.round((g+m)*255), B = Math.round((b+m)*255);
-    return '#' + [R,G,B].map(function(n){ return n.toString(16).padStart(2,'0'); }).join('');
+  // ════ 박입 42 — 카테고리 + 색 적용 잠금 완전 해제 (매 100ms 강제) ════
+  function injectCleanCategoryAndApply(){
+    // ① rmaiArSetCategory — 클릭한 카테고리 그대로 (base 강제 X)
+    window.rmaiArSetCategory = function(catKey){
+      if(typeof _rmaiAr === 'undefined') return;
+      _rmaiAr.currentCategory = catKey;  // ★ 그대로
+      if(typeof _rmaiArInitColorPicker === 'function'){
+        try { _rmaiArInitColorPicker(); } catch(e){}
+      }
+      // 카테고리 버튼 시각 강조
+      var picker = document.getElementById('rmai-ar-color-picker');
+      if(picker){
+        var btns = picker.querySelectorAll('button[onclick*="rmaiArSetCategory"]');
+        btns.forEach(function(b){
+          var on = b.getAttribute('onclick') || '';
+          if(on.indexOf("'" + catKey + "'") > -1){
+            b.style.background = 'linear-gradient(135deg,#fbbf24,#f59e0b)';
+            b.style.color = '#1a1408';
+            b.style.fontWeight = '900';
+          } else {
+            b.style.background = '#f3f4f6';
+            b.style.color = '#888';
+            b.style.fontWeight = '700';
+          }
+        });
+      }
+    };
+
+    // ② rmaiArApplyColor — 현재 카테고리에 색 박기 (base 강제 X)
+    window.rmaiArApplyColor = function(hexColor, btnEl){
+      if(typeof _rmaiAr === 'undefined') return;
+      var cat = _rmaiAr.currentCategory || 'base';
+      _rmaiAr.appliedColors = _rmaiAr.appliedColors || {};
+      _rmaiAr.appliedColors[cat] = hexColor;  // ★ 현재 카테고리에 정확히 박음
+      _rmaiAr.currentColor = hexColor;
+
+      // 브랜드 정보 표시 (선택)
+      if(typeof window._sviShowBrandInfo === 'function'){
+        try { window._sviShowBrandInfo(hexColor); } catch(e){}
+      }
+      // HSL 슬라이더 동기화 (HSL → HEX 갱신)
+      if(typeof window.sviSyncHslSlidersFromHex === 'function'){
+        try { window.sviSyncHslSlidersFromHex(hexColor); } catch(e){}
+      }
+    };
   }
+
+  // 즉시 + 매 100ms 강제 (옛 wrap 가 살아나도 차단)
+  injectCleanCategoryAndApply();
+  setInterval(injectCleanCategoryAndApply, 100);
+
+  window._inj42Control = {
+    info: function(){
+      return {
+        currentCategory: (typeof _rmaiAr !== 'undefined') ? _rmaiAr.currentCategory : null,
+        appliedColors: (typeof _rmaiAr !== 'undefined') ? _rmaiAr.appliedColors : null,
+        desc: '박입 42 — 매 100ms 카테고리/색 적용 잠금 해제'
+      };
+    }
+  };
 })();
 </script>
 <!-- ════ 박입 39 끝 ════ -->
