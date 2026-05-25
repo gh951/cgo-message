@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-3-fix-v45" name="c41-version"/>
+<meta content="2026-05-24-c42-MICRO-240-pts-v46" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -31610,6 +31610,131 @@ setTimeout(function(){
     }
   };
 }, 11500);
+</script>
+
+<!-- ════ C-42 박입 46 (★ 파트너 천재 발상 — 마이크로 240점 + 0.5~1.2px) ════ -->
+<!--    파트너 진단: "저 빛들을 더 마이크로로 쪼개면?"                          -->
+<!--    원리: PBR micro-surface roughness — 점이 작을수록 + 많을수록 매끄러움    -->
+<!--                                                                            -->
+<!--    박입 33 (옛):  80점, 1~2.5px,  alpha 0.15~0.4                            -->
+<!--    박입 46 (새): 240점, 0.5~1.2px, alpha 0.08~0.2 (절반)                    -->
+<!--                                                                            -->
+<!--    효과: 개별 점 안 보임 (0.5px = sub-pixel)                                -->
+<!--          합산 시 자연스러운 면적 광택                                       -->
+<!--          영화 VFX 진짜 피부 광택 수준                                       -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj46Wrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    var _faceOval46 = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+                       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+                       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+    // 240개 마이크로 점 캐시 (한 번만 계산)
+    var microCache46 = null;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // 옛 chain 호출 (박입 13~45 모두 호출)
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj46Enabled || !landmarks) return;
+
+      // 박입 33 의 80점 마이크로 추가 끄기 (240점이 더 좋음)
+      if(typeof window._inj33Control !== 'undefined' && window._inj33Control.disable){
+        window._inj33Enabled = false;  // 옛 80점 OFF
+      }
+
+      try {
+        // 얼굴 영역 bounding box
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        _faceOval46.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+        var faceW = maxX - minX;
+        var faceH = maxY - minY;
+        if(faceW < 50 || faceH < 50) return;
+
+        // ★ 240개 마이크로 점 (한 번 계산 후 캐시)
+        if(!microCache46 || microCache46.length === 0){
+          microCache46 = [];
+          for(var n = 0; n < 240; n++){
+            microCache46.push({
+              relX: Math.random(),
+              relY: Math.random(),
+              size: 0.5 + Math.random() * 0.7,       // 0.5~1.2px (sub-pixel)
+              baseAlpha: 0.08 + Math.random() * 0.12 // 0.08~0.2 (절반)
+            });
+          }
+        }
+
+        // 환경 광 가져오기 (박입 33 의 prevAmbientBrightness 활용)
+        var ambient = 0.7;  // 기본값
+        try {
+          if(window._inj33Control && window._inj33Control.info){
+            var info = window._inj33Control.info();
+            ambient = Math.max(0.3, Math.min(1.0, parseFloat(info.ambient_brightness) / 180));
+          }
+        } catch(e){}
+
+        var microAlpha = 0.04 * ambient * (glossLevel || 0.5);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        microCache46.forEach(function(spot){
+          var x = minX + spot.relX * faceW;
+          var y = minY + spot.relY * faceH;
+          var s = spot.size;
+          var a = spot.baseAlpha * microAlpha;
+
+          ctx.fillStyle = 'rgba(255,250,245,' + a + ')';
+          ctx.beginPath();
+          ctx.arc(x, y, s, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      } catch(e){
+        try { ctx.restore(); } catch(e2){}
+      }
+    };
+
+    window._inj46Enabled = true;
+    window._inj46Wrapped = true;
+
+    // 옛 박입 33 의 80점 자동 OFF (충돌 방지)
+    if(window._inj33Control && window._inj33Control.disable){
+      window._inj33Control.disable();
+    }
+
+    window._inj46Control = {
+      enable:  function(){ window._inj46Enabled = true; },
+      disable: function(){ window._inj46Enabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._inj46Enabled,
+          micro_points: microCache46 ? microCache46.length : 0,
+          point_size:   '0.5~1.2px (sub-pixel)',
+          point_alpha:  '0.08~0.2 (절반)',
+          desc:         '★ 박입 46 — 240점 마이크로 (점 ❌ 면적 ✅)'
+        };
+      },
+      regenerate: function(){
+        microCache46 = null;
+      }
+    };
+  }
+}, 12000);
 </script>
 
 </body>
