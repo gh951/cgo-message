@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-CATEGORY-COLOR-UNLOCK-v42" name="c41-version"/>
+<meta content="2026-05-24-c42-GLOSS-BY-CAT-v43b" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13529,6 +13529,83 @@ var Q_POOL = {
     }
   };
 
+  // ════ 박입 43 — 물광 + HSL 카테고리별 분리 ════
+  // _rmaiAr.glossByCategory[cat] = 카테고리별 물광 강도
+  // _rmaiAr.hslByCategory[cat] = 카테고리별 HSL 값
+  if(typeof _rmaiAr !== 'undefined'){
+    _rmaiAr.glossByCategory = _rmaiAr.glossByCategory || {
+      lip: 0.5, cheek: 0.5, eye: 0.3, base: 0.4
+    };
+    _rmaiAr.hslByCategory = _rmaiAr.hslByCategory || {
+      lip: {h:0, s:80, l:50},
+      cheek: {h:0, s:80, l:50},
+      eye: {h:0, s:80, l:50},
+      base: {h:0, s:80, l:50}
+    };
+  }
+
+  // 카테고리 변경 시 슬라이더 자동 동기
+  window.syncSlidersToCategory = function(catKey){
+    if(typeof _rmaiAr === 'undefined') return;
+    catKey = catKey || _rmaiAr.currentCategory || 'base';
+
+    // 물광 슬라이더 값 갱신
+    var glossBar = document.getElementById('svi-gloss-bar-m');
+    var glossVal = document.getElementById('svi-gloss-val-m');
+    if(glossBar && _rmaiAr.glossByCategory){
+      var g = Math.round((_rmaiAr.glossByCategory[catKey] || 0) * 100);
+      glossBar.value = g;
+      if(glossVal) glossVal.textContent = g + '%';
+      // 현재 카테고리 표시 라벨 추가
+      _rmaiAr.glossLevel = _rmaiAr.glossByCategory[catKey];
+    }
+
+    // HSL 슬라이더 값 갱신
+    var hueBar = document.getElementById('svi-hue-bar-m');
+    var satBar = document.getElementById('svi-sat-bar-m');
+    var lightBar = document.getElementById('svi-light-bar-m');
+    if(hueBar && _rmaiAr.hslByCategory){
+      var hsl = _rmaiAr.hslByCategory[catKey] || {h:0, s:80, l:50};
+      hueBar.value = hsl.h;
+      satBar.value = hsl.s;
+      lightBar.value = hsl.l;
+      document.getElementById('svi-hue-val-m').textContent = hsl.h + '°';
+      document.getElementById('svi-sat-val-m').textContent = hsl.s + '%';
+      document.getElementById('svi-light-val-m').textContent = hsl.l + '%';
+      // 미리보기 갱신
+      if(typeof window.makeupUpdateHsl === 'function') window.makeupUpdateHsl();
+    }
+  };
+
+  // 물광 슬라이더 호출 시 — 현재 카테고리에 저장
+  var origMakeupUpdateGloss = window.makeupUpdateGloss;
+  window.makeupUpdateGloss = function(){
+    var v = +document.getElementById('svi-gloss-bar-m').value;
+    document.getElementById('svi-gloss-val-m').textContent = v + '%';
+    if(typeof _rmaiAr !== 'undefined'){
+      var cat = _rmaiAr.currentCategory || 'base';
+      _rmaiAr.glossByCategory = _rmaiAr.glossByCategory || {};
+      _rmaiAr.glossByCategory[cat] = v / 100;  // ★ 카테고리별 저장
+      _rmaiAr.glossLevel = v / 100;             // 현재 효과
+    }
+  };
+
+  // HSL 슬라이더 호출 시 — 현재 카테고리에 저장
+  var origMakeupUpdateHsl = window.makeupUpdateHsl;
+  window.makeupUpdateHsl = function(){
+    if(typeof origMakeupUpdateHsl === 'function') origMakeupUpdateHsl();
+
+    var h = +document.getElementById('svi-hue-bar-m').value;
+    var s = +document.getElementById('svi-sat-bar-m').value;
+    var l = +document.getElementById('svi-light-bar-m').value;
+
+    if(typeof _rmaiAr !== 'undefined'){
+      var cat = _rmaiAr.currentCategory || 'base';
+      _rmaiAr.hslByCategory = _rmaiAr.hslByCategory || {};
+      _rmaiAr.hslByCategory[cat] = {h:h, s:s, l:l};
+    }
+  };
+
   // ════ 박입 42 — 카테고리 + 색 적용 잠금 완전 해제 (매 100ms 강제) ════
   function injectCleanCategoryAndApply(){
     // ① rmaiArSetCategory — 클릭한 카테고리 그대로 (base 강제 X)
@@ -13537,6 +13614,10 @@ var Q_POOL = {
       _rmaiAr.currentCategory = catKey;  // ★ 그대로
       if(typeof _rmaiArInitColorPicker === 'function'){
         try { _rmaiArInitColorPicker(); } catch(e){}
+      }
+      // ★ 박입 43 — 카테고리별 slider 자동 동기
+      if(typeof window.syncSlidersToCategory === 'function'){
+        setTimeout(function(){ window.syncSlidersToCategory(catKey); }, 50);
       }
       // 카테고리 버튼 시각 강조
       var picker = document.getElementById('rmai-ar-color-picker');
