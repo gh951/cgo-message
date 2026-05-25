@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-mediapipe468-v52c" name="c41-version"/>
+<meta content="2026-05-25-c43-cheek-nose-cluster-v52d" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32204,26 +32204,26 @@ setTimeout(function(){
 }, 13500);
 </script>
 
-<!-- ════ C-43 박입 52 v3.0 (★ MediaPipe 468 landmark 직접 사용 — 파트너 통찰) ════ -->
-<!--    파트너 통찰 (v2.0 회초리):                                                  -->
-<!--      "총 468개가 있는것이 아닌가요?"                                            -->
-<!--      → MediaPipe 가 이미 468 landmark 제공 (얼굴 따라 자동 추적)                -->
-<!--      → 별도 랜덤 좌표 생성은 회피였음                                            -->
-<!--                                                                                -->
-<!--    v2.0 vs v3.0:                                                                 -->
-<!--      v2.0: Math.random() 으로 200점 (잔상 위험)                                  -->
-<!--      v3.0: MediaPipe 468 그대로 사용 (잔상 0 자동)                              -->
-<!--                                                                                -->
-<!--    천공 제외 (점 X):                                                              -->
-<!--      ✦ 입술: 20점                                                                -->
-<!--      ✦ 좌안+우안: 32점                                                           -->
-<!--      ✦ 눈썹 좌+우: 20점                                                          -->
-<!--      → 총 72점 제외, 약 396점 활성                                                -->
-<!--                                                                                -->
-<!--    각 점 속성:                                                                    -->
-<!--      ✦ 크기 0.125~0.275px (인덱스 기반 deterministic — 매번 동일)                -->
-<!--      ✦ z 값 기반 alpha 보정 (카메라 쪽 강조 = 입체감)                            -->
-<!--      ✦ baseAlpha 0.025 (점 많아서 약하게)                                         -->
+<!-- ════ C-43 박입 52 v4.0 (★ 양볼+코 집중 cluster — 파트너 통찰) ════ -->
+<!--    파트너 통찰 (v3.0 회초리):                                                    -->
+<!--      "좌표 다 사용하지 말고 양쪽 볼 + 코의 좌표 크기를 4배로 줄이고 숫자를 늘림" -->
+<!--                                                                                  -->
+<!--    v3.0 vs v4.0:                                                                   -->
+<!--      v3.0: MediaPipe 468 전체 (396점, 얼굴 균일)                                 -->
+<!--      v4.0: 양볼+코 집중 (28 landmark × 8 cluster = 224점, 그 영역 밀도 3배)      -->
+<!--                                                                                  -->
+<!--    영역:                                                                            -->
+<!--      ✦ 볼 좌 8 landmark: [116,117,118,100,50,205,36,142]                          -->
+<!--      ✦ 볼 우 8 landmark: [345,346,347,329,280,425,266,371]                        -->
+<!--      ✦ 코  12 landmark: [168,6,197,195,5,4,1,19,98,327,97,326]                    -->
+<!--                                                                                  -->
+<!--    각 landmark cluster (8개 deterministic):                                       -->
+<!--      ✦ 각 점이 landmark 주변 0~1.6px 반경                                          -->
+<!--      ✦ 각도 = (l*23 + c*137) deg → 매번 동일 분포 (잔상 0)                       -->
+<!--                                                                                  -->
+<!--    점 크기 4배 축소:                                                                -->
+<!--      ✦ v3.0: 0.125~0.275px                                                        -->
+<!--      ✦ v4.0: 0.031~0.073px (1/4 — 개별 점 거의 안 보임)                          -->
 <script>
 setTimeout(function(){
   'use strict';
@@ -32239,34 +32239,16 @@ setTimeout(function(){
     window._inj47MicroEnabled = false;
 
     var prevGlow52 = window.drawFresnelWaterGlow;
-    var excludeSet = null;
 
-    // 천공 영역 (입술/눈/눈썹) 인덱스 집합 — 한 번만 계산
-    function buildExcludeSet(){
-      var ex = {};
-
-      // 입술 (안 + 밖)
-      var lipsOuter = window._rmaiArLipsOuter ||
-        [61, 84, 17, 314, 405, 320, 307, 375, 321, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95, 78];
-      var lipsInner = [78, 95, 88, 178, 87, 14, 317, 402, 318, 324, 308];
-      lipsOuter.forEach(function(i){ ex[i] = true; });
-      lipsInner.forEach(function(i){ ex[i] = true; });
-
-      // 좌안 16점
-      var leftEye = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246];
-      // 우안 16점
-      var rightEye = [263, 249, 390, 373, 374, 380, 381, 382, 362, 398, 384, 385, 386, 387, 388, 466];
-      leftEye.forEach(function(i){ ex[i] = true; });
-      rightEye.forEach(function(i){ ex[i] = true; });
-
-      // 눈썹 좌/우
-      var leftBrow  = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46];
-      var rightBrow = [300, 293, 334, 296, 336, 285, 295, 282, 283, 276];
-      leftBrow.forEach(function(i){ ex[i] = true; });
-      rightBrow.forEach(function(i){ ex[i] = true; });
-
-      return ex;
-    }
+    // ★ 양볼 + 코 MediaPipe 468 인덱스
+    var INDICES_52 = [
+      // 볼 좌 8점
+      116, 117, 118, 100, 50, 205, 36, 142,
+      // 볼 우 8점
+      345, 346, 347, 329, 280, 425, 266, 371,
+      // 코 12점
+      168, 6, 197, 195, 5, 4, 1, 19, 98, 327, 97, 326
+    ];
 
     window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
       prevGlow52(ctx, canvas, landmarks, glossLevel);
@@ -32277,40 +32259,46 @@ setTimeout(function(){
         var W = canvas.width, H = canvas.height;
         if(W < 10 || H < 10) return;
 
-        if(!excludeSet){
-          excludeSet = buildExcludeSet();
-        }
-
         var baseAlpha = (typeof window._inj52BaseAlpha === 'number') ? window._inj52BaseAlpha : 0.025;
         var microAlpha = baseAlpha * (glossLevel || 0.5);
+        var clusterCount = window._inj52Cluster || 8;
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
 
-        // ★ MediaPipe 468 landmark 모두 순회 (천공 제외)
-        for(var idx = 0; idx < 468; idx++){
-          if(excludeSet[idx]) continue;
-
+        // ★ 양볼 + 코 landmark 순회
+        for(var l = 0; l < INDICES_52.length; l++){
+          var idx = INDICES_52[l];
           var lm = landmarks[idx];
           if(!lm) continue;
 
-          var x = lm.x * W;
-          var y = lm.y * H;
-
-          // 점 크기: 0.125~0.275px (인덱스 기반 deterministic - 매번 동일)
-          var size = 0.125 + (idx % 7) * 0.025;
+          var cx = lm.x * W;
+          var cy = lm.y * H;
 
           // z 값 기반 alpha (카메라 쪽 강조)
-          // MediaPipe z: 카메라 쪽 = 음수, 멀리 = 양수
           var z = lm.z || 0;
           var zAlpha = Math.max(0.4, Math.min(1.0, 1.0 - z * 15));
 
-          var alpha = 0.08 * zAlpha * microAlpha;
+          // ★ landmark 주변 cluster (deterministic — 매번 동일 분포)
+          for(var c = 0; c < clusterCount; c++){
+            // 각도: (l * 23 + c * 137) — golden angle 비슷
+            var angle = ((l * 23 + c * 137) % 360) * Math.PI / 180;
+            // 반경: 0 ~ 1.6px (cluster 안 micro 분포)
+            var dist  = ((l + c) % 5) * 0.4;
 
-          ctx.fillStyle = 'rgba(255,250,245,' + alpha + ')';
-          ctx.beginPath();
-          ctx.arc(x, y, size, 0, Math.PI * 2);
-          ctx.fill();
+            var x = cx + Math.cos(angle) * dist;
+            var y = cy + Math.sin(angle) * dist;
+
+            // ★ 크기 4배 축소: 0.031 ~ 0.073px
+            var size = 0.031 + (c % 7) * 0.006;
+
+            var alpha = 0.08 * zAlpha * microAlpha;
+
+            ctx.fillStyle = 'rgba(255,250,245,' + alpha + ')';
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
         ctx.restore();
       } catch(e){}
@@ -32318,6 +32306,7 @@ setTimeout(function(){
 
     window._inj52Enabled   = false;
     window._inj52BaseAlpha = 0.025;
+    window._inj52Cluster   = 8;
     window._inj52Wrapped   = true;
 
     window._inj52Control = {
@@ -32326,19 +32315,22 @@ setTimeout(function(){
       setAlpha: function(a){
         window._inj52BaseAlpha = Math.max(0, Math.min(0.5, +a || 0.025));
       },
+      setCluster: function(n){
+        window._inj52Cluster = Math.max(1, Math.min(32, +n || 8));
+      },
       info: function(){
         return {
           on:       !!window._inj52Enabled,
-          source:   'MediaPipe 468 landmark',
+          source:   '양볼+코 28 landmark × ' + window._inj52Cluster + ' cluster',
+          total:    28 * window._inj52Cluster + '점',
+          size:     '0.031~0.073px (v3.0 대비 1/4)',
           alpha:    window._inj52BaseAlpha,
-          excluded: '입술 + 눈 + 눈썹 (약 72점)',
-          active:   '약 396점',
           coords:   'MediaPipe (잔상 0 자동)'
         };
       }
     };
 
-    console.log('[박입 52 v3] ON (MediaPipe 468)');
+    console.log('[박입 52 v4] ON (양볼+코 cluster)');
   }
 
   applyInj52();
