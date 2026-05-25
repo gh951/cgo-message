@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-CAMERA-FIX-v34" name="c41-version"/>
+<meta content="2026-05-24-c42-picker-PURE-AR-v35b" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30694,6 +30694,63 @@ setTimeout(function(){
   };
 }, 3000);  // 박입 8 (2700ms) 직후 덮어쓰기
 </script>
+
+<!-- ════ C-42 박입 35 (★ AR 메이크업 picker — 순수 기술 모드 / 사주 X) ════ -->
+<!--    파트너 명령: "사주를 빼기로 안했나요. 순수 기술로만 위상을 높이게요"     -->
+<!--    동생 = 순수 AR 그래픽 기술 (글로벌 1,2위 정면 승부)                      -->
+<!--    본진 = 사주 + 한의학 + AR (융합) — 별도                                  -->
+<!--    표시: 립/볼/아이/베이스 4 카테고리 + 일반 데일리 + 명품 럭셔리           -->
+<!--    숨김: 사주 추천 / 오행 보너스 / oheng 모드                              -->
+<style>
+/* ① 립/볼/아이 카테고리 버튼 복원 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('lip')"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('cheek')"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('eye')"] {
+  display: inline-block !important;
+  flex: 1 1 auto !important;
+  visibility: visible !important;
+}
+
+/* ② 사주 추천 oheng 토글 — 영구 숨김 (순수 AR 모드) */
+#rmai-ar-color-picker button[onclick*="rmaiArSetPalette('oheng')"] {
+  display: none !important;
+}
+
+/* ③ 카드 모드 oheng — 영구 숨김 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCardMode('oheng')"] {
+  display: none !important;
+}
+
+/* ④ 베이직 컬러 7색 swatch 복원 */
+#rmai-ar-color-picker button[onclick*="rmaiArSetPalette('rainbow')"] {
+  display: inline-block !important;
+  visibility: visible !important;
+}
+
+/* ⑤ "오행 보너스 100색 + 현실 500색" 안내 — 영구 숨김 */
+#rmai-ar-color-picker div[style*="font-size:9px"][style*="margin-top:6px"] {
+  display: none !important;
+}
+
+/* ⑥ base 강제 강조 제거 (4개 카테고리 균등) */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('base')"] {
+  flex: 1 1 auto !important;
+  background: #f3f4f6 !important;
+  color: #888 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+}
+
+/* ⑦ 활성 카테고리 강조 (inline style 우선) */
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('lip')"][style*="fbbf24"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('cheek')"][style*="fbbf24"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('eye')"][style*="fbbf24"],
+#rmai-ar-color-picker button[onclick*="rmaiArSetCategory('base')"][style*="fbbf24"] {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1a1408 !important;
+  font-weight: 900 !important;
+}
+</style>
 
 </body>
 </html>
