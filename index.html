@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-micro-mult-v52" name="c41-version"/>
+<meta content="2026-05-25-c43-relative-coord-v52a" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32202,13 +32202,24 @@ setTimeout(function(){
 }, 13500);
 </script>
 
-<!-- ════ C-43 박입 52 (★ 마이크로 좌표 미세화 + 배수 — 파트너 명령) ════ -->
-<!--    파트너 명령: "좌표를 아주 작게 + 그 크기 만큼 배수"                       -->
-<!--    원리: 영화 VFX 마이크로 텍스처 — 개별 점 안 보임, 합쳐서 자연 광택       -->
-<!--    박입 47 (0.5~1.1px, 200점) → 영구 OFF                                    -->
-<!--    박입 52        (0.125~0.275px, 800점, mult=4)                            -->
-<!--    chain 순서: 박입 52 (13800ms) → 박입 51 (14000ms 머리카락 필터)          -->
-<!--                → 머리카락 영역 마이크로 점도 자동 alpha 0                   -->
+<!-- ════ C-43 박입 52 v2.0 (★ 마이크로 얼굴 상대 좌표 — 잔상 0 / 회초리 후 수정) ════ -->
+<!--    파트너 회초리 (v1.0 실패):                                                  -->
+<!--      "고개를 좌우로 돌리면 흰 색깔과 코 쪽에 잔상이 일어납니다"                 -->
+<!--      "배수를 더 작게 + 코나 빰을 좌표가 따라가게"                                -->
+<!--                                                                                -->
+<!--    v1.0 실패 원인 (정직 자수):                                                  -->
+<!--      절대 좌표 (Math.random() * canvas.width)                                   -->
+<!--      → 영화 VFX "광원 고정" 원리로 박았지만                                     -->
+<!--      → 작은 점 800개가 화면에 고정 → 얼굴 움직이면 잔상                         -->
+<!--                                                                                -->
+<!--    v2.0 수정:                                                                   -->
+<!--      ① 얼굴 bounding box 상대 좌표 (relX, relY = 0~1)                           -->
+<!--         매 프레임 minX + relX*faceW 로 계산 → 얼굴 따라 움직임                  -->
+<!--      ② 배수 4 → 2 (점 개수 800 → 200, 파트너 "더 작게")                         -->
+<!--      ③ 점 크기 0.125~0.275px 유지 (매우 미세)                                   -->
+<!--      ④ alpha 0.06~0.16 (약함 - 개별 점 안 보임)                                  -->
+<!--                                                                                -->
+<!--    면적: 박입 33 (565 px²) → 박입 52 v2.0 (25 px²) — 22배 축소                  -->
 <script>
 setTimeout(function(){
   'use strict';
@@ -32224,8 +32235,7 @@ setTimeout(function(){
     window._inj47MicroEnabled = false;
 
     var prevGlow52 = window.drawFresnelWaterGlow;
-    var absMicro52 = null;
-    var lastW = 0, lastH = 0;
+    var relMicroCache = null;
 
     var FACE_OVAL_52 = window._rmaiArFaceOval ||
       [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
@@ -32241,7 +32251,7 @@ setTimeout(function(){
         var W = canvas.width, H = canvas.height;
         if(W < 10 || H < 10) return;
 
-        // 얼굴 oval bounding box
+        // ★ 얼굴 bounding box 매 프레임 계산 (얼굴 따라 움직임)
         var minX = W, maxX = 0, minY = H, maxY = 0;
         FACE_OVAL_52.forEach(function(idx){
           var lm = landmarks[idx];
@@ -32254,22 +32264,24 @@ setTimeout(function(){
         });
         if(maxX <= minX || maxY <= minY) return;
 
-        // ★ 좌표 미세화 + 배수 (파트너 명령)
-        var mult = window._inj52Multiplier || 4;
-        var pointCount = 200 * mult;
+        var faceW = maxX - minX, faceH = maxY - minY;
+        if(faceW < 50 || faceH < 50) return;
 
-        if(!absMicro52 || canvas.width !== lastW || canvas.height !== lastH){
-          absMicro52 = [];
-          lastW = canvas.width;
-          lastH = canvas.height;
+        // 배수 (파트너 "더 작게" — 기본 2)
+        var mult = window._inj52Multiplier || 2;
+        var pointCount = 100 * mult;
 
-          var baseSize  = 0.5 / mult;   // 0.125 (mult=4 기준)
-          var sizeRange = 0.6 / mult;   // 0.15
+        // ★ 상대 좌표 캐시 (개수만 변경 시 재생성, 캔버스 크기 변동 X)
+        if(!relMicroCache || relMicroCache.length !== pointCount){
+          relMicroCache = [];
+          // 점 크기는 매우 작게 고정 (mult 와 무관)
+          var baseSize  = 0.125;
+          var sizeRange = 0.15;
 
           for(var n = 0; n < pointCount; n++){
-            absMicro52.push({
-              absX:      Math.random() * W,   // 절대 좌표 (조명 고정)
-              absY:      Math.random() * H,
+            relMicroCache.push({
+              relX:      Math.random(),   // ★ 0~1 얼굴 안 상대 좌표
+              relY:      Math.random(),
               size:      baseSize + Math.random() * sizeRange,
               baseAlpha: 0.06 + Math.random() * 0.1
             });
@@ -32280,40 +32292,41 @@ setTimeout(function(){
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
-        absMicro52.forEach(function(spot){
-          // 얼굴 영역 안만 그림
-          if(spot.absX < minX || spot.absX > maxX) return;
-          if(spot.absY < minY || spot.absY > maxY) return;
+        relMicroCache.forEach(function(spot){
+          // ★ 얼굴 bounding box 안의 위치 (얼굴 따라 움직임 - 잔상 0)
+          var x = minX + spot.relX * faceW;
+          var y = minY + spot.relY * faceH;
 
           var a = spot.baseAlpha * microAlpha;
           ctx.fillStyle = 'rgba(255,250,245,' + a + ')';
           ctx.beginPath();
-          ctx.arc(spot.absX, spot.absY, spot.size, 0, Math.PI * 2);
+          ctx.arc(x, y, spot.size, 0, Math.PI * 2);
           ctx.fill();
         });
         ctx.restore();
       } catch(e){}
     };
 
-    // 초기: 박입 49 가 페이지에 따라 토글 (메이크업 = true)
+    // 초기 (박입 49 가 메이크업 페이지에서 ON)
     window._inj52Enabled    = false;
-    window._inj52Multiplier = 4;
+    window._inj52Multiplier = 2;   // 기본 배수 (파트너 "더 작게")
     window._inj52Wrapped    = true;
 
     window._inj52Control = {
       enable:  function(){ window._inj52Enabled = true; },
       disable: function(){ window._inj52Enabled = false; },
       setMultiplier: function(m){
-        window._inj52Multiplier = Math.max(1, Math.min(10, +m || 4));
-        absMicro52 = null;
+        window._inj52Multiplier = Math.max(1, Math.min(10, +m || 2));
+        relMicroCache = null;
       },
-      regenerate: function(){ absMicro52 = null; },
+      regenerate: function(){ relMicroCache = null; },
       info: function(){
         return {
-          on:    !!window._inj52Enabled,
-          mult:  window._inj52Multiplier,
-          size:  (0.5/window._inj52Multiplier).toFixed(3) + '~' + (1.1/window._inj52Multiplier).toFixed(3) + 'px',
-          count: 200 * window._inj52Multiplier
+          on:     !!window._inj52Enabled,
+          mult:   window._inj52Multiplier,
+          count:  100 * window._inj52Multiplier,
+          size:   '0.125~0.275px',
+          coords: 'face-relative (잔상 0)'
         };
       }
     };
