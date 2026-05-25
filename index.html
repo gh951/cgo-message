@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-relative-coord-v52a" name="c41-version"/>
+<meta content="2026-05-25-c43-inj51-pagesplit-v52b" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32145,6 +32145,7 @@ setTimeout(function(){
         window._cheekHighlightEnabled  = false;
         window._rppgGlowEnabled        = false;
         window._inj52Enabled           = false;
+        window._inj51Enabled           = false;  // ★ 머리카락 필터 OFF (잔상 누적 방지)
         if(window._cheekHighlightControl) try { window._cheekHighlightControl.disable(); } catch(e){}
         if(window._rppgGlowControl)       try { window._rppgGlowControl.disable();       } catch(e){}
         if(window._cheekColorControl)     try { window._cheekColorControl.disable();     } catch(e){}
@@ -32158,6 +32159,7 @@ setTimeout(function(){
         window._cheekHighlightEnabled  = false;
         window._rppgGlowEnabled        = false;
         window._inj52Enabled           = true;   // 박입 52 ON
+        window._inj51Enabled           = true;   // ★ 머리카락 필터 ON
         if(window._cheekHighlightControl) try { window._cheekHighlightControl.disable(); } catch(e){}
         if(window._rppgGlowControl)       try { window._rppgGlowControl.disable();       } catch(e){}
         if(window._cheekColorControl)     try { window._cheekColorControl.disable();     } catch(e){}
