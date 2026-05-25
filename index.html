@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c43-v47-instant-all" name="c41-version"/>
+<meta content="2026-05-26-c43-v47-hair-v1" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27173,7 +27173,8 @@ function _rmaiArInitColorPicker(){
     {key:'lip',   icon:'💋', name:'립',     pal: currentCardLib.lip,   subtitle:'립스틱'},
     {key:'cheek', icon:'🌸', name:'볼',     pal: currentCardLib.cheek, subtitle:'블러셔'},
     {key:'eye',   icon:'👁️', name:'아이',   pal: currentCardLib.eye,   subtitle:'아이쉐도우'},
-    {key:'base',  icon:'🫧', name:'베이스', pal: currentCardLib.base,  subtitle:'베이스 톤'}
+    {key:'base',  icon:'🫧', name:'베이스', pal: currentCardLib.base,  subtitle:'베이스 톤'},
+    {key:'hair',  icon:'💇', name:'헤어',   pal: currentCardLib.hair || currentCardLib.base, subtitle:'헤어 컬러'}
   ];
 
   // 카테고리 탭 — 4개 한 줄
@@ -31974,6 +31975,17 @@ setTimeout(function(){
         var data = imgData.data;
 
         // ⑤ ★ 머리카락 필터 3종 (구글 AI 권고 — 마이크로 경계 OFF)
+        //   헤어 카테고리 선택 + 색 있음 → 머리카락에 색 입힘 (염색)
+        //   그 외 → 머리카락 영역 alpha 0 (충돌 방지)
+        var hairCat = (window._rmaiAr && window._rmaiAr.currentCategory === 'hair');
+        var hairCol = (hairCat && window._rmaiAr && window._rmaiAr.currentColor) ? window._rmaiAr.currentColor : null;
+        var hairR = 0, hairG = 0, hairB = 0;
+        if(hairCol && hairCol.charAt(0) === '#' && hairCol.length === 7){
+          hairR = parseInt(hairCol.substr(1,2), 16);
+          hairG = parseInt(hairCol.substr(3,2), 16);
+          hairB = parseInt(hairCol.substr(5,2), 16);
+        }
+
         for(var i = 0; i < data.length; i += 4){
           var r = data[i];
           var g = data[i+1];
@@ -31981,29 +31993,36 @@ setTimeout(function(){
 
           // ITU-R BT.709 휘도 (박입 27 동일 공식)
           var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          var isHair = false;
 
           // [필터 1] 동양인 검은 머리 / 머리카락 그림자
           if(luminance < 75){
-            data[i+3] = 0;
-            continue;
+            isHair = true;
+          } else {
+            // [필터 2] 서양인 금발(Blond) / 빨간 머리(Ginger)
+            var rbDiff = r - b;
+            var isBlondOrGinger = (r > 140 && g > 110 && b < 100 && rbDiff > 55);
+
+            // [필터 3] 서양인 흰머리(White) / 은발
+            var rgDiff = Math.abs(r - g);
+            var gbDiff = Math.abs(g - b);
+            var isWhiteHair = (luminance > 175 && rgDiff < 12 && gbDiff < 12);
+
+            if(isBlondOrGinger || isWhiteHair) isHair = true;
           }
 
-          // [필터 2] 서양인 금발(Blond) / 빨간 머리(Ginger)
-          var rbDiff = r - b;
-          var isBlondOrGinger = (r > 140 && g > 110 && b < 100 && rbDiff > 55);
-
-          // [필터 3] 서양인 흰머리(White) / 은발
-          var rgDiff = Math.abs(r - g);
-          var gbDiff = Math.abs(g - b);
-          var isWhiteHair = (luminance > 175 && rgDiff < 12 && gbDiff < 12);
-
-          if(isBlondOrGinger || isWhiteHair){
-            data[i+3] = 0;
-            continue;
+          if(isHair){
+            if(hairCol){
+              // ★ 헤어 카테고리: 머리카락에 색 입힘 (단순 50/50 blend)
+              data[i]   = (r + hairR) >> 1;
+              data[i+1] = (g + hairG) >> 1;
+              data[i+2] = (b + hairB) >> 1;
+              // alpha 그대로 (머리카락 보임)
+            } else {
+              // 기본: 충돌 방지 — 메이크업 alpha 0
+              data[i+3] = 0;
+            }
           }
-
-          // ★ 마이크로 경계 처리 (75 <= Y < 105) OFF
-          //   구글 AI 권고: 연산 부담 절감 → 잔상 = 연산 지연 방지
         }
 
         // ⑥ 처리된 픽셀 데이터를 캔버스에 재투고
