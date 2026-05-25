@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-cheek-camera-final-v25" name="c41-version"/>
+<meta content="2026-05-24-c42-camera-restore-v26" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -29576,43 +29576,199 @@ setTimeout(function(){
     };
   }
 
-  // ③ 카메라 재시작 안정화 — rmaiArStop wrap (stream 완전 해제)
-  if(typeof window.rmaiArStop === 'function' && !window._rmaiArStopWrapped){
-    var origStop = window.rmaiArStop;
-    window.rmaiArStop = function(){
-      // 옛 stop 호출
-      try { origStop(); } catch(e){}
-
-      // 추가: video stream 의 모든 track 강제 해제
-      try {
-        var video = document.getElementById('rmai-ar-video');
-        if(video && video.srcObject){
-          var stream = video.srcObject;
-          if(stream.getTracks){
-            stream.getTracks().forEach(function(track){
-              track.stop();
-            });
-          }
-          video.srcObject = null;
-          video.pause();
-        }
-      } catch(e){}
-
-      // _rmaiAr 상태 강제 리셋
-      try {
-        if(typeof _rmaiAr !== 'undefined'){
-          _rmaiAr.running = false;
-          if(_rmaiAr.camera){
-            try { _rmaiAr.camera.stop(); } catch(e){}
-            _rmaiAr.camera = null;
-          }
-        }
-      } catch(e){}
-    };
-    window._rmaiArStopWrapped = true;
-  }
+  // ③ 카메라 재시작 안정화 — 박입 25 정정: 옛 stop 코드 그대로 두기
+  //    이전 시도: 강제 stream.getTracks().stop() + _rmaiAr.camera.stop()
+  //    → 두 번째 시작 시 충돌 원인 (옛 카메라 인스턴스 재사용 차단)
+  //    → 이 부분 제거. 옛 rmaiArStop 그대로 사용.
 
 }, 7300);
+</script>
+
+<!-- ════ C-42 박입 26 (★ 세계 최초 — rPPG 혈류 → AR 메이크업 광택 자동 연동) ════ -->
+<!--    구글 AI 진단: "2-트랙 분리 + rPPG 데이터 → 메이크업 자동 매핑"          -->
+<!--    동생 아키텍처 검증: 이미 2-트랙 (offCanvas/rmaiAr.canvas 분리)          -->
+<!--    박입 26: rPPG 출력 → 광택 alpha 동적 매핑                                -->
+<!--                                                                            -->
+<!--    원리:                                                                    -->
+<!--      BPM 정상 (60~100) + HRV 높음 (>40) = 건강                              -->
+<!--        → 광택 sharp + bright (alpha × 1.3)                                  -->
+<!--      BPM 정상 + HRV 낮음 (<25) = 피로                                       -->
+<!--        → 광택 dim (alpha × 0.5)                                             -->
+<!--      stressScore 높음 (>70) = 스트레스                                      -->
+<!--        → 광택 추가 약화 (alpha × 0.7)                                       -->
+<!--      데이터 없음 = 중립 (alpha × 1.0)                                       -->
+<!--                                                                            -->
+<!--    효과: 사용자의 생체 상태에 따라 메이크업 광택 자동 조절                  -->
+<!--          = 퍼펙트코프/모디페이스가 못 하는 영역                              -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // rPPG 데이터 → 광택 multiplier 계산
+  function computeRppgMultiplier(){
+    var bpm = 0, hrv = 0, stress = 50;
+
+    // ① window._rPPG 에서 직접
+    if(window._rPPG){
+      bpm = window._rPPG.bpm || 0;
+      hrv = window._rPPG.hrv || 0;
+    }
+
+    // ② _svi.rppg 에서 (백업)
+    if(typeof _svi !== 'undefined' && _svi.rppg){
+      if(!bpm) bpm = _svi.rppg.bpm || 0;
+      if(!hrv) hrv = _svi.rppg.hrv || 0;
+      stress = _svi.rppg.stressScore || 50;
+    }
+
+    // ③ 매핑 공식
+    var mul = 1.0;
+    var status = 'neutral';
+
+    if(bpm === 0 || hrv === 0){
+      // 데이터 없음
+      return { mul: 1.0, status: 'no-data', bpm: 0, hrv: 0, stress: stress };
+    }
+
+    if(bpm >= 60 && bpm <= 100){
+      // BPM 정상
+      if(hrv > 40){
+        mul = 1.3;  // 건강 — sharp bright
+        status = 'healthy';
+      } else if(hrv < 25){
+        mul = 0.5;  // 피로 — dim
+        status = 'fatigue';
+      } else {
+        mul = 1.0;  // 보통
+        status = 'normal';
+      }
+    } else if(bpm > 100){
+      mul = 1.15;  // 흥분/운동 후 — 약간 sharp
+      status = 'excited';
+    } else {
+      mul = 0.8;   // 저심박 — 약간 dim
+      status = 'low-bpm';
+    }
+
+    // 스트레스 추가 보정
+    if(stress > 70) mul *= 0.7;
+    else if(stress < 30) mul *= 1.1;
+
+    return {
+      mul: mul,
+      status: status,
+      bpm: bpm,
+      hrv: hrv,
+      stress: stress
+    };
+  }
+
+  // 박입 25 의 광대 highlight 위에 rPPG 보정 wrap
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._rppgGlowWrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+    var lcheekIdx = [116, 117, 118, 100, 207];
+    var rcheekIdx = [345, 346, 347, 329, 427];
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // 옛 그리기 (박입 13~25)
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._rppgGlowEnabled || !landmarks) return;
+
+      try {
+        var rppg = computeRppgMultiplier();
+
+        // rPPG 가 데이터 없으면 추가 그리기 X
+        if(rppg.status === 'no-data') return;
+
+        // 광대 좌/우 중심 계산
+        var lx=0, ly=0, lc=0;
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i]){ lx += landmarks[i].x; ly += landmarks[i].y; lc++; }
+        });
+        var rx=0, ry=0, rc=0;
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i]){ rx += landmarks[i].x; ry += landmarks[i].y; rc++; }
+        });
+        if(lc === 0 || rc === 0) return;
+
+        lx = (lx / lc) * canvas.width;
+        ly = (ly / lc) * canvas.height;
+        rx = (rx / rc) * canvas.width;
+        ry = (ry / rc) * canvas.height;
+
+        // rPPG mul - 1 이 추가 강도 (이미 박입 25 가 base 그렸으므로 차분만 그림)
+        var extra = rppg.mul - 1.0;
+        if(Math.abs(extra) < 0.05) return;  // 변화 미미 시 skip
+
+        // 건강 (extra > 0): 광택 추가 + 약간 핑크 톤 (혈류 좋음)
+        // 피로 (extra < 0): destination-out 으로 광택 일부 제거
+        var alpha = Math.abs(extra) * 0.18 * (glossLevel || 0.5);
+        var radius = 24;
+
+        ctx.save();
+        if(extra > 0){
+          // 건강 — 광택 추가 (핑크 빛 살짝)
+          ctx.globalCompositeOperation = 'screen';
+          var pinkR = 255, pinkG = 220, pinkB = 200;
+          [[lx,ly],[rx,ry]].forEach(function(p){
+            var grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], radius);
+            grad.addColorStop(0,   'rgba(' + pinkR + ',' + pinkG + ',' + pinkB + ',' + alpha + ')');
+            grad.addColorStop(0.6, 'rgba(' + pinkR + ',' + pinkG + ',' + pinkB + ',' + (alpha * 0.2) + ')');
+            grad.addColorStop(1,   'rgba(' + pinkR + ',' + pinkG + ',' + pinkB + ',0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        } else {
+          // 피로 — 광택 약화 (destination-out 약하게)
+          ctx.globalCompositeOperation = 'destination-out';
+          [[lx,ly],[rx,ry]].forEach(function(p){
+            var grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], radius);
+            grad.addColorStop(0,   'rgba(0,0,0,' + (alpha * 0.4) + ')');
+            grad.addColorStop(0.6, 'rgba(0,0,0,' + (alpha * 0.15) + ')');
+            grad.addColorStop(1,   'rgba(0,0,0,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+        }
+        ctx.restore();
+      } catch(e){}
+    };
+
+    window._rppgGlowEnabled = true;
+    window._rppgGlowWrapped = true;
+
+    window._rppgGlowControl = {
+      enable:  function(){ window._rppgGlowEnabled = true; },
+      disable: function(){ window._rppgGlowEnabled = false; },
+      info:    function(){
+        var rppg = computeRppgMultiplier();
+        return {
+          enabled: !!window._rppgGlowEnabled,
+          rppg_status: rppg.status,
+          bpm: rppg.bpm,
+          hrv: rppg.hrv,
+          stress: rppg.stress,
+          multiplier: rppg.mul.toFixed(2),
+          desc: 'rPPG 혈류 → 광택 자동 (' + rppg.status + ')'
+        };
+      },
+      // 시뮬레이션 (rPPG 데이터 없을 때 테스트)
+      simulate: function(bpm, hrv, stress){
+        window._rPPG = window._rPPG || {};
+        window._rPPG.bpm = bpm;
+        window._rPPG.hrv = hrv;
+        if(typeof _svi !== 'undefined' && _svi.rppg){
+          _svi.rppg.stressScore = stress;
+        }
+      }
+    };
+  }
+}, 7800);
 </script>
 
 </body>
