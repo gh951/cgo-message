@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-temporal-damping-v22" name="c41-version"/>
+<meta content="2026-05-24-c42-z-fake-normal-v23" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -29242,6 +29242,153 @@ setTimeout(function(){
   }
 
   setTimeout(wrapCheekSmoothing, 6000);
+})();
+</script>
+
+<!-- ════ C-42 박입 23 (무중생유 — z 기반 fake normal lighting) ════ -->
+<!--    아이디어: MediaPipe FaceMesh 의 landmark.z 값 활용                     -->
+<!--    원리: 광대 z 평균 → highlight 강도 동적 조절                            -->
+<!--          - 카메라 쪽 (z 작음) → highlight 강                              -->
+<!--          - 멀리 (z 큼) → highlight 약                                     -->
+<!--    효과: 고개 돌릴 때 광대 양쪽 강약이 자동 변화 → 입체감                  -->
+<!--    = Canvas 2D 안의 fake normal lighting (WebGL 필요 X)                  -->
+<script>
+(function(){
+  'use strict';
+
+  function wrapZNormal(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapZNormal, 300); return;
+    }
+    if(window._zNormalWrapped) return;
+
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._zNormalEnabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // ① 광대 z 평균 (좌/우 별도)
+        var lcheekIdx = [116, 117, 118, 100, 207];
+        var rcheekIdx = [345, 346, 347, 329, 427];
+
+        var lzSum = 0, lzCount = 0;
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i] && typeof landmarks[i].z === 'number'){
+            lzSum += landmarks[i].z; lzCount++;
+          }
+        });
+        var rzSum = 0, rzCount = 0;
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i] && typeof landmarks[i].z === 'number'){
+            rzSum += landmarks[i].z; rzCount++;
+          }
+        });
+
+        if(lzCount === 0 || rzCount === 0){
+          return prevGlow(ctx, canvas, landmarks, glossLevel);
+        }
+
+        var lz = lzSum / lzCount;  // 좌광대 평균 z
+        var rz = rzSum / rzCount;  // 우광대 평균 z
+
+        // ② MediaPipe z 값:
+        //    카메라 쪽 = 음수 (가까움)
+        //    멀리      = 양수
+        //    정면: 광대 z ≈ -0.02 ~ -0.04
+        //    측면: 카메라 쪽 광대 z = -0.06, 반대쪽 = +0.02
+        //
+        //    fake normal 계산:
+        //    light direction (정면 카메라) · cheek normal (z 축)
+        //    z 음수일수록 카메라 쪽 = highlight 강
+        //
+        //    공식: glossMultiplier = clamp(1.0 - z * 20, 0.2, 1.5)
+        //    - z = -0.05 (카메라 쪽) → 1.0 - (-1.0) = 2.0 → clamp 1.5
+        //    - z =  0.00 (정면)     → 1.0
+        //    - z = +0.05 (멀리)     → 1.0 - 1.0 = 0.0 → clamp 0.2
+
+        function glossMul(z){
+          var m = 1.0 - z * 20;
+          if(m > 1.5) m = 1.5;
+          if(m < 0.2) m = 0.2;
+          return m;
+        }
+
+        var lMul = glossMul(lz);
+        var rMul = glossMul(rz);
+
+        // ③ 박입 21 의 광대 highlight 가 _cheekHighlightAlpha 사용
+        //    여기서 좌/우 별도 강도 주려면 박입 21 의 alpha 단일값 으로는 한계
+        //    → glossLevel 자체를 동적으로 조정해서 효과 부여
+        //    → 평균 multiplier 적용 (좌/우 가까운 쪽 우선)
+        var avgMul = Math.max(lMul, rMul);  // 카메라 쪽 광대 기준
+
+        // 박입 21 호출 (z 보정된 glossLevel 로)
+        prevGlow(ctx, canvas, landmarks, glossLevel * avgMul);
+
+        // ④ 추가: 좌/우 차이가 크면 (측면) 카메라 쪽 광대에 별도 강조 highlight
+        var diff = Math.abs(lz - rz);
+        if(diff > 0.025){  // 측면 자세 감지
+          var brightSide = (lz < rz) ? 'left' : 'right';
+          var idx = (brightSide === 'left') ? lcheekIdx : rcheekIdx;
+
+          var cx = 0, cy = 0, c = 0;
+          idx.forEach(function(i){
+            if(landmarks[i]){ cx += landmarks[i].x; cy += landmarks[i].y; c++; }
+          });
+          if(c > 0){
+            cx = (cx / c) * canvas.width;
+            cy = (cy / c) * canvas.height;
+
+            // 측면 광대 추가 sharp highlight (z 기반 강조)
+            var extraAlpha = Math.min(diff * 8, 0.6) * (glossLevel || 0.5);
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            var grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 14);
+            grad.addColorStop(0,   'rgba(255,255,255,' + extraAlpha + ')');
+            grad.addColorStop(0.4, 'rgba(255,255,255,' + (extraAlpha * 0.4) + ')');
+            grad.addColorStop(1,   'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._zNormalEnabled = true;
+    window._zNormalWrapped = true;
+
+    window._zNormalControl = {
+      enable:  function(){ window._zNormalEnabled = true; },
+      disable: function(){ window._zNormalEnabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._zNormalEnabled,
+          desc:    'MediaPipe z 값 → 광대 highlight 동적 강약 (fake normal)'
+        };
+      },
+      // 디버깅 — 현재 z 값 확인
+      probe: function(){
+        if(!window._rmaiAr || !window._rmaiAr.lastLandmarks) return '랜드마크 없음';
+        var lm = window._rmaiAr.lastLandmarks;
+        return {
+          leftCheek_z:  lm[117] ? lm[117].z.toFixed(4) : 'N/A',
+          rightCheek_z: lm[346] ? lm[346].z.toFixed(4) : 'N/A',
+          noseTip_z:    lm[1]   ? lm[1].z.toFixed(4)   : 'N/A',
+          forehead_z:   lm[10]  ? lm[10].z.toFixed(4)  : 'N/A'
+        };
+      }
+    };
+  }
+
+  setTimeout(wrapZNormal, 6300);
 })();
 </script>
 
