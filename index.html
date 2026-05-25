@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-hair-filter-v51" name="c41-version"/>
+<meta content="2026-05-25-c43-micro-mult-v52" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32075,19 +32075,14 @@ setTimeout(function(){
       noseFeatherOn:  function(){ window._inj48NoseFeatherEnabled = true; },
       info: function(){
         return {
-          enabled:          !!window._inj48Enabled,
-          blurPx:           window._inj48BlurPx,
-          noseFeather:      !!window._inj48NoseFeatherEnabled,
-          noseFeatherAlpha: window._inj48NoseFeatherAlpha,
-          applies_to:       ['scrSkinage', 'scrMakeup'],
-          desc:             '박입 48 — 외곽선 동적 페더링 + 콧대 라인 페더링 (gamma 2.2 curve)'
+          on:      !!window._inj48Enabled,
+          blur:    window._inj48BlurPx,
+          nose:    window._inj48NoseFeatherAlpha
         };
       }
     };
 
-    console.log('[C-43 박입 48] 동적 페더링 작동 ✦ 외곽 blur ' +
-                window._inj48BlurPx + 'px + 콧대 페더 ' +
-                Math.round(window._inj48NoseFeatherAlpha * 100) + '% ✦ scrSkinage + scrMakeup 동시 적용');
+    console.log('[박입 48] ON');
   }
 
   applyInj48();
@@ -32128,6 +32123,8 @@ setTimeout(function(){
   if(window._inj33Control && window._inj33Control.disable){
     try { window._inj33Control.disable(); } catch(e){}
   }
+  // ★ 박입 47 영구 OFF (박입 52 가 대체 — 작은 점 + 배수)
+  window._inj47MicroEnabled = false;
 
   function applyPageEffects(){
     if(!window._inj49AutoGlow) return;
@@ -32140,56 +32137,50 @@ setTimeout(function(){
       var inMk = !!(scrMk && scrMk.classList.contains('active'));
 
       if(inSk){
-        // ★ 피부 페이지 = 베이스만 모드 — 모든 광택/광점 OFF
-        window._spectrumGlowEnabled    = false;  // 박입 27 OFF
-        window._inj47MicroEnabled      = false;  // 박입 47 OFF
-        window._inj33Enabled           = false;  // 박입 33 OFF (영구)
-        window._zNormalEnabled         = false;  // 박입 23 OFF
-        window._cheekHighlightEnabled  = false;  // 박입 21 OFF
-        window._rppgGlowEnabled        = false;  // 박입 26 OFF
-        // 명시적 disable 호출 (이중 안전)
+        // 피부 페이지 = 베이스만
+        window._spectrumGlowEnabled    = false;
+        window._inj47MicroEnabled      = false;
+        window._inj33Enabled           = false;
+        window._zNormalEnabled         = false;
+        window._cheekHighlightEnabled  = false;
+        window._rppgGlowEnabled        = false;
+        window._inj52Enabled           = false;
         if(window._cheekHighlightControl) try { window._cheekHighlightControl.disable(); } catch(e){}
         if(window._rppgGlowControl)       try { window._rppgGlowControl.disable();       } catch(e){}
         if(window._cheekColorControl)     try { window._cheekColorControl.disable();     } catch(e){}
         if(window._cheekFinalControl)     try { window._cheekFinalControl.disable();     } catch(e){}
       } else if(inMk){
-        // ★ 메이크업 페이지 = 박입 27 + 47 풀 효과
-        window._spectrumGlowEnabled    = true;   // 박입 27 ON
-        window._inj47MicroEnabled      = true;   // 박입 47 ON (절대 좌표 200점)
-        window._inj33Enabled           = false;  // 박입 33 영구 OFF (박입 47 대체)
-        window._zNormalEnabled         = true;   // 박입 23 ON (광택 강도 조절)
-        // 박입 21/24/25/26 광대 광점 — 영구 OFF (박입 27 의 부작용 차단 의도 유지)
+        // 메이크업 페이지 = 박입 27 + 52 풀 효과
+        window._spectrumGlowEnabled    = true;
+        window._inj47MicroEnabled      = false;  // 영구 OFF (박입 52 가 대체)
+        window._inj33Enabled           = false;
+        window._zNormalEnabled         = true;
         window._cheekHighlightEnabled  = false;
         window._rppgGlowEnabled        = false;
+        window._inj52Enabled           = true;   // 박입 52 ON
         if(window._cheekHighlightControl) try { window._cheekHighlightControl.disable(); } catch(e){}
         if(window._rppgGlowControl)       try { window._rppgGlowControl.disable();       } catch(e){}
         if(window._cheekColorControl)     try { window._cheekColorControl.disable();     } catch(e){}
         if(window._cheekFinalControl)     try { window._cheekFinalControl.disable();     } catch(e){}
       }
-      // 다른 페이지 — 현 상태 유지 (영향 X)
     } catch(e){}
   }
 
-  // ★ 즉시 1회 실행 (페이지가 이미 활성화된 경우 즉시 적용)
   applyPageEffects();
-
-  // ★ 페이지 전환 자동 감지 (300ms)
   setInterval(applyPageEffects, 300);
 
-  // 외부 토글 도구
   window._inj49Control = {
-    auto: function(b){
-      window._inj49AutoGlow = !!b;
-    },
+    auto: function(b){ window._inj49AutoGlow = !!b; },
     glowOn: function(){
       window._inj49AutoGlow       = false;
       window._spectrumGlowEnabled = true;
-      window._inj47MicroEnabled   = true;
+      window._inj52Enabled        = true;
     },
     glowOff: function(){
       window._inj49AutoGlow         = false;
       window._spectrumGlowEnabled   = false;
       window._inj47MicroEnabled     = false;
+      window._inj52Enabled          = false;
       window._inj33Enabled          = false;
       window._zNormalEnabled        = false;
       window._cheekHighlightEnabled = false;
@@ -32199,22 +32190,139 @@ setTimeout(function(){
       var scrSk = document.getElementById('scrSkinage');
       var scrMk = document.getElementById('scrMakeup');
       return {
-        autoGlow:        !!window._inj49AutoGlow,
-        spectrumGlow:    !!window._spectrumGlowEnabled,
-        microAbsolute:   !!window._inj47MicroEnabled,
-        micro80_inj33:   !!window._inj33Enabled,   // 영구 false 여야 함
-        zNormal:         !!window._zNormalEnabled,
-        cheekHighlight:  !!window._cheekHighlightEnabled,
-        rppgGlow:        !!window._rppgGlowEnabled,
-        currentPage:     (scrSk && scrSk.classList.contains('active')) ? 'scrSkinage' :
-                         (scrMk && scrMk.classList.contains('active')) ? 'scrMakeup'  : 'other',
-        desc:            '박입 49 v2.0 — 모든 광택 효과 정밀 분리 + 박입 33 영구 OFF'
+        page:  (scrSk && scrSk.classList.contains('active')) ? 'skinage' :
+               (scrMk && scrMk.classList.contains('active')) ? 'makeup'  : 'other',
+        glow:  !!window._spectrumGlowEnabled,
+        micro: !!window._inj52Enabled
       };
     }
   };
 
-  console.log('[C-43 박입 49 v2.0] 모든 광택 효과 분리 ✦ 박입 33 영구 OFF (회초리 후 수정)');
+  console.log('[박입 49] ON');
 }, 13500);
+</script>
+
+<!-- ════ C-43 박입 52 (★ 마이크로 좌표 미세화 + 배수 — 파트너 명령) ════ -->
+<!--    파트너 명령: "좌표를 아주 작게 + 그 크기 만큼 배수"                       -->
+<!--    원리: 영화 VFX 마이크로 텍스처 — 개별 점 안 보임, 합쳐서 자연 광택       -->
+<!--    박입 47 (0.5~1.1px, 200점) → 영구 OFF                                    -->
+<!--    박입 52        (0.125~0.275px, 800점, mult=4)                            -->
+<!--    chain 순서: 박입 52 (13800ms) → 박입 51 (14000ms 머리카락 필터)          -->
+<!--                → 머리카락 영역 마이크로 점도 자동 alpha 0                   -->
+<script>
+setTimeout(function(){
+  'use strict';
+  if(window._inj52Wrapped) return;
+
+  function applyInj52(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(applyInj52, 300); return;
+    }
+    if(window._inj52Wrapped) return;
+
+    // 박입 47 영구 OFF
+    window._inj47MicroEnabled = false;
+
+    var prevGlow52 = window.drawFresnelWaterGlow;
+    var absMicro52 = null;
+    var lastW = 0, lastH = 0;
+
+    var FACE_OVAL_52 = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      prevGlow52(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj52Enabled || !landmarks) return;
+
+      try {
+        var W = canvas.width, H = canvas.height;
+        if(W < 10 || H < 10) return;
+
+        // 얼굴 oval bounding box
+        var minX = W, maxX = 0, minY = H, maxY = 0;
+        FACE_OVAL_52.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * W, y = lm.y * H;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+
+        // ★ 좌표 미세화 + 배수 (파트너 명령)
+        var mult = window._inj52Multiplier || 4;
+        var pointCount = 200 * mult;
+
+        if(!absMicro52 || canvas.width !== lastW || canvas.height !== lastH){
+          absMicro52 = [];
+          lastW = canvas.width;
+          lastH = canvas.height;
+
+          var baseSize  = 0.5 / mult;   // 0.125 (mult=4 기준)
+          var sizeRange = 0.6 / mult;   // 0.15
+
+          for(var n = 0; n < pointCount; n++){
+            absMicro52.push({
+              absX:      Math.random() * W,   // 절대 좌표 (조명 고정)
+              absY:      Math.random() * H,
+              size:      baseSize + Math.random() * sizeRange,
+              baseAlpha: 0.06 + Math.random() * 0.1
+            });
+          }
+        }
+
+        var microAlpha = 0.05 * (glossLevel || 0.5);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        absMicro52.forEach(function(spot){
+          // 얼굴 영역 안만 그림
+          if(spot.absX < minX || spot.absX > maxX) return;
+          if(spot.absY < minY || spot.absY > maxY) return;
+
+          var a = spot.baseAlpha * microAlpha;
+          ctx.fillStyle = 'rgba(255,250,245,' + a + ')';
+          ctx.beginPath();
+          ctx.arc(spot.absX, spot.absY, spot.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      } catch(e){}
+    };
+
+    // 초기: 박입 49 가 페이지에 따라 토글 (메이크업 = true)
+    window._inj52Enabled    = false;
+    window._inj52Multiplier = 4;
+    window._inj52Wrapped    = true;
+
+    window._inj52Control = {
+      enable:  function(){ window._inj52Enabled = true; },
+      disable: function(){ window._inj52Enabled = false; },
+      setMultiplier: function(m){
+        window._inj52Multiplier = Math.max(1, Math.min(10, +m || 4));
+        absMicro52 = null;
+      },
+      regenerate: function(){ absMicro52 = null; },
+      info: function(){
+        return {
+          on:    !!window._inj52Enabled,
+          mult:  window._inj52Multiplier,
+          size:  (0.5/window._inj52Multiplier).toFixed(3) + '~' + (1.1/window._inj52Multiplier).toFixed(3) + 'px',
+          count: 200 * window._inj52Multiplier
+        };
+      }
+    };
+
+    console.log('[박입 52] ON');
+  }
+
+  applyInj52();
+}, 13800);
 </script>
 
 <!-- ════ C-43 박입 51 (★ 머리카락 픽셀 자동 필터 — 인종 unbiased / 가이드 작성자 소스) ════ -->
@@ -32360,23 +32468,10 @@ setTimeout(function(){
     window._inj51Control = {
       enable:  function(){ window._inj51Enabled = true; },
       disable: function(){ window._inj51Enabled = false; },
-      info:    function(){
-        return {
-          enabled:    !!window._inj51Enabled,
-          frameSkip:  '격프레임 (2 frames per loop)',
-          filters: [
-            '[1] 검은 머리 (Y<75)',
-            '[2] 금발/빨강 (R>140 && G>110 && B<100 && R-B>55)',
-            '[3] 흰머리 (Y>175 && |R-G|<12 && |G-B|<12)'
-          ],
-          microEdge:  '잔머리 선형 감쇄 (75 <= Y < 105)',
-          appliesTo:  ['scrSkinage', 'scrMakeup'],
-          desc:       '박입 51 — 인종 unbiased 머리카락 픽셀 필터 (가이드 소스 + 우리 chain 통합)'
-        };
-      }
+      info:    function(){ return { on: !!window._inj51Enabled, thresholds: 'Y<75 / blond / Y>175' }; }
     };
 
-    console.log('[C-43 박입 51] 머리카락 픽셀 필터 작동 ✦ 3종 인종 필터 + 잔머리 선형 감쇄 + 격프레임');
+    console.log('[박입 51] ON');
   }
 
   applyInj51();
