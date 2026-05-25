@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-3FIX-absolute-v47" name="c41-version"/>
+<meta content="2026-05-25-c43-feathering-v48" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -31892,6 +31892,206 @@ setTimeout(function(){
     }
   };
 }, 12500);
+</script>
+
+<!-- ════ C-43 박입 48 (★ 외곽선 + 콧대 라인 동적 페더링 — 가이드 1번) ════ -->
+<!--    파트너 명령: "콧등과 콧대 라인 일단 1번 진행 ... 피부나이 + AR 메이크업 같이"   -->
+<!--    가이드 출처: 3대 한계 극복 가이드 1번 — 경계선 부자연스러움 해결              -->
+<!--                                                                                  -->
+<!--    원리 (Gamma 2.2 Power Curve + Multiply Composite):                            -->
+<!--      ① _rmaiArDrawBase wrap (박입 13 evenodd 천공의 위)                          -->
+<!--      ② offscreen canvas 에 박입 13 결과물 그림                                   -->
+<!--      ③ destination-in + ctx.filter='blur(6px)' 로 얼굴 oval mask 페더링          -->
+<!--         → 외곽 (이마-머리카락 / 턱 / 광대) + 천공 (눈/입술) 동시 부드러워짐      -->
+<!--      ④ 콧대 8점 + 콧등 4점 위치에 radial gradient (gamma 2.2 곡선 근사)          -->
+<!--         → destination-out 으로 콧대 영역 alpha 약화 (입체감 보존)                -->
+<!--      ⑤ 메인 캔버스 합성 (ctx.drawImage)                                          -->
+<!--                                                                                  -->
+<!--    적용 페이지:                                                                  -->
+<!--      ✦ scrSkinage (피부 분석) — 박입 13 사용                                     -->
+<!--      ✦ scrMakeup (AR 메이크업) — 박입 39 가 _rmaiAr.canvas 만 교체. 함수 동일   -->
+<!--      → 두 페이지 자동 동시 적용                                                  -->
+<!--                                                                                  -->
+<!--    호환성:                                                                       -->
+<!--      ✦ 박입 13 (evenodd) — wrap 위에 박입 → 호환                                  -->
+<!--      ✦ 박입 16/20 (코 마스킹) — destination-in 단계 분리 → 호환                   -->
+<!--      ✦ 박입 27/47 (drawFresnelWaterGlow chain) — 독립 함수 → 호환                -->
+<!--      ✦ iOS Safari 11+ filter blur 지원. 미지원 시 fallback (try/catch)            -->
+<!--                                                                                  -->
+<!--    토글: window._inj48Control                                                    -->
+<!--      .disable() / .enable()                                                      -->
+<!--      .setBlur(0~20)        — 외곽 blur 강도                                       -->
+<!--      .setNoseFeather(0~1)  — 콧대 페더 alpha                                      -->
+<!--      .noseFeatherOff() / .noseFeatherOn()                                         -->
+<!--      .info()                                                                     -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  function applyInj48(){
+    if(typeof window._rmaiArDrawBase !== 'function'){
+      setTimeout(applyInj48, 300); return;
+    }
+    if(window._inj48Wrapped) return;
+
+    var origDrawBase48 = window._rmaiArDrawBase;
+
+    // Offscreen canvas (페더링 합성용) — 한 번만 생성
+    var fCanvas = document.createElement('canvas');
+    var fCtx = fCanvas.getContext('2d');
+
+    // MediaPipe 얼굴 oval 36점 (박입 13 의 _rmaiArFaceOval 과 동일)
+    var FACE_OVAL_48 = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+    // 콧대 8점 + 콧등 좌/우 각 2점 = 12점
+    var NOSE_BRIDGE_48 = [168, 6, 197, 195, 5, 4, 1, 19];
+    var NOSE_LEFT_48   = [129, 98];
+    var NOSE_RIGHT_48  = [358, 327];
+
+    // _rmaiArDrawBase chain wrap (박입 13 위)
+    window._rmaiArDrawBase = function(ctx, canvas, landmarks, color){
+      // OFF 또는 landmarks 없으면 원본 호출
+      if(!window._inj48Enabled || !landmarks){
+        return origDrawBase48(ctx, canvas, landmarks, color);
+      }
+
+      try {
+        var W = canvas.width, H = canvas.height;
+        if(W < 10 || H < 10){
+          return origDrawBase48(ctx, canvas, landmarks, color);
+        }
+
+        // ① offscreen canvas 동기화
+        if(fCanvas.width !== W || fCanvas.height !== H){
+          fCanvas.width  = W;
+          fCanvas.height = H;
+        }
+        fCtx.clearRect(0, 0, W, H);
+
+        // ② 박입 13 evenodd 천공 결과를 offscreen 에 그림
+        origDrawBase48(fCtx, fCanvas, landmarks, color);
+
+        // ③ destination-in + blur(Npx) → 얼굴 oval mask 페더링
+        var blurPx = (typeof window._inj48BlurPx === 'number') ? window._inj48BlurPx : 6;
+        var filterOk = true;
+        fCtx.save();
+        fCtx.globalCompositeOperation = 'destination-in';
+        try {
+          fCtx.filter = 'blur(' + blurPx + 'px)';
+        } catch(eFilter){
+          // 일부 구형 브라우저 filter 미지원 — fallback (blur 없이 mask)
+          filterOk = false;
+          try { fCtx.filter = 'none'; } catch(e2){}
+        }
+
+        // 얼굴 oval path
+        fCtx.beginPath();
+        FACE_OVAL_48.forEach(function(idx, i){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * W;
+          var y = lm.y * H;
+          if(i === 0) fCtx.moveTo(x, y);
+          else        fCtx.lineTo(x, y);
+        });
+        fCtx.closePath();
+        fCtx.fillStyle = 'rgba(0,0,0,1)';
+        fCtx.fill();
+        try { fCtx.filter = 'none'; } catch(e3){}
+        fCtx.restore();
+
+        // ④ 콧대 라인 페더링 (gamma 2.2 power curve 근사)
+        if(window._inj48NoseFeatherEnabled !== false){
+          var ncx = 0, ncy = 0, nCount = 0;
+          NOSE_BRIDGE_48.forEach(function(idx){
+            var lm = landmarks[idx];
+            if(lm){ ncx += lm.x * W; ncy += lm.y * H; nCount++; }
+          });
+
+          if(nCount > 0){
+            ncx /= nCount;
+            ncy /= nCount;
+
+            // 콧대 반경 (얼굴 크기 기준 18%)
+            var foreheadLm = landmarks[10];
+            var chinLm     = landmarks[152];
+            var noseRadius;
+            if(foreheadLm && chinLm){
+              noseRadius = Math.abs((chinLm.y - foreheadLm.y) * H) * 0.18;
+            } else {
+              noseRadius = Math.min(W, H) * 0.08;
+            }
+            noseRadius = Math.max(15, Math.min(60, noseRadius));
+
+            // destination-out + radial gradient (gamma 2.2 곡선 근사)
+            var noseAlpha = (typeof window._inj48NoseFeatherAlpha === 'number')
+              ? window._inj48NoseFeatherAlpha : 0.25;
+
+            fCtx.save();
+            fCtx.globalCompositeOperation = 'destination-out';
+            var grad = fCtx.createRadialGradient(ncx, ncy, 0, ncx, ncy, noseRadius);
+            grad.addColorStop(0,    'rgba(0,0,0,' + noseAlpha + ')');
+            grad.addColorStop(0.45, 'rgba(0,0,0,' + (noseAlpha * 0.5) + ')');
+            grad.addColorStop(0.75, 'rgba(0,0,0,' + (noseAlpha * 0.15) + ')');
+            grad.addColorStop(1,    'rgba(0,0,0,0)');
+            fCtx.fillStyle = grad;
+            fCtx.fillRect(ncx - noseRadius, ncy - noseRadius,
+                          noseRadius * 2,    noseRadius * 2);
+            fCtx.restore();
+          }
+        }
+
+        // ⑤ 메인 캔버스에 합성
+        ctx.drawImage(fCanvas, 0, 0);
+
+      } catch(e){
+        // 안전 fallback — 원본 호출
+        try { fCtx.filter = 'none'; } catch(e2){}
+        origDrawBase48(ctx, canvas, landmarks, color);
+      }
+    };
+
+    // 기본 설정
+    window._inj48Enabled            = true;
+    window._inj48BlurPx             = 6;
+    window._inj48NoseFeatherEnabled = true;
+    window._inj48NoseFeatherAlpha   = 0.25;
+    window._inj48Wrapped            = true;
+
+    // 외부 토글 도구
+    window._inj48Control = {
+      enable:  function(){ window._inj48Enabled = true; },
+      disable: function(){ window._inj48Enabled = false; },
+      setBlur: function(px){
+        window._inj48BlurPx = Math.max(0, Math.min(20, +px || 0));
+      },
+      setNoseFeather: function(alpha){
+        window._inj48NoseFeatherAlpha = Math.max(0, Math.min(1, +alpha || 0));
+      },
+      noseFeatherOff: function(){ window._inj48NoseFeatherEnabled = false; },
+      noseFeatherOn:  function(){ window._inj48NoseFeatherEnabled = true; },
+      info: function(){
+        return {
+          enabled:          !!window._inj48Enabled,
+          blurPx:           window._inj48BlurPx,
+          noseFeather:      !!window._inj48NoseFeatherEnabled,
+          noseFeatherAlpha: window._inj48NoseFeatherAlpha,
+          applies_to:       ['scrSkinage', 'scrMakeup'],
+          desc:             '박입 48 — 외곽선 동적 페더링 + 콧대 라인 페더링 (gamma 2.2 curve)'
+        };
+      }
+    };
+
+    console.log('[C-43 박입 48] 동적 페더링 작동 ✦ 외곽 blur ' +
+                window._inj48BlurPx + 'px + 콧대 페더 ' +
+                Math.round(window._inj48NoseFeatherAlpha * 100) + '% ✦ scrSkinage + scrMakeup 동시 적용');
+  }
+
+  applyInj48();
+}, 13000);
 </script>
 
 </body>
