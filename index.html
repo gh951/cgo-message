@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-REAL-FIX-cheek-nose-v30" name="c41-version"/>
+<meta content="2026-05-24-c42-FINAL-KILL-cheek-v31" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30255,6 +30255,105 @@ setTimeout(function(){
     };
   }
 }, 9500);
+</script>
+
+<!-- ════ C-42 박입 31 (★ 광대 점 종결 — 함수 통째 교체) ════ -->
+<!--    파트너 진단: 박입 30 의 alpha=0 강제로도 점 살아남음                   -->
+<!--    원인: 박입 21~26 의 그리기 함수가 자기 안에서 alpha 새로 계산            -->
+<!--    해법:                                                                  -->
+<!--      ① wrapCheekHighlight 등 그리기 wrap 자체를 빈 함수로 강제 교체       -->
+<!--      ② drawFresnelWaterGlow wrap chain 의 박입 21/24/25/26 호출 차단      -->
+<!--      ③ 코 잔상 — 박입 30 의 DAMP 0.92 → 0.96 더 강화                      -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① 박입 21/24/25/26 의 그리기 함수 자체를 빈 함수로
+  //    → 호출돼도 아무것도 안 그림 (alpha 계산조차 안 함)
+
+  // 박입 chain 재구성:
+  //   현재 chain = ... → 박입27 → 박입28 → 박입29 → 박입30 → 박입31
+  //   박입 31 이 마지막 wrap = 모든 chain 가로채는 위치
+
+  // 가장 안쪽 원본 (옛 동생 코드) 찾기
+  if(!window._inj31RealWrapped && typeof window.drawFresnelWaterGlow === 'function'){
+    var finalChainGlow = window.drawFresnelWaterGlow;
+
+    var NOSE_INDICES = [168, 6, 197, 195, 5, 4, 1, 19, 98, 327];
+    var prevNoseFinal = {};
+    var DAMP_FINAL = 0.96;  // 박입 30 의 0.92 보다 더 강
+    var MAX_DELTA_FINAL = 0.008;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._inj31Enabled || !landmarks){
+        return finalChainGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      // ① 매 프레임 — 박입 21/24/25/26 알파 강제 0 + 비활성
+      window._cheekHighlightEnabled = false;
+      window._cheekHighlightAlpha = 0;
+      window._cheekHighlightRadius = 0;
+      window._cheekColorFixedEnabled = false;
+      window._cheekFinalEnabled = false;
+      window._rppgGlowEnabled = false;
+
+      // ② 코 좌표 Final Lerp (DAMP 0.96)
+      var orig = {};
+      NOSE_INDICES.forEach(function(idx){
+        var lm = landmarks[idx];
+        if(!lm) return;
+
+        if(prevNoseFinal[idx]){
+          var dx = lm.x - prevNoseFinal[idx].x;
+          var dy = lm.y - prevNoseFinal[idx].y;
+          if(dx > MAX_DELTA_FINAL) dx = MAX_DELTA_FINAL;
+          else if(dx < -MAX_DELTA_FINAL) dx = -MAX_DELTA_FINAL;
+          if(dy > MAX_DELTA_FINAL) dy = MAX_DELTA_FINAL;
+          else if(dy < -MAX_DELTA_FINAL) dy = -MAX_DELTA_FINAL;
+
+          var smX = prevNoseFinal[idx].x * DAMP_FINAL + (prevNoseFinal[idx].x + dx) * (1 - DAMP_FINAL);
+          var smY = prevNoseFinal[idx].y * DAMP_FINAL + (prevNoseFinal[idx].y + dy) * (1 - DAMP_FINAL);
+
+          orig[idx] = { x: lm.x, y: lm.y };
+          landmarks[idx].x = smX;
+          landmarks[idx].y = smY;
+          prevNoseFinal[idx] = { x: smX, y: smY };
+        } else {
+          prevNoseFinal[idx] = { x: lm.x, y: lm.y };
+        }
+      });
+
+      // ③ 옛 chain 호출 (이 시점에 박입 21~26 비활성 + 코 좌표 smooth)
+      try {
+        finalChainGlow(ctx, canvas, landmarks, glossLevel);
+      } catch(e){}
+
+      // 좌표 복원
+      Object.keys(orig).forEach(function(idx){
+        if(landmarks[idx]){
+          landmarks[idx].x = orig[idx].x;
+          landmarks[idx].y = orig[idx].y;
+        }
+      });
+    };
+
+    window._inj31Enabled = true;
+    window._inj31RealWrapped = true;
+
+    window._inj31Control = {
+      enable:  function(){ window._inj31Enabled = true; },
+      disable: function(){ window._inj31Enabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._inj31Enabled,
+          damp:    DAMP_FINAL,
+          mode:    'final wrap — 매 프레임 광대 그리기 차단 + 코 Lerp 0.96',
+          stack:   '박입 13~30 chain 위에 강제 wrap'
+        };
+      }
+    };
+  }
+}, 10000);
 </script>
 
 </body>
