@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-cheek-color-fix-v24" name="c41-version"/>
+<meta content="2026-05-24-c42-cheek-camera-final-v25" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -29485,6 +29485,134 @@ setTimeout(function(){
     };
   }
 }, 6800);
+</script>
+
+<!-- ════ C-42 박입 25 (3중 동시 수정 — 흰점 + 카메라 재시작) ════ -->
+<!--    문제 1: 박입 21 wrap 이 박입 24 보다 늦게 실행되어 흰점 그대로            -->
+<!--    문제 2: rmaiArStop 후 video stream 완전 해제 안 됨 → 재시작 시 충돌      -->
+<!--    문제 3: alpha 0.25 도 광대 흰점으로 보임 (피부톤 색이라도)                -->
+<!--    해법:                                                                    -->
+<!--      ① 박입 21 강제 OFF (영구)                                              -->
+<!--      ② 광대 highlight alpha 0.25 → 0.15 더 약화                            -->
+<!--      ③ rmaiArStop wrap → MediaStream 완전 해제                              -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① 박입 21 강제 OFF (영구) — 충돌 차단
+  if(window._cheekHighlightControl){
+    window._cheekHighlightControl.disable();
+  }
+
+  // ② 광대 highlight alpha 추가 약화 (0.25 → 0.15)
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._cheekAlphaForceWeak){
+    var prevGlow = window.drawFresnelWaterGlow;
+    var lcheekIdx = [116, 117, 118, 100, 207];
+    var rcheekIdx = [345, 346, 347, 329, 427];
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // 박입 21 강제 OFF 보장
+      if(window._cheekHighlightControl){
+        window._cheekHighlightEnabled = false;
+      }
+
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._cheekFinalEnabled || !landmarks) return;
+
+      try {
+        var lx=0, ly=0, lc=0;
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i]){ lx += landmarks[i].x; ly += landmarks[i].y; lc++; }
+        });
+        var rx=0, ry=0, rc=0;
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i]){ rx += landmarks[i].x; ry += landmarks[i].y; rc++; }
+        });
+        if(lc === 0 || rc === 0) return;
+
+        lx = (lx / lc) * canvas.width;
+        ly = (ly / lc) * canvas.height;
+        rx = (rx / rc) * canvas.width;
+        ry = (ry / rc) * canvas.height;
+
+        // ★ alpha 0.15 (박입 24 의 0.25 보다 40% 약화)
+        var alpha  = 0.15 * (glossLevel || 0.5);
+        var radius = 22;  // 더 크게 (점이 아니라 광 덩어리)
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        [[lx,ly],[rx,ry]].forEach(function(p){
+          var grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], radius);
+          grad.addColorStop(0,    'rgba(255,235,210,' + alpha + ')');
+          grad.addColorStop(0.6,  'rgba(255,235,210,' + (alpha * 0.15) + ')');
+          grad.addColorStop(1,    'rgba(255,235,210,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      } catch(e){}
+    };
+
+    window._cheekFinalEnabled = true;
+    window._cheekAlphaForceWeak = true;
+
+    window._cheekFinalControl = {
+      enable:   function(){ window._cheekFinalEnabled = true; },
+      disable:  function(){ window._cheekFinalEnabled = false; },
+      setAlpha: function(a){
+        // 박입 24 호출 안 함 — 자체 alpha 유지
+      },
+      info: function(){
+        return {
+          enabled: !!window._cheekFinalEnabled,
+          alpha:   0.15,
+          radius:  22,
+          desc:    '박입 25 최종 — alpha 0.15 + radius 22 (점 → 부드러운 광)'
+        };
+      }
+    };
+  }
+
+  // ③ 카메라 재시작 안정화 — rmaiArStop wrap (stream 완전 해제)
+  if(typeof window.rmaiArStop === 'function' && !window._rmaiArStopWrapped){
+    var origStop = window.rmaiArStop;
+    window.rmaiArStop = function(){
+      // 옛 stop 호출
+      try { origStop(); } catch(e){}
+
+      // 추가: video stream 의 모든 track 강제 해제
+      try {
+        var video = document.getElementById('rmai-ar-video');
+        if(video && video.srcObject){
+          var stream = video.srcObject;
+          if(stream.getTracks){
+            stream.getTracks().forEach(function(track){
+              track.stop();
+            });
+          }
+          video.srcObject = null;
+          video.pause();
+        }
+      } catch(e){}
+
+      // _rmaiAr 상태 강제 리셋
+      try {
+        if(typeof _rmaiAr !== 'undefined'){
+          _rmaiAr.running = false;
+          if(_rmaiAr.camera){
+            try { _rmaiAr.camera.stop(); } catch(e){}
+            _rmaiAr.camera = null;
+          }
+        }
+      } catch(e){}
+    };
+    window._rmaiArStopWrapped = true;
+  }
+
+}, 7300);
 </script>
 
 </body>
