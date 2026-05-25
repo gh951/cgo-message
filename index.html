@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-feathering-v48" name="c41-version"/>
+<meta content="2026-05-25-c43-skinage-base-only-v49" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32092,6 +32092,102 @@ setTimeout(function(){
 
   applyInj48();
 }, 13000);
+</script>
+
+<!-- ════ C-43 박입 49 (★ scrSkinage = 베이스만 / scrMakeup = 풀 효과 자동 분리) ════ -->
+<!--    파트너 명령:                                                                    -->
+<!--      "피부 페이지는 얼굴 베이스만 있어야 합니다.. AR 메이크업 페이지가 있기 때문에" -->
+<!--      "피부 페이지는 나중에 뭐를 추가 하나 하려 합니다"                              -->
+<!--                                                                                    -->
+<!--    문제 진단 (정직):                                                                 -->
+<!--      박입 13 (evenodd 천공) → 입술/눈 영역에 베이스 색 안 그림 ✓                   -->
+<!--      박입 44/47 → setCategory base 강제 ✓                                          -->
+<!--      ★ 그러나 박입 27 (스펙트럼) + 박입 47 (마이크로) 의 광택 효과는                -->
+<!--        카테고리와 무관하게 입술 영역도 처리 → 입술이 도드라져 보임                  -->
+<!--                                                                                    -->
+<!--    해법:                                                                             -->
+<!--      페이지 활성 상태 감지 → 광택/마이크로 enabled 변수 자동 토글                  -->
+<!--      ✦ scrSkinage 활성: _spectrumGlowEnabled=false, _inj47MicroEnabled=false       -->
+<!--      ✦ scrMakeup  활성: 둘 다 true                                                  -->
+<!--      ✦ 박입 48 외곽 페더링은 두 페이지 모두 유지 (베이스 자체의 부드러움 필요)     -->
+<!--                                                                                    -->
+<!--    토글: window._inj49Control                                                       -->
+<!--      .auto(true/false)  — 자동 ON/OFF 모드                                          -->
+<!--      .glowOn() / .glowOff() — 수동 강제                                              -->
+<!--      .info()                                                                       -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  if(window._inj49Wrapped) return;
+
+  // 기본: 자동 모드 ON (페이지에 따라 광택 자동 ON/OFF)
+  window._inj49AutoGlow = true;
+  window._inj49Wrapped  = true;
+
+  // 페이지 상태 감지 + 광택 변수 동기화 (300ms 마다)
+  setInterval(function(){
+    if(!window._inj49AutoGlow) return;
+
+    try {
+      var scrSk = document.getElementById('scrSkinage');
+      var scrMk = document.getElementById('scrMakeup');
+
+      var inSk = !!(scrSk && scrSk.classList.contains('active'));
+      var inMk = !!(scrMk && scrMk.classList.contains('active'));
+
+      if(inSk){
+        // ★ 피부 페이지 = 베이스만 모드
+        //   광택 (스펙트럼 역이용) OFF
+        //   마이크로 절대 좌표 OFF
+        //   → 입술/눈 영역에 광택 효과 안 가게 함
+        //   → 박입 48 외곽 페더링은 유지 (베이스 외곽 부드러움)
+        window._spectrumGlowEnabled = false;
+        window._inj47MicroEnabled   = false;
+      } else if(inMk){
+        // ★ AR 메이크업 페이지 = 풀 효과 모드
+        window._spectrumGlowEnabled = true;
+        window._inj47MicroEnabled   = true;
+      }
+      // 두 페이지 모두 비활성 (다른 페이지) — 현 상태 유지 (영향 X)
+    } catch(e){
+      // 안전 — 오류 시 자동 모드 끔
+    }
+  }, 300);
+
+  // 외부 토글 도구
+  window._inj49Control = {
+    auto: function(b){
+      window._inj49AutoGlow = !!b;
+    },
+    glowOn: function(){
+      // 수동 강제: 광택 ON (자동 모드 끔)
+      window._inj49AutoGlow       = false;
+      window._spectrumGlowEnabled = true;
+      window._inj47MicroEnabled   = true;
+    },
+    glowOff: function(){
+      // 수동 강제: 광택 OFF (자동 모드 끔)
+      window._inj49AutoGlow       = false;
+      window._spectrumGlowEnabled = false;
+      window._inj47MicroEnabled   = false;
+    },
+    info: function(){
+      var scrSk = document.getElementById('scrSkinage');
+      var scrMk = document.getElementById('scrMakeup');
+      return {
+        autoGlow:        !!window._inj49AutoGlow,
+        spectrumGlow:    !!window._spectrumGlowEnabled,
+        microAbsolute:   !!window._inj47MicroEnabled,
+        currentPage:     (scrSk && scrSk.classList.contains('active')) ? 'scrSkinage' :
+                         (scrMk && scrMk.classList.contains('active')) ? 'scrMakeup'  : 'other',
+        desc:            '박입 49 — scrSkinage=베이스만 / scrMakeup=풀효과 (300ms 자동 분리)'
+      };
+    }
+  };
+
+  console.log('[C-43 박입 49] 페이지 분리 자동화 ✦ scrSkinage=베이스만 / scrMakeup=풀효과');
+}, 13500);
 </script>
 
 </body>
