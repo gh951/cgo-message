@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-pagesplit-v49b-allglow-off" name="c41-version"/>
+<meta content="2026-05-25-c43-hair-filter-v51" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32215,6 +32215,172 @@ setTimeout(function(){
 
   console.log('[C-43 박입 49 v2.0] 모든 광택 효과 분리 ✦ 박입 33 영구 OFF (회초리 후 수정)');
 }, 13500);
+</script>
+
+<!-- ════ C-43 박입 51 (★ 머리카락 픽셀 자동 필터 — 인종 unbiased / 가이드 작성자 소스) ════ -->
+<!--    파트너 명령:                                                                    -->
+<!--      "스펙트럼 역이용을 이마 영역에 그대로, 수식 조건만 바꿔서"                    -->
+<!--      "AI 없이 코드 3단계로 화장을 머리카락 밑으로 쏙 밀어 넣기"                    -->
+<!--                                                                                    -->
+<!--    원리 (박입 27 패턴의 자연 확장 — Pixel Spectrum Direct Analysis):                -->
+<!--      ① drawFresnelWaterGlow chain 의 최상단 wrap (모든 효과 후 마지막 처리)          -->
+<!--      ② 이마 영역 bounding box 만 getImageData (성능 최소화)                        -->
+<!--      ③ ITU-R BT.709 휘도 + RGB 채널 편차 분석                                      -->
+<!--      ④ 3종 인종 필터 + 마이크로 경계 (잔머리 선형 감쇄)                            -->
+<!--      ⑤ 머리카락 픽셀 alpha 0 → 그 밑 video element 원본 노출                       -->
+<!--                                                                                    -->
+<!--    필터:                                                                            -->
+<!--      [1] 검은 머리 (동양인): Y < 75                                                 -->
+<!--      [2] 금발/빨강 (서양인): R>140 && G>110 && B<100 && R-B>55                      -->
+<!--      [3] 흰머리/은발 (서양인): Y>175 && |R-G|<12 && |G-B|<12                        -->
+<!--      [마이크로 경계] 75<=Y<105 → 잔머리 선형 감쇄                                   -->
+<!--                                                                                    -->
+<!--    이마 영역 (MediaPipe 468):                                                       -->
+<!--      좌: landmark[103]  / 우: landmark[332]                                         -->
+<!--      아래: landmark[107] / [336] (눈썹 위 평균)                                     -->
+<!--      위: landmark[10] (이마 중심) - 캔버스 15% (머리카락 위쪽 포함)                  -->
+<!--                                                                                    -->
+<!--    성능: 격프레임 처리 (박입 27 패턴) + 이마 영역만                                  -->
+<!--    토글: window._inj51Control                                                       -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  if(window._inj51Wrapped) return;
+
+  function applyInj51(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(applyInj51, 300); return;
+    }
+    if(window._inj51Wrapped) return;
+
+    var prevGlow51 = window.drawFresnelWaterGlow;
+    var frameCount51 = 0;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // ① 기존 chain (박입 13/14/.../47) 호출 — 모든 효과 그림
+      prevGlow51(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj51Enabled || !landmarks) return;
+
+      // ② 격프레임 처리 (박입 27 패턴 — 성능 부담 최소화)
+      frameCount51++;
+      if(frameCount51 % 2 !== 0) return;
+
+      try {
+        var W = canvas.width, H = canvas.height;
+        if(W < 10 || H < 10) return;
+
+        // ③ 이마 영역 bounding box 계산 (MediaPipe 468)
+        var foreheadTop = landmarks[10];   // 이마 중심
+        var leftSide    = landmarks[103];  // 좌 이마 옆
+        var rightSide   = landmarks[332];  // 우 이마 옆
+        var leftBrow    = landmarks[107];  // 좌 눈썹 위
+        var rightBrow   = landmarks[336];  // 우 눈썹 위
+
+        if(!foreheadTop || !leftSide || !rightSide) return;
+        if(!leftBrow)  leftBrow  = foreheadTop;
+        if(!rightBrow) rightBrow = foreheadTop;
+
+        // 이마 영역 좌표
+        var minX = Math.floor(Math.min(leftSide.x,  leftBrow.x)  * W);
+        var maxX = Math.ceil( Math.max(rightSide.x, rightBrow.x) * W);
+        // 위: 얼굴 oval 위쪽 (머리카락 위쪽 포함) — 캔버스 15% 위까지
+        var minY = Math.max(0, Math.floor(foreheadTop.y * H) - Math.floor(H * 0.15));
+        // 아래: 눈썹 위 평균 (이마 끝)
+        var maxY = Math.ceil(((leftBrow.y + rightBrow.y) / 2) * H);
+
+        // 경계 안전 처리
+        minX = Math.max(0, minX);
+        maxX = Math.min(W, maxX);
+        minY = Math.max(0, minY);
+        maxY = Math.min(H, maxY);
+
+        var w = maxX - minX, h = maxY - minY;
+        if(w < 10 || h < 10) return;
+
+        // ④ 이마 영역 픽셀 추출
+        var imgData = ctx.getImageData(minX, minY, w, h);
+        var data = imgData.data;
+
+        // ⑤ ★ 가이드 작성자 소스 — 인종별 머리카락 필터 + 마이크로 경계
+        for(var i = 0; i < data.length; i += 4){
+          var r = data[i];
+          var g = data[i+1];
+          var b = data[i+2];
+          var a = data[i+3];
+
+          // ITU-R BT.709 휘도 (박입 27 과 동일 공식)
+          var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+          // [필터 1] 동양인 검은 머리 / 머리카락 그림자
+          if(luminance < 75){
+            data[i+3] = 0;
+            continue;
+          }
+
+          // [필터 2] 서양인 금발(Blond) / 빨간 머리(Ginger)
+          //   인간 피부는 R/G/B 채널 편차가 크지 않음
+          //   금발/적발 = Red 높음 + Blue 극단적 낮음
+          var rbDiff = r - b;
+          var isBlondOrGinger = (r > 140 && g > 110 && b < 100 && rbDiff > 55);
+
+          // [필터 3] 서양인 흰머리 / 은발
+          //   피부와 휘도는 비슷하나, 붉은 혈색이 결여
+          //   R/G/B 가 균일하게 평형 (무채색 고휘도)
+          var rgDiff = Math.abs(r - g);
+          var gbDiff = Math.abs(g - b);
+          var isWhiteHair = (luminance > 175 && rgDiff < 12 && gbDiff < 12);
+
+          if(isBlondOrGinger || isWhiteHair){
+            data[i+3] = 0;
+            continue;
+          }
+
+          // [마이크로 경계] 잔머리/피부 경계선 선형 감쇄 (75 ~ 105)
+          //   = 칼로 자른 듯한 경계 X
+          //   = 붓으로 펴 바른 듯 자연스럽게 스며듬
+          if(luminance >= 75 && luminance < 105){
+            var hairWeight = (luminance - 75) / (105 - 75);  // 0.0 ~ 1.0
+            data[i+3] = a * hairWeight;
+          }
+        }
+
+        // ⑥ 처리된 픽셀 데이터를 캔버스에 재투고
+        ctx.putImageData(imgData, minX, minY);
+
+      } catch(e){
+        // 안전 — getImageData/putImageData 실패 시 무시 (CORS 등)
+      }
+    };
+
+    window._inj51Enabled = true;
+    window._inj51Wrapped = true;
+
+    window._inj51Control = {
+      enable:  function(){ window._inj51Enabled = true; },
+      disable: function(){ window._inj51Enabled = false; },
+      info:    function(){
+        return {
+          enabled:    !!window._inj51Enabled,
+          frameSkip:  '격프레임 (2 frames per loop)',
+          filters: [
+            '[1] 검은 머리 (Y<75)',
+            '[2] 금발/빨강 (R>140 && G>110 && B<100 && R-B>55)',
+            '[3] 흰머리 (Y>175 && |R-G|<12 && |G-B|<12)'
+          ],
+          microEdge:  '잔머리 선형 감쇄 (75 <= Y < 105)',
+          appliesTo:  ['scrSkinage', 'scrMakeup'],
+          desc:       '박입 51 — 인종 unbiased 머리카락 픽셀 필터 (가이드 소스 + 우리 chain 통합)'
+        };
+      }
+    };
+
+    console.log('[C-43 박입 51] 머리카락 픽셀 필터 작동 ✦ 3종 인종 필터 + 잔머리 선형 감쇄 + 격프레임');
+  }
+
+  applyInj51();
+}, 14000);
 </script>
 
 </body>
