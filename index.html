@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-WORLD-FIRST-SVI-to-MAKEUP-v37" name="c41-version"/>
+<meta content="2026-05-24-c42-WORLD-FIRST-SVI-v37-FIXED" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30959,12 +30959,16 @@ setTimeout(function(){
     alert(msg);
   }
 
-  // ─── picker 에 SVI 추천 버튼 박입 ───
+  // ─── picker 에 SVI 추천 버튼 박입 (재생성 대응) ───
+  // 옛 _rmaiArInitColorPicker 가 picker.innerHTML 로 매번 재생성하므로
+  // wrap 으로 매번 재삽입 보장
   function injectRecommendButton(){
     var picker = document.getElementById('rmai-ar-color-picker');
     if(!picker){
       setTimeout(injectRecommendButton, 500); return;
     }
+
+    // 이미 있으면 skip
     if(document.getElementById('svi-rec-btn')) return;
 
     var btn = document.createElement('button');
@@ -30981,6 +30985,25 @@ setTimeout(function(){
 
     picker.insertBefore(btn, picker.firstChild);
   }
+
+  // ★ _rmaiArInitColorPicker wrap — 매 호출 후 박입 37 버튼 재삽입
+  if(typeof window._rmaiArInitColorPicker === 'function' && !window._inj37PickerWrapped){
+    var origInit = window._rmaiArInitColorPicker;
+    window._rmaiArInitColorPicker = function(){
+      try { origInit.apply(this, arguments); } catch(e){}
+      // 재생성 후 박입 37 버튼 보장
+      setTimeout(injectRecommendButton, 50);
+    };
+    window._inj37PickerWrapped = true;
+  }
+
+  // ★ setInterval 안전망 (1초마다) — 어떤 이유로든 사라지면 복원
+  setInterval(function(){
+    var picker = document.getElementById('rmai-ar-color-picker');
+    if(picker && picker.children.length > 0 && !document.getElementById('svi-rec-btn')){
+      injectRecommendButton();
+    }
+  }, 1000);
 
   injectRecommendButton();
 
