@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-scrMakeup-OWN-camera-v39" name="c41-version"/>
+<meta content="2026-05-24-c42-FULL-makeup-tools-v40" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13295,6 +13295,44 @@ var Q_POOL = {
 
     <!-- 색 선택 picker (자체) -->
     <div id="rmai-ar-color-picker2" style="margin-bottom:12px;"></div>
+
+    <!-- ════ C-42 박입 40 — 미세 색 조정 + 물광 카드 ════ -->
+    <div class="svi-color-tools-card" id="svi-color-tools-card-makeup" style="background:linear-gradient(135deg,rgba(255,255,255,0.9),rgba(252,231,243,0.5));border-radius:18px;padding:18px;margin-top:14px;box-shadow:0 4px 16px rgba(0,0,0,.05);">
+      <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:14px;">🎨 미세 색상 조정 (12만 색)</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#0d3a3a;display:block;margin-bottom:4px;">색조 (Hue) <span id="svi-hue-val-m" style="color:#be185d;font-weight:900;">0°</span></label>
+          <input id="svi-hue-bar-m" max="360" min="0" oninput="window.makeupUpdateHsl()" type="range" value="0" style="width:100%;height:8px;border-radius:4px;background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#0d3a3a;display:block;margin-bottom:4px;">채도 (Saturation) <span id="svi-sat-val-m" style="color:#be185d;font-weight:900;">80%</span></label>
+          <input id="svi-sat-bar-m" max="100" min="0" oninput="window.makeupUpdateHsl()" style="width:100%;height:8px;border-radius:4px;background:linear-gradient(to right,#888,#ff0080);" type="range" value="80"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:#0d3a3a;display:block;margin-bottom:4px;">명도 (Lightness) <span id="svi-light-val-m" style="color:#be185d;font-weight:900;">50%</span></label>
+          <input id="svi-light-bar-m" max="100" min="0" oninput="window.makeupUpdateHsl()" style="width:100%;height:8px;border-radius:4px;background:linear-gradient(to right,#000,#fff);" type="range" value="50"/>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin:14px 0 8px;padding:12px;background:rgba(255,255,255,0.7);border-radius:12px;">
+        <div style="font-size:11px;font-weight:700;color:#0d3a3a;flex-shrink:0;">현재 색</div>
+        <div id="svi-hsl-preview-m" style="flex:1;height:32px;border-radius:8px;background:#ff5588;border:1px solid rgba(0,0,0,0.1);"></div>
+        <div id="svi-hsl-hex-m" style="font-family:monospace;font-size:12px;font-weight:900;color:#0d3a3a;">#FF5588</div>
+        <button onclick="window.makeupApplyHslColor()" style="padding:8px 14px;background:linear-gradient(135deg,#059669,#10b981);border:none;border-radius:10px;color:#fff;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;">✓ 적용</button>
+      </div>
+      <div style="margin-top:14px;">
+        <label style="font-size:11px;font-weight:700;color:#0d3a3a;display:block;margin-bottom:4px;">✨ 물광 강도 <span id="svi-gloss-val-m" style="color:#0284c7;font-weight:900;">0%</span></label>
+        <input id="svi-gloss-bar-m" max="100" min="0" oninput="window.makeupUpdateGloss()" type="range" value="0" style="width:100%;height:8px;border-radius:4px;background:linear-gradient(to right,#e0f2fe,#0ea5e9);"/>
+      </div>
+    </div>
+
+    <!-- ════ C-42 박입 41 — 화장 강도 (intensity) 카드 ════ -->
+    <div id="svi-intensity-card-makeup" style="background:linear-gradient(135deg,rgba(255,251,235,0.95),rgba(255,237,213,0.7));border-radius:18px;padding:18px;margin-top:14px;box-shadow:0 4px 16px rgba(0,0,0,.05);">
+      <label style="font-size:12px;font-weight:900;color:#0d3a3a;display:flex;align-items:center;">
+        💄 화장 강도 (연하게 ↔ 짙게)
+        <span id="svi-intensity-val-m" style="color:#b45309;font-weight:900;margin-left:auto;">50%</span>
+      </label>
+      <input id="svi-intensity-bar-m" type="range" min="0" max="100" value="50" oninput="window.makeupUpdateIntensity()" style="width:100%;height:8px;border-radius:4px;margin-top:8px;background:linear-gradient(to right,#fef3c7,#b45309);"/>
+    </div>
   </div>
 </div>
 
@@ -13444,6 +13482,69 @@ var Q_POOL = {
     isRunning: function(){ return _makeupRunning; },
     getStream: function(){ return _makeupStream; }
   };
+
+  // ════ 박입 40 — HSL 업데이트 (12만 색) ════
+  window.makeupUpdateHsl = function(){
+    var h = +document.getElementById('svi-hue-bar-m').value;
+    var s = +document.getElementById('svi-sat-bar-m').value;
+    var l = +document.getElementById('svi-light-bar-m').value;
+    document.getElementById('svi-hue-val-m').textContent = h + '°';
+    document.getElementById('svi-sat-val-m').textContent = s + '%';
+    document.getElementById('svi-light-val-m').textContent = l + '%';
+    // HSL → HEX
+    var hex = hslToHex(h, s, l);
+    document.getElementById('svi-hsl-preview-m').style.background = hex;
+    document.getElementById('svi-hsl-hex-m').textContent = hex.toUpperCase();
+  };
+
+  window.makeupApplyHslColor = function(){
+    var hex = document.getElementById('svi-hsl-hex-m').textContent;
+    if(typeof window.rmaiArApplyColor === 'function'){
+      window.rmaiArApplyColor(hex, null);
+    }
+  };
+
+  // ════ 박입 40 — 물광 강도 ════
+  window.makeupUpdateGloss = function(){
+    var v = +document.getElementById('svi-gloss-bar-m').value;
+    document.getElementById('svi-gloss-val-m').textContent = v + '%';
+    if(typeof _rmaiAr !== 'undefined'){
+      _rmaiAr.glossLevel = v / 100;
+    }
+  };
+
+  // ════ 박입 41 — 화장 강도 (카테고리별 alpha) ════
+  window.makeupUpdateIntensity = function(){
+    var v = +document.getElementById('svi-intensity-bar-m').value;
+    document.getElementById('svi-intensity-val-m').textContent = v + '%';
+    if(typeof _rmaiAr !== 'undefined'){
+      _rmaiAr.intensity = _rmaiAr.intensity || {};
+      var cat = _rmaiAr.currentCategory || 'base';
+      _rmaiAr.intensity[cat] = v / 100;
+      // 4 카테고리 모두 동시 조정 (선택적)
+      _rmaiAr.intensity.lip   = (v / 100) * 1.1;  // 립 약간 강
+      _rmaiAr.intensity.cheek = (v / 100) * 0.4;  // 볼 약하게
+      _rmaiAr.intensity.eye   = (v / 100) * 0.7;  // 아이 보통
+      _rmaiAr.intensity.base  = (v / 100) * 0.7;  // 베이스 보통
+    }
+  };
+
+  // HSL → HEX 변환 (헬퍼)
+  function hslToHex(h, s, l){
+    s /= 100; l /= 100;
+    var c = (1 - Math.abs(2*l-1)) * s;
+    var x = c * (1 - Math.abs((h/60) % 2 - 1));
+    var m = l - c/2;
+    var r=0, g=0, b=0;
+    if(h<60){ r=c; g=x; b=0; }
+    else if(h<120){ r=x; g=c; b=0; }
+    else if(h<180){ r=0; g=c; b=x; }
+    else if(h<240){ r=0; g=x; b=c; }
+    else if(h<300){ r=x; g=0; b=c; }
+    else { r=c; g=0; b=x; }
+    var R = Math.round((r+m)*255), G = Math.round((g+m)*255), B = Math.round((b+m)*255);
+    return '#' + [R,G,B].map(function(n){ return n.toString(16).padStart(2,'0'); }).join('');
+  }
 })();
 </script>
 <!-- ════ 박입 39 끝 ════ -->
