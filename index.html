@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-MICRO-240-pts-v46" name="c41-version"/>
+<meta content="2026-05-24-c42-3FIX-absolute-v47" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -31735,6 +31735,163 @@ setTimeout(function(){
     };
   }
 }, 12000);
+</script>
+
+<!-- ════ C-42 박입 47 (3중 정밀 — 캔버스 복원 + 마이크로 절대 좌표 + 잠금 재박입) ════ -->
+<!--    파트너 진단:                                                              -->
+<!--      ① "색깔 선택과 미세 연동 안 됨" → _rmaiAr.canvas = canvas2 잔존        -->
+<!--      ② "마이크로가 얼굴 따라 움직임" → 절대 좌표 필요 (조명 고정)            -->
+<!--      ③ "스크롤 아래에 미세 카드 있을 듯" → 박입 45 wrap 으로 scrSkinage 잠금 -->
+<!--                                                                            -->
+<!--    해법:                                                                    -->
+<!--      ① goScreen wrap 추가 — 페이지 진입 시 _rmaiAr.canvas/ctx 복원            -->
+<!--      ② 박입 46 마이크로 → 화면 절대 좌표로 변경 (얼굴 따라 X)                -->
+<!--      ③ rmaiArSetCategory 박입 44 잠금 재박입 (박입 36 위에)                  -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① goScreen wrap — scrSkinage 진입 시 캔버스 복원
+  if(typeof window.goScreen === 'function' && !window._inj47GoScreenWrapped){
+    var origGoScreen47 = window.goScreen;
+    window.goScreen = function(screenId){
+      try {
+        if(screenId === 'scrSkinage'){
+          // 동생 원본 캔버스로 복원
+          var skVideo = document.getElementById('rmai-ar-video');
+          var skCanvas = document.getElementById('rmai-ar-canvas');
+          if(skCanvas && typeof _rmaiAr !== 'undefined'){
+            _rmaiAr.video = skVideo;
+            _rmaiAr.canvas = skCanvas;
+            _rmaiAr.ctx = skCanvas.getContext('2d');
+          }
+        } else if(screenId === 'scrMakeup'){
+          // 박입 39 의 makeup-ar-section 캔버스로 (단 시작 버튼 누를 때까지 대기)
+          // makeupArStart 가 호출되면 _rmaiAr.canvas = canvas2 로 바뀜
+        }
+      } catch(e){}
+      return origGoScreen47.apply(this, arguments);
+    };
+    window._inj47GoScreenWrapped = true;
+  }
+
+  // ② 마이크로 절대 좌표 고정 (박입 46 위에 덮어쓰기)
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj47MicroWrapped){
+    var prevGlow47 = window.drawFresnelWaterGlow;
+
+    // 절대 좌표 캐시 (얼굴 따라 X)
+    var absMicroCache = null;
+    var lastCanvasW = 0, lastCanvasH = 0;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      prevGlow47(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj47MicroEnabled || !landmarks) return;
+
+      // 박입 46 OFF (충돌 방지)
+      if(window._inj46Control && window._inj46Control.disable){
+        window._inj46Enabled = false;
+      }
+
+      try {
+        // 얼굴 영역 mask 만 추출 (마이크로 그릴 영역)
+        var faceIdx = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+                       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+                       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+        // 얼굴 bounding box (마이크로 그릴 영역 = 절대 좌표)
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        faceIdx.forEach(function(i){
+          var lm = landmarks[i];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+
+        // ★ 절대 좌표 캐시 (canvas 크기 변할 때만 재생성)
+        if(!absMicroCache || canvas.width !== lastCanvasW || canvas.height !== lastCanvasH){
+          absMicroCache = [];
+          lastCanvasW = canvas.width;
+          lastCanvasH = canvas.height;
+          // 화면 전체에 절대 좌표 (얼굴 영역 만 활성화)
+          for(var n = 0; n < 200; n++){
+            absMicroCache.push({
+              absX: Math.random() * canvas.width,   // ★ 절대 좌표
+              absY: Math.random() * canvas.height,  // ★ 절대 좌표
+              size: 0.5 + Math.random() * 0.6,
+              baseAlpha: 0.06 + Math.random() * 0.1
+            });
+          }
+        }
+
+        var microAlpha = 0.05 * (glossLevel || 0.5);
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        absMicroCache.forEach(function(spot){
+          // ★ 얼굴 영역 안에 있는 점만 그리기
+          if(spot.absX < minX || spot.absX > maxX) return;
+          if(spot.absY < minY || spot.absY > maxY) return;
+
+          var a = spot.baseAlpha * microAlpha;
+          ctx.fillStyle = 'rgba(255,250,245,' + a + ')';
+          ctx.beginPath();
+          ctx.arc(spot.absX, spot.absY, spot.size, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.restore();
+      } catch(e){
+        try { ctx.restore(); } catch(e2){}
+      }
+    };
+
+    window._inj47MicroEnabled = true;
+    window._inj47MicroWrapped = true;
+
+    // 박입 46 자동 OFF
+    if(window._inj46Control) window._inj46Enabled = false;
+  }
+
+  // ③ rmaiArSetCategory 박입 44 잠금 재박입 (박입 36 위에)
+  setInterval(function(){
+    if(typeof window.rmaiArSetCategory !== 'function') return;
+    if(window._inj47SetCategoryGuard) return;
+
+    var origSetCat = window.rmaiArSetCategory;
+    window.rmaiArSetCategory = function(catKey){
+      try {
+        var scrSk = document.getElementById('scrSkinage');
+        if(scrSk && scrSk.classList.contains('active')){
+          catKey = 'base';  // ★ scrSkinage 진입 시 base 강제
+        }
+      } catch(e){}
+      return origSetCat.call(this, catKey);
+    };
+  }, 500);
+  window._inj47SetCategoryGuard = true;
+
+  window._inj47Control = {
+    enable:  function(){ window._inj47MicroEnabled = true; },
+    disable: function(){ window._inj47MicroEnabled = false; },
+    info:    function(){
+      return {
+        enabled: !!window._inj47MicroEnabled,
+        micro_count: absMicroCache ? absMicroCache.length : 0,
+        coordinate: '절대 좌표 (조명 고정, 얼굴 따라 X)',
+        desc: '박입 47 — 캔버스 복원 + 마이크로 절대 좌표 + 잠금 재박입'
+      };
+    },
+    regenerate: function(){
+      absMicroCache = null;
+    }
+  };
+}, 12500);
 </script>
 
 </body>
