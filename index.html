@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-GLOSS-BY-CAT-v43b" name="c41-version"/>
+<meta content="2026-05-24-c42-scrSkinage-BASE-ONLY-v44" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13611,6 +13611,15 @@ var Q_POOL = {
     // ① rmaiArSetCategory — 클릭한 카테고리 그대로 (base 강제 X)
     window.rmaiArSetCategory = function(catKey){
       if(typeof _rmaiAr === 'undefined') return;
+
+      // ★ 박입 44: scrSkinage 활성 시 base 강제 (피부 전용 페이지)
+      try {
+        var scrSkinage = document.getElementById('scrSkinage');
+        if(scrSkinage && scrSkinage.classList.contains('active')){
+          catKey = 'base';  // 피부 페이지 → base 만
+        }
+      } catch(e){}
+
       _rmaiAr.currentCategory = catKey;  // ★ 그대로
       if(typeof _rmaiArInitColorPicker === 'function'){
         try { _rmaiArInitColorPicker(); } catch(e){}
@@ -31445,6 +31454,45 @@ setTimeout(function(){
   };
 }, 4500);
 </script>
+
+<!-- ════ C-42 박입 44 (★ scrSkinage = 피부 전용, 베이스만) ════ -->
+<!--    파트너 명령:                                                              -->
+<!--      scrSkinage (피부 측정) = 베이스만 (피부톤 조정)                         -->
+<!--      립/볼/아이 = X (피부 페이지에 색조 X)                                   -->
+<!--      scrMakeup (박입 39 자체 AR) = 립/볼/아이/베이스 4 카테고리              -->
+<!--                                                                            -->
+<!--    원리: CSS 셀렉터에 #scrSkinage 추가 → 그 페이지 안에서만 숨김             -->
+<!--          박입 39 의 picker2 (rmai-ar-color-picker2, 다른 id) = 영향 X       -->
+<style>
+/* ① scrSkinage 의 picker 에서 립/볼/아이 영구 숨김 (피부 전용) */
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetCategory('lip')"],
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetCategory('cheek')"],
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetCategory('eye')"] {
+  display: none !important;
+}
+
+/* ② scrSkinage 의 picker 에서 베이스 버튼만 강조 (강제 강조) */
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetCategory('base')"] {
+  flex: 1 1 100% !important;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+  color: #1a1408 !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+}
+
+/* ③ scrSkinage 의 picker 에서 사주 추천 + oheng 숨김 (이미 박입 35 에 있음 — 재보장) */
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetPalette('oheng')"],
+#scrSkinage #rmai-ar-color-picker button[onclick*="rmaiArSetCardMode('oheng')"] {
+  display: none !important;
+}
+
+/* ④ SVI 추천 버튼 (박입 37 의 svi-rec-btn) — scrSkinage 에서는 숨김 (피부 페이지 X) */
+#scrSkinage #svi-rec-btn {
+  display: none !important;
+}
+
+/* ★ scrMakeup 의 새 picker2 는 영향 X (다른 id 사용) */
+</style>
 
 </body>
 </html>
