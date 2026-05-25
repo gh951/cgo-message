@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-25-c43-cheek-nose-cluster-v52d" name="c41-version"/>
+<meta content="2026-05-25-c43-env-adapt-v52e" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32204,26 +32204,19 @@ setTimeout(function(){
 }, 13500);
 </script>
 
-<!-- ════ C-43 박입 52 v4.0 (★ 양볼+코 집중 cluster — 파트너 통찰) ════ -->
-<!--    파트너 통찰 (v3.0 회초리):                                                    -->
-<!--      "좌표 다 사용하지 말고 양쪽 볼 + 코의 좌표 크기를 4배로 줄이고 숫자를 늘림" -->
+<!-- ════ C-43 박입 52 v5.0 (★ 양볼+코 cluster + 환경 적응 — 박입 27 방식 이식) ════ -->
+<!--    파트너 회초리 (v4.0):                                                          -->
+<!--      "검은 베이스에서 잔상 보임 + 분석을 했으면 적용을 해야지"                   -->
 <!--                                                                                  -->
-<!--    v3.0 vs v4.0:                                                                   -->
-<!--      v3.0: MediaPipe 468 전체 (396점, 얼굴 균일)                                 -->
-<!--      v4.0: 양볼+코 집중 (28 landmark × 8 cluster = 224점, 그 영역 밀도 3배)      -->
+<!--    v4.0 vs v5.0:                                                                   -->
+<!--      v4.0: 양볼+코 cluster (환경 적응 X — 검은 베이스 잔상)                     -->
+<!--      v5.0: + 박입 27 의 threshold 130 메커니즘 (검은 베이스 자동 OFF)            -->
 <!--                                                                                  -->
-<!--    영역:                                                                            -->
-<!--      ✦ 볼 좌 8 landmark: [116,117,118,100,50,205,36,142]                          -->
-<!--      ✦ 볼 우 8 landmark: [345,346,347,329,280,425,266,371]                        -->
-<!--      ✦ 코  12 landmark: [168,6,197,195,5,4,1,19,98,327,97,326]                    -->
-<!--                                                                                  -->
-<!--    각 landmark cluster (8개 deterministic):                                       -->
-<!--      ✦ 각 점이 landmark 주변 0~1.6px 반경                                          -->
-<!--      ✦ 각도 = (l*23 + c*137) deg → 매번 동일 분포 (잔상 0)                       -->
-<!--                                                                                  -->
-<!--    점 크기 4배 축소:                                                                -->
-<!--      ✦ v3.0: 0.125~0.275px                                                        -->
-<!--      ✦ v4.0: 0.031~0.073px (1/4 — 개별 점 거의 안 보임)                          -->
+<!--    환경 적응 (C-42 박입 27 방식 그대로):                                          -->
+<!--      ① 양볼+코 bounding box 한 번 getImageData (성능)                             -->
+<!--      ② 각 landmark 위치 픽셀 휘도 측정 (ITU-R BT.709)                            -->
+<!--      ③ 휘도 < 130 → 그 cluster 자동 OFF (잔상 0)                                  -->
+<!--      ④ 휘도 >= 130 → alpha 자동 적응 (밝을수록 강함)                              -->
 <script>
 setTimeout(function(){
   'use strict';
@@ -32235,18 +32228,14 @@ setTimeout(function(){
     }
     if(window._inj52Wrapped) return;
 
-    // 박입 47 영구 OFF
     window._inj47MicroEnabled = false;
 
     var prevGlow52 = window.drawFresnelWaterGlow;
 
-    // ★ 양볼 + 코 MediaPipe 468 인덱스
+    // 양볼 + 코 MediaPipe 468 인덱스
     var INDICES_52 = [
-      // 볼 좌 8점
       116, 117, 118, 100, 50, 205, 36, 142,
-      // 볼 우 8점
       345, 346, 347, 329, 280, 425, 266, 371,
-      // 코 12점
       168, 6, 197, 195, 5, 4, 1, 19, 98, 327, 97, 326
     ];
 
@@ -32259,14 +32248,43 @@ setTimeout(function(){
         var W = canvas.width, H = canvas.height;
         if(W < 10 || H < 10) return;
 
-        var baseAlpha = (typeof window._inj52BaseAlpha === 'number') ? window._inj52BaseAlpha : 0.025;
-        var microAlpha = baseAlpha * (glossLevel || 0.5);
+        var baseAlpha    = (typeof window._inj52BaseAlpha === 'number') ? window._inj52BaseAlpha : 0.025;
         var clusterCount = window._inj52Cluster || 8;
+        var threshold    = window._inj52Threshold || 130;  // 박입 27 과 동일
+        var microAlpha   = baseAlpha * (glossLevel || 0.5);
+
+        // ★ 1단계: 양볼+코 bounding box 한 번에 계산
+        var bMinX = W, bMaxX = 0, bMinY = H, bMaxY = 0;
+        for(var l = 0; l < INDICES_52.length; l++){
+          var lm = landmarks[INDICES_52[l]];
+          if(!lm) continue;
+          var lx = lm.x * W, ly = lm.y * H;
+          if(lx < bMinX) bMinX = lx;
+          if(lx > bMaxX) bMaxX = lx;
+          if(ly < bMinY) bMinY = ly;
+          if(ly > bMaxY) bMaxY = ly;
+        }
+
+        // 영역 안전 처리
+        bMinX = Math.max(0, Math.floor(bMinX) - 2);
+        bMaxX = Math.min(W, Math.ceil(bMaxX) + 2);
+        bMinY = Math.max(0, Math.floor(bMinY) - 2);
+        bMaxY = Math.min(H, Math.ceil(bMaxY) + 2);
+
+        var bw = bMaxX - bMinX, bh = bMaxY - bMinY;
+        if(bw < 10 || bh < 10) return;
+
+        // ★ 2단계: 영역 한 번 getImageData (효율적 — 매 frame 1회)
+        var bigData = null;
+        try {
+          var bigImg = ctx.getImageData(bMinX, bMinY, bw, bh);
+          bigData = bigImg.data;
+        } catch(e){ return; }
 
         ctx.save();
         ctx.globalCompositeOperation = 'screen';
 
-        // ★ 양볼 + 코 landmark 순회
+        // ★ 3단계: 각 landmark 처리 (환경 적응)
         for(var l = 0; l < INDICES_52.length; l++){
           var idx = INDICES_52[l];
           var lm = landmarks[idx];
@@ -32275,24 +32293,39 @@ setTimeout(function(){
           var cx = lm.x * W;
           var cy = lm.y * H;
 
-          // z 값 기반 alpha (카메라 쪽 강조)
+          // 4단계: landmark 위치의 베이스 픽셀 휘도 측정
+          var localX = Math.floor(cx - bMinX);
+          var localY = Math.floor(cy - bMinY);
+          if(localX < 0 || localX >= bw || localY < 0 || localY >= bh) continue;
+
+          var offset = (localY * bw + localX) * 4;
+          var r = bigData[offset];
+          var g = bigData[offset + 1];
+          var b = bigData[offset + 2];
+
+          // ITU-R BT.709 휘도 (박입 27 동일)
+          var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+          // ★ 5단계: 환경 적응 (박입 27 방식 그대로)
+          if(luminance < threshold) continue;  // 어두운 베이스 → 자동 OFF
+
+          // alpha 자동 적응 (휘도 0 ~ 1)
+          var lumAdapt = Math.min(1.0, (luminance - threshold) / (255 - threshold));
+
+          // z 값 기반 alpha
           var z = lm.z || 0;
           var zAlpha = Math.max(0.4, Math.min(1.0, 1.0 - z * 15));
 
-          // ★ landmark 주변 cluster (deterministic — 매번 동일 분포)
+          // cluster 그림 (deterministic)
           for(var c = 0; c < clusterCount; c++){
-            // 각도: (l * 23 + c * 137) — golden angle 비슷
             var angle = ((l * 23 + c * 137) % 360) * Math.PI / 180;
-            // 반경: 0 ~ 1.6px (cluster 안 micro 분포)
             var dist  = ((l + c) % 5) * 0.4;
 
             var x = cx + Math.cos(angle) * dist;
             var y = cy + Math.sin(angle) * dist;
 
-            // ★ 크기 4배 축소: 0.031 ~ 0.073px
-            var size = 0.031 + (c % 7) * 0.006;
-
-            var alpha = 0.08 * zAlpha * microAlpha;
+            var size  = 0.031 + (c % 7) * 0.006;
+            var alpha = 0.08 * zAlpha * lumAdapt * microAlpha;
 
             ctx.fillStyle = 'rgba(255,250,245,' + alpha + ')';
             ctx.beginPath();
@@ -32307,30 +32340,27 @@ setTimeout(function(){
     window._inj52Enabled   = false;
     window._inj52BaseAlpha = 0.025;
     window._inj52Cluster   = 8;
+    window._inj52Threshold = 130;  // 박입 27 과 동일
     window._inj52Wrapped   = true;
 
     window._inj52Control = {
       enable:  function(){ window._inj52Enabled = true; },
       disable: function(){ window._inj52Enabled = false; },
-      setAlpha: function(a){
-        window._inj52BaseAlpha = Math.max(0, Math.min(0.5, +a || 0.025));
-      },
-      setCluster: function(n){
-        window._inj52Cluster = Math.max(1, Math.min(32, +n || 8));
-      },
+      setAlpha:     function(a){ window._inj52BaseAlpha = Math.max(0, Math.min(0.5, +a || 0.025)); },
+      setCluster:   function(n){ window._inj52Cluster   = Math.max(1, Math.min(32, +n || 8)); },
+      setThreshold: function(t){ window._inj52Threshold = Math.max(0, Math.min(255, +t || 130)); },
       info: function(){
         return {
-          on:       !!window._inj52Enabled,
-          source:   '양볼+코 28 landmark × ' + window._inj52Cluster + ' cluster',
-          total:    28 * window._inj52Cluster + '점',
-          size:     '0.031~0.073px (v3.0 대비 1/4)',
-          alpha:    window._inj52BaseAlpha,
-          coords:   'MediaPipe (잔상 0 자동)'
+          on:        !!window._inj52Enabled,
+          source:    '양볼+코 28 landmark × ' + window._inj52Cluster + ' cluster',
+          threshold: window._inj52Threshold + ' (< → 자동 OFF)',
+          envAdapt:  '★ 박입 27 방식 (베이스 휘도 기반 자동 적응)',
+          coords:    'MediaPipe (잔상 0 자동)'
         };
       }
     };
 
-    console.log('[박입 52 v4] ON (양볼+코 cluster)');
+    console.log('[박입 52 v5] ON (양볼+코 + 환경 적응)');
   }
 
   applyInj52();
