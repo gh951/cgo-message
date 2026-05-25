@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c43-v47-hair-v1" name="c41-version"/>
+<meta content="2026-05-26-c43-v47-hair-v2" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27169,12 +27169,23 @@ function _rmaiArInitColorPicker(){
   var currentCardLib = _rmaiArColorLibrary[_rmaiAr.cardMode || 'oheng'] || _rmaiArOhengSet;
   
   // ★ 4 카테고리 탭 (현재 카드 모드의 색상 사용)
+  // ★ 헤어 전용 색 7종 (currentCardLib 에 없을 때 폴백)
+  var _hairColors = [
+    {c:'#1a1a1a', n:'내추럴 블랙'},
+    {c:'#4a2c2a', n:'다크 브라운'},
+    {c:'#6b3410', n:'브라운'},
+    {c:'#a0682b', n:'라이트 브라운'},
+    {c:'#d4a017', n:'골드 블론드'},
+    {c:'#c0392b', n:'레드'},
+    {c:'#8b4789', n:'바이올렛'}
+  ];
+
   var cats = [
     {key:'lip',   icon:'💋', name:'립',     pal: currentCardLib.lip,   subtitle:'립스틱'},
     {key:'cheek', icon:'🌸', name:'볼',     pal: currentCardLib.cheek, subtitle:'블러셔'},
     {key:'eye',   icon:'👁️', name:'아이',   pal: currentCardLib.eye,   subtitle:'아이쉐도우'},
     {key:'base',  icon:'🫧', name:'베이스', pal: currentCardLib.base,  subtitle:'베이스 톤'},
-    {key:'hair',  icon:'💇', name:'헤어',   pal: currentCardLib.hair || currentCardLib.base, subtitle:'헤어 컬러'}
+    {key:'hair',  icon:'💇', name:'헤어',   pal: currentCardLib.hair || _hairColors, subtitle:'헤어 컬러'}
   ];
 
   // 카테고리 탭 — 4개 한 줄
