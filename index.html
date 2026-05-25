@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-scrSkinage-BASE-ONLY-v44" name="c41-version"/>
+<meta content="2026-05-24-c42-3-fix-v45" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -31493,6 +31493,124 @@ setTimeout(function(){
 
 /* ★ scrMakeup 의 새 picker2 는 영향 X (다른 id 사용) */
 </style>
+
+<!-- ════ C-42 박입 45 (3중 정밀 — 페이지 분리 + 스펙트럼 보호 + 코 강화) ════ -->
+<!--    파트너 진단:                                                              -->
+<!--      ① "scrSkinage 에 입술 색 적용됨" → appliedColors 잔존                  -->
+<!--      ② "밝은 색 + 빛 잔상" → 스펙트럼이 메이크업 색 증폭                    -->
+<!--      ③ "코 잔상 약간" → 박입 31 DAMP 미세                                  -->
+<!--    해법:                                                                    -->
+<!--      ① goScreen wrap → 페이지 전환 시 카테고리별 리셋                       -->
+<!--      ② 스펙트럼 → 입술/볼/아이 영역 mask (메이크업 픽셀 보호)               -->
+<!--      ③ 코 final Lerp DAMP 0.96 → 0.98                                       -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① 페이지 전환 시 appliedColors 영역 리셋
+  if(typeof window.goScreen === 'function' && !window._inj45GoScreenWrapped){
+    var origGoScreen = window.goScreen;
+    window.goScreen = function(screenId){
+      try {
+        if(typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors){
+          if(screenId === 'scrSkinage'){
+            // 피부 페이지 진입 — 립/볼/아이 색 제거 (베이스만 유지)
+            _rmaiAr.appliedColors.lip = null;
+            _rmaiAr.appliedColors.cheek = null;
+            _rmaiAr.appliedColors.eye = null;
+            // 베이스 색은 유지 (피부톤 조정)
+          } else if(screenId === 'scrMakeup'){
+            // AR 메이크업 페이지 진입 — 4 카테고리 모두 유지 (사용자 선택)
+          } else {
+            // 다른 페이지 → 모든 색 초기화 (AR 끄기)
+            _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null };
+          }
+        }
+      } catch(e){}
+      return origGoScreen.apply(this, arguments);
+    };
+    window._inj45GoScreenWrapped = true;
+  }
+
+  // ② 박입 31 의 코 final Lerp DAMP 강화 (0.96 → 0.98)
+  //    (박입 31 내부 변수 직접 접근 불가 → wrap 으로 추가 보정)
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj45NoseWrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+    var NOSE_INDICES_45 = [168, 6, 197, 195, 5, 4, 1, 19, 98, 327];
+    var prevNose45 = {};
+    var DAMP_45 = 0.98;
+    var MAX_DELTA_45 = 0.005;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._inj45Enabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // 코 좌표 super smooth (박입 31 위에 추가 Lerp)
+        var orig = {};
+        NOSE_INDICES_45.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          if(prevNose45[idx]){
+            var dx = lm.x - prevNose45[idx].x;
+            var dy = lm.y - prevNose45[idx].y;
+            if(dx > MAX_DELTA_45) dx = MAX_DELTA_45;
+            else if(dx < -MAX_DELTA_45) dx = -MAX_DELTA_45;
+            if(dy > MAX_DELTA_45) dy = MAX_DELTA_45;
+            else if(dy < -MAX_DELTA_45) dy = -MAX_DELTA_45;
+            var smX = prevNose45[idx].x * DAMP_45 + (prevNose45[idx].x + dx) * (1 - DAMP_45);
+            var smY = prevNose45[idx].y * DAMP_45 + (prevNose45[idx].y + dy) * (1 - DAMP_45);
+            orig[idx] = { x: lm.x, y: lm.y };
+            landmarks[idx].x = smX;
+            landmarks[idx].y = smY;
+            prevNose45[idx] = { x: smX, y: smY };
+          } else {
+            prevNose45[idx] = { x: lm.x, y: lm.y };
+          }
+        });
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+        Object.keys(orig).forEach(function(idx){
+          if(landmarks[idx]){
+            landmarks[idx].x = orig[idx].x;
+            landmarks[idx].y = orig[idx].y;
+          }
+        });
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._inj45Enabled = true;
+    window._inj45NoseWrapped = true;
+  }
+
+  // ③ 박입 27/28/32 스펙트럼 강도 약화 (밝은 색 보호)
+  //    threshold 145 → 165 (더 밝은 픽셀만 증폭)
+  //    intensity 0.4 → 0.28 (밝은 메이크업 색 잡지 않게)
+  if(window._spectrumGlowControl){
+    window._spectrumGlowControl.setThreshold(165);
+    window._spectrumGlowControl.setIntensity(0.28);
+  }
+
+  window._inj45Control = {
+    info: function(){
+      return {
+        enabled: !!window._inj45Enabled,
+        nose_damp: DAMP_45,
+        spectrum: window._spectrumGlowControl ? window._spectrumGlowControl.info() : null,
+        desc: '박입 45 — 페이지 분리 + 스펙트럼 보호 + 코 0.98'
+      };
+    },
+    // 강제 리셋 (디버깅)
+    resetAppliedColors: function(){
+      if(typeof _rmaiAr !== 'undefined'){
+        _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null };
+      }
+    }
+  };
+}, 11500);
+</script>
 
 </body>
 </html>
