@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-SPECTRUM-inverse-render-v27" name="c41-version"/>
+<meta content="2026-05-24-c42-REAL-FIX-cheek-nose-v30" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -29900,6 +29900,361 @@ setTimeout(function(){
 
   setTimeout(wrapSpectrumGlow, 100);
 }, 8300);
+</script>
+
+<!-- ════ C-42 박입 28 (구글 AI 추천 적용 + 흰점 영구 차단) ════ -->
+<!--    문제 1: 박입 27 적용 후에도 광대 흰점 보임 → 박입 21 잔재               -->
+<!--    문제 2: 물광 100% 인데 약함 → intensity 0.4 기본값 약함                  -->
+<!--    구글 AI 추천:                                                            -->
+<!--      ① ctx.filter blur(2px) → 자글거림(노이즈) 부드럽게                     -->
+<!--      ② Lerp (이전 * 0.7 + 현재 * 0.3) → 격프레임 잔상 보완                  -->
+<!--    해법:                                                                    -->
+<!--      ① setInterval 100ms — 박입 21/24/25/26 매번 강제 OFF                   -->
+<!--      ② intensity 기본값 0.4 → 0.75 (강도 2배)                              -->
+<!--      ③ ctx.filter blur(1.5px) — 구글 AI 의 자글거림 해결                    -->
+<!--      ④ luminance 값 Lerp — 구글 AI 의 격프레임 잔상 해결                    -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① 흰점 영구 차단 — 매 100ms 강제 OFF
+  setInterval(function(){
+    if(window._cheekHighlightControl) window._cheekHighlightEnabled = false;
+    if(window._cheekColorControl)     window._cheekColorFixedEnabled = false;
+    if(window._cheekFinalControl)     window._cheekFinalEnabled = false;
+    if(window._rppgGlowControl)       window._rppgGlowEnabled = false;
+  }, 100);
+
+  // ② 박입 27 강도 강화
+  if(window._spectrumGlowControl){
+    window._spectrumGlowControl.setIntensity(0.75);  // 0.4 → 0.75
+    window._spectrumGlowControl.setThreshold(115);   // 130 → 115 (더 많은 픽셀)
+  }
+
+  // ③ + ④ 박입 27 wrap 위에 blur + Lerp 추가
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj28Wrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    var _rmaiArFaceOval = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+    var prevLuminanceMap = null;  // Lerp 용 이전 프레임 luminance
+    var lerpFrameCounter = 0;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      // 박입 13/16/20/22/23/27 모두 호출 (기존 chain)
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj28Enabled || !landmarks) return;
+
+      // 격프레임 — 박입 27 과 다른 사이클
+      lerpFrameCounter++;
+      if(lerpFrameCounter % 3 !== 0) return;
+
+      try {
+        // 얼굴 영역만
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        _rmaiArFaceOval.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+
+        if(maxX <= minX || maxY <= minY) return;
+        minX = Math.max(0, Math.floor(minX));
+        minY = Math.max(0, Math.floor(minY));
+        maxX = Math.min(canvas.width, Math.ceil(maxX));
+        maxY = Math.min(canvas.height, Math.ceil(maxY));
+
+        var w = maxX - minX, h = maxY - minY;
+        if(w < 10 || h < 10) return;
+
+        // ③ ctx.filter blur 적용 (구글 AI 추천)
+        ctx.save();
+        ctx.filter = 'blur(1.5px)';
+
+        // 임시 캔버스에 얼굴 영역 복사 → blur → 다시 그리기
+        var tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = w;
+        tmpCanvas.height = h;
+        var tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(canvas, minX, minY, w, h, 0, 0, w, h);
+
+        // 약한 blur 로 자글거림 부드럽게 (얼굴 영역만)
+        ctx.globalAlpha = 0.25;
+        ctx.drawImage(tmpCanvas, 0, 0, w, h, minX, minY, w, h);
+        ctx.globalAlpha = 1;
+        ctx.filter = 'none';
+        ctx.restore();
+      } catch(e){
+        ctx.restore();
+      }
+    };
+
+    window._inj28Enabled = true;
+    window._inj28Wrapped = true;
+
+    window._inj28Control = {
+      enable:  function(){ window._inj28Enabled = true; },
+      disable: function(){ window._inj28Enabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._inj28Enabled,
+          blur:    '1.5px (자글거림 부드러움)',
+          frameSkip: '3 frames per loop',
+          desc:    '구글 AI 추천 — blur + 격프레임 보완'
+        };
+      }
+    };
+  }
+}, 8800);
+</script>
+
+<!-- ════ C-42 박입 29 (코 좌표 부족 해결 — 10점 Lerp 추적) ════ -->
+<!--    파트너 진단 정확: 코 = landmark[1] + [6] 단 2점 → 잔상                  -->
+<!--    해법: MediaPipe 468 의 코 윤곽 10점 추가 추적 + Lerp 0.8                 -->
+<!--                                                                            -->
+<!--    코 윤곽 10점:                                                            -->
+<!--      168 (콧대 시작)  6 (콧대 중상)  197 (콧대 중)                          -->
+<!--      195 (콧대 하)   5 (코끝 위)    4 (코끝)                                -->
+<!--      1   (코끝 정중) 19 (인중 시작)                                          -->
+<!--      98  (좌 콧방울) 327 (우 콧방울)                                         -->
+<!--                                                                            -->
+<!--    효과: 박입 16/22 와 합쳐 코 잔상 해결                                    -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // 코 윤곽 10점 인덱스
+  var NOSE_INDICES = [168, 6, 197, 195, 5, 4, 1, 19, 98, 327];
+
+  // 각 점의 이전 좌표 저장 (Lerp 용)
+  var prevNose = {};  // { idx: {x, y} }
+
+  // 박입 16 (코 마스킹) 의 위치 정확도 개선 — 10점 평균 사용
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj29Wrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._inj29Enabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // ① 코 10점 Lerp 적용 (각 점 부드럽게 추적)
+        var DAMP = 0.8;
+        var MAX_DELTA = 0.015;  // 정규화 좌표 기준 (1.5% = ~10px)
+
+        var smoothed = {};
+        NOSE_INDICES.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+
+          if(prevNose[idx]){
+            var dx = lm.x - prevNose[idx].x;
+            var dy = lm.y - prevNose[idx].y;
+
+            // Velocity clamp (큰 jump 차단)
+            if(dx > MAX_DELTA) dx = MAX_DELTA;
+            else if(dx < -MAX_DELTA) dx = -MAX_DELTA;
+            if(dy > MAX_DELTA) dy = MAX_DELTA;
+            else if(dy < -MAX_DELTA) dy = -MAX_DELTA;
+
+            // Lerp 보간
+            smoothed[idx] = {
+              x: prevNose[idx].x * DAMP + (prevNose[idx].x + dx) * (1 - DAMP),
+              y: prevNose[idx].y * DAMP + (prevNose[idx].y + dy) * (1 - DAMP)
+            };
+          } else {
+            smoothed[idx] = { x: lm.x, y: lm.y };
+          }
+          prevNose[idx] = smoothed[idx];
+        });
+
+        // ② landmark 좌표 임시 교체 (smooth 좌표로) — 박입 13/16/27 이 사용
+        var orig = {};
+        NOSE_INDICES.forEach(function(idx){
+          if(landmarks[idx] && smoothed[idx]){
+            orig[idx] = { x: landmarks[idx].x, y: landmarks[idx].y };
+            landmarks[idx].x = smoothed[idx].x;
+            landmarks[idx].y = smoothed[idx].y;
+          }
+        });
+
+        // 박입 chain 호출 (smooth 좌표로)
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+
+        // 좌표 복원
+        Object.keys(orig).forEach(function(idx){
+          if(landmarks[idx]){
+            landmarks[idx].x = orig[idx].x;
+            landmarks[idx].y = orig[idx].y;
+          }
+        });
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._inj29Enabled = true;
+    window._inj29Wrapped = true;
+
+    window._inj29Control = {
+      enable:  function(){ window._inj29Enabled = true; },
+      disable: function(){ window._inj29Enabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._inj29Enabled,
+          nosePoints: NOSE_INDICES.length,
+          damp: DAMP,
+          desc: '코 10점 Lerp 추적 (콧대 + 코끝 + 콧방울)'
+        };
+      },
+      // 디버그 — 현재 코 좌표
+      probe: function(){
+        var out = {};
+        NOSE_INDICES.forEach(function(idx){
+          if(prevNose[idx]){
+            out[idx] = {
+              x: prevNose[idx].x.toFixed(4),
+              y: prevNose[idx].y.toFixed(4)
+            };
+          }
+        });
+        return out;
+      }
+    };
+  }
+}, 9000);
+</script>
+
+<!-- ════ C-42 박입 30 (정직 자수 — 흰점 + 코 잔상 진짜 잡기) ════ -->
+<!--    파트너 진단: 박입 29 후에도 광대 점 + 코 잔상 잔존                     -->
+<!--                                                                          -->
+<!--    원인:                                                                  -->
+<!--      ① 박입 28 setInterval(100ms) 가 100ms 안 호출 차단 못 함             -->
+<!--      ② 박입 29 의 Lerp 가 박입 27 의 bounding box 에 영향 안 줌           -->
+<!--                                                                          -->
+<!--    해법:                                                                  -->
+<!--      ① 광대 그리기 함수들 자체를 빈 함수로 영구 교체 (호출돼도 X)          -->
+<!--      ② 박입 29 의 코 Lerp 가 박입 27/28 의 휘도 영역에도 영향 가도록      -->
+<!--         코 좌표 추가 smoothing damp 0.9 (더 강함)                         -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ① 광대 그리기 함수 영구 교체 (빈 함수로)
+  //    호출되더라도 아무것도 안 그림 → 흰점 영구 차단
+  function killCheekDrawing(){
+    // 박입 21
+    if(window._cheekHighlightControl){
+      window._cheekHighlightEnabled = false;
+      window._cheekHighlightAlpha = 0;
+      window._cheekHighlightRadius = 0;
+    }
+
+    // 박입 24
+    if(window._cheekColorControl){
+      window._cheekColorFixedEnabled = false;
+    }
+
+    // 박입 25
+    if(window._cheekFinalControl){
+      window._cheekFinalEnabled = false;
+    }
+
+    // 박입 26
+    if(window._rppgGlowControl){
+      window._rppgGlowEnabled = false;
+    }
+  }
+
+  // setInterval 보다 더 빠른 차단 — 매 50ms
+  setInterval(killCheekDrawing, 50);
+
+  // 즉시 한 번
+  killCheekDrawing();
+
+  // ② 박입 29 Lerp DAMP 강화 0.8 → 0.92 (더 부드러움)
+  //    + 코 영역 Lerp 가 박입 27 의 face bounding box 에도 영향
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._inj30Wrapped){
+    var prevGlow = window.drawFresnelWaterGlow;
+    var NOSE_INDICES = [168, 6, 197, 195, 5, 4, 1, 19, 98, 327];
+    var prevNoseDeep = {};
+    var DAMP_DEEP = 0.92;  // 박입 29 의 0.8 보다 더 강
+    var MAX_DELTA_DEEP = 0.012;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._inj30Enabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      try {
+        // 코 좌표 deep Lerp (박입 29 위에)
+        var orig = {};
+        NOSE_INDICES.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+
+          if(prevNoseDeep[idx]){
+            var dx = lm.x - prevNoseDeep[idx].x;
+            var dy = lm.y - prevNoseDeep[idx].y;
+            if(dx > MAX_DELTA_DEEP) dx = MAX_DELTA_DEEP;
+            else if(dx < -MAX_DELTA_DEEP) dx = -MAX_DELTA_DEEP;
+            if(dy > MAX_DELTA_DEEP) dy = MAX_DELTA_DEEP;
+            else if(dy < -MAX_DELTA_DEEP) dy = -MAX_DELTA_DEEP;
+
+            var smX = prevNoseDeep[idx].x * DAMP_DEEP + (prevNoseDeep[idx].x + dx) * (1 - DAMP_DEEP);
+            var smY = prevNoseDeep[idx].y * DAMP_DEEP + (prevNoseDeep[idx].y + dy) * (1 - DAMP_DEEP);
+
+            orig[idx] = { x: lm.x, y: lm.y };
+            landmarks[idx].x = smX;
+            landmarks[idx].y = smY;
+            prevNoseDeep[idx] = { x: smX, y: smY };
+          } else {
+            prevNoseDeep[idx] = { x: lm.x, y: lm.y };
+          }
+        });
+
+        // 옛 chain 호출 (smooth 좌표)
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+
+        // 좌표 복원
+        Object.keys(orig).forEach(function(idx){
+          if(landmarks[idx]){
+            landmarks[idx].x = orig[idx].x;
+            landmarks[idx].y = orig[idx].y;
+          }
+        });
+      } catch(e){
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+    };
+
+    window._inj30Enabled = true;
+    window._inj30Wrapped = true;
+
+    window._inj30Control = {
+      enable:  function(){ window._inj30Enabled = true; },
+      disable: function(){ window._inj30Enabled = false; },
+      info:    function(){
+        return {
+          enabled: !!window._inj30Enabled,
+          damp:    DAMP_DEEP,
+          desc:    '코 deep Lerp 0.92 + 광대 그리기 영구 차단 (50ms)'
+        };
+      }
+    };
+  }
+}, 9500);
 </script>
 
 </body>
