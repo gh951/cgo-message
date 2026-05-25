@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-WORLD-FIRST-SVI-v37-FIXED" name="c41-version"/>
+<meta content="2026-05-24-c42-scrMakeup-OWN-camera-v39" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -4169,7 +4169,7 @@ function c40Feature(name){
     'scalp':    'scrScalp',
     'dementia': 'scrDementia',
     'iq':       'scrIQ',
-    'makeup':   'scrMakeup',
+    'makeup':   'scrMakeup',  /* ★ C-42 박입 39 — scrMakeup 에 자체 AR 영역 박입 (카메라 1번) */
     'music':    'scrMusic',
     'food':     'scrFood',
     'couple':   'scrCouple'
@@ -13261,6 +13261,192 @@ var Q_POOL = {
       }
     })();
   </script>
+
+<!-- ════ C-42 박입 39 (scrMakeup 자체 AR 영역 — 카메라 1번 허용) ════ -->
+<!--    파트너 명령: "두 영역 공유 X. 글로벌 메신저 황제."                       -->
+<!--    원리: scrMakeup 페이지 자체에 카메라 + 캔버스 + picker 박입               -->
+<!--          → scrSkinage 와 완전 분리                                          -->
+<!--          → 카메라 1번 허용                                                  -->
+<!--    DOM 이름 다름 (충돌 방지):                                                -->
+<!--      rmai-ar-video2  / rmai-ar-canvas2  / rmai-ar-color-picker2              -->
+<div id="makeup-ar-section" style="max-width:480px;margin:0 auto;padding:24px 16px 80px;">
+  <div style="background:#fff;border-radius:18px;padding:18px;box-shadow:0 8px 32px rgba(0,0,0,.08);">
+    <div style="font-size:18px;font-weight:900;color:#1a1408;margin-bottom:12px;text-align:center;">
+      🎨 AR 메이크업 시작
+    </div>
+    <div style="font-size:11px;color:#666;margin-bottom:16px;text-align:center;line-height:1.6;">
+      FaceMesh 468 랜드마크로 입술·볼·눈·베이스에<br/>
+      정확하게 색을 입혀드립니다.
+    </div>
+
+    <!-- 카메라 영역 (자체) -->
+    <div style="position:relative;width:100%;aspect-ratio:3/4;background:#000;border-radius:14px;overflow:hidden;margin-bottom:14px;">
+      <video autoplay="" id="rmai-ar-video2" muted="" playsinline="" style="width:100%;height:100%;object-fit:cover;display:none;transform:scaleX(-1);"></video>
+      <canvas id="rmai-ar-canvas2" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;transform:scaleX(-1);"></canvas>
+      <div id="rmai-ar-placeholder2" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#888;font-size:13px;text-align:center;padding:20px;">
+        🎨 아래 "시작" 버튼을 눌러주세요
+      </div>
+    </div>
+
+    <!-- 시작/정지 버튼 -->
+    <button id="makeup-ar-start-btn" onclick="window.makeupArStart()" style="width:100%;padding:14px;background:linear-gradient(135deg,#a855f7,#7c3aed);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:14px;box-shadow:0 4px 16px rgba(124,58,237,.4);">
+      🎨 AR 모드 시작 (FaceMesh 468)
+    </button>
+
+    <!-- 색 선택 picker (자체) -->
+    <div id="rmai-ar-color-picker2" style="margin-bottom:12px;"></div>
+  </div>
+</div>
+
+<script>
+// scrMakeup 자체 AR 메이크업 엔진
+(function(){
+  'use strict';
+
+  var _makeupStream = null;
+  var _makeupRunning = false;
+
+  // 시작 함수
+  window.makeupArStart = function(){
+    if(_makeupRunning) return;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      alert('이 브라우저는 카메라를 지원하지 않습니다.');
+      return;
+    }
+
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}, audio:false})
+      .then(function(stream){
+        _makeupStream = stream;
+        _makeupRunning = true;
+
+        var video = document.getElementById('rmai-ar-video2');
+        var canvas = document.getElementById('rmai-ar-canvas2');
+        var placeholder = document.getElementById('rmai-ar-placeholder2');
+        var startBtn = document.getElementById('makeup-ar-start-btn');
+
+        if(!video || !canvas) return;
+
+        video.srcObject = stream;
+        video.style.display = 'block';
+        canvas.style.display = 'block';
+        if(placeholder) placeholder.style.display = 'none';
+        if(startBtn){
+          startBtn.innerHTML = '⏹ AR 모드 정지';
+          startBtn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+          startBtn.onclick = window.makeupArStop;
+        }
+
+        video.onloadedmetadata = function(){
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          startMakeupAR();
+        };
+      })
+      .catch(function(err){
+        alert('카메라 접근 실패: ' + (err.message || err.name));
+      });
+  };
+
+  // 정지 함수
+  window.makeupArStop = function(){
+    if(_makeupStream){
+      try {
+        _makeupStream.getTracks().forEach(function(t){ t.stop(); });
+      } catch(e){}
+      _makeupStream = null;
+    }
+    _makeupRunning = false;
+
+    var video = document.getElementById('rmai-ar-video2');
+    var canvas = document.getElementById('rmai-ar-canvas2');
+    var placeholder = document.getElementById('rmai-ar-placeholder2');
+    var startBtn = document.getElementById('makeup-ar-start-btn');
+
+    if(video){
+      try { video.pause(); } catch(e){}
+      video.srcObject = null;
+      video.style.display = 'none';
+    }
+    if(canvas) canvas.style.display = 'none';
+    if(placeholder) placeholder.style.display = 'flex';
+    if(startBtn){
+      startBtn.innerHTML = '🎨 AR 모드 시작 (FaceMesh 468)';
+      startBtn.style.background = 'linear-gradient(135deg,#a855f7,#7c3aed)';
+      startBtn.onclick = window.makeupArStart;
+    }
+  };
+
+  // AR 시작 — 기존 _rmaiAr 시스템 재사용 (canvas2/video2 로 연결)
+  function startMakeupAR(){
+    var video = document.getElementById('rmai-ar-video2');
+    var canvas = document.getElementById('rmai-ar-canvas2');
+    if(!video || !canvas) return;
+
+    if(typeof _rmaiAr === 'undefined'){
+      console.warn('[makeup-ar] _rmaiAr 시스템 미초기화');
+      return;
+    }
+
+    // _rmaiAr 의 canvas / video 참조 교체 (재사용)
+    _rmaiAr.video = video;
+    _rmaiAr.canvas = canvas;
+    _rmaiAr.ctx = canvas.getContext('2d');
+    _rmaiAr.running = true;
+
+    // FaceMesh 시작 (기존 시스템)
+    if(typeof window._rmaiArInitFaceMesh === 'function'){
+      window._rmaiArInitFaceMesh();
+    } else if(typeof _rmaiArOnResults === 'function' && typeof FaceMesh !== 'undefined'){
+      var faceMesh = new FaceMesh({
+        locateFile: function(file){
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/' + file;
+        }
+      });
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      faceMesh.onResults(_rmaiArOnResults);
+
+      var camera = new Camera(video, {
+        onFrame: function(){
+          return faceMesh.send({image: video});
+        },
+        width: video.videoWidth || 480,
+        height: video.videoHeight || 640
+      });
+      camera.start();
+      _rmaiAr.camera = camera;
+    }
+
+    // picker 박입 (자체 영역 id 가리킴)
+    if(typeof _rmaiArInitColorPicker === 'function'){
+      // 옛 picker id 임시 교체
+      var orig = document.getElementById('rmai-ar-color-picker');
+      var newPicker = document.getElementById('rmai-ar-color-picker2');
+      if(orig && newPicker){
+        // _rmaiArInitColorPicker 는 'rmai-ar-color-picker' id 찾으므로 임시 교체
+        newPicker.id = 'rmai-ar-color-picker';
+        if(orig.id === 'rmai-ar-color-picker') orig.id = 'rmai-ar-color-picker-old';
+        _rmaiArInitColorPicker();
+        // 원복
+        if(orig) orig.id = 'rmai-ar-color-picker-old';
+        // 새 picker 는 'rmai-ar-color-picker' 로 두기 (picker 작동)
+      }
+    }
+  }
+
+  window._makeupArControl = {
+    start: window.makeupArStart,
+    stop: window.makeupArStop,
+    isRunning: function(){ return _makeupRunning; },
+    getStream: function(){ return _makeupStream; }
+  };
+})();
+</script>
+<!-- ════ 박입 39 끝 ════ -->
 </div>
 <!-- ══ page-svi: 피부 탄력 분석 ══ -->
 <!-- ════ C-41 박입 ① — scrSkinage = FULI SVI 풀세트 (피부탄력+피부나이+6부위+rPPG+비대칭+그래프+AI챗) ════ -->
