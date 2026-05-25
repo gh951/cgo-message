@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-picker-PURE-AR-v35b" name="c41-version"/>
+<meta content="2026-05-24-c42-WORLD-FIRST-SVI-to-MAKEUP-v37" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30751,6 +30751,265 @@ setTimeout(function(){
   font-weight: 900 !important;
 }
 </style>
+
+<!-- ════ C-42 박입 36 (★ 카테고리 잠금 해제 — 립/볼/아이/베이스 작동) ════ -->
+<!--    파트너 진단: "어제는 색조 됐는데 지금 안 됨"                              -->
+<!--    원인: 옛 박입의 wrapSetCategory (행 27484) 가                              -->
+<!--          rmaiArSetCategory 를 가로채 무조건 'base' 로 강제                    -->
+<!--          → 립/볼/아이 클릭해도 base 만 활성                                  -->
+<!--    해법: 박입 35 의 CSS 위에 박입 36 의 JS wrap                              -->
+<!--          → rmaiArSetCategory 진짜 동작 복원                                  -->
+<!--          → 4 카테고리 모두 작동                                              -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // 옛 wrapSetCategory 무력화 — 원래 동작 복원
+  if(typeof window.rmaiArSetCategory === 'function'){
+    var origRealSetCategory = window.rmaiArSetCategory;
+
+    window.rmaiArSetCategory = function(catKey){
+      // 박입 36: 클릭한 카테고리 그대로 적용 (base 강제 X)
+      if(typeof _rmaiAr !== 'undefined'){
+        _rmaiAr.currentCategory = catKey;  // ★ lip / cheek / eye / base 그대로
+      }
+
+      // 옛 함수 호출 (UI 갱신)
+      try {
+        origRealSetCategory(catKey);
+      } catch(e){
+        // 옛 wrap 이 base 강제하므로 무시
+      }
+
+      // 직접 picker 갱신
+      if(typeof _rmaiArInitColorPicker === 'function'){
+        _rmaiArInitColorPicker();
+      }
+    };
+  }
+
+  // 디버깅
+  window._inj36Control = {
+    getCurrentCategory: function(){
+      return (typeof _rmaiAr !== 'undefined') ? _rmaiAr.currentCategory : null;
+    },
+    forceCategory: function(cat){
+      if(typeof _rmaiAr !== 'undefined'){
+        _rmaiAr.currentCategory = cat;
+        if(typeof _rmaiArInitColorPicker === 'function') _rmaiArInitColorPicker();
+      }
+    },
+    info: function(){
+      return {
+        current: (typeof _rmaiAr !== 'undefined') ? _rmaiAr.currentCategory : null,
+        desc: '박입 36 — 카테고리 잠금 해제 (립/볼/아이/베이스 작동)'
+      };
+    }
+  };
+}, 4000);  // 옛 wrap (2600ms?) 후 충분히 늦게
+</script>
+
+<!-- ════ C-42 박입 37 (★★★ 세계 최초 — SVI → 4 카테고리 색 자동 추천) ════ -->
+<!--    파트너 비전: "나의 피부 분석 → 립/볼/아이/베이스 자동 연동"              -->
+<!--                                                                            -->
+<!--    원리:                                                                   -->
+<!--      ① _svi.zoneSVI = 6부위 점수 (forehead/brow/eye/cheek/jaw/mouth)        -->
+<!--      ② _rPPG.bpm / hrv = 심박/심박변이도                                    -->
+<!--      ③ 매핑 공식 → 4 카테고리 추천 색 산출                                 -->
+<!--                                                                            -->
+<!--    매핑:                                                                   -->
+<!--      입가 점수 낮음 → 립: 진한 색 (혈색 보완)                              -->
+<!--      입가 점수 높음 → 립: 누드 톤                                          -->
+<!--      볼 점수 낮음 → 볼: 진한 핑크/코랄 (혈색 보완)                          -->
+<!--      볼 점수 높음 → 볼: 옅은 색                                            -->
+<!--      눈가 점수 낮음 → 아이: 밝은 색 (어두움 보완)                          -->
+<!--      이마+턱 균일도 낮음 → 베이스: 커버력 강한 색                          -->
+<!--                                                                            -->
+<!--    글로벌 1,2위 = 못 함 (rPPG/생체 분석 없음)                              -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ─── SVI 분석 → 색 추천 핵심 엔진 ───
+  function computeSviColorRecommendation(){
+    var rec = {
+      lip: null, cheek: null, eye: null, base: null,
+      reasons: {},
+      status: 'no-data'
+    };
+
+    // SVI 데이터 확인
+    if(typeof _svi === 'undefined' || !_svi.zoneSVI){
+      return rec;
+    }
+
+    var zones = _svi.zoneSVI;
+    var bpm = (window._rPPG && _rPPG.bpm) || 0;
+    var hrv = (window._rPPG && _rPPG.hrv) || 0;
+
+    // 점수 없으면 종료
+    var hasAnyZone = ['forehead','brow','eye','cheek','jaw','mouth'].some(function(z){
+      return zones[z] !== null && zones[z] !== undefined;
+    });
+    if(!hasAnyZone){
+      return rec;
+    }
+    rec.status = 'analyzed';
+
+    // ━━ 립 추천 (mouth 부위 + 혈색) ━━
+    var mouthScore = zones.mouth || 70;
+    if(mouthScore < 60){
+      // 혈색 약 → 진한 색
+      rec.lip = '#C41E3A';  // 클래식 레드
+      rec.reasons.lip = '입가 ' + mouthScore + '점 — 혈색 보완 추천';
+    } else if(mouthScore < 80){
+      rec.lip = '#E07B54';  // 피치 코랄
+      rec.reasons.lip = '입가 ' + mouthScore + '점 — 자연 코랄';
+    } else {
+      rec.lip = '#D4A0A0';  // 누드 핑크
+      rec.reasons.lip = '입가 ' + mouthScore + '점 — 누드 톤';
+    }
+
+    // ━━ 볼 추천 (cheek 부위 + rPPG 혈류) ━━
+    var cheekScore = zones.cheek || 70;
+    if(cheekScore < 60 || (bpm > 0 && bpm < 65)){
+      // 혈색 약 → 진한 핑크
+      rec.cheek = '#FF6B6B';  // 코랄 레드
+      rec.reasons.cheek = '볼 ' + cheekScore + '점 — 혈색 강화';
+    } else if(cheekScore < 80){
+      rec.cheek = '#FFAA80';  // 피치
+      rec.reasons.cheek = '볼 ' + cheekScore + '점 — 자연 핑크';
+    } else {
+      rec.cheek = '#FFC8C8';  // 베이비 핑크
+      rec.reasons.cheek = '볼 ' + cheekScore + '점 — 옅은 핑크';
+    }
+
+    // ━━ 아이 추천 (eye 부위 + 다크서클) ━━
+    var eyeScore = zones.eye || 70;
+    if(eyeScore < 55){
+      // 어두움 → 밝은 톤 (보완)
+      rec.eye = '#D4A574';  // 골드 베이지
+      rec.reasons.eye = '눈가 ' + eyeScore + '점 — 밝은 톤 보완';
+    } else if(eyeScore < 75){
+      rec.eye = '#8B6B4F';  // 모카 브라운
+      rec.reasons.eye = '눈가 ' + eyeScore + '점 — 자연 브라운';
+    } else {
+      rec.eye = '#5C4030';  // 다크 모카
+      rec.reasons.eye = '눈가 ' + eyeScore + '점 — 깊은 톤';
+    }
+
+    // ━━ 베이스 추천 (forehead + jaw 균일도) ━━
+    var foreheadScore = zones.forehead || 70;
+    var jawScore = zones.jaw || 70;
+    var browScore = zones.brow || 70;
+    var baseAvg = (foreheadScore + jawScore + browScore) / 3;
+
+    if(baseAvg < 60){
+      // 균일도 낮음 → 커버력 강한 베이스
+      rec.base = '#E8B886';  // 진한 베이지
+      rec.reasons.base = '균일도 ' + baseAvg.toFixed(0) + '점 — 커버력 베이스';
+    } else if(baseAvg < 80){
+      rec.base = '#F2D5B0';  // 미디엄 베이지
+      rec.reasons.base = '균일도 ' + baseAvg.toFixed(0) + '점 — 자연 베이지';
+    } else {
+      rec.base = '#FAEBD7';  // 라이트 베이지
+      rec.reasons.base = '균일도 ' + baseAvg.toFixed(0) + '점 — 가벼운 베이스';
+    }
+
+    // HRV 추가 보정 (피로 → 광택 감소)
+    if(hrv > 0 && hrv < 30){
+      rec.reasons.global = 'HRV ' + hrv + 'ms — 피로 감지, 차분한 톤 추천';
+    } else if(hrv >= 50){
+      rec.reasons.global = 'HRV ' + hrv + 'ms — 활력 양호, 생기 톤 추천';
+    }
+
+    return rec;
+  }
+
+  // ─── 추천 색 적용 함수 ───
+  function applySviRecommendation(){
+    var rec = computeSviColorRecommendation();
+    if(rec.status === 'no-data'){
+      alert('먼저 피부 분석 (SVI) 을 완료해주세요.');
+      return;
+    }
+
+    if(typeof _rmaiAr === 'undefined') return;
+
+    // 4 카테고리 모두 추천 색 자동 적용
+    _rmaiAr.appliedColors = _rmaiAr.appliedColors || {};
+    _rmaiAr.appliedColors.lip = rec.lip;
+    _rmaiAr.appliedColors.cheek = rec.cheek;
+    _rmaiAr.appliedColors.eye = rec.eye;
+    _rmaiAr.appliedColors.base = rec.base;
+    _rmaiAr.currentColor = rec.base;
+    _rmaiAr.currentCategory = 'base';
+
+    if(typeof _rmaiArInitColorPicker === 'function'){
+      _rmaiArInitColorPicker();
+    }
+
+    // 토스트 알림
+    var msg = '✨ SVI 분석 → 4 카테고리 자동 적용\n\n';
+    if(rec.reasons.lip)   msg += '💋 ' + rec.reasons.lip + '\n';
+    if(rec.reasons.cheek) msg += '🌸 ' + rec.reasons.cheek + '\n';
+    if(rec.reasons.eye)   msg += '👁 ' + rec.reasons.eye + '\n';
+    if(rec.reasons.base)  msg += '💧 ' + rec.reasons.base + '\n';
+    if(rec.reasons.global) msg += '\n' + rec.reasons.global;
+    alert(msg);
+  }
+
+  // ─── picker 에 SVI 추천 버튼 박입 ───
+  function injectRecommendButton(){
+    var picker = document.getElementById('rmai-ar-color-picker');
+    if(!picker){
+      setTimeout(injectRecommendButton, 500); return;
+    }
+    if(document.getElementById('svi-rec-btn')) return;
+
+    var btn = document.createElement('button');
+    btn.id = 'svi-rec-btn';
+    btn.onclick = applySviRecommendation;
+    btn.innerHTML = '✨ SVI 분석 → 4 카테고리 자동 추천';
+    btn.style.cssText =
+      'width:100%;padding:12px;margin:8px 0;' +
+      'background:linear-gradient(135deg,#a855f7,#7c3aed);' +
+      'border:none;border-radius:12px;color:#fff;' +
+      'font-size:12px;font-weight:900;cursor:pointer;' +
+      'font-family:inherit;letter-spacing:.03em;' +
+      'box-shadow:0 4px 16px rgba(124,58,237,.35);';
+
+    picker.insertBefore(btn, picker.firstChild);
+  }
+
+  injectRecommendButton();
+
+  // 외부 노출
+  window.sviRecommendColors = computeSviColorRecommendation;
+  window.applySviRecommendation = applySviRecommendation;
+
+  window._inj37Control = {
+    info: function(){
+      var rec = computeSviColorRecommendation();
+      return {
+        status: rec.status,
+        recommendations: {
+          lip: rec.lip,
+          cheek: rec.cheek,
+          eye: rec.eye,
+          base: rec.base
+        },
+        reasons: rec.reasons,
+        zones: (typeof _svi !== 'undefined') ? _svi.zoneSVI : null,
+        rppg: window._rPPG ? { bpm: _rPPG.bpm, hrv: _rPPG.hrv } : null,
+        desc: '★ 세계 최초 — SVI 6부위 + rPPG → 4 카테고리 자동 추천'
+      };
+    },
+    apply: applySviRecommendation,
+    compute: computeSviColorRecommendation
+  };
+}, 4500);
+</script>
 
 </body>
 </html>
