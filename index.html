@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-MICRO-ambient-v33" name="c41-version"/>
+<meta content="2026-05-24-c42-CAMERA-FIX-v34" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30621,6 +30621,78 @@ setTimeout(function(){
     };
   }
 }, 11000);
+</script>
+
+<!-- ════ C-42 박입 34 (★ 카메라 2번 허용 종결) ════ -->
+<!--    파트너 진단:                                                              -->
+<!--      ① 화장품 시연 시작 → 허용 #1 (cgoCameraCheck)                          -->
+<!--      ② 카메라 나옴 → 허용 #2 (rmaiArStart 의 getUserMedia)                  -->
+<!--      ③ 두 번째 허용 누르면 → 카메라 꺼짐                                    -->
+<!--                                                                            -->
+<!--    원인: 박입 8 의 cgoCameraCheck 가 stream.getTracks().stop() 으로          -->
+<!--          첫 stream 죽임 → rmaiArStart 가 다시 getUserMedia 호출 → 충돌      -->
+<!--                                                                            -->
+<!--    해법: cgoCameraCheck 를 즉시 onGranted() 콜백만 호출하는 단순 함수로       -->
+<!--          교체. getUserMedia 는 rmaiArStart 안에서 1번만 호출되도록.          -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // 박입 8 의 cgoCameraCheck 무력화 → 즉시 콜백 (권한 체크 X)
+  // → rmaiArStart 안의 getUserMedia 1번만 호출
+  // → 카메라 허용 1번만
+  window.cgoCameraCheck = function(onGranted, opts){
+    // opts.constraints 있으면 stream 모드 (지금은 잘 안 씀)
+    if(opts && opts.constraints){
+      if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+        navigator.mediaDevices.getUserMedia(opts.constraints)
+          .then(function(s){
+            window._cgoCameraGranted = true;
+            onGranted(s);
+          })
+          .catch(function(){
+            window._cgoCameraGranted = false;
+            if(window._cgoCameraAlert && !window._cgoCameraAlertShown){
+              window._cgoCameraAlertShown = true;
+              window._cgoCameraAlert('카메라 접근이 거부됐습니다.');
+            }
+          });
+        return;
+      }
+    }
+
+    // ★ 핵심: 권한 체크 X, 즉시 콜백 호출
+    //   → rmaiArStart 가 자체적으로 getUserMedia 1번 호출
+    //   → 카메라 허용 1번만
+    window._cgoCameraGranted = true;
+    try {
+      onGranted();
+    } catch(e){
+      if(window._cgoCameraAlert){
+        window._cgoCameraAlert('카메라를 시작할 수 없습니다.');
+      }
+    }
+  };
+
+  // 박입 8 의 _cgoCameraCheckFullInjected 강제 true → 박입 8 재실행 차단
+  window._cgoCameraCheckFullInjected = true;
+
+  // 외부 노출
+  window._inj34Control = {
+    info: function(){
+      return {
+        mode: '카메라 허용 1번 모드',
+        cameraGranted: !!window._cgoCameraGranted,
+        desc: '박입 8 무력화 → rmaiArStart 1번만 getUserMedia 호출'
+      };
+    },
+    // 디버깅
+    resetGranted: function(){
+      window._cgoCameraGranted = false;
+      window._cgoCameraAlertShown = false;
+    }
+  };
+}, 3000);  // 박입 8 (2700ms) 직후 덮어쓰기
 </script>
 
 </body>
