@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-24-c42-z-fake-normal-v23" name="c41-version"/>
+<meta content="2026-05-24-c42-cheek-color-fix-v24" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -29390,6 +29390,101 @@ setTimeout(function(){
 
   setTimeout(wrapZNormal, 6300);
 })();
+</script>
+
+<!-- ════ C-42 박입 24 (광대 흰점 결함 정직 수정) ════ -->
+<!--    문제 자수: 박입 21 의 sharp white spot 이 정적 흰점으로 보임             -->
+<!--    원인: alpha 0.5 + 흰색 (255,255,255) + radius 10 → 점처럼 도드라짐      -->
+<!--    수정:                                                                    -->
+<!--      ① alpha 0.5 → 0.25 (강도 절반)                                         -->
+<!--      ② 색 (255,255,255) → (255,240,220) 따뜻한 피부톤                      -->
+<!--      ③ radius 10 → 16 (점 → 자연스러운 광 덩어리)                          -->
+<!--    범위: 박입 21 의 _cheekHighlightControl 통해 수정                        -->
+<script>
+setTimeout(function(){
+  if(window._cheekHighlightControl){
+    window._cheekHighlightControl.setAlpha(0.25);   // 강도 약화
+    window._cheekHighlightControl.setRadius(16);    // 점 → 광 덩어리
+  }
+
+  // 박입 21 의 색상 흰색 → 피부톤 으로 교체하려면 함수 자체 재정의
+  if(typeof window.drawFresnelWaterGlow === 'function' && !window._cheekColorFixed){
+    var prevGlow = window.drawFresnelWaterGlow;
+    var lcheekIdx = [116, 117, 118, 100, 207];
+    var rcheekIdx = [345, 346, 347, 329, 427];
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      if(!window._cheekColorFixedEnabled || !landmarks){
+        return prevGlow(ctx, canvas, landmarks, glossLevel);
+      }
+
+      // 박입 21 자동 OFF (충돌 방지)
+      if(window._cheekHighlightControl) window._cheekHighlightControl.disable();
+
+      try {
+        prevGlow(ctx, canvas, landmarks, glossLevel);
+
+        // 새 광대 highlight (따뜻한 피부톤 + 큰 radius + 약한 alpha)
+        var lx=0, ly=0, lc=0;
+        lcheekIdx.forEach(function(i){
+          if(landmarks[i]){ lx += landmarks[i].x; ly += landmarks[i].y; lc++; }
+        });
+        var rx=0, ry=0, rc=0;
+        rcheekIdx.forEach(function(i){
+          if(landmarks[i]){ rx += landmarks[i].x; ry += landmarks[i].y; rc++; }
+        });
+        if(lc === 0 || rc === 0) return;
+
+        lx = (lx / lc) * canvas.width;
+        ly = (ly / lc) * canvas.height;
+        rx = (rx / rc) * canvas.width;
+        ry = (ry / rc) * canvas.height;
+
+        var alpha  = 0.25 * (glossLevel || 0.5);
+        var radius = 16;
+
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+
+        [[lx,ly],[rx,ry]].forEach(function(p){
+          var grad = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], radius);
+          // ★ 흰색 → 따뜻한 피부톤 (255,240,220)
+          grad.addColorStop(0,   'rgba(255,240,220,' + alpha + ')');
+          grad.addColorStop(0.5, 'rgba(255,240,220,' + (alpha * 0.25) + ')');
+          grad.addColorStop(1,   'rgba(255,240,220,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(p[0], p[1], radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        ctx.restore();
+      } catch(e){}
+    };
+
+    window._cheekColorFixedEnabled = true;
+    window._cheekColorFixed = true;
+
+    window._cheekColorControl = {
+      enable:  function(){ window._cheekColorFixedEnabled = true; },
+      disable: function(){ window._cheekColorFixedEnabled = false; },
+      setColor: function(r, g, b){
+        window._cheekHighlightR = r;
+        window._cheekHighlightG = g;
+        window._cheekHighlightB = b;
+      },
+      info: function(){
+        return {
+          enabled: !!window._cheekColorFixedEnabled,
+          alpha:   0.25,
+          radius:  16,
+          color:   '따뜻한 피부톤 (255,240,220)',
+          desc:    '박입 21 흰점 → 자연스러운 광 덩어리 (피부톤)'
+        };
+      }
+    };
+  }
+}, 6800);
 </script>
 
 </body>
