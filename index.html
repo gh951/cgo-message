@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj82-hero-force" name="c41-version"/>
+<meta content="2026-05-26-c44-inj83-hero-natural" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13948,37 +13948,63 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </div>
 </div>
 
-<!-- ★ 박입 79/80/82 — Hero 이미지 영역 (파일명 C-6.jpeg + 강제 표시) -->
+<!-- ★ 박입 79/80/82/83 — Hero 이미지 영역 (이미지 자체 비율 유지) -->
 <style>
   #eye-hero-area{
     width:100% !important;
     display:block !important;
     visibility:visible !important;
-    min-height:200px !important;
-    max-height:520px !important;
-    aspect-ratio:16/9 !important;
     position:relative !important;
     overflow:hidden !important;
     background:linear-gradient(135deg,#f0fdfb 0%,#ccfbf1 50%,#e0f7f5 100%) !important;
     border-bottom:1px solid #ccfbf1 !important;
+    text-align:center;
   }
   #eye-hero-area img{
     width:100% !important;
-    height:100% !important;
-    object-fit:cover !important;
-    position:absolute !important;
-    inset:0 !important;
+    max-width:1200px !important;
+    height:auto !important;
     display:block !important;
+    margin:0 auto !important;
+    object-fit:contain !important;
+  }
+  #eye-hero-area .eye-hero-fallback{
+    min-height:200px;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#0f766e;
+    text-align:center;
+    padding:24px;
+    width:100%;
+  }
+  #eye-hero-area .eye-hero-stamp{
+    position:absolute;
+    bottom:14px;
+    right:18px;
+    padding:5px 12px;
+    background:rgba(0,0,0,.5);
+    backdrop-filter:blur(8px);
+    border:1px solid rgba(20,184,166,.6);
+    border-radius:10px;
+    font-size:10px;
+    font-weight:800;
+    color:#5eead4 !important;
+    letter-spacing:.16em;
+    font-family:'Courier New',monospace;
+    z-index:2;
   }
 </style>
 <div id="eye-hero-area">
 <img alt="C-44 나의 눈 헬스" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="/C-6.jpeg"/>
-<div style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#0f766e;text-align:center;padding:24px;width:100%;height:100%;position:absolute;inset:0;">
+<div class="eye-hero-fallback">
 <div style="font-size:48px;opacity:.4;">👁️</div>
 <div style="font-size:12px;letter-spacing:.04em;font-weight:700;">Hero 이미지 영역 — 추후 업로드 예정</div>
 <div style="font-size:10px;color:#14b8a6;font-family:'Courier New',monospace;">파일명: /C-6.jpeg</div>
 </div>
-<div style="position:absolute;bottom:14px;right:18px;padding:5px 12px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(20,184,166,.6);border-radius:10px;font-size:10px;font-weight:800;color:#5eead4;letter-spacing:.16em;font-family:'Courier New',monospace;z-index:2;">C-44</div>
+<div class="eye-hero-stamp">C-44</div>
 </div>
 
 <!-- 메인 페이지 (박입 79 — 폭 520 → 1200 확장, 치매 페이지 동일) -->
