@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj50-ui-polish" name="c41-version"/>
+<meta content="2026-05-26-c44-inj51-strong-hair-hslsync" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13620,6 +13620,20 @@ var Q_POOL = {
       var cat = _rmaiAr.currentCategory || 'base';
       _rmaiAr.hslByCategory = _rmaiAr.hslByCategory || {};
       _rmaiAr.hslByCategory[cat] = {h:h, s:s, l:l};
+
+      // ★ 박입 51 핵심 — HSL 슬라이더 → appliedColors[cat] 실시간 갱신
+      //   → AR 렌더링이 새 색 즉시 사용 (적용 버튼 안 눌러도 미리보기 변화)
+      try {
+        var hexEl = document.getElementById('svi-hsl-hex-m');
+        if(hexEl){
+          var hex = hexEl.textContent;
+          if(hex && hex.charAt(0) === '#' && hex.length === 7){
+            _rmaiAr.appliedColors = _rmaiAr.appliedColors || {};
+            _rmaiAr.appliedColors[cat] = hex;
+            _rmaiAr.currentColor = hex;
+          }
+        }
+      } catch(e){}
     }
   };
 
@@ -27286,7 +27300,7 @@ function _rmaiArInitColorPicker(){
   // 현재 카테고리 + 현재 팔레트에 따른 색 배열 (4 카테고리만)
   var currentColors = (_rmaiAr.currentPalette === 'rainbow') ? _rmaiArRainbowSet : (currentCat.pal || []);
   var appliedHex = _rmaiAr.appliedColors[currentCat.key];
-  var paletteLabel = (_rmaiAr.currentPalette === 'rainbow') ? '🎨 베이직 컬러' : (currentCat.icon + ' ' + currentCat.subtitle + ' · 명품 7색');
+  var paletteLabel = (_rmaiAr.currentPalette === 'rainbow') ? '🎨 베이직 컬러' : (currentCat.icon + ' ' + currentCat.subtitle + ' · ' + currentColors.length + '색');
 
   var swatchHtml = '<div style="font-size:11px;font-weight:800;color:#1a1408;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">'
     + '<span>'+paletteLabel+'</span>'
@@ -32538,6 +32552,174 @@ setTimeout(function(){
     }
   };
 }, 800);
+</script>
+
+<!-- ════ 박입 51 — 헤어 강력 렌더러 (Strong Hair Renderer) ════ -->
+<!--    문제: 박입 27+49 의 base shift + multiplicative 가 시각적으로 약함        -->
+<!--    해법: 27 wrap chain 가장 바깥 (마지막 wrap) 에서 더 공격적 알고리즘 적용 -->
+<!--          - 휘도 임계 확장 (150 → 180)                                      -->
+<!--          - LIFT_TARGET 상향 (140 → 170)                                   -->
+<!--          - 마지막에 hue 강제 주입 (검정 → 색조 명확히 변환)                 -->
+<!--          - 디버그 frameCount 박입 → 실행 검증 가능                          -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  window._inj51HairEnabled = (window._inj51HairEnabled !== false);
+  window._inj51Stats = {frameCount:0, paintCount:0, lastRegion:null};
+
+  function wrapStrongHair(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapStrongHair, 300); return;
+    }
+    if(window._inj51Wrapped) return;
+    window._inj51Wrapped = true;
+
+    var prevGlow = window.drawFresnelWaterGlow;
+    var FACE_OVAL = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+    var frameCounter = 0;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._inj51HairEnabled || !landmarks) return;
+      if(typeof _rmaiAr === 'undefined') return;
+
+      var hairHex = (_rmaiAr.appliedColors || {}).hair;
+      if(!hairHex || hairHex.charAt(0) !== '#' || hairHex.length !== 7) return;
+
+      window._inj51Stats.frameCount++;
+      frameCounter++;
+      if(frameCounter % 2 !== 0) return;  // 격프레임
+
+      try {
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        FACE_OVAL.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+
+        var faceH = maxY - minY;
+        var faceW = maxX - minX;
+        // 헤어 영역 — 위로 100% × 좌우 25% 확장 (귀 옆 머리 + 정수리 모두)
+        var hX  = Math.max(0, Math.floor(minX - faceW * 0.25));
+        var hY  = Math.max(0, Math.floor(minY - faceH * 1.0));
+        var hX2 = Math.min(canvas.width,  Math.ceil(maxX + faceW * 0.25));
+        var hY2 = Math.min(canvas.height, Math.ceil(minY + faceH * 0.15));  // 이마 살짝 포함
+        var hW = hX2 - hX, hH = hY2 - hY;
+        if(hW < 10 || hH < 10) return;
+
+        window._inj51Stats.lastRegion = {x:hX, y:hY, w:hW, h:hH};
+
+        var imgData = ctx.getImageData(hX, hY, hW, hH);
+        var data = imgData.data;
+
+        // 색 분해
+        var tintR = parseInt(hairHex.substr(1,2), 16);
+        var tintG = parseInt(hairHex.substr(3,2), 16);
+        var tintB = parseInt(hairHex.substr(5,2), 16);
+        var tintLum = 0.2126 * tintR + 0.7152 * tintG + 0.0722 * tintB;
+
+        var intensity = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.7;
+        var gloss = (_rmaiAr.glossByCategory && _rmaiAr.glossByCategory.hair !== undefined) ? _rmaiAr.glossByCategory.hair : 0.3;
+
+        // 임계 (관대하게 — 흑발/갈색모 모두 포함)
+        var LUM_HAIR_MAX = 180;  // 휘도 < 이 값 = 헤어 후보 (배경/하늘 제외)
+        var LUM_DARK = 110;      // 휘도 < 이 값 = 흑발 → 강한 base shift
+        var LIFT_TARGET = 170;   // 가상 탈색 목표
+
+        var paintedThisFrame = 0;
+
+        for(var i = 0; i < data.length; i += 4){
+          var r = data[i], g = data[i+1], b = data[i+2];
+          var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          if(lum > LUM_HAIR_MAX) continue;  // 배경/하이라이트 패스
+
+          // 베이스 시프트 (어두울수록 강하게 띄움)
+          var workR = r, workG = g, workB = b;
+          if(lum < LUM_DARK){
+            var darkness = (LUM_DARK - lum) / LUM_DARK;
+            // 더 공격적 lift (0.6 → 0.85)
+            var lift = 1 + darkness * (LIFT_TARGET / Math.max(lum, 1) - 1) * 0.85;
+            workR = Math.min(255, r * lift);
+            workG = Math.min(255, g * lift);
+            workB = Math.min(255, b * lift);
+          }
+
+          // 헤어 가중치 — 어두울수록 강하게
+          var hairWeight = (LUM_HAIR_MAX - lum) / LUM_HAIR_MAX;
+          var alpha = Math.min(0.95, intensity * Math.pow(hairWeight, 0.7));
+
+          // Multiplicative blend
+          var multR = (workR * tintR) / 255;
+          var multG = (workG * tintG) / 255;
+          var multB = (workB * tintB) / 255;
+
+          // ★ 추가 — additive 살짝 혼합 (검정 헤어에서 색 더 명확히)
+          if(lum < 80){
+            multR = multR * 0.7 + tintR * 0.3 * (1 - lum/80);
+            multG = multG * 0.7 + tintG * 0.3 * (1 - lum/80);
+            multB = multB * 0.7 + tintB * 0.3 * (1 - lum/80);
+          }
+
+          data[i]   = Math.round(r * (1 - alpha) + multR * alpha);
+          data[i+1] = Math.round(g * (1 - alpha) + multG * alpha);
+          data[i+2] = Math.round(b * (1 - alpha) + multB * alpha);
+
+          // 글로시 부스트
+          if(gloss > 0.5 && lum < 70){
+            var boost = (gloss - 0.5) * 35;
+            data[i]   = Math.min(255, data[i]   + boost);
+            data[i+1] = Math.min(255, data[i+1] + boost);
+            data[i+2] = Math.min(255, data[i+2] + boost);
+          }
+          paintedThisFrame++;
+        }
+
+        ctx.putImageData(imgData, hX, hY);
+        window._inj51Stats.paintCount = paintedThisFrame;
+      } catch(e){
+        window._inj51Stats.lastError = e.message;
+      }
+    };
+  }
+  wrapStrongHair();
+
+  // 또한 박입 49 와 27 hair tint v1 비활성 (이 박입 51 만 강제 동작)
+  // — 다중 wrap 충돌 방지
+  setTimeout(function(){
+    window._hairTintEnabled = false;          // 박입 27 hair tint v1 OFF
+    window._hairBaseShiftEnabled = false;     // 박입 49 base shift OFF
+  }, 100);
+
+  window._inj51Control = {
+    enable: function(){ window._inj51HairEnabled = true; },
+    disable: function(){ window._inj51HairEnabled = false; },
+    stats: function(){
+      return {
+        enabled: !!window._inj51HairEnabled,
+        appliedHairColor: (typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors) ? _rmaiAr.appliedColors.hair : null,
+        frameCount: window._inj51Stats.frameCount,
+        lastPaintCount: window._inj51Stats.paintCount,
+        lastRegion: window._inj51Stats.lastRegion,
+        lastError: window._inj51Stats.lastError || null,
+        wrapped: !!window._inj51Wrapped,
+        thresholds: {LUM_HAIR_MAX:180, LUM_DARK:110, LIFT_TARGET:170, lift_strength:0.85}
+      };
+    }
+  };
+}, 16000);  // 모든 wrap 다 박힌 후 최외각으로 진입
 </script>
 
 </body>
