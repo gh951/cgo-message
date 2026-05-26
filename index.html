@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj58-main-pipeline" name="c41-version"/>
+<meta content="2026-05-26-c44-inj59-boost-visibility" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26871,11 +26871,12 @@ function _rmaiArOnResults(results){
           var chinY = lm152.y * canvas.height;
           var faceH = chinY - topY;
 
-          // 글로벌 표준: 얼굴 높이의 0.6 위로 확장 (ModiFace/PerfectCorp 규격)
+          // ★ 박입 59 — 영역 확장 (정수리 + 이마 위 앞머리 모두 포함)
+          //   글로벌 표준 0.6 위 + 0.15 아래 = 앞머리 영역까지 안전 커버
           var hairY = Math.max(0, Math.floor(topY - faceH * 0.6));
-          var hairH = Math.floor(faceH * 0.6);
-          var hairX = Math.max(0, Math.floor(topX - faceH * 0.55));
-          var hairW = Math.floor(faceH * 1.1);
+          var hairH = Math.floor(faceH * 0.75);  // 0.6 → 0.75 (앞머리 +0.15)
+          var hairX = Math.max(0, Math.floor(topX - faceH * 0.6));   // 좌우 +0.05
+          var hairW = Math.floor(faceH * 1.2);                       // 1.1 → 1.2
           hairX = Math.max(0, hairX);
           hairW = Math.min(canvas.width - hairX, hairW);
           hairH = Math.min(canvas.height - hairY, hairH);
@@ -26910,11 +26911,11 @@ function _rmaiArOnResults(results){
 
                 if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
 
-                // 흑발 가상 탈색 (base shift) — multiplicative 살리면서
+                // 흑발 가상 탈색 (base shift) — 박입 59: lift 강화 0.85 → 1.3
                 var workR = hr, workG = hg, workB = hb;
                 if(hlum < 110){
                   var darkness = (110 - hlum) / 110;
-                  var lift = 1 + darkness * (170/Math.max(hlum,1) - 1) * 0.85;
+                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 1.3;  // 0.85 → 1.3
                   workR = Math.min(255, hr * lift);
                   workG = Math.min(255, hg * lift);
                   workB = Math.min(255, hb * lift);
@@ -26925,15 +26926,16 @@ function _rmaiArOnResults(results){
                 var multG = (workG * tintG) / 255;
                 var multB = (workB * tintB) / 255;
 
-                // 어두운 픽셀에 additive 추가 (색 명확히)
+                // ★ 박입 59 — 어두운 픽셀에 additive 강화 (0.35 → 0.55)
                 if(hlum < 80){
-                  multR = multR * 0.65 + tintR * 0.35 * (1 - hlum/80);
-                  multG = multG * 0.65 + tintG * 0.35 * (1 - hlum/80);
-                  multB = multB * 0.65 + tintB * 0.35 * (1 - hlum/80);
+                  multR = multR * 0.45 + tintR * 0.55 * (1 - hlum/80);
+                  multG = multG * 0.45 + tintG * 0.55 * (1 - hlum/80);
+                  multB = multB * 0.45 + tintB * 0.55 * (1 - hlum/80);
                 }
 
+                // ★ 박입 59 — 헤어 가중치 강화 (Math.pow 0.7 → 0.5 = 더 평탄)
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.95, hairInt * Math.pow(hairWeight, 0.7));
+                var alpha = Math.min(0.98, hairInt * Math.pow(hairWeight, 0.5));
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
