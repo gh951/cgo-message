@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj51-strong-hair-hslsync" name="c41-version"/>
+<meta content="2026-05-26-c44-inj52-timeout-fix-c42-revoke" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27445,7 +27445,7 @@ window.rmaiArStop = function(){
   if(arSection) arSection.style.display='none';
   if(arStartBtn) arStartBtn.style.display='block';
   _rmaiAr.currentColor = null;
-  _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null };
+  _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null, hair:null };
   _rmaiAr.intensity = { lip:0.55, cheek:0.20, eye:0.35, base:0.35 };
   _rmaiAr.currentCategory = 'lip';
   _rmaiAr.currentPalette = 'oheng';
@@ -27956,36 +27956,37 @@ window.rmaiArCapture = function(){
     if(typeof window.rmaiArApplyColor !== 'function'){ setTimeout(wrapApplyColor, 300); return; }
     if(window._sviForceBaseWrapped) return;
     window.rmaiArApplyColor = function(hex, btn){
-      // base 전용 적용
-      _rmaiAr.currentCategory = 'base';
-      _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base: hex };
+      // ★ 박입 52 — c42 의 base 강제 wrap 폐기 (헤어 카테고리 destroy 했음)
+      //   원본 박입 42 로 위임 — _sviForceBaseWrapped 만 표시
+      var cat = (_rmaiAr.currentCategory || 'base');
+      _rmaiAr.appliedColors = _rmaiAr.appliedColors || {lip:null, cheek:null, eye:null, base:null, hair:null};
+      _rmaiAr.appliedColors[cat] = hex;
       _rmaiAr.currentColor = hex;
-      // picker 재렌더링
       if(typeof _rmaiArInitColorPicker === 'function'){
         _rmaiArInitColorPicker();
       }
-      // 브랜드 정보 카드 업데이트
       if(typeof window.sviUpdateBrandInfo === 'function'){
         window.sviUpdateBrandInfo(hex, null);
       }
-      console.log('[c42] base 색 적용:', hex);
+      console.log('[c44-inj52] 색 적용:', cat, hex);
     };
     window._sviForceBaseWrapped = true;
-    console.log('[c42] rmaiArApplyColor → base 전용 wrap');
+    console.log('[c44-inj52] c42 base 강제 wrap 폐기 — currentCategory 그대로');
   }
 
-  // ★ rmaiArSetCategory wrap — 항상 base로 (다른 카테고리 호출 무시)
+  // ★ rmaiArSetCategory wrap — 박입 52: c42 의 base 고정 폐기
   function wrapSetCategory(){
     if(typeof window.rmaiArSetCategory !== 'function'){ setTimeout(wrapSetCategory, 300); return; }
     var origFn = window.rmaiArSetCategory;
     window.rmaiArSetCategory = function(cat){
-      // 무조건 base
-      _rmaiAr.currentCategory = 'base';
+      // ★ 박입 52 — 클릭한 카테고리 그대로 (base 강제 X)
+      _rmaiAr.currentCategory = cat;
       if(typeof _rmaiArInitColorPicker === 'function'){
         _rmaiArInitColorPicker();
       }
+      console.log('[c44-inj52] 카테고리:', cat);
     };
-    console.log('[c42] rmaiArSetCategory → base 고정 wrap');
+    console.log('[c44-inj52] c42 카테고리 base 고정 wrap 폐기');
   }
 
   // ★ Intensity 슬라이더 업데이트 함수
@@ -31599,7 +31600,7 @@ setTimeout(function(){
             // AR 메이크업 페이지 진입 — 4 카테고리 모두 유지 (사용자 선택)
           } else {
             // 다른 페이지 → 모든 색 초기화 (AR 끄기)
-            _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null };
+            _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null, hair:null };
           }
         }
       } catch(e){}
@@ -31681,7 +31682,7 @@ setTimeout(function(){
     // 강제 리셋 (디버깅)
     resetAppliedColors: function(){
       if(typeof _rmaiAr !== 'undefined'){
-        _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null };
+        _rmaiAr.appliedColors = { lip:null, cheek:null, eye:null, base:null, hair:null };
       }
     }
   };
@@ -32103,7 +32104,7 @@ setTimeout(function(){
       };
     }
   };
-}, 13000);
+}, 800);  // 박입 52: 14초 → 0.8초
 </script>
 
 <!-- ════ 박입 48 — 인종 통합 머리 충돌 회피 (Hair Occlusion / 글로벌 통합) ════ -->
@@ -32231,7 +32232,7 @@ setTimeout(function(){
       };
     }
   };
-}, 13500);
+}, 900);  // 박입 52: 13.5초 → 0.9초
 </script>
 
 <!-- ════ 박입 49 — 헤어 50색 + 흑발 베이스 시프트 (Hair Color Lib + Dark Hair Lift) ════ -->
@@ -32574,6 +32575,7 @@ setTimeout(function(){
     }
     if(window._inj51Wrapped) return;
     window._inj51Wrapped = true;
+    console.log('[c44-inj52] ✅ 박입 51 strong hair renderer wrap 성공');
 
     var prevGlow = window.drawFresnelWaterGlow;
     var FACE_OVAL = window._rmaiArFaceOval ||
@@ -32719,7 +32721,7 @@ setTimeout(function(){
       };
     }
   };
-}, 16000);  // 모든 wrap 다 박힌 후 최외각으로 진입
+}, 1200);  // 박입 52: 16초 → 1.2초
 </script>
 
 </body>
