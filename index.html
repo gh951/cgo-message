@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj66-hair-stronger-stamp-center" name="c41-version"/>
+<meta content="2026-05-26-c44-inj67-slider-respect" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26953,11 +26953,11 @@ function _rmaiArOnResults(results){
 
                 if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
 
-                // ★ 박입 66 — Lift 0.7 → 1.0 (자연 탈색 강화)
+                // ★ 박입 67 — Lift 1.0 → 1.4 (흑발에 색 진짜 입혀지게)
                 var workR = hr, workG = hg, workB = hb;
                 if(hlum < 110){
                   var darkness = (110 - hlum) / 110;
-                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 1.0;
+                  var lift = 1 + darkness * (190/Math.max(hlum,1) - 1) * 1.4;
                   workR = Math.min(255, hr * lift);
                   workG = Math.min(255, hg * lift);
                   workB = Math.min(255, hb * lift);
@@ -26968,16 +26968,17 @@ function _rmaiArOnResults(results){
                 var multG = (workG * tintG) / 255;
                 var multB = (workB * tintB) / 255;
 
-                // ★ 박입 66 — Additive 0.30 → 0.45 (검정 텍스처 살리되 색 강화)
+                // ★ 박입 67 — Additive 0.45 → 0.60 (검정 흑발도 색 진하게)
                 if(hlum < 80){
-                  multR = multR * 0.55 + tintR * 0.45 * (1 - hlum/80);
-                  multG = multG * 0.55 + tintG * 0.45 * (1 - hlum/80);
-                  multB = multB * 0.55 + tintB * 0.45 * (1 - hlum/80);
+                  multR = multR * 0.40 + tintR * 0.60 * (1 - hlum/80);
+                  multG = multG * 0.40 + tintG * 0.60 * (1 - hlum/80);
+                  multB = multB * 0.40 + tintB * 0.60 * (1 - hlum/80);
                 }
 
-                // ★ 박입 66 — alpha cap 0.65 → 0.85 (색 보이게 + 음영 15% 잔존)
+                // ★ 박입 67 — alpha cap 0.85 → 0.97 (slider 100% 일 때 진짜 100%)
+                //   사용자 slider 가 진하기 제어 — 기본값은 강하게, 사용자가 조절
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.85, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
+                var alpha = Math.min(0.97, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
