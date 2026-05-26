@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-makeup-frame-full-stretch" name="c41-version"/>
+<meta content="2026-05-26-color-fine-gloss-linked" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13648,6 +13648,8 @@ var Q_POOL = {
     };
 
     // ② rmaiArApplyColor — 현재 카테고리에 색 박기 (base 강제 X)
+    //    ★ 핀셋 수정 — 색 클릭 → 미세 색상 슬라이더 + 카테고리별 HSL/물광 자동 연동
+    //    외부 함수 (sviSyncHslSlidersFromHex / _sviShowBrandInfo) 미정의 → 인라인 박입
     window.rmaiArApplyColor = function(hexColor, btnEl){
       if(typeof _rmaiAr === 'undefined') return;
       var cat = _rmaiAr.currentCategory || 'base';
@@ -13655,14 +13657,36 @@ var Q_POOL = {
       _rmaiAr.appliedColors[cat] = hexColor;  // ★ 현재 카테고리에 정확히 박음
       _rmaiAr.currentColor = hexColor;
 
-      // 브랜드 정보 표시 (선택)
-      if(typeof window._sviShowBrandInfo === 'function'){
-        try { window._sviShowBrandInfo(hexColor); } catch(e){}
-      }
-      // HSL 슬라이더 동기화 (HSL → HEX 갱신)
-      if(typeof window.sviSyncHslSlidersFromHex === 'function'){
-        try { window.sviSyncHslSlidersFromHex(hexColor); } catch(e){}
-      }
+      // ★ HEX → HSL 변환 후 미세 색상 슬라이더 강제 동기
+      //   sliders.oninput 이 makeupUpdateHsl 호출하지만 .value 직접 변경은 이벤트 안 뜸 → 직접 호출
+      //   makeupUpdateHsl override 가 hslByCategory[cat] = {h,s,l} 자동 저장 + 미리보기/HEX 박스 갱신
+      try {
+        if(hexColor && hexColor.charAt(0)==='#' && hexColor.length===7){
+          var R = parseInt(hexColor.substr(1,2),16)/255;
+          var G = parseInt(hexColor.substr(3,2),16)/255;
+          var B = parseInt(hexColor.substr(5,2),16)/255;
+          var mx = Math.max(R,G,B), mn = Math.min(R,G,B);
+          var H, S, L = (mx+mn)/2;
+          if(mx===mn){ H=0; S=0; }
+          else {
+            var d = mx-mn;
+            S = L>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+            if(mx===R) H = ((G-B)/d + (G<B?6:0));
+            else if(mx===G) H = ((B-R)/d + 2);
+            else H = ((R-G)/d + 4);
+            H /= 6;
+          }
+          var Hd = Math.round(H*360), Sp = Math.round(S*100), Lp = Math.round(L*100);
+          var hueBar = document.getElementById('svi-hue-bar-m');
+          var satBar = document.getElementById('svi-sat-bar-m');
+          var lightBar = document.getElementById('svi-light-bar-m');
+          if(hueBar && satBar && lightBar){
+            hueBar.value = Hd; satBar.value = Sp; lightBar.value = Lp;
+            // ★ 라벨/미리보기 + hslByCategory[cat] 자동 저장 (override 가 처리)
+            if(typeof window.makeupUpdateHsl === 'function') window.makeupUpdateHsl();
+          }
+        }
+      } catch(e){}
     };
   }
 
