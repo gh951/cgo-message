@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj71-forehead-stabilize" name="c41-version"/>
+<meta content="2026-05-26-c44-inj72-dialback" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26904,10 +26904,10 @@ function _rmaiArOnResults(results){
             var hairInt = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.75;
             var painted = 0;
 
-            // ★ 박입 71 — 이마 보호 다중 landmark 평균 (흔들림 안정)
-            //   기존: lm10 한 점 → 머리 흔들면 흔들림
-            //   개선: 이마 쪽 6개 landmark 평균 (lm10, 8, 9, 151, 107, 336)
-            var foreheadLms = [10, 8, 9, 151, 107, 336];
+            // ★ 박입 72 — 박입 71 의 오버 fix dial back
+            //   박입 71 (6개 landmark 평균) → 코쪽 점 포함되어 머리 영역까지 보호됨
+            //   복구: lm10 (이마 탑) + lm151 (이마 정중앙) 2개만 — 코 제외
+            var foreheadLms = [10, 151];
             var foreheadYSum = 0, foreheadYCount = 0;
             for(var fli = 0; fli < foreheadLms.length; fli++){
               var flm = landmarks[foreheadLms[fli]];
@@ -26917,8 +26917,8 @@ function _rmaiArOnResults(results){
               }
             }
             var foreheadY = foreheadYCount > 0 ? (foreheadYSum / foreheadYCount) : ovalMinY;
-            // 이마 보호 zone — landmark 평균 - 8px 마진 (살짝 빡빡하게)
-            var foreheadInRegion = foreheadY - hairY - 8;
+            // ★ 박입 72 — 마진 -8 → -3 (덜 빡빡, 머리 영역 보호 안 함)
+            var foreheadInRegion = foreheadY - hairY - 3;
 
             // ★ 박입 62 — Gaussian 감쇄 중심 (영역 중앙 약간 위)
             var gaussCx = hairW / 2;
@@ -26949,12 +26949,11 @@ function _rmaiArOnResults(results){
                 var hlum = 0.2126*hr + 0.7152*hg + 0.0722*hb;
                 if(hlum > 180) continue;
 
-                // ★ 박입 71 — 이마 피부 보호 강화 (skin 임계 완화 — 침범 잘 막음)
-                //   이마 zone + 휘도 ≥ 105 (115 → 105 완화)
-                //   피부 톤 조건도 완화 — R-B 차이 100 까지 허용 (피부 다양성)
+                // ★ 박입 72 — 박입 71 의 임계 완화 dial back
+                //   휘도 105 → 112 (박입 62 수준 복구), R-B 100 → 85
                 var isInForeheadZone = (py >= foreheadInRegion - 5);
-                if(isInForeheadZone && hlum >= 105){
-                  var isSkinTone = (hr > hg - 8) && (hg > hb - 8) && (hr - hb < 100);
+                if(isInForeheadZone && hlum >= 112){
+                  var isSkinTone = (hr > hg - 5) && (hg > hb - 5) && (hr - hb < 85);
                   if(isSkinTone) continue;
                 }
 
