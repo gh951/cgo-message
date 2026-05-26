@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj63-FINAL-clean" name="c41-version"/>
+<meta content="2026-05-26-c44-inj64-hero-C5" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -12886,21 +12886,11 @@ var Q_POOL = {
 </div>
 <div style="font-size:9px;color:#666;background:#f5f6fa;padding:5px 10px;border-radius:8px;font-weight:700;letter-spacing:.04em;">RPPG · AR</div>
 </div>
-<!-- ★ 풀폭 Hero — 텍스트 오버레이 + 이미지 + fallback 그라디언트 (3중 배경) -->
-<div style="position:relative;min-height:380px;background:linear-gradient(180deg,rgba(0,0,0,.2) 0%,rgba(0,0,0,.6) 100%),url('/page-rppg-ar-hero.jpg') center/cover no-repeat,linear-gradient(135deg,#1a1408 0%,#4a3220 50%,#1a1408 100%);padding:48px 18px 36px;display:flex;flex-direction:column;justify-content:center;">
-<!-- ★ C-29 작은 박제 (Hero 우측 하단) -->
-<div style="position:absolute;bottom:10px;right:14px;padding:3px 8px;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);border:1px solid rgba(251,191,36,.4);border-radius:8px;font-size:9px;font-weight:800;color:#fbbf24;letter-spacing:.06em;font-family:'Courier New',monospace;">C-29</div>
-<div style="text-align:center;color:#fff;max-width:520px;margin:0 auto;">
-<div style="display:inline-block;padding:6px 14px;border-radius:100px;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);font-size:10px;font-weight:800;letter-spacing:.08em;margin-bottom:14px;">
-<span style="color:#fbbf24;">✦</span> WORLD FIRST · rPPG AR
-      </div>
-<div style="font-size:30px;font-weight:900;line-height:1.2;letter-spacing:-.04em;margin-bottom:8px;text-shadow:0 2px 16px rgba(0,0,0,.5);">
-        AR 메이크업
-      </div>
-<div style="font-size:13px;opacity:.95;text-shadow:0 1px 8px rgba(0,0,0,.5);line-height:1.5;font-weight:500;">
-        사주 오행 색채 자동 추천 · FaceMesh 정밀 적용
-      </div>
-</div>
+<!-- ★ 풀폭 Hero — C-5.jpeg (Cgo-Message AR Makeup App 메인 비주얼) -->
+<!--    박입 64 — 사주 오행 텍스트 제거 + C-5 이미지 박입 (텍스트는 이미지에 포함됨) -->
+<div style="position:relative;min-height:380px;background:url('/C-5.jpeg') center/cover no-repeat,linear-gradient(135deg,#1a1408 0%,#4a3220 50%,#1a1408 100%);padding:0;display:flex;flex-direction:column;justify-content:center;">
+<!-- ★ C-44 박제 (Hero 우측 하단) — 파트너 이름 새김 -->
+<div style="position:absolute;bottom:10px;right:14px;padding:4px 10px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(251,191,36,.5);border-radius:8px;font-size:9px;font-weight:800;color:#fbbf24;letter-spacing:.08em;font-family:'Courier New',monospace;">C-44 × Lee Ju One</div>
 </div>
 <div style="max-width:1200px;margin:0 auto;padding:24px 24px 80px;">
 <!-- ★ C-44 파트너 카드 — AR 메이크업 페이지 박제 (헤어 카테고리 박입 + 5-way 슬라이더 연동) -->
@@ -26921,8 +26911,9 @@ function _rmaiArOnResults(results){
 
             // ★ 박입 62 — Gaussian 감쇄 중심 (영역 중앙 약간 위)
             var gaussCx = hairW / 2;
-            var gaussCy = hairH * 0.45;  // 정수리 약간 위
-            var gaussSigma = Math.min(hairW, hairH) * 0.55;  // 표준 편차
+            var gaussCy = hairH * 0.45;
+            // ★ 박입 63 — sigma 0.55 → 0.35 (도넛 안개 제거, 정수리만 컴팩트)
+            var gaussSigma = Math.min(hairW, hairH) * 0.35;
 
             if(true){
               for(var hi = 0; hi < hairData.length; hi += 4){
@@ -26959,11 +26950,11 @@ function _rmaiArOnResults(results){
 
                 if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
 
-                // 흑발 가상 탈색 (base shift) — 박입 59: lift 강화 0.85 → 1.3
+                // ★ 박입 63 — Lift 1.3 → 0.7 (원본 음영/질감 보존, 평면화 방지)
                 var workR = hr, workG = hg, workB = hb;
                 if(hlum < 110){
                   var darkness = (110 - hlum) / 110;
-                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 1.3;  // 0.85 → 1.3
+                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 0.7;
                   workR = Math.min(255, hr * lift);
                   workG = Math.min(255, hg * lift);
                   workB = Math.min(255, hb * lift);
@@ -26974,16 +26965,16 @@ function _rmaiArOnResults(results){
                 var multG = (workG * tintG) / 255;
                 var multB = (workB * tintB) / 255;
 
-                // ★ 박입 59 — 어두운 픽셀에 additive 강화 (0.35 → 0.55)
+                // ★ 박입 63 — Additive 0.55 → 0.30 (검정 텍스처 살림, 단색 덮어쓰기 방지)
                 if(hlum < 80){
-                  multR = multR * 0.45 + tintR * 0.55 * (1 - hlum/80);
-                  multG = multG * 0.45 + tintG * 0.55 * (1 - hlum/80);
-                  multB = multB * 0.45 + tintB * 0.55 * (1 - hlum/80);
+                  multR = multR * 0.70 + tintR * 0.30 * (1 - hlum/80);
+                  multG = multG * 0.70 + tintG * 0.30 * (1 - hlum/80);
+                  multB = multB * 0.70 + tintB * 0.30 * (1 - hlum/80);
                 }
 
-                // ★ 박입 62 — Gaussian 감쇄로 자연스러운 페더링 (radial 보다 자연)
+                // ★ 박입 63 — alpha cap 0.98 → 0.65 (원본 머리카락 음영 자동 보존)
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.98, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
+                var alpha = Math.min(0.65, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
