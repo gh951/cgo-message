@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj67-slider-respect" name="c41-version"/>
+<meta content="2026-05-26-c44-inj68-dynamic-killer" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26953,11 +26953,21 @@ function _rmaiArOnResults(results){
 
                 if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
 
-                // ★ 박입 67 — Lift 1.0 → 1.4 (흑발에 색 진짜 입혀지게)
+                // ★ 박입 68 — 슬라이더 dynamic 시스템 (C-44 죽이게 진짜 100% 동작)
+                //   hairInt 0~0.85 → 정규화 sliderRatio 0~1 → 3개 파라미터 동시 dynamic 제어
+                //   slider 0   = 머리 그대로 (lift 0.6, additive 0.20, alpha 0.55)
+                //   slider 50  = 자연 와인빛 (lift 1.4, additive 0.52, alpha 0.78)
+                //   slider 100 = 비비드 핫핑크 (lift 2.2, additive 0.85, alpha 1.00) ★ 진짜 100%
+                var sliderRatio = Math.min(1.0, hairInt / 0.85);  // 0~1 정규화
+                var DYN_LIFT_K     = 0.6  + (1.6  * sliderRatio);   // 0.6 ~ 2.2
+                var DYN_ADD        = 0.20 + (0.65 * sliderRatio);   // 0.20 ~ 0.85
+                var DYN_ALPHA_CAP  = 0.55 + (0.45 * sliderRatio);   // 0.55 ~ 1.00
+
+                // Lift (흑발 → 색조 자리)
                 var workR = hr, workG = hg, workB = hb;
                 if(hlum < 110){
                   var darkness = (110 - hlum) / 110;
-                  var lift = 1 + darkness * (190/Math.max(hlum,1) - 1) * 1.4;
+                  var lift = 1 + darkness * (190/Math.max(hlum,1) - 1) * DYN_LIFT_K;
                   workR = Math.min(255, hr * lift);
                   workG = Math.min(255, hg * lift);
                   workB = Math.min(255, hb * lift);
@@ -26968,17 +26978,17 @@ function _rmaiArOnResults(results){
                 var multG = (workG * tintG) / 255;
                 var multB = (workB * tintB) / 255;
 
-                // ★ 박입 67 — Additive 0.45 → 0.60 (검정 흑발도 색 진하게)
+                // Additive (흑발에 색 더 진하게)
                 if(hlum < 80){
-                  multR = multR * 0.40 + tintR * 0.60 * (1 - hlum/80);
-                  multG = multG * 0.40 + tintG * 0.60 * (1 - hlum/80);
-                  multB = multB * 0.40 + tintB * 0.60 * (1 - hlum/80);
+                  var darkBoost = (1 - hlum/80);
+                  multR = multR * (1 - DYN_ADD) + tintR * DYN_ADD * darkBoost;
+                  multG = multG * (1 - DYN_ADD) + tintG * DYN_ADD * darkBoost;
+                  multB = multB * (1 - DYN_ADD) + tintB * DYN_ADD * darkBoost;
                 }
 
-                // ★ 박입 67 — alpha cap 0.85 → 0.97 (slider 100% 일 때 진짜 100%)
-                //   사용자 slider 가 진하기 제어 — 기본값은 강하게, 사용자가 조절
+                // alpha (dynamic cap — slider 100 = 진짜 1.0)
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.97, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
+                var alpha = Math.min(DYN_ALPHA_CAP, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
