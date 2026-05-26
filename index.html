@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj52-timeout-fix-c42-revoke" name="c41-version"/>
+<meta content="2026-05-26-c44-inj53-debug-box" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32722,6 +32722,114 @@ setTimeout(function(){
     }
   };
 }, 1200);  // 박입 52: 16초 → 1.2초
+</script>
+
+<!-- ════ 박입 53 — 화면 디버그 박스 (스마트폰 콘솔 X 대응) ════ -->
+<!--    AR 화면 우측 상단에 반투명 박스 박입                              -->
+<!--    표시: 현재 카테고리 · 헤어 색 · 헤어 픽셀 paint 카운트            -->
+<!--    시험 끝나면 박입 54 로 제거                                       -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // 박스 생성
+  var dbg = document.createElement('div');
+  dbg.id = 'inj53-debug-box';
+  dbg.style.cssText = [
+    'position:fixed',
+    'top:60px',
+    'right:8px',
+    'z-index:99999',
+    'background:rgba(0,0,0,0.85)',
+    'color:#0f0',
+    'padding:8px 10px',
+    'border-radius:8px',
+    'font-family:monospace',
+    'font-size:11px',
+    'line-height:1.4',
+    'min-width:170px',
+    'max-width:220px',
+    'box-shadow:0 4px 12px rgba(0,0,0,0.4)',
+    'border:1px solid #0f0',
+    'pointer-events:auto',
+    'user-select:none'
+  ].join(';');
+  dbg.innerHTML = '<div style="color:#fbbf24;font-weight:900;margin-bottom:4px;display:flex;justify-content:space-between;">' +
+    '<span>🔍 박입 53 진단</span>' +
+    '<span id="inj53-close" style="color:#f88;cursor:pointer;padding:0 4px;">✕</span>' +
+    '</div>' +
+    '<div id="inj53-cat">cat: <span style="color:#fff;">-</span></div>' +
+    '<div id="inj53-hair">hair: <span style="color:#fff;">null</span></div>' +
+    '<div id="inj53-wrap">wrap: <span style="color:#fff;">?</span></div>' +
+    '<div id="inj53-frame">frame: <span style="color:#fff;">0</span></div>' +
+    '<div id="inj53-paint">paint: <span style="color:#fff;">0</span></div>' +
+    '<div id="inj53-region">region: <span style="color:#fff;">-</span></div>' +
+    '<div id="inj53-err" style="color:#f88;font-size:10px;margin-top:3px;"></div>';
+  document.body.appendChild(dbg);
+
+  // 닫기 버튼
+  document.getElementById('inj53-close').addEventListener('click', function(){
+    dbg.style.display = 'none';
+  });
+
+  // 매 500ms 갱신
+  setInterval(function(){
+    try {
+      var cat = (typeof _rmaiAr !== 'undefined' && _rmaiAr.currentCategory) ? _rmaiAr.currentCategory : '-';
+      var hair = (typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors) ? _rmaiAr.appliedColors.hair : null;
+      var wrap = window._inj51Wrapped ? 'OK' : 'FAIL';
+      var stats = window._inj51Stats || {};
+      var region = stats.lastRegion ? (stats.lastRegion.w + 'x' + stats.lastRegion.h) : '-';
+      var err = stats.lastError || '';
+
+      var catEl = document.getElementById('inj53-cat');
+      var hairEl = document.getElementById('inj53-hair');
+      var wrapEl = document.getElementById('inj53-wrap');
+      var frameEl = document.getElementById('inj53-frame');
+      var paintEl = document.getElementById('inj53-paint');
+      var regionEl = document.getElementById('inj53-region');
+      var errEl = document.getElementById('inj53-err');
+
+      // 카테고리 — 헤어면 노란색
+      if(catEl){
+        var catColor = (cat === 'hair') ? '#fbbf24' : '#fff';
+        catEl.innerHTML = 'cat: <span style="color:'+catColor+';font-weight:900;">' + cat + '</span>';
+      }
+      // 헤어 색 — null 이면 빨강, hex 면 그 색으로 표시
+      if(hairEl){
+        if(hair){
+          hairEl.innerHTML = 'hair: <span style="color:'+hair+';font-weight:900;background:#222;padding:1px 4px;border-radius:3px;">' + hair + '</span>';
+        } else {
+          hairEl.innerHTML = 'hair: <span style="color:#f88;">null</span>';
+        }
+      }
+      // wrap 상태
+      if(wrapEl){
+        var wrapColor = (wrap === 'OK') ? '#0f0' : '#f88';
+        wrapEl.innerHTML = 'wrap: <span style="color:'+wrapColor+';font-weight:900;">' + wrap + '</span>';
+      }
+      // 프레임 카운트
+      if(frameEl){
+        frameEl.innerHTML = 'frame: <span style="color:#fff;">' + (stats.frameCount || 0) + '</span>';
+      }
+      // 페인트 카운트 (헤어 픽셀 처리 수)
+      if(paintEl){
+        var pc = stats.paintCount || 0;
+        var pcColor = (pc > 1000) ? '#0f0' : (pc > 0) ? '#fbbf24' : '#f88';
+        paintEl.innerHTML = 'paint: <span style="color:'+pcColor+';font-weight:900;">' + pc + '</span>';
+      }
+      // 영역 크기
+      if(regionEl){
+        regionEl.innerHTML = 'region: <span style="color:#fff;">' + region + '</span>';
+      }
+      // 에러
+      if(errEl){
+        errEl.textContent = err ? ('err: ' + err.substring(0, 40)) : '';
+      }
+    } catch(e){}
+  }, 500);
+
+}, 1500);
 </script>
 
 </body>
