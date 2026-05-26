@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj53-debug-box" name="c41-version"/>
+<meta content="2026-05-26-c44-inj54-force-draw" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -27840,9 +27840,11 @@ window.rmaiArCapture = function(){
       if(typeof _rmaiArOnResults === 'function'){
         _rmaiArOnResults(results);
       }
-      // 물광 효과 추가 그리기
-      if(_rmaiAr.glossLevel > 0 && results.multiFaceLandmarks && results.multiFaceLandmarks[0]){
-        window.drawFresnelWaterGlow(_rmaiAr.ctx, _rmaiAr.canvas, results.multiFaceLandmarks[0], _rmaiAr.glossLevel);
+      // 물광 효과 추가 그리기 — 박입 54: 헤어 색 박혔으면 glossLevel 무관 호출
+      var hasHair = (_rmaiAr.appliedColors && _rmaiAr.appliedColors.hair);
+      var shouldDraw = (_rmaiAr.glossLevel > 0 || hasHair) && results.multiFaceLandmarks && results.multiFaceLandmarks[0];
+      if(shouldDraw){
+        window.drawFresnelWaterGlow(_rmaiAr.ctx, _rmaiAr.canvas, results.multiFaceLandmarks[0], _rmaiAr.glossLevel || 0);
       }
     });
     _rmaiAr._fresnelHooked = true;
