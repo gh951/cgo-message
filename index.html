@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj83-hero-natural" name="c41-version"/>
+<meta content="2026-05-26-c44-inj84-hero-safe" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13948,7 +13948,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </div>
 </div>
 
-<!-- ★ 박입 79/80/82/83 — Hero 이미지 영역 (이미지 자체 비율 유지) -->
+<!-- ★ 박입 84 — Hero (안전한 최소 높이 + 이미지 자연 비율) -->
 <style>
   #eye-hero-area{
     width:100% !important;
@@ -13958,19 +13958,22 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     overflow:hidden !important;
     background:linear-gradient(135deg,#f0fdfb 0%,#ccfbf1 50%,#e0f7f5 100%) !important;
     border-bottom:1px solid #ccfbf1 !important;
+    min-height:240px !important;
     text-align:center;
   }
   #eye-hero-area img{
-    width:100% !important;
-    max-width:1200px !important;
+    width:auto !important;
+    max-width:100% !important;
+    max-height:600px !important;
     height:auto !important;
     display:block !important;
     margin:0 auto !important;
     object-fit:contain !important;
   }
   #eye-hero-area .eye-hero-fallback{
-    min-height:200px;
-    display:none;
+    position:absolute;
+    inset:0;
+    display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
@@ -13978,7 +13981,11 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     color:#0f766e;
     text-align:center;
     padding:24px;
-    width:100%;
+    pointer-events:none;
+    opacity:0.6;
+  }
+  #eye-hero-area img:not([src=""]) ~ .eye-hero-fallback{
+    display:none;
   }
   #eye-hero-area .eye-hero-stamp{
     position:absolute;
@@ -13994,16 +14001,18 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     color:#5eead4 !important;
     letter-spacing:.16em;
     font-family:'Courier New',monospace;
-    z-index:2;
+    z-index:3;
   }
 </style>
 <div id="eye-hero-area">
-<img alt="C-44 나의 눈 헬스" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="/C-6.jpeg"/>
+<!-- 폴백 박스 (img 가려질 때만 보이는 배경 표시) -->
 <div class="eye-hero-fallback">
 <div style="font-size:48px;opacity:.4;">👁️</div>
-<div style="font-size:12px;letter-spacing:.04em;font-weight:700;">Hero 이미지 영역 — 추후 업로드 예정</div>
+<div style="font-size:12px;letter-spacing:.04em;font-weight:700;">C-44 · 나의 눈 헬스</div>
 <div style="font-size:10px;color:#14b8a6;font-family:'Courier New',monospace;">파일명: /C-6.jpeg</div>
 </div>
+<!-- 이미지 (위에 덮어짐) -->
+<img alt="C-44 나의 눈 헬스" src="/C-6.jpeg" style="position:relative;z-index:1;"/>
 <div class="eye-hero-stamp">C-44</div>
 </div>
 
