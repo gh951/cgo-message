@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj54-force-draw" name="c41-version"/>
+<meta content="2026-05-26-c44-inj55-autorecover" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -32780,6 +32780,17 @@ setTimeout(function(){
       var cat = (typeof _rmaiAr !== 'undefined' && _rmaiAr.currentCategory) ? _rmaiAr.currentCategory : '-';
       var hair = (typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors) ? _rmaiAr.appliedColors.hair : null;
       var wrap = window._inj51Wrapped ? 'OK' : 'FAIL';
+      // ★ 박입 55 — 함수가 진짜 박입 51 의 새 버전인지 확인
+      //   박입 51 함수 안에는 _inj51Stats.frameCount++ 가 있음
+      //   함수 toString() 안에 그 코드가 있는지 검사
+      var isAlive = false;
+      try {
+        var fnStr = window.drawFresnelWaterGlow ? window.drawFresnelWaterGlow.toString() : '';
+        isAlive = (fnStr.indexOf('_inj51Stats') > -1);
+      } catch(e){}
+      if(wrap === 'OK' && !isAlive){
+        wrap = 'DEAD';  // wrap 됐지만 다른 wrap 가 위에 덮음
+      }
       var stats = window._inj51Stats || {};
       var region = stats.lastRegion ? (stats.lastRegion.w + 'x' + stats.lastRegion.h) : '-';
       var err = stats.lastError || '';
@@ -32832,6 +32843,135 @@ setTimeout(function(){
   }, 500);
 
 }, 1500);
+</script>
+
+<!-- ════ 박입 55 — 박입 51 강제 재 wrap (DEAD 상태 회복) ════ -->
+<!--   박입 51 wrap 이 다른 wrap 에 의해 덮인 경우 (DEAD) 매 2초마다 재진입       -->
+<!--   isAlive 체크: window.drawFresnelWaterGlow.toString() 안에 _inj51Stats 있음? -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // 박입 51 의 강력 헤어 렌더러 함수 본체 (재사용용)
+  function makeHairRenderer(prevGlow){
+    var FACE_OVAL = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+    var frameCounter = 0;
+
+    return function(ctx, canvas, landmarks, glossLevel){
+      // 이전 chain 실행
+      if(typeof prevGlow === 'function'){
+        try { prevGlow(ctx, canvas, landmarks, glossLevel); } catch(e){}
+      }
+
+      if(!landmarks || typeof _rmaiAr === 'undefined') return;
+      var hairHex = (_rmaiAr.appliedColors || {}).hair;
+      if(!hairHex || hairHex.charAt(0) !== '#' || hairHex.length !== 7) return;
+
+      window._inj51Stats = window._inj51Stats || {frameCount:0, paintCount:0};
+      window._inj51Stats.frameCount++;
+      frameCounter++;
+      if(frameCounter % 2 !== 0) return;
+
+      try {
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        FACE_OVAL.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+
+        var faceH = maxY - minY;
+        var faceW = maxX - minX;
+        var hX  = Math.max(0, Math.floor(minX - faceW * 0.25));
+        var hY  = Math.max(0, Math.floor(minY - faceH * 1.0));
+        var hX2 = Math.min(canvas.width,  Math.ceil(maxX + faceW * 0.25));
+        var hY2 = Math.min(canvas.height, Math.ceil(minY + faceH * 0.15));
+        var hW = hX2 - hX, hH = hY2 - hY;
+        if(hW < 10 || hH < 10) return;
+
+        window._inj51Stats.lastRegion = {x:hX, y:hY, w:hW, h:hH};
+
+        var imgData = ctx.getImageData(hX, hY, hW, hH);
+        var data = imgData.data;
+
+        var tintR = parseInt(hairHex.substr(1,2), 16);
+        var tintG = parseInt(hairHex.substr(3,2), 16);
+        var tintB = parseInt(hairHex.substr(5,2), 16);
+        var intensity = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.7;
+        var gloss = (_rmaiAr.glossByCategory && _rmaiAr.glossByCategory.hair !== undefined) ? _rmaiAr.glossByCategory.hair : 0.3;
+
+        var LUM_HAIR_MAX = 180, LUM_DARK = 110, LIFT_TARGET = 170;
+        var paintedThisFrame = 0;
+
+        for(var i = 0; i < data.length; i += 4){
+          var r = data[i], g = data[i+1], b = data[i+2];
+          var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          if(lum > LUM_HAIR_MAX) continue;
+
+          var workR = r, workG = g, workB = b;
+          if(lum < LUM_DARK){
+            var darkness = (LUM_DARK - lum) / LUM_DARK;
+            var lift = 1 + darkness * (LIFT_TARGET / Math.max(lum, 1) - 1) * 0.85;
+            workR = Math.min(255, r * lift);
+            workG = Math.min(255, g * lift);
+            workB = Math.min(255, b * lift);
+          }
+
+          var hairWeight = (LUM_HAIR_MAX - lum) / LUM_HAIR_MAX;
+          var alpha = Math.min(0.95, intensity * Math.pow(hairWeight, 0.7));
+
+          var multR = (workR * tintR) / 255;
+          var multG = (workG * tintG) / 255;
+          var multB = (workB * tintB) / 255;
+
+          if(lum < 80){
+            multR = multR * 0.7 + tintR * 0.3 * (1 - lum/80);
+            multG = multG * 0.7 + tintG * 0.3 * (1 - lum/80);
+            multB = multB * 0.7 + tintB * 0.3 * (1 - lum/80);
+          }
+
+          data[i]   = Math.round(r * (1 - alpha) + multR * alpha);
+          data[i+1] = Math.round(g * (1 - alpha) + multG * alpha);
+          data[i+2] = Math.round(b * (1 - alpha) + multB * alpha);
+          paintedThisFrame++;
+        }
+
+        ctx.putImageData(imgData, hX, hY);
+        window._inj51Stats.paintCount = paintedThisFrame;
+      } catch(e){
+        window._inj51Stats.lastError = e.message;
+      }
+    };
+  }
+
+  // ★ 매 2초마다 isAlive 검사 — DEAD 면 강제 재진입
+  setInterval(function(){
+    try {
+      if(typeof window.drawFresnelWaterGlow !== 'function') return;
+      var fnStr = window.drawFresnelWaterGlow.toString();
+      var isAlive = (fnStr.indexOf('_inj51Stats') > -1);
+      if(isAlive) return;  // 살아 있으면 skip
+
+      // DEAD — 강제 재 wrap
+      var prevGlow = window.drawFresnelWaterGlow;
+      window.drawFresnelWaterGlow = makeHairRenderer(prevGlow);
+      window._inj55RewrapCount = (window._inj55RewrapCount || 0) + 1;
+      console.log('[c44-inj55] 박입 51 DEAD 감지 → 재 wrap (count: ' + window._inj55RewrapCount + ')');
+    } catch(e){}
+  }, 2000);
+
+  console.log('[c44-inj55] 박입 51 자동 회복 monitor 시작');
+}, 2500);
 </script>
 
 </body>
