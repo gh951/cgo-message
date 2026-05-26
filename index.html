@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj48-hair-occlusion" name="c41-version"/>
+<meta content="2026-05-26-c44-inj50-ui-polish" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13665,7 +13665,7 @@ var Q_POOL = {
     };
 
     // ② rmaiArApplyColor — 현재 카테고리에 색 박기 (base 강제 X)
-    //    ★ 핀셋 수정 — 색 클릭 → 미세 색상 슬라이더 자동 연동 (인라인 HEX→HSL)
+    //    ★ 박입 50 핀셋 보강 — 현재색 박스/HEX 직접 갱신 + picker 강제 새로고침 (선택 표시)
     window.rmaiArApplyColor = function(hexColor, btnEl){
       if(typeof _rmaiAr === 'undefined') return;
       var cat = _rmaiAr.currentCategory || 'base';
@@ -13674,7 +13674,6 @@ var Q_POOL = {
       _rmaiAr.currentColor = hexColor;
 
       // ★ HEX → HSL 변환 후 미세 색상 슬라이더 강제 동기
-      //   makeupUpdateHsl override 가 hslByCategory[cat] = {h,s,l} 자동 저장 + 미리보기 갱신
       try {
         if(hexColor && hexColor.charAt(0)==='#' && hexColor.length===7){
           var R = parseInt(hexColor.substr(1,2),16)/255;
@@ -13697,8 +13696,32 @@ var Q_POOL = {
           var lightBar = document.getElementById('svi-light-bar-m');
           if(hueBar && satBar && lightBar){
             hueBar.value = Hd; satBar.value = Sp; lightBar.value = Lp;
-            if(typeof window.makeupUpdateHsl === 'function') window.makeupUpdateHsl();
+            // 라벨 직접 갱신 (makeupUpdateHsl 의존 X)
+            var hueVal = document.getElementById('svi-hue-val-m');
+            var satVal = document.getElementById('svi-sat-val-m');
+            var lightVal = document.getElementById('svi-light-val-m');
+            if(hueVal) hueVal.textContent = Hd + '°';
+            if(satVal) satVal.textContent = Sp + '%';
+            if(lightVal) lightVal.textContent = Lp + '%';
+            // ★ 박입 50 핵심 — 현재색 박스 + HEX 표시 직접 갱신 (hslToHex scope 의존 X)
+            var preview = document.getElementById('svi-hsl-preview-m');
+            var hexBox = document.getElementById('svi-hsl-hex-m');
+            if(preview) preview.style.background = hexColor;
+            if(hexBox) hexBox.textContent = hexColor.toUpperCase();
+            // hslByCategory 자동 저장 (makeupUpdateHsl override 가 처리)
+            if(typeof window.makeupUpdateHsl === 'function'){
+              try { window.makeupUpdateHsl(); } catch(e){}
+            }
           }
+        }
+      } catch(e){}
+
+      // ★ 박입 50 핵심 — picker 강제 새로고침 (선택 표시 gold ring 출력)
+      try {
+        if(typeof window._rmaiArInitColorPicker === 'function'){
+          window._rmaiArInitColorPicker();
+        } else if(typeof _rmaiArInitColorPicker === 'function'){
+          _rmaiArInitColorPicker();
         }
       } catch(e){}
     };
@@ -32195,6 +32218,326 @@ setTimeout(function(){
     }
   };
 }, 13500);
+</script>
+
+<!-- ════ 박입 49 — 헤어 50색 + 흑발 베이스 시프트 (Hair Color Lib + Dark Hair Lift) ════ -->
+<!--    문제: ① currentCardLib.hair 없어 base 폴백 (피부톤) → 헤어 무의미                -->
+<!--          ② 흑발에 multiplicative blend 약함 (어두운 픽셀 × 색 = 어두운 색)         -->
+<!--    해법: ① daily/luxury/oheng 각 모드에 헤어 50색 주입                              -->
+<!--          ② 흑발 (luminance < 80) 에 베이스 시프트 적용 → 가상 탈색 → 색 입힘       -->
+<!--          ③ mini preview 와 maxIntensity 에 hair 추가                                -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // ─── ① 헤어 50색 라이브러리 (daily 30 + luxury 15 + oheng 5) ───
+  // daily.hair — 자연 일상 30색
+  var DAILY_HAIR = [
+    {n:'자연 흑색',     c:'#1a1a1a'},
+    {n:'블루블랙',      c:'#0a0e1a'},
+    {n:'소프트 블랙',   c:'#2a2424'},
+    {n:'다크 브라운',   c:'#3a2418'},
+    {n:'미디엄 브라운', c:'#5d3a20'},
+    {n:'라이트 브라운', c:'#8b5a2b'},
+    {n:'초콜릿 브라운', c:'#3b2418'},
+    {n:'모카 브라운',   c:'#4a3326'},
+    {n:'카라멜 브라운', c:'#7d4f24'},
+    {n:'헤이즐넛',      c:'#8b6342'},
+    {n:'골든 브라운',   c:'#a47148'},
+    {n:'카퍼 브라운',   c:'#a85a32'},
+    {n:'허니 브라운',   c:'#9c6b2f'},
+    {n:'시나몬 브라운', c:'#995c33'},
+    {n:'캐러멜 마키아토', c:'#b08055'},
+    {n:'다크 블론드',   c:'#a67c52'},
+    {n:'미디엄 블론드', c:'#c9a063'},
+    {n:'골든 블론드',   c:'#d4a857'},
+    {n:'와이 블론드',   c:'#d8b878'},
+    {n:'애쉬 그레이',   c:'#6b6b6b'},
+    {n:'애쉬 브라운',   c:'#6b5a4f'},
+    {n:'애쉬 블론드',   c:'#a8967c'},
+    {n:'그레이지',      c:'#8a7a6b'},
+    {n:'다크 레드',     c:'#5c2018'},
+    {n:'오번',          c:'#922d1b'},
+    {n:'미디엄 레드',   c:'#a8443c'},
+    {n:'라이트 카퍼',   c:'#c47e4a'},
+    {n:'다크 마호가니', c:'#4a2424'},
+    {n:'다크 부르고뉴', c:'#3d1f24'},
+    {n:'내추럴 보르도', c:'#682838'}
+  ];
+  // luxury.hair — 트렌디·프리미엄 15색
+  var LUXURY_HAIR = [
+    {n:'플래티넘 블론드', c:'#e8dccc'},
+    {n:'스트로베리 블론드', c:'#d49880'},
+    {n:'발레이아쥬 골드', c:'#c89858'},
+    {n:'발레이아쥬 카퍼', c:'#b8633a'},
+    {n:'라벤더 그레이', c:'#a8a4b8'},
+    {n:'로즈 골드',     c:'#c89098'},
+    {n:'미스티 라일락', c:'#b8a8c4'},
+    {n:'페일 핑크',     c:'#e8b8c4'},
+    {n:'비비드 블루',   c:'#3060a8'},
+    {n:'비비드 그린',   c:'#388048'},
+    {n:'비비드 퍼플',   c:'#7028a8'},
+    {n:'비비드 핑크',   c:'#d83878'},
+    {n:'챔피언 골드',   c:'#d4a838'},
+    {n:'화이트 실버',   c:'#dcdcdc'},
+    {n:'메탈릭 그레이', c:'#8a8a8a'}
+  ];
+  // oheng.hair — 오행 5색
+  var OHENG_HAIR = [
+    {n:'木(목) 자연 갈색', c:'#5a3a20'},
+    {n:'火(화) 적갈색',   c:'#8b2818'},
+    {n:'土(토) 황토 카멜', c:'#a87c44'},
+    {n:'金(금) 골든 블론드', c:'#c89a48'},
+    {n:'水(수) 블루블랙', c:'#0e1828'}
+  ];
+
+  // 라이브러리 주입 — _rmaiArColorLibrary 가 정의된 후
+  function injectHairLib(){
+    if(typeof _rmaiArColorLibrary === 'undefined'){
+      setTimeout(injectHairLib, 200); return;
+    }
+    if(_rmaiArColorLibrary.daily)   _rmaiArColorLibrary.daily.hair   = DAILY_HAIR;
+    if(_rmaiArColorLibrary.luxury)  _rmaiArColorLibrary.luxury.hair  = LUXURY_HAIR;
+    if(_rmaiArColorLibrary.oheng)   _rmaiArColorLibrary.oheng.hair   = OHENG_HAIR;
+    // ★ 박입 50 — 주입 직후 picker 강제 새로고침 (헤어 색 즉시 표시)
+    try {
+      if(typeof window._rmaiArInitColorPicker === 'function'){
+        window._rmaiArInitColorPicker();
+      } else if(typeof _rmaiArInitColorPicker === 'function'){
+        _rmaiArInitColorPicker();
+      }
+    } catch(e){}
+  }
+  injectHairLib();
+
+  // ─── ② mini preview 에 hair 포함 (rmaiArInitColorPicker 안의 'lip,cheek,eye,base' 만 처리 중) ───
+  // → 직접 수정 어려우니, 매 100ms 강제 갱신 wrap (박입 42 패턴)
+  setInterval(function(){
+    try {
+      if(typeof _rmaiAr === 'undefined' || !_rmaiAr.appliedColors) return;
+      // 헤어 색 적용 상태를 picker 안의 mini preview 에 끼워 넣기
+      var hairHex = _rmaiAr.appliedColors.hair;
+      var picker = document.getElementById('rmai-ar-color-picker') || document.getElementById('rmai-ar-color-picker2');
+      if(!picker || !hairHex) return;
+      var toggleBtn = picker.querySelector('button[onclick*="rmaiArTogglePicker"]');
+      if(!toggleBtn) return;
+      // 이미 헤어 미니 칩 박혀 있으면 skip
+      if(toggleBtn.querySelector('[data-hair-mini]')) return;
+      var miniSpan = toggleBtn.querySelector('span');
+      if(!miniSpan) return;
+      var hairChip = document.createElement('span');
+      hairChip.setAttribute('data-hair-mini', '1');
+      hairChip.style.cssText = 'display:inline-flex;align-items:center;gap:3px;padding:3px 7px;background:rgba(255,255,255,.7);border-radius:8px;font-size:10px;color:#444;';
+      hairChip.innerHTML = '<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+hairHex+';border:1px solid rgba(0,0,0,.1);"></span>💇';
+      miniSpan.appendChild(hairChip);
+    } catch(e){}
+  }, 500);
+
+  // ─── ③ 흑발 베이스 시프트 — 기존 헤어 tint 약함 보완 ───
+  // 박입 47번대 헤어 tint (_hairTintEnabled) 가 이미 wrap 됨.
+  // 그 위에 다시 wrap — 어두운 픽셀이면 색 입히기 전에 가상 탈색 (휘도 ↑)
+  window._hairBaseShiftEnabled = (window._hairBaseShiftEnabled !== false);
+
+  function wrapBaseShift(){
+    if(typeof window.drawFresnelWaterGlow !== 'function'){
+      setTimeout(wrapBaseShift, 300); return;
+    }
+    if(window._hairBaseShiftWrapped) return;
+    window._hairBaseShiftWrapped = true;
+
+    var prevGlow = window.drawFresnelWaterGlow;
+    var FACE_OVAL = window._rmaiArFaceOval ||
+      [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+       365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+       132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+    var frameCounter = 0;
+
+    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
+      prevGlow(ctx, canvas, landmarks, glossLevel);
+
+      if(!window._hairBaseShiftEnabled || !landmarks) return;
+      if(typeof _rmaiAr === 'undefined') return;
+
+      var hairHex = (_rmaiAr.appliedColors || {}).hair;
+      if(!hairHex || hairHex.charAt(0) !== '#' || hairHex.length !== 7) return;
+
+      frameCounter++;
+      if(frameCounter % 2 !== 0) return;  // 격프레임
+
+      try {
+        // 헤어 영역 bounding box (얼굴 위쪽)
+        var minX = canvas.width, maxX = 0;
+        var minY = canvas.height, maxY = 0;
+        FACE_OVAL.forEach(function(idx){
+          var lm = landmarks[idx];
+          if(!lm) return;
+          var x = lm.x * canvas.width;
+          var y = lm.y * canvas.height;
+          if(x < minX) minX = x;
+          if(x > maxX) maxX = x;
+          if(y < minY) minY = y;
+          if(y > maxY) maxY = y;
+        });
+        if(maxX <= minX || maxY <= minY) return;
+
+        var faceH = maxY - minY;
+        var faceW = maxX - minX;
+        var hX  = Math.max(0, Math.floor(minX - faceW * 0.10));
+        var hY  = Math.max(0, Math.floor(minY - faceH * 0.75));
+        var hX2 = Math.min(canvas.width,  Math.ceil(maxX + faceW * 0.10));
+        var hY2 = Math.min(canvas.height, Math.ceil(minY));
+        var hW = hX2 - hX, hH = hY2 - hY;
+        if(hW < 10 || hH < 10) return;
+
+        var imgData = ctx.getImageData(hX, hY, hW, hH);
+        var data = imgData.data;
+
+        // 헤어 색 분해
+        var tintR = parseInt(hairHex.substr(1,2), 16);
+        var tintG = parseInt(hairHex.substr(3,2), 16);
+        var tintB = parseInt(hairHex.substr(5,2), 16);
+
+        var intensity = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.5;
+        var gloss = (_rmaiAr.glossByCategory && _rmaiAr.glossByCategory.hair !== undefined) ? _rmaiAr.glossByCategory.hair : 0.3;
+
+        // 베이스 시프트 강도 — 흑발일수록 강하게 띄움
+        var LUM_DARK = 90;     // 휘도 < 이 값 = 흑발 추정
+        var LIFT_TARGET = 140; // 가상 탈색 목표 휘도 (중간톤)
+
+        for(var i = 0; i < data.length; i += 4){
+          var r = data[i], g = data[i+1], b = data[i+2];
+          var lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          if(lum > 180) continue;  // 밝은 픽셀 = 배경/하이라이트/이마 잔재 패스
+
+          // ★ 흑발 베이스 시프트 — 어두울수록 강하게 휘도 끌어올림
+          var workR = r, workG = g, workB = b;
+          if(lum < LUM_DARK){
+            // lift factor: 휘도가 낮을수록 크게 (최대 2.5배 정도)
+            var darkness = (LUM_DARK - lum) / LUM_DARK;  // 0~1
+            var lift = 1 + darkness * (LIFT_TARGET / Math.max(lum, 1) - 1) * 0.6;
+            workR = Math.min(255, r * lift);
+            workG = Math.min(255, g * lift);
+            workB = Math.min(255, b * lift);
+          }
+
+          // 헤어 영역 가중치 (darkness 기반 자연 페이드)
+          var hairWeight = (180 - lum) / 180;  // 어두울수록 1에 가까움
+          var alpha = Math.min(0.92, intensity * hairWeight);
+
+          // Multiplicative blend (이제 베이스가 올라갔으니 색이 보임)
+          var multR = (workR * tintR) / 255;
+          var multG = (workG * tintG) / 255;
+          var multB = (workB * tintB) / 255;
+
+          data[i]   = Math.round(r * (1 - alpha) + multR * alpha);
+          data[i+1] = Math.round(g * (1 - alpha) + multG * alpha);
+          data[i+2] = Math.round(b * (1 - alpha) + multB * alpha);
+
+          // 글로시 — 가장 어두운 픽셀에 미세한 brightness boost
+          if(gloss > 0.5 && lum < 60){
+            var boost = (gloss - 0.5) * 25;
+            data[i]   = Math.min(255, data[i]   + boost);
+            data[i+1] = Math.min(255, data[i+1] + boost);
+            data[i+2] = Math.min(255, data[i+2] + boost);
+          }
+        }
+
+        ctx.putImageData(imgData, hX, hY);
+      } catch(e){}
+    };
+  }
+  wrapBaseShift();
+
+  // ─── 디버그 콘솔 ───
+  window._inj49Control = {
+    enable: function(){ window._hairBaseShiftEnabled = true; },
+    disable: function(){ window._hairBaseShiftEnabled = false; },
+    refreshLib: injectHairLib,
+    info: function(){
+      return {
+        enabled: !!window._hairBaseShiftEnabled,
+        hair_colors: {
+          daily: (_rmaiArColorLibrary && _rmaiArColorLibrary.daily && _rmaiArColorLibrary.daily.hair) ? _rmaiArColorLibrary.daily.hair.length : 0,
+          luxury: (_rmaiArColorLibrary && _rmaiArColorLibrary.luxury && _rmaiArColorLibrary.luxury.hair) ? _rmaiArColorLibrary.luxury.hair.length : 0,
+          oheng: (_rmaiArColorLibrary && _rmaiArColorLibrary.oheng && _rmaiArColorLibrary.oheng.hair) ? _rmaiArColorLibrary.oheng.hair.length : 0
+        },
+        applied: (typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors) ? _rmaiAr.appliedColors.hair : null,
+        pattern: '박입 49 — 50색 + 흑발 베이스 시프트 (LUM_DARK=90, LIFT_TARGET=140)'
+      };
+    }
+  };
+}, 500);
+</script>
+
+<!-- ════ 박입 50 — 선택 표시 강화 (Selection Indicator Boost) ════ -->
+<!--    문제: gold ring 3px vs 2.5px → 시각 차이 거의 없음                   -->
+<!--    해법: 매 300ms picker 안 swatch 스캔 → 선택된 것 (gold ring) 에   -->
+<!--          추가 outline + ✓ 체크마크 박입 → 한 눈에 보임                -->
+<script>
+setTimeout(function(){
+  'use strict';
+
+  // CSS 강제 박입 — 골드 ring 선택 swatch 에 외부 outline + scale + checkmark badge
+  var styleEl = document.createElement('style');
+  styleEl.id = 'inj50-selection-style';
+  styleEl.textContent = [
+    '[data-rmai-swatch].inj50-selected {',
+    '  position: relative;',
+    '  outline: 3px solid #fbbf24 !important;',
+    '  outline-offset: 3px !important;',
+    '  box-shadow: 0 0 0 6px rgba(251, 191, 36, 0.25), 0 4px 12px rgba(0,0,0,.2) !important;',
+    '  transform: scale(1.18) !important;',
+    '  z-index: 5;',
+    '}',
+    '[data-rmai-swatch].inj50-selected::after {',
+    '  content: "✓";',
+    '  position: absolute;',
+    '  top: -8px; right: -8px;',
+    '  width: 18px; height: 18px;',
+    '  background: #fbbf24;',
+    '  color: #1a1408;',
+    '  border-radius: 50%;',
+    '  font-size: 11px;',
+    '  font-weight: 900;',
+    '  display: flex;',
+    '  align-items: center;',
+    '  justify-content: center;',
+    '  box-shadow: 0 2px 4px rgba(0,0,0,.3);',
+    '  border: 2px solid #fff;',
+    '}'
+  ].join('\n');
+  document.head.appendChild(styleEl);
+
+  // 매 300ms 선택 swatch 스캔 → 클래스 박입
+  setInterval(function(){
+    try {
+      var swatches = document.querySelectorAll('[data-rmai-swatch]');
+      swatches.forEach(function(sw){
+        var border = sw.style.border || '';
+        // 골드 ring (#fbbf24 또는 rgb(251, 191, 36)) 으로 표시된 swatch = 선택됨
+        var isSelected = (border.indexOf('#fbbf24') > -1 ||
+                         border.indexOf('rgb(251, 191, 36)') > -1 ||
+                         border.indexOf('rgb(251,191,36)') > -1);
+        if(isSelected){
+          sw.classList.add('inj50-selected');
+        } else {
+          sw.classList.remove('inj50-selected');
+        }
+      });
+    } catch(e){}
+  }, 300);
+
+  window._inj50Control = {
+    info: function(){
+      var selected = document.querySelectorAll('[data-rmai-swatch].inj50-selected');
+      return {
+        pattern: '박입 50 — 선택 표시 강화 (outline 3px + checkmark + scale 1.18)',
+        currentlySelected: selected.length,
+        cssInjected: !!document.getElementById('inj50-selection-style')
+      };
+    }
+  };
+}, 800);
 </script>
 
 </body>
