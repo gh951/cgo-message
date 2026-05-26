@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj77-eye-health" name="c41-version"/>
+<meta content="2026-05-26-c44-inj80-hero-C6" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13947,13 +13947,25 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </div>
 </div>
 
-<!-- 메인 페이지 -->
-<div id="page-c44-eye" style="max-width:520px;margin:0 auto;padding:20px 16px 80px;">
-<!-- Hero -->
+<!-- ★ 박입 79/80 — Hero 이미지 영역 (파일명 C-6.jpeg 파트너님 업로드) -->
+<div id="eye-hero-area" style="width:100%;aspect-ratio:16/9;max-height:520px;background:linear-gradient(135deg,#f0fdfb 0%,#ccfbf1 50%,#e0f7f5 100%);display:flex;align-items:center;justify-content:center;border-bottom:1px solid #ccfbf1;position:relative;overflow:hidden;">
+<img alt="C-44 나의 눈 헬스" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" src="/C-6.jpeg" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;"/>
+<div style="display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#0f766e;text-align:center;padding:24px;">
+<div style="font-size:48px;opacity:.4;">👁️</div>
+<div style="font-size:12px;letter-spacing:.04em;font-weight:700;">Hero 이미지 영역 — 추후 업로드 예정</div>
+<div style="font-size:10px;color:#14b8a6;font-family:'Courier New',monospace;">파일명: /C-6.jpeg</div>
+</div>
+<div style="position:absolute;bottom:14px;right:18px;padding:5px 12px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(20,184,166,.6);border-radius:10px;font-size:10px;font-weight:800;color:#5eead4;letter-spacing:.16em;font-family:'Courier New',monospace;z-index:2;">C-44</div>
+</div>
+
+<!-- 메인 페이지 (박입 79 — 폭 520 → 1200 확장, 치매 페이지 동일) -->
+<div id="page-c44-eye" style="background:#f0fdfb;min-height:100vh;padding:32px 20px 80px;">
+<div style="max-width:1200px;margin:0 auto;">
+<!-- Hero 타이틀 -->
 <div style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,#fff,#f0fdfb);border:1px solid #ccfbf1;border-radius:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(20,184,166,.08);">
 <div style="font-size:10px;font-weight:800;color:#0f766e;letter-spacing:.2em;margin-bottom:8px;">C-44 · EYE × rPPG FUSION</div>
-<div style="font-size:24px;font-weight:900;color:#134e4a;margin-bottom:4px;letter-spacing:-.03em;">👁️ 나의 눈 헬스</div>
-<div style="font-size:11px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지 속도<br/><b>EyeAns 지수 (눈-자율신경 융합)</b></div>
+<div style="font-size:26px;font-weight:900;color:#134e4a;margin-bottom:4px;letter-spacing:-.03em;">👁️ 나의 눈 헬스</div>
+<div style="font-size:13px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지 속도<br/><b>EyeAns 지수 (눈-자율신경 융합 · 세계 최초)</b></div>
 </div>
 
 <!-- 측정 영역 -->
@@ -14038,50 +14050,135 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
 </div>
 </div>
+</div>
 
 <!-- ★ 박입 77 — 눈 헬스 스크립트 (25문항 + 측정 + 결과) -->
 <script>
 (function(){
   'use strict';
 
-  // ── 25 문항 데이터 ───────────────────────────────────────────
-  // ① 시각 인지 속도 (10문항) — 자극 → 빠른 선택
-  // ② 명암 대비 인지 (5문항) — 옅은 글자 인지
-  // ③ 색상 구분 (5문항) — 미세 색 차이
-  // ④ 패턴 인식 (3문항) — 회전/방향
-  // ⑤ 시선 고정 안정성 (2문항) — 동공 측정
+  // ── 25 문항 데이터 (박입 78 — 전면 재설계) ───────────────────────
+  // 원칙: 모든 문항 객관적 정답 명확 + 답 구성 헷갈림 없음
+  // ① 도형 인지 (5문항)
+  // ② 색상 구분 (5문항)
+  // ③ 숫자/문자 인지 (5문항)
+  // ④ 방향/위치 (5문항)
+  // ⑤ 명암 대비 (3문항) — 옅은 글자 → 그 글자 객관식 선택
+  // ⑥ 시선 고정 (2문항) — 버튼 없이 3초 자동 통과
   var EYE_QUESTIONS = [
-    // ① 시각 인지 속도 (10)
-    {cat:'react', q:'화면에 가장 먼저 나타나는 색은?', emoji:'🟦', opts:['파랑','빨강','노랑','초록'], correct:0, hint:'빠르게 선택하세요'},
-    {cat:'react', q:'다음 중 큰 원은?', emoji:'⭕', opts:['● (작음)','⬤ (중간)','🔴 (큼)','○ (외곽)'], correct:2},
-    {cat:'react', q:'화살표 방향은?', emoji:'➡️', opts:['↑ 위','→ 오른쪽','↓ 아래','← 왼쪽'], correct:1},
-    {cat:'react', q:'화면 가운데 도형은?', emoji:'🔺', opts:['원','삼각형','사각형','오각형'], correct:1},
-    {cat:'react', q:'화면 가장자리 색은?', emoji:'🟨', opts:['파랑','노랑','초록','보라'], correct:1},
-    {cat:'react', q:'숫자 \"3\" 이 보이는 곳은?', emoji:'3️⃣', opts:['좌상','우상','좌하','우하'], correct:0, hint:'좌상에 3'},
-    {cat:'react', q:'두 줄의 길이는?', emoji:'═══ ▬', opts:['위가 김','아래가 김','같음','모름'], correct:0},
-    {cat:'react', q:'점이 몇 개?', emoji:'••• ••', opts:['3개','4개','5개','6개'], correct:2},
-    {cat:'react', q:'밝은 영역은?', emoji:'⬜ ⬛', opts:['왼쪽','오른쪽','위','아래'], correct:0},
-    {cat:'react', q:'움직이는 방향?', emoji:'→→→', opts:['정지','왼쪽','오른쪽','회전'], correct:2},
-    // ② 명암 대비 (5)
-    {cat:'contrast', q:'옅은 글자 \"가\" 가 보이세요?', emoji:'<span style="color:#ddd;font-size:32px;">가</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1, hint:'정직하게 답하세요'},
-    {cat:'contrast', q:'옅은 글자 \"나\" 가 보이세요?', emoji:'<span style="color:#ccc;font-size:28px;">나</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
-    {cat:'contrast', q:'옅은 글자 \"다\" 가 보이세요?', emoji:'<span style="color:#bbb;font-size:24px;">다</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
-    {cat:'contrast', q:'옅은 글자 \"라\" 가 보이세요?', emoji:'<span style="color:#aaa;font-size:22px;">라</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
-    {cat:'contrast', q:'옅은 글자 \"마\" 가 보이세요?', emoji:'<span style="color:#999;font-size:20px;">마</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
-    // ③ 색상 구분 (5)
-    {cat:'color', q:'두 색이 다른가요?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#e74c3c;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#e84030;margin:0 4px;"></span>', opts:['같음','약간 다름','명확히 다름','모름'], correct:1},
-    {cat:'color', q:'더 빨간 쪽은?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#c0392b;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#e74c3c;margin:0 4px;"></span>', opts:['왼쪽','오른쪽','같음','모름'], correct:1, hint:'오른쪽이 더 밝은 빨강'},
-    {cat:'color', q:'더 진한 파랑은?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#3498db;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#2980b9;margin:0 4px;"></span>', opts:['왼쪽','오른쪽','같음','모름'], correct:1},
-    {cat:'color', q:'다른 색은?', emoji:'<span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#2ecc71;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span>', opts:['1번','2번','3번','4번'], correct:2},
-    {cat:'color', q:'노랑 → 주황 사이는?', emoji:'<span style="display:inline-block;width:35px;height:35px;background:#f1c40f;"></span><span style="display:inline-block;width:35px;height:35px;background:#f39c12;"></span><span style="display:inline-block;width:35px;height:35px;background:#e67e22;"></span>', opts:['1번 (노랑)','2번 (중간)','3번 (주황)','모름'], correct:1},
-    // ④ 패턴 (3)
-    {cat:'pattern', q:'다음에 올 도형은?', emoji:'△ ▲ △ ▲ ?', opts:['△','▲','□','○'], correct:0},
-    {cat:'pattern', q:'회전 방향은?', emoji:'↻ ↻ ↻', opts:['시계','반시계','정지','모름'], correct:0},
-    {cat:'pattern', q:'대칭은?', emoji:'◀ │ ▶', opts:['좌우','상하','대각','없음'], correct:0},
-    // ⑤ 시선 고정 (2)
-    {cat:'fixation', q:'화면 중앙 점을 3초간 응시하세요', emoji:'<span style="font-size:48px;color:#0f766e;">●</span>', opts:['시작','준비됨','보임','잘 보임'], correct:0, hint:'동공 안정성 측정 중'},
-    {cat:'fixation', q:'천천히 깜빡이세요 (3회)', emoji:'<span style="font-size:48px;">👁️</span>', opts:['1회 완료','2회 완료','3회 완료','진행 중'], correct:2, hint:'깜빡임 측정 중'}
+    // ① 도형 인지 (5) — 명확한 도형
+    {cat:'shape', q:'화면 도형은?',
+     emoji:'<span style="font-size:64px;color:#e74c3c;">▲</span>',
+     opts:['삼각형','사각형','원','오각형'], correct:0},
+    {cat:'shape', q:'화면 도형은?',
+     emoji:'<span style="font-size:64px;color:#3498db;">●</span>',
+     opts:['삼각형','사각형','원','별'], correct:2},
+    {cat:'shape', q:'화면 도형은?',
+     emoji:'<span style="font-size:64px;color:#f39c12;">■</span>',
+     opts:['삼각형','사각형','원','육각형'], correct:1},
+    {cat:'shape', q:'화면 도형 개수는?',
+     emoji:'<span style="font-size:48px;color:#27ae60;">▲ ▲ ▲</span>',
+     opts:['1개','2개','3개','4개'], correct:2},
+    {cat:'shape', q:'다른 도형 1개는?',
+     emoji:'<span style="font-size:36px;color:#8e44ad;">● ● ▲ ●</span>',
+     opts:['1번 위치','2번 위치','3번 위치','4번 위치'], correct:2},
+
+    // ② 색상 구분 (5) — 명확한 색 차이
+    {cat:'color', q:'화면 색은?',
+     emoji:'<span style="display:inline-block;width:80px;height:80px;background:#e74c3c;border-radius:8px;"></span>',
+     opts:['빨강','파랑','초록','노랑'], correct:0},
+    {cat:'color', q:'화면 색은?',
+     emoji:'<span style="display:inline-block;width:80px;height:80px;background:#3498db;border-radius:8px;"></span>',
+     opts:['빨강','파랑','초록','노랑'], correct:1},
+    {cat:'color', q:'화면 색은?',
+     emoji:'<span style="display:inline-block;width:80px;height:80px;background:#27ae60;border-radius:8px;"></span>',
+     opts:['빨강','파랑','초록','노랑'], correct:2},
+    {cat:'color', q:'더 어두운 쪽은?',
+     emoji:'<span style="display:inline-block;width:60px;height:60px;background:#2980b9;margin:0 6px;border-radius:6px;"></span><span style="display:inline-block;width:60px;height:60px;background:#5dade2;margin:0 6px;border-radius:6px;"></span>',
+     opts:['왼쪽','오른쪽','같음','모름'], correct:0},
+    {cat:'color', q:'다른 색 1개는?',
+     emoji:'<span style="display:inline-block;width:45px;height:45px;background:#e74c3c;margin:0 4px;border-radius:6px;"></span><span style="display:inline-block;width:45px;height:45px;background:#e74c3c;margin:0 4px;border-radius:6px;"></span><span style="display:inline-block;width:45px;height:45px;background:#3498db;margin:0 4px;border-radius:6px;"></span><span style="display:inline-block;width:45px;height:45px;background:#e74c3c;margin:0 4px;border-radius:6px;"></span>',
+     opts:['1번','2번','3번','4번'], correct:2},
+
+    // ③ 숫자/문자 인지 (5)
+    {cat:'symbol', q:'화면 숫자는?',
+     emoji:'<span style="font-size:96px;font-weight:900;color:#134e4a;">7</span>',
+     opts:['1','7','9','4'], correct:1},
+    {cat:'symbol', q:'화면 숫자는?',
+     emoji:'<span style="font-size:96px;font-weight:900;color:#134e4a;">3</span>',
+     opts:['8','3','5','9'], correct:1},
+    {cat:'symbol', q:'화면 글자는?',
+     emoji:'<span style="font-size:96px;font-weight:900;color:#134e4a;">한</span>',
+     opts:['한','할','함','합'], correct:0},
+    {cat:'symbol', q:'화면 글자는?',
+     emoji:'<span style="font-size:96px;font-weight:900;color:#134e4a;">눈</span>',
+     opts:['눈','눔','늦','늘'], correct:0},
+    {cat:'symbol', q:'더 큰 숫자는?',
+     emoji:'<span style="font-size:48px;font-weight:900;color:#134e4a;margin:0 14px;">5</span><span style="font-size:48px;font-weight:900;color:#134e4a;margin:0 14px;">8</span>',
+     opts:['왼쪽 (5)','오른쪽 (8)','같음','모름'], correct:1},
+
+    // ④ 방향/위치 (5)
+    {cat:'direction', q:'화살표 방향은?',
+     emoji:'<span style="font-size:80px;color:#0f766e;">→</span>',
+     opts:['위','오른쪽','아래','왼쪽'], correct:1},
+    {cat:'direction', q:'화살표 방향은?',
+     emoji:'<span style="font-size:80px;color:#0f766e;">↑</span>',
+     opts:['위','오른쪽','아래','왼쪽'], correct:0},
+    {cat:'direction', q:'화살표 방향은?',
+     emoji:'<span style="font-size:80px;color:#0f766e;">↓</span>',
+     opts:['위','오른쪽','아래','왼쪽'], correct:2},
+    {cat:'direction', q:'점이 있는 위치는?',
+     emoji:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:120px;margin:0 auto;"><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="font-size:28px;color:#e74c3c;">●</span></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div></div>',
+     opts:['왼쪽 위','오른쪽 위','왼쪽 아래','오른쪽 아래'], correct:1},
+    {cat:'direction', q:'점이 있는 위치는?',
+     emoji:'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:120px;margin:0 auto;"><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;display:flex;align-items:center;justify-content:center;"><span style="font-size:28px;color:#e74c3c;">●</span></div><div style="height:50px;border:2px solid #ccc;border-radius:6px;"></div></div>',
+     opts:['왼쪽 위','오른쪽 위','왼쪽 아래','오른쪽 아래'], correct:2},
+
+    // ⑤ 명암 대비 (3) — 옅은 글자 → 그 글자 객관식 선택
+    {cat:'contrast', q:'화면에 어떤 글자가 보이나요?',
+     emoji:'<span style="color:#bbbbbb;font-size:80px;font-weight:900;">눈</span>',
+     opts:['눈','달','별','해'], correct:0, hint:'옅게 보이는 글자를 선택'},
+    {cat:'contrast', q:'화면에 어떤 숫자가 보이나요?',
+     emoji:'<span style="color:#cccccc;font-size:80px;font-weight:900;">5</span>',
+     opts:['3','5','7','8'], correct:1, hint:'옅게 보이는 숫자를 선택'},
+    {cat:'contrast', q:'화면에 어떤 도형이 보이나요?',
+     emoji:'<span style="color:#dddddd;font-size:80px;">▲</span>',
+     opts:['● 원','▲ 삼각형','■ 사각형','★ 별'], correct:1, hint:'옅게 보이는 도형을 선택'},
+
+    // ⑥ 시선 고정 (2) — 자동 통과
+    {cat:'fixation', q:'화면 중앙의 점을 3초간 응시하세요',
+     emoji:'<span style="font-size:60px;color:#0f766e;display:inline-block;animation:eyePulse 2s ease-in-out infinite;">●</span>',
+     opts:[], correct:0, autoTimer: 3000, hint:'카메라가 동공 안정성을 측정합니다'},
+    {cat:'fixation', q:'천천히 3회 깜빡이세요',
+     emoji:'<span style="font-size:60px;">👁️</span><div style="margin-top:8px;font-size:14px;color:#0f766e;font-weight:800;">깜빡 · 깜빡 · 깜빡</div>',
+     opts:[], correct:0, autoTimer: 4000, hint:'카메라가 깜빡임 횟수를 측정합니다'}
   ];
+
+  // ── 비프 음 (Web Audio API) ──────────────────────────────
+  var eyeAudioCtx = null;
+  function eyeBeep(freq, duration, vol){
+    try {
+      if(!eyeAudioCtx){
+        eyeAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      var osc = eyeAudioCtx.createOscillator();
+      var gain = eyeAudioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(eyeAudioCtx.destination);
+      osc.frequency.value = freq || 880;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(vol || 0.15, eyeAudioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, eyeAudioCtx.currentTime + (duration || 0.15));
+      osc.start();
+      osc.stop(eyeAudioCtx.currentTime + (duration || 0.15));
+    } catch(e){ console.warn('beep err:', e); }
+  }
+  function eyeBeepStart(){ eyeBeep(880, 0.2, 0.18); }  // 시작 — 높은 띠
+  function eyeBeepEnd(){
+    eyeBeep(660, 0.15, 0.15);
+    setTimeout(function(){ eyeBeep(880, 0.2, 0.18); }, 180);
+  }  // 끝 — 띠 띠
+  function eyeBeepClick(){ eyeBeep(1200, 0.05, 0.08); }  // 문항 전환 — 작은 클릭
 
   // ── 측정 상태 ─────────────────────────────────────────────
   var eyeState = {
@@ -14119,8 +14216,13 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
     // 카메라 시작 (FaceMesh + iris)
     eyeStartCamera().then(function(){
-      eyeShowQuestion(0);
-      eyeStartRppgLoop();
+      // ★ 박입 78 — 측정 시작 비프 (띠—) + 사용자 안내
+      eyeBeepStart();
+      eyeDebug('🔔 측정 시작! 카메라 ON · 25문항 시작합니다');
+      setTimeout(function(){
+        eyeShowQuestion(0);
+        eyeStartRppgLoop();
+      }, 500);
     }).catch(function(err){
       eyeDebug('⚠️ 카메라 접근 실패: ' + err.message);
       alert('카메라 권한이 필요합니다. 다시 시도해 주세요.');
@@ -14154,28 +14256,65 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     document.getElementById('eye-q-total').textContent = EYE_QUESTIONS.length;
     document.getElementById('eye-q-timer').textContent = '0.0';
 
+    // ★ 박입 78 — 카테고리 한글 라벨
+    var catLabels = {shape:'도형', color:'색상', symbol:'숫자/문자', direction:'방향',
+                     contrast:'명암', fixation:'시선 고정'};
+    var catLabel = catLabels[q.cat] || '';
+
     var qText = document.getElementById('eye-question-text');
-    qText.innerHTML = '<div style="font-size:14px;color:#888;margin-bottom:6px;">' + q.q + '</div>' +
+    qText.innerHTML = '<div style="font-size:10px;color:#0f766e;font-weight:800;letter-spacing:.15em;margin-bottom:4px;">' + catLabel.toUpperCase() + '</div>' +
+                      '<div style="font-size:14px;color:#444;margin-bottom:10px;font-weight:700;">' + q.q + '</div>' +
                       '<div style="font-size:32px;">' + q.emoji + '</div>' +
-                      (q.hint ? '<div style="font-size:10px;color:#999;margin-top:4px;">💡 ' + q.hint + '</div>' : '');
+                      (q.hint ? '<div style="font-size:10px;color:#0f766e;margin-top:8px;background:rgba(20,184,166,.1);padding:6px 10px;border-radius:6px;display:inline-block;">💡 ' + q.hint + '</div>' : '');
 
     var grid = document.getElementById('eye-options-grid');
     grid.innerHTML = '';
-    q.opts.forEach(function(opt, oi){
-      var btn = document.createElement('button');
-      btn.textContent = opt;
-      btn.style.cssText = 'padding:12px 8px;background:#f0fdfb;border:2px solid #ccfbf1;border-radius:10px;font-size:12px;font-weight:700;color:#134e4a;cursor:pointer;font-family:inherit;transition:all .15s;';
-      btn.onmouseover = function(){ this.style.background = '#ccfbf1'; };
-      btn.onmouseout = function(){ this.style.background = '#f0fdfb'; };
-      btn.onclick = function(){ eyeAnswer(idx, oi); };
-      grid.appendChild(btn);
-    });
 
-    eyeState.questionStartTime = Date.now();
-    eyeState.qTimerInterval = setInterval(function(){
-      var elapsed = (Date.now() - eyeState.questionStartTime) / 1000;
-      document.getElementById('eye-q-timer').textContent = elapsed.toFixed(1);
-    }, 100);
+    // ★ 박입 78 — 시선 고정 (autoTimer) 문항은 버튼 없이 자동 진행
+    if(q.autoTimer){
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:12px;background:rgba(20,184,166,.08);border-radius:10px;font-size:12px;color:#0f766e;font-weight:700;">📷 카메라 측정 중... <span id="eye-auto-countdown">' + (q.autoTimer/1000).toFixed(1) + '</span>초</div>';
+
+      eyeState.questionStartTime = Date.now();
+      var startTime = Date.now();
+      var totalMs = q.autoTimer;
+
+      eyeState.qTimerInterval = setInterval(function(){
+        var elapsed = Date.now() - startTime;
+        var remain = Math.max(0, totalMs - elapsed);
+        document.getElementById('eye-q-timer').textContent = (elapsed/1000).toFixed(1);
+        var cd = document.getElementById('eye-auto-countdown');
+        if(cd) cd.textContent = (remain/1000).toFixed(1);
+      }, 100);
+
+      setTimeout(function(){
+        clearInterval(eyeState.qTimerInterval);
+        // 자동 통과 (정답 처리)
+        var rt = Date.now() - eyeState.questionStartTime;
+        eyeState.reactionTimes.push(rt);
+        eyeState.answers.push({q:idx, opt:0, correct:true, rt:rt, cat:q.cat, auto:true});
+        eyeBeepClick();
+        eyeUpdateLiveStats();
+        setTimeout(function(){ eyeShowQuestion(idx + 1); }, 300);
+      }, q.autoTimer);
+
+    } else {
+      // 일반 객관식 문항
+      q.opts.forEach(function(opt, oi){
+        var btn = document.createElement('button');
+        btn.textContent = opt;
+        btn.style.cssText = 'padding:14px 8px;background:#f0fdfb;border:2px solid #ccfbf1;border-radius:10px;font-size:13px;font-weight:700;color:#134e4a;cursor:pointer;font-family:inherit;transition:all .15s;';
+        btn.onmouseover = function(){ this.style.background = '#ccfbf1'; };
+        btn.onmouseout = function(){ this.style.background = '#f0fdfb'; };
+        btn.onclick = function(){ eyeAnswer(idx, oi); };
+        grid.appendChild(btn);
+      });
+
+      eyeState.questionStartTime = Date.now();
+      eyeState.qTimerInterval = setInterval(function(){
+        var elapsed = (Date.now() - eyeState.questionStartTime) / 1000;
+        document.getElementById('eye-q-timer').textContent = elapsed.toFixed(1);
+      }, 100);
+    }
   }
 
   function eyeAnswer(qIdx, optIdx){
@@ -14185,6 +14324,9 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     eyeState.answers.push({q:qIdx, opt:optIdx, correct: optIdx === q.correct, rt: rt, cat: q.cat});
 
     clearInterval(eyeState.qTimerInterval);
+
+    // ★ 박입 78 — 클릭 비프
+    eyeBeepClick();
 
     // 통계 디스플레이 업데이트
     eyeUpdateLiveStats();
@@ -14240,6 +14382,9 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       eyeState.stream.getTracks().forEach(function(t){t.stop();});
     }
 
+    // ★ 박입 78 — 측정 끝 비프 (띠 띠)
+    eyeBeepEnd();
+
     document.getElementById('eye-camera-area').style.display = 'none';
     document.getElementById('eye-question-area').style.display = 'none';
 
@@ -14248,8 +14393,9 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     var accuracy = totalCorrect / EYE_QUESTIONS.length * 100;
     var avgRt = eyeState.reactionTimes.reduce(function(a,b){return a+b;},0) / eyeState.reactionTimes.length;
 
-    // 카테고리별 정답률
-    var catStats = {react:{c:0,t:0,rt:[]}, contrast:{c:0,t:0,rt:[]}, color:{c:0,t:0,rt:[]}, pattern:{c:0,t:0,rt:[]}, fixation:{c:0,t:0,rt:[]}};
+    // 카테고리별 정답률 (박입 78 — 신규 카테고리)
+    var catStats = {shape:{c:0,t:0,rt:[]}, color:{c:0,t:0,rt:[]}, symbol:{c:0,t:0,rt:[]},
+                    direction:{c:0,t:0,rt:[]}, contrast:{c:0,t:0,rt:[]}, fixation:{c:0,t:0,rt:[]}};
     eyeState.answers.forEach(function(a){
       var s = catStats[a.cat];
       if(s){
@@ -14279,7 +14425,8 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     // 카테고리별 결과
     resultHtml += '<div style="background:#fff;border:1px solid #ccfbf1;border-radius:12px;padding:14px;margin-bottom:14px;">';
     resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">📊 카테고리별 자가 점검 결과</div>';
-    var catNames = {react:'시각 인지 속도', contrast:'명암 대비 인지', color:'색상 구분', pattern:'패턴 인식', fixation:'시선 고정'};
+    var catNames = {shape:'도형 인지', color:'색상 구분', symbol:'숫자/문자 인지',
+                    direction:'방향 인지', contrast:'명암 대비', fixation:'시선 고정'};
     Object.keys(catStats).forEach(function(k){
       var s = catStats[k];
       if(s.t === 0) return;
