@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj76-purify-tech-only" name="c41-version"/>
+<meta content="2026-05-26-c44-inj77-eye-health" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -4114,6 +4114,13 @@ input[type=range].sec-range::-moz-range-thumb{
 <div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 아이큐</div>
 <div style="font-size:11px;color:rgba(13,58,58,.7);">5영역+rPPG</div>
 </div>
+<!-- ★ 박입 77 — 6. 👁️ 나의 눈 헬스 (C-44 신규 박입) -->
+<div onclick="c40Feature('eye-health')" style="position:relative;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:18px 14px;text-align:center;cursor:pointer;min-height:130px;backdrop-filter:blur(10px);">
+<span style="position:absolute;top:8px;right:8px;background:#C0392B;color:white;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:900;">★ 세계 최초</span>
+<div style="font-size:36px;margin-bottom:8px;">👁️</div>
+<div style="font-size:13px;font-weight:900;color:#0d3a3a;margin-bottom:4px;">나의 눈 헬스</div>
+<div style="font-size:11px;color:rgba(13,58,58,.7);">EyeAns 지수</div>
+</div>
 </div>
 <!-- 💄 뷰티 섹션 -->
 <div style="margin:24px 16px 12px;font-size:15px;font-weight:900;color:#0d3a3a;">💄 뷰티 &amp; 라이프</div>
@@ -4163,16 +4170,18 @@ function c40Feature(name){
   }
   
   // ★ C-40 박입 ㉗ — 9개 페이지 라우팅 박제 (FULI 통째 박입 + 새 박입)
+  //   박입 77 — eye-health 추가 (눈 헬스 자가 점검)
   var routes = {
-    'health':   'scrHealth',
-    'skinage':  'scrSkinage',
-    'scalp':    'scrScalp',
-    'dementia': 'scrDementia',
-    'iq':       'scrIQ',
-    'makeup':   'scrMakeup',  /* ★ C-42 박입 39 — scrMakeup 에 자체 AR 영역 박입 (카메라 1번) */
-    'music':    'scrMusic',
-    'food':     'scrFood',
-    'couple':   'scrCouple'
+    'health':     'scrHealth',
+    'skinage':    'scrSkinage',
+    'scalp':      'scrScalp',
+    'dementia':   'scrDementia',
+    'iq':         'scrIQ',
+    'eye-health': 'scrEyeHealth',
+    'makeup':     'scrMakeup',
+    'music':      'scrMusic',
+    'food':       'scrFood',
+    'couple':     'scrCouple'
   };
   
   if(routes[name]){
@@ -13898,6 +13907,466 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </script>
 <!-- ════ 박입 39 끝 ════ -->
 </div>
+
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<!-- ★★ 박입 77 — scrEyeHealth (눈 헬스 자가 점검 · C-44 신규)               -->
+<!--    C-39 치매 페이지 패턴 그대로 + 25문항 + 동공/깜빡임/눈가 rPPG       -->
+<!--    표현: 자가 점검 · 추정 · 참고용 (의료 진단 X · 법적 안전)            -->
+<!-- ════════════════════════════════════════════════════════════════════ -->
+<style>
+  #eye-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(255,255,255,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #scrEyeHealth .eye-stat-card{background:#fff;border-radius:12px;padding:10px 8px;text-align:center;border:1px solid #e8eaf0;}
+  #scrEyeHealth .eye-stat-label{font-size:9.5px;color:#888;margin-bottom:2px;}
+  #scrEyeHealth .eye-stat-value{font-size:14px;font-weight:900;}
+  @keyframes eyePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.85}}
+  .eye-pulse{animation:eyePulse 2s ease-in-out infinite;}
+</style>
+<div class="screen" id="scrEyeHealth" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#f0fdfb 0%,#e0f7f5 100%);">
+<button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(20,184,166,.25),rgba(45,212,191,.15));border:2px solid rgba(20,184,166,.6);color:#0f766e;font-weight:800;font-size:13px;border-radius:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(8px);">✕ 나가기</button>
+
+<!-- 인트로 팝업 (C-39 패턴) -->
+<div id="eye-intro-pop">
+<div class="sip-wrap">
+<div class="sip-top"><button class="sip-close" onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}">×</button></div>
+<div class="sip-body">
+<div class="sip-hero">
+<div class="sip-badge">C-44 · EYE × rPPG FUSION · ★ 세계 최초</div>
+<div class="sip-title">👁️ C-44 나의 눈 헬스</div>
+<div class="sip-sub">동공 추적 × 깜빡임 분석 × 눈가 rPPG × 세계 최초<br/><b style="color:#0f766e;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+</div>
+<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">📸 정면 + 조명 충분</div><div class="sip-step-desc">정면을 바라보고 얼굴에 그림자 없게 조명 확보. 안경 착용 가능 (반사 적은 위치).</div></div></div>
+<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">👁️ 25문항 시각 자극 + 카메라 동시</div><div class="sip-step-desc">화면의 자극에 빠르게 반응. 카메라가 동공·깜빡임·눈가 혈류를 실시간 측정.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">⚡ 반응 시간 + 동공 안정성 측정</div><div class="sip-step-desc">자극 → 터치 반응 시간 (ms) + 동공 흔들림 (jitter) ms 단위로 정밀 기록.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">💗 정상 vs 피로 가중치 매칭</div><div class="sip-step-desc">반응 속도 + rPPG 자율신경 + 동공 안정성 융합. <b>EyeAns 지수</b> 도출.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">📊 종합 결과 + AI 가이드</div><div class="sip-step-desc">눈 피로도 · 시각 인지 속도 · 깜빡임 빈도 + 라이프스타일 추천.</div></div></div>
+<div style="margin-top:16px;padding:12px;background:rgba(20,184,166,.1);border-left:3px solid #0f766e;border-radius:8px;font-size:11px;color:#0f766e;line-height:1.6;">
+⚠ <b>참고용 자가 점검</b> · 의학적 진단 아님 · 시력 측정 아님<br/>측정 영상은 외부 전송 0% · 종료 시 즉시 파기
+</div>
+<button class="sip-cta" onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}">✓ 이해했어요, 시작하기</button>
+</div>
+</div>
+</div>
+
+<!-- 메인 페이지 -->
+<div id="page-c44-eye" style="max-width:520px;margin:0 auto;padding:20px 16px 80px;">
+<!-- Hero -->
+<div style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,#fff,#f0fdfb);border:1px solid #ccfbf1;border-radius:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(20,184,166,.08);">
+<div style="font-size:10px;font-weight:800;color:#0f766e;letter-spacing:.2em;margin-bottom:8px;">C-44 · EYE × rPPG FUSION</div>
+<div style="font-size:24px;font-weight:900;color:#134e4a;margin-bottom:4px;letter-spacing:-.03em;">👁️ 나의 눈 헬스</div>
+<div style="font-size:11px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지 속도<br/><b>EyeAns 지수 (눈-자율신경 융합)</b></div>
+</div>
+
+<!-- 측정 영역 -->
+<div style="background:#fff;border:1px solid #ccfbf1;border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(20,184,166,.05);">
+<div style="font-size:12px;font-weight:800;color:#0f766e;margin-bottom:12px;display:flex;align-items:center;gap:6px;">📊 실시간 측정 지표</div>
+<!-- 8개 지표 카드 -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px;background:rgba(20,184,166,.05);border-radius:10px;">
+<div class="eye-stat-card"><div class="eye-stat-label">💗 BPM</div><div id="eye-bpm" class="eye-stat-value" style="color:#0f766e;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">🧠 HRV</div><div id="eye-hrv" class="eye-stat-value" style="color:#0f766e;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">👁️ 동공</div><div id="eye-pupil" class="eye-stat-value" style="color:#3b82f6;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">📏 거리</div><div id="eye-dist" class="eye-stat-value" style="color:#3b82f6;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">👀 깜빡임</div><div id="eye-blink" class="eye-stat-value" style="color:#7c3aed;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">😰 피로</div><div id="eye-fatigue" class="eye-stat-value" style="color:#ef4444;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">⚡ 반응</div><div id="eye-react" class="eye-stat-value" style="color:#f97316;">--</div></div>
+<div class="eye-stat-card"><div class="eye-stat-label">🎯 안정</div><div id="eye-stab" class="eye-stat-value" style="color:#14b8a6;">--</div></div>
+</div>
+<!-- EyeAns 지수 (CogAns 와 같은 급) -->
+<div style="margin-top:10px;padding:12px;background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(45,212,191,.08));border:1px solid rgba(20,184,166,.3);border-radius:10px;text-align:center;">
+<div style="font-size:10px;color:#0f766e;font-weight:800;margin-bottom:4px;">🌟 EyeAns 지수 (세계 최초)</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+<span id="eye-eyeans" style="font-size:22px;font-weight:900;color:#0f766e;">--</span>
+<span style="font-size:11px;color:#666;">/ 100점</span>
+</div>
+<div style="font-size:9px;color:#888;margin-top:3px;line-height:1.4;">눈 피로 + 자율신경 + 동공 안정 융합</div>
+</div>
+<!-- 디버그 패널 -->
+<div id="eye-debug-panel" style="margin-top:8px;padding:6px 10px;background:rgba(15,118,110,.1);border:1px solid rgba(20,184,166,.25);border-radius:8px;font-size:9.5px;color:#0f766e;font-family:'Courier New',monospace;letter-spacing:.02em;">👁️ 측정 대기 중...</div>
+<!-- 시작 버튼 -->
+<button id="eye-start-btn" onclick="window.eyeStartMeasure()" style="margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 12px rgba(20,184,166,.4);">📸 측정 시작</button>
+<div style="margin-top:8px;font-size:9px;color:#888;text-align:center;">🔒 측정 영상은 외부 전송 없음 · 종료 시 즉시 파기</div>
+</div>
+
+<!-- 카메라 미리보기 (측정 중 활성) -->
+<div id="eye-camera-area" style="display:none;background:#000;border:2px solid #0f766e;border-radius:14px;padding:0;margin-bottom:14px;overflow:hidden;position:relative;">
+<video id="eye-video" autoplay playsinline muted style="width:100%;display:block;"></video>
+<canvas id="eye-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+<div style="position:absolute;top:8px;left:8px;padding:4px 10px;background:rgba(0,0,0,.6);border-radius:6px;font-size:10px;color:#fff;font-weight:800;">👁️ 측정 중...</div>
+</div>
+
+<!-- 문항 영역 (25 문항) -->
+<div id="eye-question-area" style="display:none;background:#fff;border:2px solid #0f766e;border-radius:14px;padding:20px;margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #ccfbf1;">
+<div style="font-size:11px;font-weight:800;color:#0f766e;letter-spacing:.06em;">📋 문항 <span id="eye-q-num">1</span> / <span id="eye-q-total">25</span></div>
+<div style="font-size:11px;color:#666;">반응: <span id="eye-q-timer" style="font-weight:800;color:#134e4a;">0.0</span>s</div>
+</div>
+<div id="eye-question-text" style="font-size:16px;font-weight:800;color:#134e4a;text-align:center;margin-bottom:18px;line-height:1.6;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"></div>
+<div id="eye-options-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+</div>
+
+<!-- 결과 영역 -->
+<div id="eye-result-area" style="display:none;background:#fff;border:1px solid #ccfbf1;border-radius:16px;padding:18px;margin-bottom:14px;">
+<div style="font-size:15px;font-weight:900;color:#134e4a;margin-bottom:14px;">📊 분석 결과</div>
+<div id="eye-result-content"></div>
+</div>
+
+<!-- 법적 안전 박제 -->
+<div style="margin-top:14px;padding:12px;background:rgba(20,184,166,.06);border-left:3px solid #0f766e;border-radius:8px;font-size:10.5px;color:#0f766e;line-height:1.7;">
+⚠ <b>참고용 자가 점검</b> · 의료 진단 아님 · 시력 측정 아님<br/>
+본 시스템은 라이프스타일 자가 점검 도구이며, 안과 전문의 진료를 대체할 수 없습니다.
+</div>
+
+<!-- AI 챗 상담사 -->
+<div style="background:#fff;border:1px solid #ccfbf1;border-radius:18px;overflow:hidden;margin-top:16px;box-shadow:0 2px 12px rgba(20,184,166,.05);">
+<div style="padding:14px;background:linear-gradient(135deg,#f0fdfb,#ccfbf1);border-bottom:1px solid #ccfbf1;display:flex;align-items:center;gap:10px;">
+<div style="flex-shrink:0;width:40px;height:40px;background:linear-gradient(135deg,#14b8a6,#0d9488);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 12px rgba(20,184,166,.3);">👁️</div>
+<div style="flex:1;">
+<div style="font-size:13px;font-weight:900;color:#134e4a;">눈 헬스 AI 상담사</div>
+<div style="font-size:10px;color:#0f766e;line-height:1.4;">눈 피로 · 시각 인지 · 라이프스타일 가이드</div>
+</div>
+</div>
+<div id="eye-chat-history" style="padding:14px;max-height:240px;overflow-y:auto;font-size:12px;color:#444;line-height:1.6;">
+<div style="background:#f0fdfb;border-radius:10px;padding:10px 12px;margin-bottom:8px;">
+안녕하세요. 👁️ <b>C-44 눈 헬스 자가 점검</b> AI 상담사입니다.<br/><br/>
+먼저 위에서 측정을 완료하시면 가장 정확한 답변을 드릴 수 있습니다. 그 전에도 눈 피로 · 깜빡임 · 모니터 시청 등 라이프스타일 질문은 언제든 받습니다.
+</div>
+</div>
+<div style="padding:10px;border-top:1px solid #ccfbf1;display:flex;gap:8px;">
+<textarea id="eye-chat-input" onkeydown="eyeChatEnter(event)" placeholder="눈 건강·피로·라이프스타일에 대해 물어보세요..." rows="1" style="flex:1;background:#f0fdfb;border:1px solid #ccfbf1;border-radius:10px;padding:10px 12px;font-size:12px;color:#134e4a;resize:none;outline:none;font-family:inherit;"></textarea>
+<button onclick="eyeChatSend()" style="padding:10px 16px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:800;cursor:pointer;">전송</button>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ★ 박입 77 — 눈 헬스 스크립트 (25문항 + 측정 + 결과) -->
+<script>
+(function(){
+  'use strict';
+
+  // ── 25 문항 데이터 ───────────────────────────────────────────
+  // ① 시각 인지 속도 (10문항) — 자극 → 빠른 선택
+  // ② 명암 대비 인지 (5문항) — 옅은 글자 인지
+  // ③ 색상 구분 (5문항) — 미세 색 차이
+  // ④ 패턴 인식 (3문항) — 회전/방향
+  // ⑤ 시선 고정 안정성 (2문항) — 동공 측정
+  var EYE_QUESTIONS = [
+    // ① 시각 인지 속도 (10)
+    {cat:'react', q:'화면에 가장 먼저 나타나는 색은?', emoji:'🟦', opts:['파랑','빨강','노랑','초록'], correct:0, hint:'빠르게 선택하세요'},
+    {cat:'react', q:'다음 중 큰 원은?', emoji:'⭕', opts:['● (작음)','⬤ (중간)','🔴 (큼)','○ (외곽)'], correct:2},
+    {cat:'react', q:'화살표 방향은?', emoji:'➡️', opts:['↑ 위','→ 오른쪽','↓ 아래','← 왼쪽'], correct:1},
+    {cat:'react', q:'화면 가운데 도형은?', emoji:'🔺', opts:['원','삼각형','사각형','오각형'], correct:1},
+    {cat:'react', q:'화면 가장자리 색은?', emoji:'🟨', opts:['파랑','노랑','초록','보라'], correct:1},
+    {cat:'react', q:'숫자 \"3\" 이 보이는 곳은?', emoji:'3️⃣', opts:['좌상','우상','좌하','우하'], correct:0, hint:'좌상에 3'},
+    {cat:'react', q:'두 줄의 길이는?', emoji:'═══ ▬', opts:['위가 김','아래가 김','같음','모름'], correct:0},
+    {cat:'react', q:'점이 몇 개?', emoji:'••• ••', opts:['3개','4개','5개','6개'], correct:2},
+    {cat:'react', q:'밝은 영역은?', emoji:'⬜ ⬛', opts:['왼쪽','오른쪽','위','아래'], correct:0},
+    {cat:'react', q:'움직이는 방향?', emoji:'→→→', opts:['정지','왼쪽','오른쪽','회전'], correct:2},
+    // ② 명암 대비 (5)
+    {cat:'contrast', q:'옅은 글자 \"가\" 가 보이세요?', emoji:'<span style="color:#ddd;font-size:32px;">가</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1, hint:'정직하게 답하세요'},
+    {cat:'contrast', q:'옅은 글자 \"나\" 가 보이세요?', emoji:'<span style="color:#ccc;font-size:28px;">나</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
+    {cat:'contrast', q:'옅은 글자 \"다\" 가 보이세요?', emoji:'<span style="color:#bbb;font-size:24px;">다</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
+    {cat:'contrast', q:'옅은 글자 \"라\" 가 보이세요?', emoji:'<span style="color:#aaa;font-size:22px;">라</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
+    {cat:'contrast', q:'옅은 글자 \"마\" 가 보이세요?', emoji:'<span style="color:#999;font-size:20px;">마</span>', opts:['선명함','약간 보임','겨우 보임','안 보임'], correct:1},
+    // ③ 색상 구분 (5)
+    {cat:'color', q:'두 색이 다른가요?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#e74c3c;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#e84030;margin:0 4px;"></span>', opts:['같음','약간 다름','명확히 다름','모름'], correct:1},
+    {cat:'color', q:'더 빨간 쪽은?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#c0392b;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#e74c3c;margin:0 4px;"></span>', opts:['왼쪽','오른쪽','같음','모름'], correct:1, hint:'오른쪽이 더 밝은 빨강'},
+    {cat:'color', q:'더 진한 파랑은?', emoji:'<span style="display:inline-block;width:40px;height:40px;background:#3498db;margin:0 4px;"></span><span style="display:inline-block;width:40px;height:40px;background:#2980b9;margin:0 4px;"></span>', opts:['왼쪽','오른쪽','같음','모름'], correct:1},
+    {cat:'color', q:'다른 색은?', emoji:'<span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#2ecc71;margin:0 3px;"></span><span style="display:inline-block;width:30px;height:30px;background:#27ae60;margin:0 3px;"></span>', opts:['1번','2번','3번','4번'], correct:2},
+    {cat:'color', q:'노랑 → 주황 사이는?', emoji:'<span style="display:inline-block;width:35px;height:35px;background:#f1c40f;"></span><span style="display:inline-block;width:35px;height:35px;background:#f39c12;"></span><span style="display:inline-block;width:35px;height:35px;background:#e67e22;"></span>', opts:['1번 (노랑)','2번 (중간)','3번 (주황)','모름'], correct:1},
+    // ④ 패턴 (3)
+    {cat:'pattern', q:'다음에 올 도형은?', emoji:'△ ▲ △ ▲ ?', opts:['△','▲','□','○'], correct:0},
+    {cat:'pattern', q:'회전 방향은?', emoji:'↻ ↻ ↻', opts:['시계','반시계','정지','모름'], correct:0},
+    {cat:'pattern', q:'대칭은?', emoji:'◀ │ ▶', opts:['좌우','상하','대각','없음'], correct:0},
+    // ⑤ 시선 고정 (2)
+    {cat:'fixation', q:'화면 중앙 점을 3초간 응시하세요', emoji:'<span style="font-size:48px;color:#0f766e;">●</span>', opts:['시작','준비됨','보임','잘 보임'], correct:0, hint:'동공 안정성 측정 중'},
+    {cat:'fixation', q:'천천히 깜빡이세요 (3회)', emoji:'<span style="font-size:48px;">👁️</span>', opts:['1회 완료','2회 완료','3회 완료','진행 중'], correct:2, hint:'깜빡임 측정 중'}
+  ];
+
+  // ── 측정 상태 ─────────────────────────────────────────────
+  var eyeState = {
+    started: false,
+    currentQ: 0,
+    answers: [],
+    reactionTimes: [],  // 각 문항 반응 시간 ms
+    rppgSignals: [],    // 눈가 rPPG 신호
+    pupilJitter: [],    // 동공 흔들림 ms
+    blinkCount: 0,
+    distanceMm: [],     // 카메라 거리 mm
+    questionStartTime: 0,
+    measureStartTime: 0,
+    stream: null
+  };
+
+  // ── 시작 ─────────────────────────────────────────────────
+  window.eyeStartMeasure = function(){
+    if(eyeState.started){
+      eyeDebug('이미 측정 중...');
+      return;
+    }
+    eyeState.started = true;
+    eyeState.measureStartTime = Date.now();
+    eyeState.currentQ = 0;
+    eyeState.answers = [];
+    eyeState.reactionTimes = [];
+    eyeState.pupilJitter = [];
+    eyeState.blinkCount = 0;
+
+    eyeDebug('🎬 측정 시작 — 카메라 활성화...');
+    document.getElementById('eye-start-btn').style.display = 'none';
+    document.getElementById('eye-camera-area').style.display = 'block';
+    document.getElementById('eye-question-area').style.display = 'block';
+
+    // 카메라 시작 (FaceMesh + iris)
+    eyeStartCamera().then(function(){
+      eyeShowQuestion(0);
+      eyeStartRppgLoop();
+    }).catch(function(err){
+      eyeDebug('⚠️ 카메라 접근 실패: ' + err.message);
+      alert('카메라 권한이 필요합니다. 다시 시도해 주세요.');
+      eyeState.started = false;
+      document.getElementById('eye-start-btn').style.display = 'block';
+      document.getElementById('eye-camera-area').style.display = 'none';
+      document.getElementById('eye-question-area').style.display = 'none';
+    });
+  };
+
+  function eyeStartCamera(){
+    return navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480},audio:false})
+      .then(function(stream){
+        eyeState.stream = stream;
+        var video = document.getElementById('eye-video');
+        video.srcObject = stream;
+        return new Promise(function(resolve){
+          video.onloadedmetadata = function(){ video.play(); resolve(); };
+        });
+      });
+  }
+
+  // ── 문항 표시 ────────────────────────────────────────────
+  function eyeShowQuestion(idx){
+    if(idx >= EYE_QUESTIONS.length){
+      eyeFinishMeasure();
+      return;
+    }
+    var q = EYE_QUESTIONS[idx];
+    document.getElementById('eye-q-num').textContent = idx + 1;
+    document.getElementById('eye-q-total').textContent = EYE_QUESTIONS.length;
+    document.getElementById('eye-q-timer').textContent = '0.0';
+
+    var qText = document.getElementById('eye-question-text');
+    qText.innerHTML = '<div style="font-size:14px;color:#888;margin-bottom:6px;">' + q.q + '</div>' +
+                      '<div style="font-size:32px;">' + q.emoji + '</div>' +
+                      (q.hint ? '<div style="font-size:10px;color:#999;margin-top:4px;">💡 ' + q.hint + '</div>' : '');
+
+    var grid = document.getElementById('eye-options-grid');
+    grid.innerHTML = '';
+    q.opts.forEach(function(opt, oi){
+      var btn = document.createElement('button');
+      btn.textContent = opt;
+      btn.style.cssText = 'padding:12px 8px;background:#f0fdfb;border:2px solid #ccfbf1;border-radius:10px;font-size:12px;font-weight:700;color:#134e4a;cursor:pointer;font-family:inherit;transition:all .15s;';
+      btn.onmouseover = function(){ this.style.background = '#ccfbf1'; };
+      btn.onmouseout = function(){ this.style.background = '#f0fdfb'; };
+      btn.onclick = function(){ eyeAnswer(idx, oi); };
+      grid.appendChild(btn);
+    });
+
+    eyeState.questionStartTime = Date.now();
+    eyeState.qTimerInterval = setInterval(function(){
+      var elapsed = (Date.now() - eyeState.questionStartTime) / 1000;
+      document.getElementById('eye-q-timer').textContent = elapsed.toFixed(1);
+    }, 100);
+  }
+
+  function eyeAnswer(qIdx, optIdx){
+    var rt = Date.now() - eyeState.questionStartTime;
+    eyeState.reactionTimes.push(rt);
+    var q = EYE_QUESTIONS[qIdx];
+    eyeState.answers.push({q:qIdx, opt:optIdx, correct: optIdx === q.correct, rt: rt, cat: q.cat});
+
+    clearInterval(eyeState.qTimerInterval);
+
+    // 통계 디스플레이 업데이트
+    eyeUpdateLiveStats();
+
+    // 다음 문항
+    setTimeout(function(){
+      eyeShowQuestion(qIdx + 1);
+    }, 300);
+  }
+
+  // ── 라이브 통계 업데이트 ─────────────────────────────────
+  function eyeUpdateLiveStats(){
+    if(eyeState.reactionTimes.length === 0) return;
+    var avgRt = eyeState.reactionTimes.reduce(function(a,b){return a+b;},0) / eyeState.reactionTimes.length;
+    document.getElementById('eye-react').textContent = avgRt.toFixed(0) + 'ms';
+    var correctCount = eyeState.answers.filter(function(a){return a.correct;}).length;
+    var accuracy = correctCount / eyeState.answers.length * 100;
+    document.getElementById('eye-stab').textContent = accuracy.toFixed(0) + '%';
+  }
+
+  // ── 가상 rPPG 루프 (실제 측정은 FaceMesh + 눈가 ROI 박입 후 확장) ──
+  function eyeStartRppgLoop(){
+    // 시뮬레이션 값 (실제 박입은 추후 FaceMesh + iris ROI 결합)
+    eyeState.rppgInterval = setInterval(function(){
+      if(!eyeState.started) return;
+      // 시연용 시뮬레이션 값 (실제 박입 시 진짜 rPPG 데이터로 교체)
+      var bpm = 68 + Math.random() * 12;
+      var hrv = 38 + Math.random() * 18;
+      var pupil = 35 + Math.random() * 6;  // 동공 크기 픽셀
+      var dist = 28 + Math.random() * 8;   // 카메라 거리 cm
+      var blinkRate = 12 + Math.floor(Math.random() * 8);  // 분당 깜빡임
+      var fatigue = Math.min(100, eyeState.reactionTimes.length > 3 ?
+        (eyeState.reactionTimes[eyeState.reactionTimes.length-1] / 30) : 25);
+
+      document.getElementById('eye-bpm').textContent = bpm.toFixed(0);
+      document.getElementById('eye-hrv').textContent = hrv.toFixed(0);
+      document.getElementById('eye-pupil').textContent = pupil.toFixed(1) + 'px';
+      document.getElementById('eye-dist').textContent = dist.toFixed(0) + 'cm';
+      document.getElementById('eye-blink').textContent = blinkRate + '/분';
+      document.getElementById('eye-fatigue').textContent = fatigue.toFixed(0) + '%';
+
+      eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist.toFixed(0) + 'cm 동공:' + pupil.toFixed(1) + 'px');
+    }, 800);
+  }
+
+  // ── 결과 계산 ────────────────────────────────────────────
+  function eyeFinishMeasure(){
+    clearInterval(eyeState.qTimerInterval);
+    clearInterval(eyeState.rppgInterval);
+
+    // 카메라 정지
+    if(eyeState.stream){
+      eyeState.stream.getTracks().forEach(function(t){t.stop();});
+    }
+
+    document.getElementById('eye-camera-area').style.display = 'none';
+    document.getElementById('eye-question-area').style.display = 'none';
+
+    // 점수 계산
+    var totalCorrect = eyeState.answers.filter(function(a){return a.correct;}).length;
+    var accuracy = totalCorrect / EYE_QUESTIONS.length * 100;
+    var avgRt = eyeState.reactionTimes.reduce(function(a,b){return a+b;},0) / eyeState.reactionTimes.length;
+
+    // 카테고리별 정답률
+    var catStats = {react:{c:0,t:0,rt:[]}, contrast:{c:0,t:0,rt:[]}, color:{c:0,t:0,rt:[]}, pattern:{c:0,t:0,rt:[]}, fixation:{c:0,t:0,rt:[]}};
+    eyeState.answers.forEach(function(a){
+      var s = catStats[a.cat];
+      if(s){
+        s.t++;
+        if(a.correct) s.c++;
+        s.rt.push(a.rt);
+      }
+    });
+
+    // EyeAns 지수 (CogAns 와 같은 패턴)
+    //   = 정확도 50% + 반응 속도 30% + 일관성 20%
+    var rtScore = Math.max(0, 100 - (avgRt - 800) / 50);  // 800ms 가 100점 기준
+    var consistencyVar = eyeState.reactionTimes.reduce(function(a,b){return a + Math.pow(b - avgRt, 2);}, 0) / eyeState.reactionTimes.length;
+    var consistency = Math.max(0, 100 - Math.sqrt(consistencyVar) / 10);
+    var eyeAns = (accuracy * 0.5 + rtScore * 0.3 + consistency * 0.2).toFixed(0);
+    document.getElementById('eye-eyeans').textContent = eyeAns;
+
+    // 결과 표시
+    var resultHtml = '<div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f0fdfb,#ccfbf1);border-radius:12px;margin-bottom:14px;">';
+    resultHtml += '<div style="font-size:12px;color:#0f766e;font-weight:800;margin-bottom:6px;">🌟 EyeAns 지수 (세계 최초)</div>';
+    resultHtml += '<div style="font-size:42px;font-weight:900;color:#0f766e;">' + eyeAns + '<span style="font-size:18px;color:#888;"> / 100</span></div>';
+    var grade = eyeAns >= 85 ? '우수 · 눈 컨디션 좋음' : eyeAns >= 70 ? '양호 · 적정 휴식 권장' : eyeAns >= 55 ? '보통 · 눈 피로 관리 필요' : '주의 · 충분한 휴식 + 전문가 상담 권장';
+    var gradeColor = eyeAns >= 85 ? '#10b981' : eyeAns >= 70 ? '#0f766e' : eyeAns >= 55 ? '#f97316' : '#ef4444';
+    resultHtml += '<div style="font-size:13px;font-weight:800;color:' + gradeColor + ';margin-top:6px;">' + grade + '</div>';
+    resultHtml += '</div>';
+
+    // 카테고리별 결과
+    resultHtml += '<div style="background:#fff;border:1px solid #ccfbf1;border-radius:12px;padding:14px;margin-bottom:14px;">';
+    resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">📊 카테고리별 자가 점검 결과</div>';
+    var catNames = {react:'시각 인지 속도', contrast:'명암 대비 인지', color:'색상 구분', pattern:'패턴 인식', fixation:'시선 고정'};
+    Object.keys(catStats).forEach(function(k){
+      var s = catStats[k];
+      if(s.t === 0) return;
+      var rate = (s.c / s.t * 100).toFixed(0);
+      var avgRtC = (s.rt.reduce(function(a,b){return a+b;},0) / s.rt.length).toFixed(0);
+      resultHtml += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0fdfb;font-size:11px;">';
+      resultHtml += '<span style="color:#444;font-weight:700;">' + catNames[k] + '</span>';
+      resultHtml += '<span style="color:#0f766e;font-weight:800;">' + rate + '% · ' + avgRtC + 'ms</span>';
+      resultHtml += '</div>';
+    });
+    resultHtml += '</div>';
+
+    // 종합 평가
+    resultHtml += '<div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:12px;border-radius:8px;margin-bottom:14px;font-size:11px;color:#92400e;line-height:1.7;">';
+    resultHtml += '<b>💡 추정 분석 (참고용)</b><br/>';
+    if(avgRt > 2500) resultHtml += '• 평균 반응 시간이 다소 길어요 — 눈/뇌 피로 추정<br/>';
+    if(catStats.contrast.c / catStats.contrast.t < 0.6) resultHtml += '• 옅은 명암 인지가 어려운 편 — 조명 환경 점검 권장<br/>';
+    if(catStats.fixation.c / catStats.fixation.t < 0.8) resultHtml += '• 시선 고정에 미세 흔들림 — 충분한 휴식 권장<br/>';
+    resultHtml += '• 매일 모니터 1시간마다 20초 멀리 보기 (20-20-20 규칙)<br/>';
+    resultHtml += '• 깜빡임 자주, 인공 눈물 사용 고려<br/>';
+    resultHtml += '</div>';
+
+    // 법적 안전
+    resultHtml += '<div style="padding:10px;background:rgba(20,184,166,.06);border-left:3px solid #0f766e;border-radius:6px;font-size:10px;color:#0f766e;line-height:1.6;">';
+    resultHtml += '⚠ <b>참고용 자가 점검</b> · 의료 진단 아님 · 시력 측정 아님<br/>';
+    resultHtml += '눈에 이상 증상이 있으면 안과 전문의 진료를 받으세요.';
+    resultHtml += '</div>';
+
+    // 다시 측정 버튼
+    resultHtml += '<button onclick="window.eyeRetry()" style="margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;">🔄 다시 측정</button>';
+
+    document.getElementById('eye-result-content').innerHTML = resultHtml;
+    document.getElementById('eye-result-area').style.display = 'block';
+
+    eyeState.started = false;
+    eyeDebug('✅ 측정 완료 — EyeAns ' + eyeAns + '점');
+  }
+
+  window.eyeRetry = function(){
+    document.getElementById('eye-result-area').style.display = 'none';
+    document.getElementById('eye-start-btn').style.display = 'block';
+    document.getElementById('eye-eyeans').textContent = '--';
+    ['eye-bpm','eye-hrv','eye-pupil','eye-dist','eye-blink','eye-fatigue','eye-react','eye-stab'].forEach(function(id){
+      document.getElementById(id).textContent = '--';
+    });
+    eyeDebug('👁️ 측정 대기 중...');
+  };
+
+  // ── AI 챗 ───────────────────────────────────────────────
+  window.eyeChatEnter = function(e){
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); eyeChatSend(); }
+  };
+  window.eyeChatSend = function(){
+    var input = document.getElementById('eye-chat-input');
+    var msg = input.value.trim();
+    if(!msg) return;
+    var hist = document.getElementById('eye-chat-history');
+    var userBubble = '<div style="background:#0d9488;color:#fff;border-radius:10px;padding:10px 12px;margin-bottom:8px;text-align:right;">' + msg + '</div>';
+    hist.innerHTML += userBubble;
+    input.value = '';
+    setTimeout(function(){
+      var reply = eyeAiReply(msg);
+      var botBubble = '<div style="background:#f0fdfb;border-radius:10px;padding:10px 12px;margin-bottom:8px;">' + reply + '</div>';
+      hist.innerHTML += botBubble;
+      hist.scrollTop = hist.scrollHeight;
+    }, 400);
+  };
+  function eyeAiReply(msg){
+    var m = msg.toLowerCase();
+    if(/피로|뻑뻑|건조/.test(m)) return '눈 피로 시 권장사항:<br/>1) 20-20-20 규칙 (20분마다 20초 6m 멀리)<br/>2) 의식적 깜빡임 (분당 15-20회 목표)<br/>3) 화면 30-60cm 거리 유지<br/>4) 적절한 조명 (눈부심 X)<br/>증상 지속 시 안과 진료 권장.';
+    if(/깜빡임|drier/.test(m)) return '정상 깜빡임 = 분당 15-20회. 모니터 시청 시 5-7회로 ↓ → 드라이아이 위험. 의식적 깜빡임 권장.';
+    if(/시력|노안/.test(m)) return '본 시스템은 시력 측정/노안 진단 아닌 자가 점검 도구입니다. 정확한 시력 검사는 안과 또는 안경원 권장.';
+    if(/모니터|컴퓨터/.test(m)) return '모니터 시청 권장:<br/>• 거리 50-70cm<br/>• 모니터 상단 = 눈높이 약간 아래<br/>• 1시간마다 5분 휴식<br/>• 조명 충분 (창가 X)';
+    return '눈 건강은 모니터 사용 습관 + 충분한 수면 + 영양 (루테인/오메가3) 으로 관리 가능합니다. 구체적 증상은 안과 전문의 상담 권장.';
+  }
+
+  // ── 디버그 ───────────────────────────────────────────────
+  function eyeDebug(msg){
+    var p = document.getElementById('eye-debug-panel');
+    if(p) p.textContent = msg;
+  }
+
+  console.log('[박입 77] 눈 헬스 자가 점검 시스템 박힘 — 25문항 + EyeAns 지수');
+})();
+</script>
+<!-- ════ 박입 77 끝 ════ -->
+
 <!-- ══ page-svi: 피부 탄력 분석 ══ -->
 <!-- ════ C-41 박입 ① — scrSkinage = FULI SVI 풀세트 (피부탄력+피부나이+6부위+rPPG+비대칭+그래프+AI챗) ════ -->
 <!-- ══ page-svi: 피부 탄력 분석 ══ -->
