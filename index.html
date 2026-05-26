@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj55-autorecover" name="c41-version"/>
+<meta content="2026-05-26-c44-inj58-main-pipeline" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26854,6 +26854,109 @@ function _rmaiArOnResults(results){
     // 4. 립 (가장 위)
     if(ac.lip) _rmaiArDrawLip(ctx, canvas, landmarks, ac.lip);
 
+    // 5. ★ 박입 58 — 헤어 (메인 파이프라인 직결, wrap chain 우회)
+    //    구글 AI 진단: 두 페이지 입구 + 41 wrap chain → silently fail
+    //    fix: _rmaiArOnResults 본체에 직접 박입 (캔버스 clear 후 즉시 적용)
+    //    좌표: 글로벌 표준 — landmark 10 (이마 탑) 기준, 얼굴 높이의 0.6 위로 확장
+    if(ac.hair){
+      try {
+        window._inj58Stats = window._inj58Stats || {frameCount:0, paintCount:0};
+        window._inj58Stats.frameCount++;
+
+        var lm10 = landmarks[10];   // 이마 정중앙 탑
+        var lm152 = landmarks[152]; // 턱 끝
+        if(lm10 && lm152){
+          var topX = lm10.x * canvas.width;
+          var topY = lm10.y * canvas.height;
+          var chinY = lm152.y * canvas.height;
+          var faceH = chinY - topY;
+
+          // 글로벌 표준: 얼굴 높이의 0.6 위로 확장 (ModiFace/PerfectCorp 규격)
+          var hairY = Math.max(0, Math.floor(topY - faceH * 0.6));
+          var hairH = Math.floor(faceH * 0.6);
+          var hairX = Math.max(0, Math.floor(topX - faceH * 0.55));
+          var hairW = Math.floor(faceH * 1.1);
+          hairX = Math.max(0, hairX);
+          hairW = Math.min(canvas.width - hairX, hairW);
+          hairH = Math.min(canvas.height - hairY, hairH);
+
+          if(hairW > 10 && hairH > 10){
+            window._inj58Stats.lastRegion = {x:hairX, y:hairY, w:hairW, h:hairH};
+
+            var hairImgData = ctx.getImageData(hairX, hairY, hairW, hairH);
+            var hairData = hairImgData.data;
+
+            // 헤어 색 분해
+            var hexH = ac.hair;
+            var tintR = parseInt(hexH.substr(1,2), 16);
+            var tintG = parseInt(hexH.substr(3,2), 16);
+            var tintB = parseInt(hexH.substr(5,2), 16);
+
+            var hairInt = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.75;
+            var painted = 0;
+
+            // 격프레임 (성능)
+            if(_rmaiAr.frameCount % 2 === 0){
+              for(var hi = 0; hi < hairData.length; hi += 4){
+                var hr = hairData[hi], hg = hairData[hi+1], hb = hairData[hi+2];
+                var hlum = 0.2126*hr + 0.7152*hg + 0.0722*hb;
+                if(hlum > 180) continue;  // 배경/하이라이트 패스
+
+                // 인종 통합 머리카락 판정
+                var rbDiff = hr - hb;
+                var isBlondOrGinger = (hr > 140 && hg > 110 && hb < 100 && rbDiff > 55);
+                var isWhiteHair = (hlum > 175 && Math.abs(hr-hg) < 12 && Math.abs(hg-hb) < 12);
+                var isDarkHair = hlum < 110;
+
+                if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
+
+                // 흑발 가상 탈색 (base shift) — multiplicative 살리면서
+                var workR = hr, workG = hg, workB = hb;
+                if(hlum < 110){
+                  var darkness = (110 - hlum) / 110;
+                  var lift = 1 + darkness * (170/Math.max(hlum,1) - 1) * 0.85;
+                  workR = Math.min(255, hr * lift);
+                  workG = Math.min(255, hg * lift);
+                  workB = Math.min(255, hb * lift);
+                }
+
+                // multiplicative blend (텍스처 보존)
+                var multR = (workR * tintR) / 255;
+                var multG = (workG * tintG) / 255;
+                var multB = (workB * tintB) / 255;
+
+                // 어두운 픽셀에 additive 추가 (색 명확히)
+                if(hlum < 80){
+                  multR = multR * 0.65 + tintR * 0.35 * (1 - hlum/80);
+                  multG = multG * 0.65 + tintG * 0.35 * (1 - hlum/80);
+                  multB = multB * 0.65 + tintB * 0.35 * (1 - hlum/80);
+                }
+
+                var hairWeight = (180 - hlum) / 180;
+                var alpha = Math.min(0.95, hairInt * Math.pow(hairWeight, 0.7));
+
+                hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
+                hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
+                hairData[hi+2] = Math.round(hb * (1 - alpha) + multB * alpha);
+                painted++;
+              }
+              ctx.putImageData(hairImgData, hairX, hairY);
+              window._inj58Stats.paintCount = painted;
+
+              // 박입 53 진단 박스 호환 (stats 공유)
+              window._inj51Stats = window._inj51Stats || {};
+              window._inj51Stats.frameCount = window._inj58Stats.frameCount;
+              window._inj51Stats.paintCount = painted;
+              window._inj51Stats.lastRegion = window._inj58Stats.lastRegion;
+            }
+          }
+        }
+      } catch(eh){
+        window._inj58Stats = window._inj58Stats || {};
+        window._inj58Stats.lastError = eh.message;
+      }
+    }
+
     // ★ C-42 — 빨간 478점 시각화 제거 (사용자 요청 — 사진 보기 흉함)
     // 원본 cgo-fuli 디버그용 코드. 메신저에서는 숨김.
     // landmarks 478점 추적은 그대로 — 시각화만 제거.
@@ -27845,6 +27948,90 @@ window.rmaiArCapture = function(){
       var shouldDraw = (_rmaiAr.glossLevel > 0 || hasHair) && results.multiFaceLandmarks && results.multiFaceLandmarks[0];
       if(shouldDraw){
         window.drawFresnelWaterGlow(_rmaiAr.ctx, _rmaiAr.canvas, results.multiFaceLandmarks[0], _rmaiAr.glossLevel || 0);
+      }
+      // ★ 박입 56 — 헤어 렌더링 INLINE (drawFresnelWaterGlow 호출 여부와 무관)
+      try {
+        if(hasHair && results.multiFaceLandmarks && results.multiFaceLandmarks[0]){
+          var landmarks = results.multiFaceLandmarks[0];
+          var ctx = _rmaiAr.ctx;
+          var canvas = _rmaiAr.canvas;
+          var hairHex = _rmaiAr.appliedColors.hair;
+
+          window._inj56Stats = window._inj56Stats || {frameCount:0, paintCount:0};
+          window._inj56Stats.frameCount++;
+          window._inj56FrameCounter = (window._inj56FrameCounter || 0) + 1;
+
+          if(window._inj56FrameCounter % 2 === 0){
+            var FACE_OVAL = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397,
+                             365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58,
+                             132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+            var minX = canvas.width, maxX = 0, minY = canvas.height, maxY = 0;
+            for(var oi = 0; oi < FACE_OVAL.length; oi++){
+              var lm = landmarks[FACE_OVAL[oi]];
+              if(!lm) continue;
+              var lx = lm.x * canvas.width, ly = lm.y * canvas.height;
+              if(lx < minX) minX = lx;
+              if(lx > maxX) maxX = lx;
+              if(ly < minY) minY = ly;
+              if(ly > maxY) maxY = ly;
+            }
+            if(maxX > minX && maxY > minY){
+              var faceH = maxY - minY, faceW = maxX - minX;
+              var hX  = Math.max(0, Math.floor(minX - faceW * 0.25));
+              var hY  = Math.max(0, Math.floor(minY - faceH * 1.0));
+              var hX2 = Math.min(canvas.width,  Math.ceil(maxX + faceW * 0.25));
+              var hY2 = Math.min(canvas.height, Math.ceil(minY + faceH * 0.15));
+              var hW = hX2 - hX, hH = hY2 - hY;
+              if(hW >= 10 && hH >= 10){
+                window._inj56Stats.lastRegion = {x:hX, y:hY, w:hW, h:hH};
+                var imgData = ctx.getImageData(hX, hY, hW, hH);
+                var data = imgData.data;
+                var tintR = parseInt(hairHex.substr(1,2), 16);
+                var tintG = parseInt(hairHex.substr(3,2), 16);
+                var tintB = parseInt(hairHex.substr(5,2), 16);
+                var intensity = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.7;
+                var painted = 0;
+                for(var i = 0; i < data.length; i += 4){
+                  var r = data[i], g = data[i+1], b = data[i+2];
+                  var lum = 0.2126*r + 0.7152*g + 0.0722*b;
+                  if(lum > 180) continue;
+                  var workR = r, workG = g, workB = b;
+                  if(lum < 110){
+                    var darkness = (110 - lum) / 110;
+                    var lift = 1 + darkness * (170/Math.max(lum,1) - 1) * 0.85;
+                    workR = Math.min(255, r * lift);
+                    workG = Math.min(255, g * lift);
+                    workB = Math.min(255, b * lift);
+                  }
+                  var hairWeight = (180 - lum) / 180;
+                  var alpha = Math.min(0.95, intensity * Math.pow(hairWeight, 0.7));
+                  var multR = (workR * tintR) / 255;
+                  var multG = (workG * tintG) / 255;
+                  var multB = (workB * tintB) / 255;
+                  if(lum < 80){
+                    multR = multR*0.7 + tintR*0.3*(1 - lum/80);
+                    multG = multG*0.7 + tintG*0.3*(1 - lum/80);
+                    multB = multB*0.7 + tintB*0.3*(1 - lum/80);
+                  }
+                  data[i]   = Math.round(r * (1 - alpha) + multR * alpha);
+                  data[i+1] = Math.round(g * (1 - alpha) + multG * alpha);
+                  data[i+2] = Math.round(b * (1 - alpha) + multB * alpha);
+                  painted++;
+                }
+                ctx.putImageData(imgData, hX, hY);
+                window._inj56Stats.paintCount = painted;
+                // 박입 51 stats 도 함께 갱신 (진단 박스 호환)
+                window._inj51Stats = window._inj51Stats || {};
+                window._inj51Stats.frameCount = window._inj56Stats.frameCount;
+                window._inj51Stats.paintCount = painted;
+                window._inj51Stats.lastRegion = window._inj56Stats.lastRegion;
+              }
+            }
+          }
+        }
+      } catch(e){
+        window._inj56Stats = window._inj56Stats || {};
+        window._inj56Stats.lastError = e.message;
       }
     });
     _rmaiAr._fresnelHooked = true;
@@ -31813,7 +32000,7 @@ setTimeout(function(){
       }
     };
   }
-}, 12000);
+}, 600);  // 박입 57: 12초 → 0.6초 (박입 51 1.2초 전에 박혀야 박입 51 이 마지막 wrap 됨)
 </script>
 
 <!-- ════ C-42 박입 47 (3중 정밀 — 캔버스 복원 + 마이크로 절대 좌표 + 잠금 재박입) ════ -->
@@ -31970,7 +32157,7 @@ setTimeout(function(){
       absMicroCache = null;
     }
   };
-}, 12500);
+}, 700);  // 박입 57: 12.5초 → 0.7초 (박입 51 1.2초 전에 박혀야 박입 51 이 마지막)
 </script>
 
 <!-- ════ 헤어 픽셀 염색 (박입 27 스펙트럼 패턴 그대로 — 격프레임 + 영역 한정 + multiplicative blend) ════ -->
@@ -32723,7 +32910,7 @@ setTimeout(function(){
       };
     }
   };
-}, 1200);  // 박입 52: 16초 → 1.2초
+}, 1200);  // 박입 52: 16초 → 1.2초 (박입 55 의 auto-recover 가 후속 wrap 덮음 시 복구)
 </script>
 
 <!-- ════ 박입 53 — 화면 디버그 박스 (스마트폰 콘솔 X 대응) ════ -->
@@ -32766,6 +32953,7 @@ setTimeout(function(){
     '<div id="inj53-frame">frame: <span style="color:#fff;">0</span></div>' +
     '<div id="inj53-paint">paint: <span style="color:#fff;">0</span></div>' +
     '<div id="inj53-region">region: <span style="color:#fff;">-</span></div>' +
+    '<div id="inj53-rewrap">rewrap: <span style="color:#fff;">0</span></div>' +
     '<div id="inj53-err" style="color:#f88;font-size:10px;margin-top:3px;"></div>';
   document.body.appendChild(dbg);
 
@@ -32834,6 +33022,13 @@ setTimeout(function(){
       // 영역 크기
       if(regionEl){
         regionEl.innerHTML = 'region: <span style="color:#fff;">' + region + '</span>';
+      }
+      // 박입 57 — auto-recovery rewrap 카운터
+      var rewrapEl = document.getElementById('inj53-rewrap');
+      if(rewrapEl){
+        var rwc = window._inj55RewrapCount || 0;
+        var rwColor = (rwc > 0) ? '#fbbf24' : '#fff';
+        rewrapEl.innerHTML = 'rewrap: <span style="color:'+rwColor+';font-weight:900;">' + rwc + '</span>';
       }
       // 에러
       if(errEl){
@@ -32972,6 +33167,41 @@ setTimeout(function(){
 
   console.log('[c44-inj55] 박입 51 자동 회복 monitor 시작');
 }, 2500);
+</script>
+
+<!-- ════ 박입 56 — 강제 unhook + rehook (옛 onResults 콜백 폐기) ════ -->
+<!--   _fresnelHooked 가 이미 true 면 박입 54/56 코드가 등록 안 됨           -->
+<!--   강제로 flag 초기화 + tryFresnelHook 다시 호출                          -->
+<script>
+setTimeout(function(){
+  'use strict';
+  try {
+    if(typeof _rmaiAr !== 'undefined'){
+      _rmaiAr._fresnelHooked = false;  // 강제 해제
+      console.log('[c44-inj56] _fresnelHooked 강제 해제 — onResults 재등록 트리거');
+      if(typeof window.tryFresnelHook === 'function'){
+        window.tryFresnelHook();
+      } else {
+        // tryFresnelHook 가 window 에 없을 수 있음 — _rmaiAr.faceMesh 직접 접근
+        var retryCount = 0;
+        var rehookTimer = setInterval(function(){
+          retryCount++;
+          if(retryCount > 30){ clearInterval(rehookTimer); return; }
+          if(_rmaiAr && _rmaiAr.faceMesh && !_rmaiAr._fresnelHooked){
+            // 그냥 매번 강제로 false 박음 — tryFresnelHook 가 알아서 등록함
+            _rmaiAr._fresnelHooked = false;
+          }
+          if(_rmaiAr && _rmaiAr._fresnelHooked){
+            clearInterval(rehookTimer);
+            console.log('[c44-inj56] 박입 56 onResults 콜백 등록 성공');
+          }
+        }, 500);
+      }
+    }
+  } catch(e){
+    console.log('[c44-inj56] 에러:', e.message);
+  }
+}, 3000);
 </script>
 
 </body>
