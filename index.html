@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj60-coord-fix" name="c41-version"/>
+<meta content="2026-05-26-c44-inj61-noflicker-feather" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26886,9 +26886,11 @@ function _rmaiArOnResults(results){
           var faceH = ovalMaxY - ovalMinY;
           var faceW = ovalMaxX - ovalMinX;
 
-          // 박입 60 — 위로 0.3 만 확장, 아래로 +0.05 (앞머리 영역 포함)
-          var hairY = Math.max(0, Math.floor(ovalMinY - faceH * 0.3));
-          var hairH = Math.floor(faceH * 0.35);  // 정수리 → 이마 살짝 아래까지
+          // ★ 박입 61 — 영역 확장 (깜빡임 제거 + 정수리 포함)
+          //   위로 0.3 → 0.45 (정수리 끝까지)
+          //   높이 0.35 → 0.55 (영역 더 크게)
+          var hairY = Math.max(0, Math.floor(ovalMinY - faceH * 0.45));
+          var hairH = Math.floor(faceH * 0.55);
           var hairX = Math.max(0, Math.floor(ovalMinX - faceW * 0.15));
           var hairW = Math.floor(faceW * 1.3);
           hairW = Math.min(canvas.width - hairX, hairW);
@@ -26909,12 +26911,32 @@ function _rmaiArOnResults(results){
             var hairInt = (_rmaiAr.intensity && _rmaiAr.intensity.hair !== undefined) ? _rmaiAr.intensity.hair : 0.75;
             var painted = 0;
 
-            // 격프레임 (성능)
-            if(_rmaiAr.frameCount % 2 === 0){
+            // ★ 박입 61 — 격프레임 제거 (매 프레임 그림 → 깜빡임 0)
+            //   + 외곽 페더링 (가장자리 부드러움)
+            if(true){
+              // 페더링 영역 정의 (가장자리 15% 부드럽게)
+              var featherX = hairW * 0.12;
+              var featherY = hairH * 0.12;
+
               for(var hi = 0; hi < hairData.length; hi += 4){
+                // 페더링 — 픽셀의 영역 내 위치
+                var pixelIdx = hi / 4;
+                var px = pixelIdx % hairW;
+                var py = Math.floor(pixelIdx / hairW);
+
+                // 가장자리 알파 감쇄 (radial feather)
+                var distLeft = px;
+                var distRight = hairW - 1 - px;
+                var distTop = py;
+                var distBottom = hairH - 1 - py;
+                var distEdge = Math.min(distLeft, distRight, distTop, distBottom);
+                var featherDist = Math.min(featherX, featherY);
+                var edgeFade = (distEdge < featherDist) ? (distEdge / featherDist) : 1.0;
+                if(edgeFade <= 0.02) continue;
+
                 var hr = hairData[hi], hg = hairData[hi+1], hb = hairData[hi+2];
                 var hlum = 0.2126*hr + 0.7152*hg + 0.0722*hb;
-                if(hlum > 180) continue;  // 배경/하이라이트 패스
+                if(hlum > 180) continue;
 
                 // 인종 통합 머리카락 판정
                 var rbDiff = hr - hb;
@@ -26948,7 +26970,7 @@ function _rmaiArOnResults(results){
 
                 // ★ 박입 59 — 헤어 가중치 강화 (Math.pow 0.7 → 0.5 = 더 평탄)
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.98, hairInt * Math.pow(hairWeight, 0.5));
+                var alpha = Math.min(0.98, hairInt * Math.pow(hairWeight, 0.5) * edgeFade);  // ★ 박입 61: edgeFade 곱
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
