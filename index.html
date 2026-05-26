@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj68-dynamic-killer" name="c41-version"/>
+<meta content="2026-05-26-c44-inj69-side-hair" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26879,15 +26879,13 @@ function _rmaiArOnResults(results){
           var faceH = ovalMaxY - ovalMinY;
           var faceW = ovalMaxX - ovalMinX;
 
-          // ★ 박입 62 — 정수리 + 옆머리 + 이마 침범 방지
-          //   위로 0.45 → 0.65 (정수리 끝까지, 단 천장 직전)
-          //   높이 0.55 → 0.75 (영역 ↑)
-          //   좌우 0.15 → 0.30 (옆머리 포함)
-          //   가로 1.3 → 1.6
+          // ★ 박입 69 — 좌우 영역 확장 (옆머리 잡기)
+          //   파트너님 진단: 옆머리 짧아서 안 잡힘
+          //   0.30 → 0.45 좌우 확장, 1.6 → 1.9 가로
           var hairY = Math.max(0, Math.floor(ovalMinY - faceH * 0.65));
           var hairH = Math.floor(faceH * 0.75);
-          var hairX = Math.max(0, Math.floor(ovalMinX - faceW * 0.30));
-          var hairW = Math.floor(faceW * 1.6);
+          var hairX = Math.max(0, Math.floor(ovalMinX - faceW * 0.45));
+          var hairW = Math.floor(faceW * 1.9);
           hairW = Math.min(canvas.width - hairX, hairW);
           hairH = Math.min(canvas.height - hairY, hairH);
 
@@ -26924,11 +26922,17 @@ function _rmaiArOnResults(results){
                 var px = pixelIdx % hairW;
                 var py = Math.floor(pixelIdx / hairW);
 
-                // ★ 박입 62 — Gaussian 감쇄 (얼굴 중심에서 멀수록 약하게)
+                // ★ 박입 69 — 수평 균등 + 수직 Gaussian (양옆 머리 잡기)
+                //   파트너님 통찰: "픽셀의 등분화" — 가운데만 진하고 양옆 약한 문제 해결
+                //   수평 (X): 거의 균등 (sigma 매우 크게 — 가장자리 살짝 페이드)
+                //   수직 (Y): 기존 Gaussian (정수리 ~ 이마 자연 감쇄)
                 var dx = px - gaussCx;
                 var dy = py - gaussCy;
-                var distSq = dx*dx + dy*dy;
-                var gaussAttenuation = Math.exp(-distSq / (2 * gaussSigma * gaussSigma));
+                var sigmaX = hairW * 0.55;   // 가로 — 매우 크게 (양옆 균등)
+                var sigmaY = hairH * 0.32;   // 세로 — Gaussian 자연 감쇄
+                var attenX = Math.exp(-(dx*dx) / (2 * sigmaX * sigmaX));
+                var attenY = Math.exp(-(dy*dy) / (2 * sigmaY * sigmaY));
+                var gaussAttenuation = attenX * attenY;
                 if(gaussAttenuation <= 0.05) continue;
 
                 var hr = hairData[hi], hg = hairData[hi+1], hb = hairData[hi+2];
