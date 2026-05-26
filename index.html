@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj69-side-hair" name="c41-version"/>
+<meta content="2026-05-26-c44-inj70-limited-alpha" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26947,6 +26947,32 @@ function _rmaiArOnResults(results){
                   // 피부 톤 검사 — R 가 G 보다 살짝 높고 B 가 가장 낮음 (따뜻 피부 톤)
                   var isSkinTone = (hr > hg - 5) && (hg > hb - 5) && (hr - hb < 80);
                   if(isSkinTone) continue;  // 피부 영역 — 빨강 침범 차단
+                }
+
+                // ★ 박입 70 — 한정 알파 (파트너님 발상)
+                //   삐져나온 픽셀 = 영역 가장자리 모호 휘도 (140~180) + 고립
+                //   주변 머리카락 클러스터 검사로 진짜 머리카락만 칠하기
+                //   부담 최소화 — 모호 픽셀에만 적용 (대다수 픽셀은 skip)
+                var isAmbiguous = (hlum >= 140 && hlum <= 180);
+                var isEdgePixel = (px < hairW * 0.20 || px > hairW * 0.80 ||
+                                   py < hairH * 0.18 || py > hairH * 0.82);
+                if(isAmbiguous && isEdgePixel){
+                  // 4 방향 (위/아래/좌/우, 10px 떨어진) 검사 — 8 neighbor 보다 부담 ↓
+                  var neighborHairCount = 0;
+                  var checkOffsets = [
+                    [-10, 0], [10, 0], [0, -10], [0, 10]
+                  ];
+                  for(var ci = 0; ci < checkOffsets.length; ci++){
+                    var cx = px + checkOffsets[ci][0];
+                    var cy = py + checkOffsets[ci][1];
+                    if(cx < 0 || cx >= hairW || cy < 0 || cy >= hairH) continue;
+                    var cIdx = (cy * hairW + cx) * 4;
+                    var nr = hairData[cIdx], ng = hairData[cIdx+1], nb = hairData[cIdx+2];
+                    var nLum = 0.2126*nr + 0.7152*ng + 0.0722*nb;
+                    if(nLum < 140) neighborHairCount++;  // 어두운 이웃 = 머리카락
+                  }
+                  // 머리카락 이웃 0~1 개 = 고립 픽셀 = 배경, 패스
+                  if(neighborHairCount < 2) continue;
                 }
 
                 // 인종 통합 머리카락 판정
