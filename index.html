@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-color-fine-gloss-linked" name="c41-version"/>
+<meta content="2026-05-26-v47-makeup-frame-balanced" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13279,7 +13279,7 @@ var Q_POOL = {
       정확하게 색을 입혀드립니다.
     </div>
 
-    <!-- 카메라 영역 (자체) — 흰 카드 전체 폭으로 펴짐 -->
+    <!-- 카메라 영역 (자체) -->
     <div style="position:relative;width:100%;aspect-ratio:3/4;background:#000;border-radius:14px;overflow:hidden;margin-bottom:14px;">
       <video autoplay="" id="rmai-ar-video2" muted="" playsinline="" style="width:100%;height:100%;object-fit:cover;display:none;transform:scaleX(-1);"></video>
       <canvas id="rmai-ar-canvas2" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;transform:scaleX(-1);"></canvas>
@@ -13648,8 +13648,6 @@ var Q_POOL = {
     };
 
     // ② rmaiArApplyColor — 현재 카테고리에 색 박기 (base 강제 X)
-    //    ★ 핀셋 수정 — 색 클릭 → 미세 색상 슬라이더 + 카테고리별 HSL/물광 자동 연동
-    //    외부 함수 (sviSyncHslSlidersFromHex / _sviShowBrandInfo) 미정의 → 인라인 박입
     window.rmaiArApplyColor = function(hexColor, btnEl){
       if(typeof _rmaiAr === 'undefined') return;
       var cat = _rmaiAr.currentCategory || 'base';
@@ -13657,36 +13655,14 @@ var Q_POOL = {
       _rmaiAr.appliedColors[cat] = hexColor;  // ★ 현재 카테고리에 정확히 박음
       _rmaiAr.currentColor = hexColor;
 
-      // ★ HEX → HSL 변환 후 미세 색상 슬라이더 강제 동기
-      //   sliders.oninput 이 makeupUpdateHsl 호출하지만 .value 직접 변경은 이벤트 안 뜸 → 직접 호출
-      //   makeupUpdateHsl override 가 hslByCategory[cat] = {h,s,l} 자동 저장 + 미리보기/HEX 박스 갱신
-      try {
-        if(hexColor && hexColor.charAt(0)==='#' && hexColor.length===7){
-          var R = parseInt(hexColor.substr(1,2),16)/255;
-          var G = parseInt(hexColor.substr(3,2),16)/255;
-          var B = parseInt(hexColor.substr(5,2),16)/255;
-          var mx = Math.max(R,G,B), mn = Math.min(R,G,B);
-          var H, S, L = (mx+mn)/2;
-          if(mx===mn){ H=0; S=0; }
-          else {
-            var d = mx-mn;
-            S = L>0.5 ? d/(2-mx-mn) : d/(mx+mn);
-            if(mx===R) H = ((G-B)/d + (G<B?6:0));
-            else if(mx===G) H = ((B-R)/d + 2);
-            else H = ((R-G)/d + 4);
-            H /= 6;
-          }
-          var Hd = Math.round(H*360), Sp = Math.round(S*100), Lp = Math.round(L*100);
-          var hueBar = document.getElementById('svi-hue-bar-m');
-          var satBar = document.getElementById('svi-sat-bar-m');
-          var lightBar = document.getElementById('svi-light-bar-m');
-          if(hueBar && satBar && lightBar){
-            hueBar.value = Hd; satBar.value = Sp; lightBar.value = Lp;
-            // ★ 라벨/미리보기 + hslByCategory[cat] 자동 저장 (override 가 처리)
-            if(typeof window.makeupUpdateHsl === 'function') window.makeupUpdateHsl();
-          }
-        }
-      } catch(e){}
+      // 브랜드 정보 표시 (선택)
+      if(typeof window._sviShowBrandInfo === 'function'){
+        try { window._sviShowBrandInfo(hexColor); } catch(e){}
+      }
+      // HSL 슬라이더 동기화 (HSL → HEX 갱신)
+      if(typeof window.sviSyncHslSlidersFromHex === 'function'){
+        try { window.sviSyncHslSlidersFromHex(hexColor); } catch(e){}
+      }
     };
   }
 
@@ -27193,23 +27169,11 @@ function _rmaiArInitColorPicker(){
   var currentCardLib = _rmaiArColorLibrary[_rmaiAr.cardMode || 'oheng'] || _rmaiArOhengSet;
   
   // ★ 4 카테고리 탭 (현재 카드 모드의 색상 사용)
-  // ★ 헤어 전용 색 7종 (currentCardLib 에 없을 때 폴백)
-  var _hairColors = [
-    {c:'#1a1a1a', n:'내추럴 블랙'},
-    {c:'#4a2c2a', n:'다크 브라운'},
-    {c:'#6b3410', n:'브라운'},
-    {c:'#a0682b', n:'라이트 브라운'},
-    {c:'#d4a017', n:'골드 블론드'},
-    {c:'#c0392b', n:'레드'},
-    {c:'#8b4789', n:'바이올렛'}
-  ];
-
   var cats = [
     {key:'lip',   icon:'💋', name:'립',     pal: currentCardLib.lip,   subtitle:'립스틱'},
     {key:'cheek', icon:'🌸', name:'볼',     pal: currentCardLib.cheek, subtitle:'블러셔'},
     {key:'eye',   icon:'👁️', name:'아이',   pal: currentCardLib.eye,   subtitle:'아이쉐도우'},
-    {key:'base',  icon:'🫧', name:'베이스', pal: currentCardLib.base,  subtitle:'베이스 톤'},
-    {key:'hair',  icon:'💇', name:'헤어',   pal: currentCardLib.hair || _hairColors, subtitle:'헤어 컬러'}
+    {key:'base',  icon:'🫧', name:'베이스', pal: currentCardLib.base,  subtitle:'베이스 톤'}
   ];
 
   // 카테고리 탭 — 4개 한 줄
@@ -30356,7 +30320,7 @@ setTimeout(function(){
   }
 
   setTimeout(wrapSpectrumGlow, 100);
-}, 0);
+}, 8300);
 </script>
 
 <!-- ════ C-42 박입 28 (구글 AI 추천 적용 + 흰점 영구 차단) ════ -->
@@ -31645,7 +31609,7 @@ setTimeout(function(){
       }
     }
   };
-}, 0);
+}, 11500);
 </script>
 
 <!-- ════ C-42 박입 46 (★ 파트너 천재 발상 — 마이크로 240점 + 0.5~1.2px) ════ -->
@@ -31770,7 +31734,7 @@ setTimeout(function(){
       }
     };
   }
-}, 0);
+}, 12000);
 </script>
 
 <!-- ════ C-42 박입 47 (3중 정밀 — 캔버스 복원 + 마이크로 절대 좌표 + 잠금 재박입) ════ -->
@@ -31927,173 +31891,7 @@ setTimeout(function(){
       absMicroCache = null;
     }
   };
-}, 0);
-</script>
-
-<!-- ════ C-43 박입 51 (★ 머리카락 픽셀 필터 — 핀셋 수정 / 구글 AI 권고 반영) ════ -->
-<!--    파트너 명령: "핀셋 수정의 중요성 — v47 의 31,897줄 1줄도 안 건드림"      -->
-<!--                                                                              -->
-<!--    구글 AI 권고 반영 (16시간 사투의 결론):                                    -->
-<!--      ① drawFresnelWaterGlow chain 최상단 wrap (최종 마스킹 위치)              -->
-<!--      ② 머리카락 필터 3종 (Y<75 / 금발 / 흰머리) — 인종 unbiased              -->
-<!--      ③ 마이크로 경계 (75~105) OFF — 연산 부담 절감 (잔상 = 연산 지연 진단)  -->
-<!--      ④ 이마 영역 Crop — 머리카락 경계선 주변부만                            -->
-<!--      ⑤ 격프레임 (2 frames per loop)                                          -->
-<!--                                                                              -->
-<!--    토글:                                                                       -->
-<!--      window._inj51Control.disable();  // 즉시 OFF (v47 원상 복귀)             -->
-<!--      window._inj51Control.enable();   // 다시 ON                              -->
-<!--      window._inj51Control.info();     // 상태 확인                            -->
-<script>
-setTimeout(function(){
-  'use strict';
-  if(window._inj51Wrapped) return;
-
-  function applyInj51(){
-    if(typeof window.drawFresnelWaterGlow !== 'function'){
-      setTimeout(applyInj51, 300); return;
-    }
-    if(window._inj51Wrapped) return;
-
-    var prevGlow51 = window.drawFresnelWaterGlow;
-    var frameCount51 = 0;
-
-    window.drawFresnelWaterGlow = function(ctx, canvas, landmarks, glossLevel){
-      // ① 기존 chain (박입 13/27/47 등 C-42 박입 chain) 호출
-      prevGlow51(ctx, canvas, landmarks, glossLevel);
-
-      if(!window._inj51Enabled || !landmarks) return;
-
-      // ★ 파트너 명령 (핀셋): 피부 페이지 (scrSkinage) 에서는 작동 X
-      //   AR 메이크업 페이지 (scrMakeup) 에서만 머리카락 필터 작동
-      var scrMk = document.getElementById('scrMakeup');
-      if(!scrMk || !scrMk.classList.contains('active')) return;
-
-      // ② 격프레임 (구글 AI 권고: 연산 지연형 잔상 방지)
-      frameCount51++;
-      if(frameCount51 % 2 !== 0) return;
-
-      try {
-        var W = canvas.width, H = canvas.height;
-        if(W < 10 || H < 10) return;
-
-        // ③ 이마 영역 bounding box (MediaPipe 468)
-        var foreheadTop = landmarks[10];   // 이마 중심
-        var leftSide    = landmarks[103];  // 좌 이마 옆
-        var rightSide   = landmarks[332];  // 우 이마 옆
-        var leftBrow    = landmarks[107];  // 좌 눈썹 위
-        var rightBrow   = landmarks[336];  // 우 눈썹 위
-
-        if(!foreheadTop || !leftSide || !rightSide) return;
-        if(!leftBrow)  leftBrow  = foreheadTop;
-        if(!rightBrow) rightBrow = foreheadTop;
-
-        // 좌/우/위/아래 영역 계산
-        var minX = Math.floor(Math.min(leftSide.x,  leftBrow.x)  * W);
-        var maxX = Math.ceil( Math.max(rightSide.x, rightBrow.x) * W);
-        // 위: 얼굴 oval 위쪽 15% (머리카락 경계선 영역 포함)
-        var minY = Math.max(0, Math.floor(foreheadTop.y * H) - Math.floor(H * 0.15));
-        // 아래: 눈썹 위 평균 (이마 끝)
-        var maxY = Math.ceil(((leftBrow.y + rightBrow.y) / 2) * H);
-
-        // 경계 안전 처리
-        minX = Math.max(0, minX);
-        maxX = Math.min(W, maxX);
-        minY = Math.max(0, minY);
-        maxY = Math.min(H, maxY);
-
-        var w = maxX - minX, h = maxY - minY;
-        if(w < 10 || h < 10) return;
-
-        // ④ 이마 영역 픽셀 한 번에 추출
-        var imgData = ctx.getImageData(minX, minY, w, h);
-        var data = imgData.data;
-
-        // ⑤ ★ 머리카락 필터 3종 (구글 AI 권고 — 마이크로 경계 OFF)
-        //   헤어 카테고리 선택 + 색 있음 → 머리카락에 색 입힘 (염색)
-        //   그 외 → 머리카락 영역 alpha 0 (충돌 방지)
-        var hairCat = (window._rmaiAr && window._rmaiAr.currentCategory === 'hair');
-        var hairCol = (hairCat && window._rmaiAr && window._rmaiAr.currentColor) ? window._rmaiAr.currentColor : null;
-        var hairR = 0, hairG = 0, hairB = 0;
-        if(hairCol && hairCol.charAt(0) === '#' && hairCol.length === 7){
-          hairR = parseInt(hairCol.substr(1,2), 16);
-          hairG = parseInt(hairCol.substr(3,2), 16);
-          hairB = parseInt(hairCol.substr(5,2), 16);
-        }
-
-        for(var i = 0; i < data.length; i += 4){
-          var r = data[i];
-          var g = data[i+1];
-          var b = data[i+2];
-
-          // ITU-R BT.709 휘도 (박입 27 동일 공식)
-          var luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-          var isHair = false;
-
-          // [필터 1] 동양인 검은 머리 / 머리카락 그림자
-          if(luminance < 75){
-            isHair = true;
-          } else {
-            // [필터 2] 서양인 금발(Blond) / 빨간 머리(Ginger)
-            var rbDiff = r - b;
-            var isBlondOrGinger = (r > 140 && g > 110 && b < 100 && rbDiff > 55);
-
-            // [필터 3] 서양인 흰머리(White) / 은발
-            var rgDiff = Math.abs(r - g);
-            var gbDiff = Math.abs(g - b);
-            var isWhiteHair = (luminance > 175 && rgDiff < 12 && gbDiff < 12);
-
-            if(isBlondOrGinger || isWhiteHair) isHair = true;
-          }
-
-          if(isHair){
-            if(hairCol){
-              // ★ 헤어 카테고리: 머리카락에 색 입힘 (단순 50/50 blend)
-              data[i]   = (r + hairR) >> 1;
-              data[i+1] = (g + hairG) >> 1;
-              data[i+2] = (b + hairB) >> 1;
-              // alpha 그대로 (머리카락 보임)
-            } else {
-              // 기본: 충돌 방지 — 메이크업 alpha 0
-              data[i+3] = 0;
-            }
-          }
-        }
-
-        // ⑥ 처리된 픽셀 데이터를 캔버스에 재투고
-        ctx.putImageData(imgData, minX, minY);
-
-      } catch(e){
-        // 안전 — getImageData/putImageData 실패 시 무시 (CORS 등)
-      }
-    };
-
-    window._inj51Enabled = true;
-    window._inj51Wrapped = true;
-
-    window._inj51Control = {
-      enable:  function(){ window._inj51Enabled = true; },
-      disable: function(){ window._inj51Enabled = false; },
-      info:    function(){
-        var scrMk = document.getElementById('scrMakeup');
-        var inMk = !!(scrMk && scrMk.classList.contains('active'));
-        return {
-          on:        !!window._inj51Enabled,
-          activeNow: inMk,
-          page:      inMk ? 'scrMakeup ✅' : 'other ❌ (scrMakeup 만 작동)',
-          filters:   '검은머리 / 금발 / 흰머리',
-          microEdge: 'OFF (잔상 방지)',
-          frameSkip: '2 frames per loop',
-          mode:      '핀셋 — scrMakeup 전용'
-        };
-      }
-    };
-
-    console.log('[박입 51] ON');
-  }
-
-  applyInj51();
-}, 0);
+}, 12500);
 </script>
 
 </body>
