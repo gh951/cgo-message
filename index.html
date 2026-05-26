@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj72-dialback" name="c41-version"/>
+<meta content="2026-05-26-c44-inj73-sweetspot" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -26949,11 +26949,12 @@ function _rmaiArOnResults(results){
                 var hlum = 0.2126*hr + 0.7152*hg + 0.0722*hb;
                 if(hlum > 180) continue;
 
-                // ★ 박입 72 — 박입 71 의 임계 완화 dial back
-                //   휘도 105 → 112 (박입 62 수준 복구), R-B 100 → 85
+                // ★ 박입 73 — 박입 71/72 사이 균형점 (이마 침범 막되 머리 안 깎음)
+                //   휘도 108 (박입 71 105 와 72 112 의 중간)
+                //   R-B 95 (박입 71 100 과 72 85 의 중간)
                 var isInForeheadZone = (py >= foreheadInRegion - 5);
-                if(isInForeheadZone && hlum >= 112){
-                  var isSkinTone = (hr > hg - 5) && (hg > hb - 5) && (hr - hb < 85);
+                if(isInForeheadZone && hlum >= 108){
+                  var isSkinTone = (hr > hg - 6) && (hg > hb - 6) && (hr - hb < 95);
                   if(isSkinTone) continue;
                 }
 
