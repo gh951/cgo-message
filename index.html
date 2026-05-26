@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj65-hero-stamp" name="c41-version"/>
+<meta content="2026-05-26-c44-inj66-hair-stronger-stamp-center" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -12887,19 +12887,14 @@ var Q_POOL = {
 <div style="font-size:9px;color:#666;background:#f5f6fa;padding:5px 10px;border-radius:8px;font-weight:700;letter-spacing:.04em;">RPPG · AR</div>
 </div>
 <!-- ★ 풀폭 Hero — C-5.jpeg (Cgo-Message AR Makeup App 메인 비주얼) -->
-<!--    박입 65 — Hero 위쪽: "C-44 / 새로운 AR 신기술" 박제                  -->
-<!--             Hero 아래쪽: "C-44" 박제                                    -->
-<div style="position:relative;min-height:380px;background:url('/C-5.jpeg') center/cover no-repeat,linear-gradient(135deg,#1a1408 0%,#4a3220 50%,#1a1408 100%);padding:0;display:flex;flex-direction:column;justify-content:space-between;">
-<!-- ★ Hero 위쪽 C-44 박제 -->
-<div style="padding:14px 18px 0;display:flex;justify-content:flex-end;">
-<div style="display:inline-flex;flex-direction:column;align-items:flex-end;gap:2px;padding:8px 14px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);border:1px solid rgba(251,191,36,.5);border-radius:10px;">
-<div style="font-size:18px;font-weight:900;color:#fbbf24;letter-spacing:-.02em;font-family:'Times New Roman',serif;line-height:1;">C—44</div>
-<div style="font-size:9px;font-weight:800;color:#fff;letter-spacing:.12em;opacity:.85;">새로운 AR 신기술</div>
+<!--    박입 66 — 우측 박제 2개 제거, 가운데 하단에 큰 타원 박제 (C-44 / 새로운 AR 신기술) -->
+<div style="position:relative;min-height:380px;background:url('/C-5.jpeg') center/cover no-repeat,linear-gradient(135deg,#1a1408 0%,#4a3220 50%,#1a1408 100%);padding:0;display:flex;flex-direction:column;justify-content:flex-end;">
+<!-- ★ Hero 중앙 하단 큰 박제 — 파트너님 표시 자리 (타원, 큰 글씨) -->
+<div style="display:flex;justify-content:center;padding:0 18px 28px;">
+<div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:14px 32px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border:1.5px solid rgba(251,191,36,.65);border-radius:100px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
+<div style="font-size:30px;font-weight:900;color:#fbbf24;letter-spacing:-.02em;font-family:'Times New Roman',serif;line-height:1;">C—44</div>
+<div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:.16em;opacity:.92;">새로운 AR 신기술</div>
 </div>
-</div>
-<!-- ★ Hero 아래쪽 C-44 박제 -->
-<div style="padding:0 18px 14px;display:flex;justify-content:flex-end;">
-<div style="padding:4px 10px;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);border:1px solid rgba(251,191,36,.5);border-radius:8px;font-size:11px;font-weight:900;color:#fbbf24;letter-spacing:.08em;font-family:'Courier New',monospace;">C-44</div>
 </div>
 </div>
 <div style="max-width:1200px;margin:0 auto;padding:24px 24px 80px;">
@@ -26958,11 +26953,11 @@ function _rmaiArOnResults(results){
 
                 if(!isDarkHair && !isBlondOrGinger && !isWhiteHair && hlum > 110) continue;
 
-                // ★ 박입 63 — Lift 1.3 → 0.7 (원본 음영/질감 보존, 평면화 방지)
+                // ★ 박입 66 — Lift 0.7 → 1.0 (자연 탈색 강화)
                 var workR = hr, workG = hg, workB = hb;
                 if(hlum < 110){
                   var darkness = (110 - hlum) / 110;
-                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 0.7;
+                  var lift = 1 + darkness * (180/Math.max(hlum,1) - 1) * 1.0;
                   workR = Math.min(255, hr * lift);
                   workG = Math.min(255, hg * lift);
                   workB = Math.min(255, hb * lift);
@@ -26973,16 +26968,16 @@ function _rmaiArOnResults(results){
                 var multG = (workG * tintG) / 255;
                 var multB = (workB * tintB) / 255;
 
-                // ★ 박입 63 — Additive 0.55 → 0.30 (검정 텍스처 살림, 단색 덮어쓰기 방지)
+                // ★ 박입 66 — Additive 0.30 → 0.45 (검정 텍스처 살리되 색 강화)
                 if(hlum < 80){
-                  multR = multR * 0.70 + tintR * 0.30 * (1 - hlum/80);
-                  multG = multG * 0.70 + tintG * 0.30 * (1 - hlum/80);
-                  multB = multB * 0.70 + tintB * 0.30 * (1 - hlum/80);
+                  multR = multR * 0.55 + tintR * 0.45 * (1 - hlum/80);
+                  multG = multG * 0.55 + tintG * 0.45 * (1 - hlum/80);
+                  multB = multB * 0.55 + tintB * 0.45 * (1 - hlum/80);
                 }
 
-                // ★ 박입 63 — alpha cap 0.98 → 0.65 (원본 머리카락 음영 자동 보존)
+                // ★ 박입 66 — alpha cap 0.65 → 0.85 (색 보이게 + 음영 15% 잔존)
                 var hairWeight = (180 - hlum) / 180;
-                var alpha = Math.min(0.65, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
+                var alpha = Math.min(0.85, hairInt * Math.pow(hairWeight, 0.5) * gaussAttenuation);
 
                 hairData[hi]   = Math.round(hr * (1 - alpha) + multR * alpha);
                 hairData[hi+1] = Math.round(hg * (1 - alpha) + multG * alpha);
