@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj118-complete" name="c41-version"/>
+<meta content="2026-05-26-c44-inj120-force-visible" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14038,8 +14038,32 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </div>
 <!-- 디버그 패널 -->
 <div id="eye-debug-panel" style="margin-top:8px;padding:6px 10px;background:rgba(15,118,110,.1);border:1px solid rgba(20,184,166,.25);border-radius:8px;font-size:9.5px;color:#0f766e;font-family:'Courier New',monospace;letter-spacing:.02em;">👁️ 측정 대기 중...</div>
+
+<!-- ★ 박입 120 — 진짜 배포 검증 표지 (캐시 무효화 + 진짜 보임 검증) -->
+<div style="margin-top:14px;padding:10px;background:#fbbf24;color:#78350f;text-align:center;font-size:11px;font-weight:900;border-radius:8px;letter-spacing:.05em;">
+🚨 박입 120 진짜 배포 검증 — 아래 빨강/파랑 버튼 보이면 ✓
+</div>
+
+<!-- ★ 박입 119 — 왼쪽/오른쪽 눈 선택 박입 (안과 표준 패턴) -->
+<div id="eye-side-select" style="margin-top:14px;padding:14px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(45,212,191,.04));border:1px solid rgba(20,184,166,.3);border-radius:12px;">
+<div style="font-size:11px;font-weight:900;color:#0f766e;text-align:center;margin-bottom:10px;letter-spacing:.05em;">👁️ 어느 쪽 눈을 측정하시겠어요?</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+<button id="eye-side-left" onclick="window.eyeSelectSide('left')" style="padding:14px 8px;background:#fff;border:2px solid #ef4444;border-radius:10px;font-size:13px;font-weight:800;color:#ef4444;cursor:pointer;font-family:inherit;transition:all .15s;">
+<div style="font-size:24px;margin-bottom:4px;">🔴</div>
+<div>왼쪽 눈</div>
+<div style="font-size:9px;color:#888;font-weight:600;margin-top:2px;">오른쪽 눈 가리기</div>
+</button>
+<button id="eye-side-right" onclick="window.eyeSelectSide('right')" style="padding:14px 8px;background:#fff;border:2px solid #3b82f6;border-radius:10px;font-size:13px;font-weight:800;color:#3b82f6;cursor:pointer;font-family:inherit;transition:all .15s;">
+<div style="font-size:24px;margin-bottom:4px;">🔵</div>
+<div>오른쪽 눈</div>
+<div style="font-size:9px;color:#888;font-weight:600;margin-top:2px;">왼쪽 눈 가리기</div>
+</button>
+</div>
+<div id="eye-side-status" style="margin-top:10px;font-size:10px;color:#0f766e;text-align:center;font-weight:700;">한쪽 눈 선택 후 측정 시작 가능</div>
+</div>
+
 <!-- 시작 버튼 -->
-<button id="eye-start-btn" onclick="window.eyeStartMeasure()" style="margin-top:14px;width:100%;padding:14px;background:linear-gradient(135deg,#14b8a6,#0d9488);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.04em;box-shadow:0 4px 12px rgba(20,184,166,.4);">📸 측정 시작</button>
+<button id="eye-start-btn" onclick="window.eyeStartMeasure()" disabled style="margin-top:10px;width:100%;padding:14px;background:#94a3b8;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:800;cursor:not-allowed;letter-spacing:.04em;box-shadow:0 4px 12px rgba(148,163,184,.3);">📸 측정 시작 (눈 선택 필요)</button>
 <div style="margin-top:8px;font-size:9px;color:#888;text-align:center;">🔒 측정 영상은 외부 전송 없음 · 종료 시 즉시 파기</div>
 </div>
 
@@ -14296,10 +14320,53 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     stream: null
   };
 
+  // ★ 박입 119 — 왼쪽/오른쪽 눈 선택 박입 (안과 표준 패턴)
+  window.eyeSelectSide = function(side){
+    eyeState.selectedSide = side;
+    var leftBtn = document.getElementById('eye-side-left');
+    var rightBtn = document.getElementById('eye-side-right');
+    var statusEl = document.getElementById('eye-side-status');
+    var startBtn = document.getElementById('eye-start-btn');
+
+    if(side === 'left'){
+      leftBtn.style.background = '#fef2f2';
+      leftBtn.style.borderWidth = '3px';
+      leftBtn.style.boxShadow = '0 0 12px rgba(239,68,68,.3)';
+      rightBtn.style.background = '#fff';
+      rightBtn.style.borderWidth = '2px';
+      rightBtn.style.boxShadow = 'none';
+      statusEl.innerHTML = '🔴 <b>왼쪽 눈</b> 선택 · 오른쪽 눈을 손으로 가리고 측정 시작';
+      statusEl.style.color = '#ef4444';
+    } else {
+      rightBtn.style.background = '#eff6ff';
+      rightBtn.style.borderWidth = '3px';
+      rightBtn.style.boxShadow = '0 0 12px rgba(59,130,246,.3)';
+      leftBtn.style.background = '#fff';
+      leftBtn.style.borderWidth = '2px';
+      leftBtn.style.boxShadow = 'none';
+      statusEl.innerHTML = '🔵 <b>오른쪽 눈</b> 선택 · 왼쪽 눈을 손으로 가리고 측정 시작';
+      statusEl.style.color = '#3b82f6';
+    }
+
+    // 측정 시작 버튼 활성화
+    startBtn.disabled = false;
+    startBtn.style.cursor = 'pointer';
+    startBtn.style.background = 'linear-gradient(135deg,#14b8a6,#0d9488)';
+    startBtn.style.boxShadow = '0 4px 12px rgba(20,184,166,.4)';
+    startBtn.textContent = '📸 측정 시작 (' + (side === 'left' ? '왼쪽' : '오른쪽') + ' 눈)';
+    eyeDebug('👁️ ' + (side === 'left' ? '왼쪽' : '오른쪽') + ' 눈 측정 선택 — 시작 가능');
+  };
+
   // ── 시작 ─────────────────────────────────────────────────
   window.eyeStartMeasure = function(){
     if(eyeState.started){
       eyeDebug('이미 측정 중...');
+      return;
+    }
+    // ★ 박입 119 — 눈 선택 검증
+    if(!eyeState.selectedSide){
+      alert('먼저 측정할 눈 (왼쪽/오른쪽) 을 선택해 주세요.');
+      eyeDebug('⚠️ 눈 선택 X — 왼쪽 또는 오른쪽 눈 선택 후 시작 가능');
       return;
     }
     eyeState.started = true;
@@ -14310,8 +14377,10 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     eyeState.pupilJitter = [];
     eyeState.blinkCount = 0;
 
-    eyeDebug('🎬 측정 시작 — 카메라 활성화...');
+    var sideKor = eyeState.selectedSide === 'left' ? '왼쪽' : '오른쪽';
+    eyeDebug('🎬 ' + sideKor + ' 눈 측정 시작 — 카메라 활성화...');
     document.getElementById('eye-start-btn').style.display = 'none';
+    document.getElementById('eye-side-select').style.display = 'none';  // ★ 박입 119 — 선택 박스 숨김
     document.getElementById('eye-camera-area').style.display = 'block';
     document.getElementById('eye-question-area').style.display = 'block';
 
@@ -14792,6 +14861,18 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     // 결과 표시
     var resultHtml = '';
 
+    // ★ 박입 119 — 측정 눈 표시 (안과 표준)
+    var sideKor119 = eyeState.selectedSide === 'left' ? '왼쪽 눈' : '오른쪽 눈';
+    var sideColor119 = eyeState.selectedSide === 'left' ? '#ef4444' : '#3b82f6';
+    var sideIcon119 = eyeState.selectedSide === 'left' ? '🔴' : '🔵';
+    var sideBg119 = eyeState.selectedSide === 'left' ? 'linear-gradient(135deg,#fef2f2,#fecaca)' : 'linear-gradient(135deg,#eff6ff,#dbeafe)';
+
+    resultHtml += '<div style="text-align:center;padding:14px;background:' + sideBg119 + ';border:2px solid ' + sideColor119 + ';border-radius:12px;margin-bottom:14px;">';
+    resultHtml += '<div style="font-size:24px;margin-bottom:4px;">' + sideIcon119 + '</div>';
+    resultHtml += '<div style="font-size:16px;font-weight:900;color:' + sideColor119 + ';letter-spacing:.05em;">' + sideKor119 + ' 측정 결과</div>';
+    resultHtml += '<div style="font-size:10px;color:#666;margin-top:4px;">반대쪽 눈을 가린 상태에서 측정됨</div>';
+    resultHtml += '</div>';
+
     // ① 시력 추정 (점수 박입 X · 분위기 좋게 박입)
     resultHtml += '<div style="text-align:center;padding:28px 20px;background:linear-gradient(135deg,#f0fdfb 0%,#ccfbf1 50%,#a7f3d0 100%);border-radius:18px;margin-bottom:14px;box-shadow:0 4px 16px rgba(20,184,166,.18);position:relative;overflow:hidden;">';
     resultHtml += '<div style="position:absolute;top:8px;right:12px;font-size:8px;color:#0f766e;font-weight:800;letter-spacing:.06em;background:rgba(255,255,255,.7);padding:3px 8px;border-radius:6px;">C-44 × Patent #47</div>';
@@ -14969,10 +15050,40 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     document.getElementById('eye-result-area').style.display = 'none';
     document.getElementById('eye-start-btn').style.display = 'block';
     document.getElementById('eye-eyeans').textContent = '--';
+    // ★ 박입 119 — 눈 선택 박스 복귀 + reset
+    var sideSelEl = document.getElementById('eye-side-select');
+    if(sideSelEl) sideSelEl.style.display = 'block';
+    eyeState.selectedSide = null;
+    var leftBtn = document.getElementById('eye-side-left');
+    var rightBtn = document.getElementById('eye-side-right');
+    if(leftBtn){
+      leftBtn.style.background = '#fff';
+      leftBtn.style.borderWidth = '2px';
+      leftBtn.style.boxShadow = 'none';
+    }
+    if(rightBtn){
+      rightBtn.style.background = '#fff';
+      rightBtn.style.borderWidth = '2px';
+      rightBtn.style.boxShadow = 'none';
+    }
+    var statusEl = document.getElementById('eye-side-status');
+    if(statusEl){
+      statusEl.innerHTML = '한쪽 눈 선택 후 측정 시작 가능';
+      statusEl.style.color = '#0f766e';
+    }
+    var startBtn = document.getElementById('eye-start-btn');
+    if(startBtn){
+      startBtn.disabled = true;
+      startBtn.style.cursor = 'not-allowed';
+      startBtn.style.background = '#94a3b8';
+      startBtn.style.boxShadow = '0 4px 12px rgba(148,163,184,.3)';
+      startBtn.textContent = '📸 측정 시작 (눈 선택 필요)';
+    }
     ['eye-bpm','eye-hrv','eye-pupil','eye-dist','eye-blink','eye-fatigue','eye-react','eye-stab'].forEach(function(id){
-      document.getElementById(id).textContent = '--';
+      var el = document.getElementById(id);
+      if(el) el.textContent = '--';
     });
-    eyeDebug('👁️ 측정 대기 중...');
+    eyeDebug('👁️ 측정 대기 중... 눈 선택 후 시작');
   };
 
   // ── AI 챗 ───────────────────────────────────────────────
