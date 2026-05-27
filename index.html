@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj109-dist-state" name="c41-version"/>
+<meta content="2026-05-26-c44-inj110-face-detect" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14423,6 +14423,18 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     }
     var s108 = window._eye108State;
 
+    // ★ 박입 110 — rPPG 스캔 패턴 박입 (파트너 진단)
+    //   파트너 진단: "rPPG 스캔 중 얼굴 안 보이면 스캔 멈춤 — 그 패턴 참고"
+    //   진짜 fix:
+    //     ① 얼굴 감지 상태 (faceDetected) 박입
+    //     ② 얼굴 안 보이면 → "얼굴이 안 보입니다" 표시 + 측정 차단
+    //     ③ 얼굴 보이면 → 거리 측정 진행 + 상태 박입
+    //     ④ FaceMesh 호출 실패 시 → 사용자에게 명확히 알림
+    if(s108.faceDetected === undefined){
+      s108.faceDetected = false;
+      s108.faceLostTime = 0;
+    }
+
     // FaceMesh 박입 (없으면 초기화)
     if(!s108.faceMesh && typeof FaceMesh !== 'undefined'){
       try {
@@ -14437,21 +14449,36 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
           if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
             var lm = results.multiFaceLandmarks[0];
             var video = document.getElementById('eye-video');
-            if(!video || !video.videoWidth) return;
+            if(!video || !video.videoWidth){
+              s108.faceDetected = false;
+              return;
+            }
             // ★ 양쪽 눈 외측 꼭짓점 (33 = 왼쪽 / 263 = 오른쪽)
             var eyeL = lm[33], eyeR = lm[263];
-            if(!eyeL || !eyeR) return;
+            if(!eyeL || !eyeR){
+              s108.faceDetected = false;
+              return;
+            }
             var dx = (eyeR.x - eyeL.x) * video.videoWidth;
             var dy = (eyeR.y - eyeL.y) * video.videoHeight;
             var pixelDist = Math.sqrt(dx*dx + dy*dy);
-            // ★ 캘리브레이션: 양쪽 눈 평균 거리 6.3cm + 초점 거리 추정
-            //    pixelDist 200 ≈ 30cm / pixelDist 150 ≈ 40cm / pixelDist 120 ≈ 50cm
-            //    공식: distCm ≈ 6000 / pixelDist  (역비례 추정)
-            var distCm = pixelDist > 10 ? Math.round(6000 / pixelDist) : 999;
+            // ★ 캘리브레이션: pixelDist 200 ≈ 30cm / 150 ≈ 40cm / 120 ≈ 50cm
+            var distCm = pixelDist > 10 ? Math.round(6000 / pixelDist) : 0;
             s108.eyeDist = distCm;
+            s108.faceDetected = true;
+            s108.faceLostTime = 0;
+          } else {
+            // 얼굴 안 보임
+            s108.faceDetected = false;
+            s108.eyeDist = 0;
           }
         });
-      } catch(e){ console.warn('[박입 108] FaceMesh 박입 실패:', e); }
+      } catch(e){
+        console.warn('[박입 110] FaceMesh 박입 실패:', e);
+        eyeDebug('⚠️ FaceMesh 박입 실패 — 거리 측정 X');
+      }
+    } else if(typeof FaceMesh === 'undefined'){
+      eyeDebug('⚠️ FaceMesh 라이브러리 로드 안 됨');
     }
 
     // FaceMesh 매 프레임 호출 (40Hz — 박입 97 패턴)
@@ -14474,25 +14501,37 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
       // ★ 진짜 거리 (s108.eyeDist) — FaceMesh 박힘
       var dist = s108.eyeDist || 0;
+      var now = Date.now();
 
       document.getElementById('eye-bpm').textContent = bpm.toFixed(0);
       document.getElementById('eye-hrv').textContent = hrv.toFixed(0);
       document.getElementById('eye-pupil').textContent = pupil.toFixed(1) + 'px';
-      document.getElementById('eye-dist').textContent = dist > 0 ? dist + 'cm' : '--';
       document.getElementById('eye-blink').textContent = blinkRate + '/분';
       document.getElementById('eye-fatigue').textContent = fatigue.toFixed(0) + '%';
 
-      // ★ 거리 OK / 경고 박입
-      var now = Date.now();
-      var distInRange = (dist >= 30 && dist <= 40);  // 표준 30~40cm
-      var distOK = (dist >= 30 && dist <= 50);       // 최대 50cm 까지 OK
+      // ★ 박입 110 — rPPG 패턴 그대로 박입 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+      //   얼굴 안 보이면 → 거리 측정 차단 + 명확한 메시지
+      //   얼굴 보이면 → 거리 상태 박입 + 비프
+      if(!s108.faceDetected){
+        // 얼굴 안 보임
+        document.getElementById('eye-dist').textContent = '얼굴 X';
+        if(s108.faceLostTime === 0) s108.faceLostTime = now;
+        var lostSec = Math.floor((now - s108.faceLostTime) / 1000);
+        // 3초마다 삐 (얼굴 안 보임 경고)
+        if(lostSec >= 2 && now - s108.lastBeepTime > 3000){
+          eyeBeepDistWarn();
+          s108.lastBeepTime = now;
+          eyeDebug('⚠️ 얼굴이 안 보입니다 (' + lostSec + '초) — 카메라 정면 응시');
+        }
+        // 상태 reset (다음 face detect 시 딩동댕 박입)
+        s108.distState = 'noface';
+        return;
+      }
 
-      // ★ 박입 109 — 거리 상태 변경 시 비프 박입 (파트너 진단)
-      //   파트너 진단: "처음만 딩동, 중간에 멀어져도 소리 X"
-      //   진짜 fix:
-      //     ① 거리 상태 (OK / 가까움 / 멈) 박입
-      //     ② 상태 변경될 때마다 비프 (재진입 시 딩동댕 / 이탈 시 삐)
-      //     ③ 이탈 상태 지속 시 반복 삐 (3초마다)
+      // 얼굴 보임 — 거리 표시 박입
+      document.getElementById('eye-dist').textContent = dist > 0 ? dist + 'cm' : '--';
+
+      // 거리 상태 박입
       var prevState = s108.distState || 'init';
       var nowState = 'unknown';
       if(dist === 0 || dist > 200) nowState = 'unknown';
@@ -14526,10 +14565,10 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       }
       s108.distOK = (nowState === 'ok');
 
-      eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist + 'cm' + (distOK ? ' ✓' : ' ⚠️'));
-    }, 300);  // ★ 박입 109 — 800ms → 300ms (거리 변경 빠른 감지)
+      eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist + 'cm' + (s108.distOK ? ' ✓' : ' ⚠️') + ' 얼굴:' + (s108.faceDetected ? '✓' : '✗'));
+    }, 300);
   }
-  // ★ 박입 108 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ★ 박입 110 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   // ── 결과 계산 ────────────────────────────────────────────
   function eyeFinishMeasure(){
