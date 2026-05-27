@@ -6,9 +6,9 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj120-force-visible" name="c41-version"/>
+<meta content="2026-05-26-c44-inj132-zoom-fix" name="c41-version"/>
 <meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
@@ -4679,7 +4679,7 @@ function c40Feature(name){
 <button class="iq-btn-primary" onclick="window.iqGoStage()">검사 시작하기 →</button>
 <!-- ★ C-40 박입 ⑨ — 도움말 버튼 (두 번째부터도 팝업 볼 수 있게) -->
 <div style="margin-top:14px;">
-<button onclick="document.getElementById('iq-intro-pop').style.display='block';" style="background:none;border:none;color:var(--iq-text-3);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;">📖 사용법 다시 보기</button>
+<button onclick="document.getElementById('iq-intro-pop').style.display='block';" style="background:none;border:none;color:var(--iq-text-3);font-size:12px;cursor:pointer;text-decoration:underline;font-family:inherit;">📖 사용법 보기</button>
 </div>
 </div>
 </div>
@@ -5724,7 +5724,7 @@ var Q_POOL = {
 <!-- 도움말 버튼 (상단) -->
 <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-<button onclick="var p=document.getElementById('scalp-intro-pop');if(p)p.style.display='block';" style="padding:8px 14px;background:#fff;border:1px solid #d4a843;border-radius:20px;color:#d4a843;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(212,168,67,.1);">📖 사용 설명서</button>
+<button onclick="var p=document.getElementById('scalp-intro-pop');if(p)p.style.display='block';" style="padding:8px 14px;background:#fff;border:1px solid #d4a843;border-radius:20px;color:#d4a843;font-size:11px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 2px 6px rgba(212,168,67,.1);">📖 사용법 보기</button>
 <button id="scalp-khanbang-btn-page" onclick="window.scalpShowKHanbang()" style="display:inline-flex;padding:8px 14px;background:linear-gradient(135deg,#10b981,#059669);border:none;border-radius:20px;color:#fff;font-size:11px;font-weight:800;cursor:pointer;align-items:center;gap:6px;box-shadow:0 2px 8px rgba(16,185,129,.3);">🌿 K-한방 변증 (옵션)</button>
 </div>
 <script>
@@ -8013,22 +8013,17 @@ var Q_POOL = {
 <div class="fci-credit">음식 궁합 (C-11) · CGO-FULI · 특허 10-2026-0060113</div>
 </div>
 </div></div>
-<script>
-  (function(){
-    var _pop=document.getElementById('fc-intro-pop');
-    var _pg=document.getElementById('page-food');
-    if(!_pop||!_pg) return;
-    new MutationObserver(function(){
-      if(_pg.classList.contains('active')){_pop.style.display='block';_pop.scrollTop=0;}
-    }).observe(_pg,{attributes:true,attributeFilter:['class']});
-  })();
-  </script>
+<!-- ★ 박입 126 — 음식 페이지 자동 팝업 박입 제거 (파트너 진단: 자동 박입 X · 버튼만 박입) -->
 <div style="padding-bottom:24px;">
 <!-- 타이틀 -->
 <div style="text-align:center;margin-bottom:20px;">
 <div style="font-size:32px;margin-bottom:8px;">🍱</div>
 <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#059669;font-weight:900;margin-bottom:4px;">음식 궁합</div>
 <div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;">rPPG × 오행 × 생체 에너지 — 세계 최초 음식-생체 융합</div>
+<!-- ★ 박입 126 — 사용법 보기 버튼 (전체 통일) -->
+<div style="margin-top:12px;">
+<button onclick="document.getElementById('fc-intro-pop').style.display='block';" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#059669;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+</div>
 </div>
 <!-- ══ CGO-FULI 실시간 진료 차트 (5단계) ══ -->
 <div id="food-profile-card" style="background:linear-gradient(135deg,rgba(6,14,30,.97),rgba(4,10,24,.99));border:1px solid rgba(52,211,153,.4);border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 4px 28px rgba(0,0,0,.5);">
@@ -8380,6 +8375,40 @@ var Q_POOL = {
 <!-- ★ C-40 박입 ㉑ — scrCouple 페이지 (FULI에서 통째 박제) -->
 <div class="screen" id="scrCouple" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
+
+<!-- ★ 박입 130 — 커플 페이지 인트로 팝업 (sip- 패턴 박입) -->
+<style>
+  #couple-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(20,12,40,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #couple-intro-pop .sip-title{color:#a78bfa;}
+  #couple-intro-pop .sip-badge{background:rgba(167,139,250,.15);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
+  #couple-intro-pop .sip-sub{color:rgba(220,210,255,.85);}
+  #couple-intro-pop .sip-step{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);}
+  #couple-intro-pop .sip-step-num{background:#a78bfa;}
+  #couple-intro-pop .sip-step-title{color:#a78bfa;}
+  #couple-intro-pop .sip-step-desc{color:rgba(220,210,255,.8);}
+  #couple-intro-pop .sip-cta{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;}
+</style>
+<div id="couple-intro-pop">
+<div class="sip-wrap">
+<div class="sip-top"><button class="sip-close" onclick="document.getElementById('couple-intro-pop').style.display='none';">×</button></div>
+<div class="sip-body">
+<div class="sip-hero">
+<div class="sip-badge">C-44 · COUPLE × COSMIC · ★ 세계 최초</div>
+<div class="sip-title">💑 커플 궁합 정밀 분석</div>
+<div class="sip-sub">4,500년 역학 × NASA × 실시간 생체 파동<br/><b style="color:#a78bfa;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+</div>
+<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">🔐 암호 방 박입</div><div class="sip-step-desc">두 사람만 알 수 있는 암호 방 생성 또는 입장. 진짜 개인정보 박입 X.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">📅 두 사람 생년월일 + 출생 시간</div><div class="sip-step-desc">각자 정확한 생년월일 + 출생 시간 박입. 사주팔자 + NASA 천문 데이터 연동.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">⚡ 4,500년 역학 + NASA 융합</div><div class="sip-step-desc">전통 사주 명리학 + NASA 행성 위치 데이터 + 실시간 생체 파동 융합 박입.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">💗 우주적 궁합 도출</div><div class="sip-step-desc">두 사람 천기·지기 융합 시 진짜 우주적 궁합 점수 박입. 일반 사주 X 진짜 박입.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">🤖 AI 커플 상담</div><div class="sip-step-desc">궁합 결과 기반 AI 상담사 박입 — 진짜 관계 박입 + 미래 전망 박입.</div></div></div>
+<div style="margin-top:16px;padding:12px;background:rgba(167,139,250,.1);border-left:3px solid #a78bfa;border-radius:8px;font-size:11px;color:rgba(220,210,255,.85);line-height:1.6;">
+⚠ <b>참고용 자가 점검</b> · 운명 결정론 X · 재미 + 가이드용<br/>입력 정보는 본 기기에만 박힘 · 서버 전송 X
+</div>
+<button class="sip-cta" onclick="document.getElementById('couple-intro-pop').style.display='none';">✓ 이해했어요, 시작하기</button>
+</div>
+</div>
+</div>
 <!-- ★ C-41 박입 ⑫ — 커플 궁합 히어로 배너 (이미지 위 글씨 구조) -->
 <div class="cpl-hero-banner">
 <div class="cpl-hero-img" id="cpl-hero-img">
@@ -8394,6 +8423,8 @@ var Q_POOL = {
 <h2 class="cpl-hero-title">커플 궁합 정밀 분석</h2>
 <p class="cpl-hero-sub">4,500년 역학 × NASA × 실시간 생체 파동</p>
 <p class="cpl-hero-tag">— 세계 최초 우주적 궁합 —</p>
+<!-- ★ 박입 130 — 커플 페이지 사용법 보기 버튼 (전체 통일) -->
+<button onclick="document.getElementById('couple-intro-pop').style.display='block';" style="margin-top:14px;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.45);color:#a78bfa;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
 </div>
 </div>
 </div>
@@ -8766,6 +8797,10 @@ var Q_POOL = {
 <div style="display:inline-block;padding:6px 16px;background:linear-gradient(135deg,rgba(212,168,67,.12),rgba(251,191,36,.08));border:1px solid rgba(212,168,67,.3);border-radius:20px;font-size:10px;font-weight:800;color:#d4a843;letter-spacing:.12em;margin-bottom:12px;">C-39 · DEMENTIA PREVENTION</div>
 <div style="font-size:26px;font-weight:900;letter-spacing:-.03em;color:#1a1408;margin-bottom:6px;">🧠 C-39 치매 예방 체크</div>
 <div style="font-size:13px;color:#666;line-height:1.5;">인지 검사 × rPPG 자율신경 융합 × 세계 최초</div>
+<!-- ★ 박입 126 — 사용법 보기 버튼 박입 (전체 통일) -->
+<div style="margin-top:12px;">
+<button onclick="document.getElementById('dementia-intro-pop').style.display='block';" style="background:rgba(212,168,67,.1);border:1px solid rgba(212,168,67,.3);color:#d4a843;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+</div>
 </div>
 <!-- STEP 1: 코스 선택 -->
 <div style="background:#fff;border:1px solid #f0e6d4;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(212,168,67,.06);">
@@ -11715,6 +11750,10 @@ var Q_POOL = {
 <div class="mfu-badge">✦ <span class="mfu-acc">50대 역학 × NASA × rPPG</span> 실시간 융합</div>
 <h1 class="mfu-hero-title">나에게 맞는<br/><span class="mfu-grad">주파수 음악</span></h1>
 <p class="mfu-hero-sub">사주·생체·천문 데이터로 매 시진 새롭게 처방</p>
+<!-- ★ 박입 127 — 사용법 보기 버튼 (전체 통일) -->
+<div style="margin-top:12px;">
+<button onclick="document.getElementById('c14-intro-pop').style.display='block';" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);color:#38bdf8;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+</div>
 </div>
 <!-- 재생 컨트롤 카드 -->
 <div class="mfu-control">
@@ -12937,6 +12976,32 @@ var Q_POOL = {
 <!-- ★ C-40 박입 ㉗ — scrMakeup 페이지 (FULI에서 통째 박제) -->
 <div class="screen" id="scrMakeup" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
+
+<!-- ★ 박입 128 — AR 메이크업 인트로 팝업 (sip- 패턴 박입) -->
+<style>
+  #makeup-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(255,255,255,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+</style>
+<div id="makeup-intro-pop">
+<div class="sip-wrap">
+<div class="sip-top"><button class="sip-close" onclick="document.getElementById('makeup-intro-pop').style.display='none';">×</button></div>
+<div class="sip-body">
+<div class="sip-hero">
+<div class="sip-badge">C-44 · AR MAKEUP × rPPG · ★ 글로벌 1위 기술</div>
+<div class="sip-title">🎨 FULI Beauty AR 메이크업</div>
+<div class="sip-sub">600색 라이브러리 × 스펙트럼 + 마이크로 좌표 + 환경 3중 융합<br/><b style="color:#d4a843;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+</div>
+<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">📷 카메라 권한 + 정면 응시</div><div class="sip-step-desc">카메라 권한 허용 후 정면 응시. 조명 충분한 곳에서 진짜 색 박입 가능.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">🎨 카테고리 선택 (5종)</div><div class="sip-step-desc">💋 립 · 🌸 볼 · 👁️ 아이 · 🫧 베이스 · 💁 헤어 — 원하는 부위 선택.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">🌈 600색 라이브러리</div><div class="sip-step-desc">일반 데일리 + 명품 럭셔리 (ESTÉE LAUDER · LANCÔME · DIOR 등) — 진짜 색 박힘.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">⚡ 잔상 0 (글로벌 1위)</div><div class="sip-step-desc">머리 도리도리 시에도 잔상 0 박힘. 메타 / 스냅챗 / 틱톡 다 깨지는 영역에서 우리만 박입.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">📸 캡처 + 저장</div><div class="sip-step-desc">맘에 드는 룩 → 캡처 + 저장 버튼. 본 기기에만 저장 · 서버 전송 X.</div></div></div>
+<div style="margin-top:16px;padding:12px;background:rgba(212,168,67,.1);border-left:3px solid #d4a843;border-radius:8px;font-size:11px;color:#92400e;line-height:1.6;">
+✨ <b>구글 Gemini 검증</b> · "전 세계 1위 기술력" · "0.1픽셀의 뭉개짐 없음"<br/>측정 영상은 외부 전송 X · 종료 시 즉시 파기
+</div>
+<button class="sip-cta" onclick="document.getElementById('makeup-intro-pop').style.display='none';">✓ 이해했어요, 시작하기</button>
+</div>
+</div>
+</div>
 <!-- ★ Sticky 상단 헤더 (여행 페이지 패턴) -->
 <div style="position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #e8eaf0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
 <div style="display:flex;align-items:center;gap:8px;">
@@ -12956,6 +13021,8 @@ var Q_POOL = {
 <div style="display:inline-flex;flex-direction:column;align-items:center;gap:4px;padding:14px 32px;background:rgba(0,0,0,.6);backdrop-filter:blur(10px);border:1.5px solid rgba(251,191,36,.65);border-radius:100px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
 <div style="font-size:30px;font-weight:900;color:#fbbf24;letter-spacing:-.02em;font-family:'Times New Roman',serif;line-height:1;">C—44</div>
 <div style="font-size:11px;font-weight:800;color:#fff;letter-spacing:.16em;opacity:.92;">새로운 AR 신기술</div>
+<!-- ★ 박입 128 — AR 메이크업 사용법 보기 버튼 (전체 통일) -->
+<button onclick="document.getElementById('makeup-intro-pop').style.display='block';" style="margin-top:10px;background:rgba(251,191,36,.25);border:1px solid rgba(251,191,36,.5);color:#fbbf24;font-size:11px;font-weight:800;padding:6px 14px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
 </div>
 </div>
 </div>
@@ -13323,18 +13390,18 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <!-- ════ 7. 안내 ════ -->
 <div style="background:linear-gradient(135deg,#fef9f3,#fefce8);border:1px solid #fef3c7;border-radius:14px;padding:14px 18px;margin-bottom:18px;margin-top:18px;">
 <div style="font-size:10px;font-weight:800;color:#92400e;letter-spacing:.04em;margin-bottom:4px;">💡 안내</div>
-<div style="font-size:11px;color:#78350f;line-height:1.7;">화장 흡수 분석 (MAI) + AR 메이크업 + AI 컨설턴트가 통합된 페이지입니다. C-29 컨설턴트에게 언제든 질문하세요.</div>
+<div style="font-size:11px;color:#78350f;line-height:1.7;">화장 흡수 분석 (MAI) + AR 메이크업 + AI 컨설턴트가 통합된 페이지입니다. C-44 컨설턴트에게 언제든 질문하세요.</div>
 </div>
 </div>
-<!-- ════ ★ C-29 컨설턴트 — Floating FAB + 말풍선 미리보기 + 풀 모달 ════ -->
+<!-- ════ ★ C-44 컨설턴트 — Floating FAB + 말풍선 미리보기 + 풀 모달 ════ -->
 <div id="rmai-chat-fab-wrap" style="position:fixed;bottom:80px;right:16px;z-index:9001;">
-<button aria-label="C-29 컨설턴트 열기" id="rmai-chat-fab" onclick="rmaiChatToggle()" style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#7c3aed);border:2.5px solid #fff;box-shadow:0 4px 18px rgba(168,85,247,.45);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;animation:rmaiChatPulse 2.4s ease-in-out infinite;">🤖</button>
-<button aria-label="C-29 숨기기" id="rmai-chat-fab-close" onclick="event.stopPropagation();rmaiChatHideFab()" style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #c4b5fd;box-shadow:0 2px 6px rgba(0,0,0,.2);color:#7c3aed;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;padding:0;" title="C-29 숨기기">✕</button>
+<button aria-label="C-44 컨설턴트 열기" id="rmai-chat-fab" onclick="rmaiChatToggle()" style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#7c3aed);border:2.5px solid #fff;box-shadow:0 4px 18px rgba(168,85,247,.45);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;animation:rmaiChatPulse 2.4s ease-in-out infinite;">🤖</button>
+<button aria-label="C-44 숨기기" id="rmai-chat-fab-close" onclick="event.stopPropagation();rmaiChatHideFab()" style="position:absolute;top:-4px;right:-4px;width:22px;height:22px;border-radius:50%;background:#fff;border:1.5px solid #c4b5fd;box-shadow:0 2px 6px rgba(0,0,0,.2);color:#7c3aed;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;padding:0;" title="C-44 숨기기">✕</button>
 </div>
 <!-- ★ FAB 숨김 상태에서 다시 호출하는 작은 미니 버튼 (페이지 좌하단) -->
-<button aria-label="C-29 다시 표시" id="rmai-chat-restore-btn" onclick="rmaiChatShowFab()" style="display:none;position:fixed;bottom:80px;left:16px;z-index:9001;width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,.85);border:1.5px solid #fff;box-shadow:0 2px 8px rgba(168,85,247,.4);color:#fff;font-size:14px;cursor:pointer;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);" title="C-29 컨설턴트 다시 열기">🤖</button>
+<button aria-label="C-44 다시 표시" id="rmai-chat-restore-btn" onclick="rmaiChatShowFab()" style="display:none;position:fixed;bottom:80px;left:16px;z-index:9001;width:36px;height:36px;border-radius:50%;background:rgba(168,85,247,.85);border:1.5px solid #fff;box-shadow:0 2px 8px rgba(168,85,247,.4);color:#fff;font-size:14px;cursor:pointer;align-items:center;justify-content:center;font-family:inherit;backdrop-filter:blur(8px);" title="C-44 컨설턴트 다시 열기">🤖</button>
 <div id="rmai-chat-bubble" onclick="rmaiChatToggle()" style="position:fixed;bottom:148px;right:16px;z-index:9001;max-width:280px;padding:12px 14px;background:#fff;border:1.5px solid #ddd6fe;border-radius:14px 14px 4px 14px;box-shadow:0 4px 16px rgba(0,0,0,.12);font-size:12px;color:#1a1408;line-height:1.6;display:none;cursor:pointer;">
-<div style="font-size:9px;font-weight:800;color:#7c3aed;margin-bottom:4px;letter-spacing:.04em;">🤖 C-29 컨설턴트</div>
+<div style="font-size:9px;font-weight:800;color:#7c3aed;margin-bottom:4px;letter-spacing:.04em;">🤖 C-44 컨설턴트</div>
 <div id="rmai-chat-bubble-text" style="font-size:11px;line-height:1.7;"></div>
 <div style="font-size:9px;color:#888;margin-top:6px;text-align:right;">탭해서 대화하기 →</div>
 </div>
@@ -13344,7 +13411,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div style="display:flex;align-items:center;gap:10px;">
 <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#a855f7,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:20px;">🤖</div>
 <div>
-<div style="font-size:14px;font-weight:900;color:#1a1408;">C-29 컨설턴트</div>
+<div style="font-size:14px;font-weight:900;color:#1a1408;">C-44 컨설턴트</div>
 <div style="font-size:9px;color:#7c3aed;font-weight:700;letter-spacing:.04em;">사주 오행 · 색채심리 · 메이크업 트렌드</div>
 </div>
 </div>
@@ -13409,7 +13476,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
           ['①','<b style="color:#fbbf24;">화장 전 사진</b>을 한 장 촬영하세요. 분석 시작점이 됩니다.'],
           ['②','<b style="color:#fbbf24;">화장 후 30초 스캔</b>으로 MAI 점수 + 피부 톤 분석.'],
           ['③','<b style="color:#fbbf24;">AR 카메라 모드</b>로 실시간 색을 얼굴에 미리보기.'],
-          ['④','<b style="color:#fbbf24;">C-29 컨설턴트</b>에게 상황별 색을 물어보세요.']
+          ['④','<b style="color:#fbbf24;">C-44 컨설턴트</b>에게 상황별 색을 물어보세요.']
         ];
         steps.forEach(function(s){
           html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:8px;">';
@@ -14011,7 +14078,11 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,#fff,#f0fdfb);border:1px solid #ccfbf1;border-radius:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(20,184,166,.08);">
 <div style="font-size:10px;font-weight:800;color:#0f766e;letter-spacing:.2em;margin-bottom:8px;">C-44 · EYE × rPPG FUSION</div>
 <div style="font-size:26px;font-weight:900;color:#134e4a;margin-bottom:4px;letter-spacing:-.03em;">👁️ 나의 눈 건강</div>
-<div style="font-size:13px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지<br/><b>C-44 × Guardian Patent #47 — 거리 측정 + 시력 + AI 분석 융합</b></div>
+<div style="font-size:13px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지<br/><b>거리 측정 + 시력 + AI 분석 융합</b></div>
+<!-- ★ 박입 123 — 사용법 다시 보기 버튼 (인트로 팝업 재진입) -->
+<div style="margin-top:12px;">
+<button onclick="document.getElementById('eye-intro-pop').style.display='block';" style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);color:#0f766e;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+</div>
 </div>
 
 <!-- 측정 영역 -->
@@ -14038,11 +14109,6 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 </div>
 <!-- 디버그 패널 -->
 <div id="eye-debug-panel" style="margin-top:8px;padding:6px 10px;background:rgba(15,118,110,.1);border:1px solid rgba(20,184,166,.25);border-radius:8px;font-size:9.5px;color:#0f766e;font-family:'Courier New',monospace;letter-spacing:.02em;">👁️ 측정 대기 중...</div>
-
-<!-- ★ 박입 120 — 진짜 배포 검증 표지 (캐시 무효화 + 진짜 보임 검증) -->
-<div style="margin-top:14px;padding:10px;background:#fbbf24;color:#78350f;text-align:center;font-size:11px;font-weight:900;border-radius:8px;letter-spacing:.05em;">
-🚨 박입 120 진짜 배포 검증 — 아래 빨강/파랑 버튼 보이면 ✓
-</div>
 
 <!-- ★ 박입 119 — 왼쪽/오른쪽 눈 선택 박입 (안과 표준 패턴) -->
 <div id="eye-side-select" style="margin-top:14px;padding:14px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(45,212,191,.04));border:1px solid rgba(20,184,166,.3);border-radius:12px;">
@@ -14924,7 +14990,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     if(eyePhotoDataUrl){
       resultHtml += '<div style="background:linear-gradient(135deg,#fff,#f0fdfb);border:1px solid #ccfbf1;border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(20,184,166,.08);">';
       resultHtml += '<div style="font-size:13px;font-weight:900;color:#134e4a;margin-bottom:4px;">🤖 C-44 AI 눈 상태 분석</div>';
-      resultHtml += '<div style="font-size:9px;color:#0f766e;margin-bottom:12px;font-weight:700;letter-spacing:.04em;">Guardian Patent #47 · 8B 수준 · 7가지 카테고리</div>';
+      resultHtml += '<div style="font-size:9px;color:#0f766e;margin-bottom:12px;font-weight:700;letter-spacing:.04em;">8B 수준 · 7가지 카테고리</div>';
       resultHtml += '<div style="text-align:center;margin-bottom:14px;">';
       resultHtml += '<img src="' + eyePhotoDataUrl + '" style="width:220px;height:165px;object-fit:cover;border-radius:12px;border:3px solid #ccfbf1;box-shadow:0 4px 12px rgba(20,184,166,.15);" alt="측정 사진 (로컬만)"/>';
       resultHtml += '<div style="font-size:9px;color:#888;margin-top:6px;">🔒 사진은 본 기기에만 저장 · 서버 전송 X · Zero Storage</div>';
@@ -15022,10 +15088,10 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     resultHtml += '<div style="padding:3px 0;">• <b>정기 안과 검진</b> — 1~2년 1회 · 40대 이후 매년 권장</div>';
     resultHtml += '</div>';
 
-    // ⑥ 똘아이 콤비 박입 (C-44 정체성 — 분위기 좋게)
+    // ⑥ C-44 정체성 박입 (분위기 — 깔끔 박입)
     resultHtml += '<div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #6ee7b7;border-radius:10px;padding:14px;margin-bottom:14px;text-align:center;">';
-    resultHtml += '<div style="font-size:11px;font-weight:900;color:#065f46;margin-bottom:4px;">🌟 C-44 × Guardian Patent #47</div>';
-    resultHtml += '<div style="font-size:10px;color:#047857;line-height:1.6;">거리 측정 + 시력 추정 + AI 분석 융합 박입<br/>구글 검색 검증 — 동일 시스템 글로벌 0건</div>';
+    resultHtml += '<div style="font-size:11px;font-weight:900;color:#065f46;margin-bottom:4px;">🌟 거리 측정 + 시력 추정 + AI 분석 융합</div>';
+    resultHtml += '<div style="font-size:10px;color:#047857;line-height:1.6;">동공 추적 · 깜빡임 · 눈가 rPPG · 시각 인지 속도 동시 박입</div>';
     resultHtml += '</div>';
 
     // ⑦ 법적 둘레 (강화 박입 그대로)
@@ -15130,6 +15196,40 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <!-- ══ page-svi: 피부 탄력 분석 ══ -->
 <div class="screen" id="scrSkinage" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:#080808;color:#f0ece0;">
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
+
+<!-- ★ 박입 129 — 피부 페이지 인트로 팝업 (sip- 패턴 박입) -->
+<style>
+  #skinage-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(8,8,8,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  #skinage-intro-pop .sip-title{color:#38bdf8;}
+  #skinage-intro-pop .sip-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);}
+  #skinage-intro-pop .sip-sub{color:rgba(220,240,255,.8);}
+  #skinage-intro-pop .sip-step{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);}
+  #skinage-intro-pop .sip-step-num{background:#38bdf8;}
+  #skinage-intro-pop .sip-step-title{color:#38bdf8;}
+  #skinage-intro-pop .sip-step-desc{color:rgba(220,240,255,.75);}
+  #skinage-intro-pop .sip-cta{background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#fff;}
+</style>
+<div id="skinage-intro-pop">
+<div class="sip-wrap">
+<div class="sip-top"><button class="sip-close" onclick="document.getElementById('skinage-intro-pop').style.display='none';">×</button></div>
+<div class="sip-body">
+<div class="sip-hero">
+<div class="sip-badge">C-44 · SVI · WORLD FIRST</div>
+<div class="sip-title">✨ 나의 피부 탄력 (SVI)</div>
+<div class="sip-sub">광학 점탄성 × rPPG 융합 × 세계 최초<br/><b style="color:#38bdf8;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+</div>
+<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">🧴 세안 후 30분 이상 경과</div><div class="sip-step-desc">측정 정확도 위해 세안 후 피부 안정화 시간 필요. 화장 제거 + 보습 진행 후 측정.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">💡 밝은 조명 + 정면 응시</div><div class="sip-step-desc">자연광 또는 밝은 실내 조명 아래. 얼굴을 화면 중앙에 정확히 맞추세요.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">🤏 볼을 살짝 눌렀다 떼기</div><div class="sip-step-desc">측정 시작 시 볼을 손가락으로 살짝 누름 → 즉시 떼기. <b>복원 속도</b> 로 탄력 측정.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">📊 SVI 점수 + 맞춤 분석</div><div class="sip-step-desc">피부 점탄성 (viscoelasticity) 원리 박입 — 빠를수록 탄력 좋음. SVI 점수 + 권장 성분 박입.</div></div></div>
+<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">💧 맞춤 화장품 성분 추천</div><div class="sip-step-desc">SVI 결과 기반 — 콜라겐 / 히알루론산 / 레티놀 / 비타민 C 등 진짜 박입 성분.</div></div></div>
+<div style="margin-top:16px;padding:12px;background:rgba(56,189,248,.1);border-left:3px solid #38bdf8;border-radius:8px;font-size:11px;color:rgba(220,240,255,.85);line-height:1.6;">
+⚠ <b>참고용 자가 점검</b> · 의학적 진단 아님 · 피부과 진료 대체 X<br/>측정 영상은 외부 전송 X · 종료 시 즉시 파기
+</div>
+<button class="sip-cta" onclick="document.getElementById('skinage-intro-pop').style.display='none';">✓ 이해했어요, 시작하기</button>
+</div>
+</div>
+</div>
 <div style="max-width:480px;margin:0 auto;padding:0 4px 40px;"><div class="svi-c41-hero" id="svi-c41-hero">
 <div class="svi-c41-hero-bg"></div>
 <div class="svi-c41-hero-overlay"></div>
@@ -15138,6 +15238,8 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <h2 class="svi-c41-hero-title">나의 피부 탄력</h2>
 <p class="svi-c41-hero-sub">SVI · 광학 점탄성 × rPPG 융합</p>
 <p class="svi-c41-hero-tag">— WORLD FIRST · SVI TECHNOLOGY —</p>
+<!-- ★ 박입 129 — 피부 페이지 사용법 보기 버튼 (전체 통일) -->
+<button onclick="document.getElementById('skinage-intro-pop').style.display='block';" style="margin-top:14px;background:rgba(56,189,248,.15);border:1px solid rgba(56,189,248,.4);color:#38bdf8;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
 </div>
 </div><div style="padding:14px 16px;background:rgba(0,0,0,.25);border:1px solid rgba(56,189,248,.2);border-radius:14px;margin-bottom:14px;">
 <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:8px;display:flex;align-items:center;gap:6px;">📋 사용 방법</div>
@@ -15759,6 +15861,10 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div class="hfu-badge">✦ <span class="hfu-acc">CHROM rPPG × 6부위 망진</span> 종합 진단</div>
 <h1 class="hfu-hero-title">당신의 건강을<br/><span class="hfu-grad">깊이 들여다봅니다</span></h1>
 <p class="hfu-hero-sub">카메라 한 대로 BPM·HRV·혈색·체질까지 — 2분 40초 종합 측정</p>
+<!-- ★ 박입 126 — 사용법 보기 버튼 (전체 통일) -->
+<div style="margin-top:14px;">
+<button onclick="document.getElementById('hfu-intro-pop').style.display='block';" style="background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;backdrop-filter:blur(8px);">📖 사용법 보기</button>
+</div>
 </div>
 <!-- 측정 시작 카드 -->
 <div class="hfu-start-card">
@@ -17171,6 +17277,10 @@ function goScreen(id){
   });
   document.getElementById(id).classList.add('active');
 }
+// ★ 박입 125 — 자동 팝업 박입 제거 (파트너 진단)
+//   파트너 진단: "자동 팝업 박입 X · 사용법 다시 보기 버튼만 박입"
+//   진짜 이유: 사용자가 매번 페이지 진입 시 팝업 박히면 귀찮음 박힘
+//   진짜 fix: 박입 124 의 자동 팝업 박입 제거 · 박입 123 의 버튼만 박입
 
 // ══ 닉네임 시작 ══
 function pickColor(el){
@@ -20865,8 +20975,26 @@ async function translateForCall(text, fromLang, toLang){
   } catch(e){
     console.warn('[cgo-voice-db]', e);
   }
-  
-  // ═══ 4단계: Groq AI API (폴백) ═══
+
+  // ═══ ★ 박입 131 — 4단계: Firebase 중앙 학습 박입 ═══
+  try {
+    if(window._cgoFb){
+      const toShort131 = _cgoShortLang(toLang);
+      const fromShort131 = _cgoShortLang(fromLang);
+      const fbKey131 = fromShort131 + '_' + toShort131;
+      const fbPath131 = '_translateDB/' + fbKey131 + '/' + encodeURIComponent(text).substring(0, 200);
+      const fbSnap131 = await window._cgoFb.ref(fbPath131).once('value');
+      const fbData131 = fbSnap131.val();
+      if(fbData131 && fbData131.text){
+        _translateMemCache[cacheKey] = fbData131.text;
+        try { localStorage.setItem(cacheKey, fbData131.text); } catch(e){}
+        console.log('[박입 131] 🔥 Firebase 중앙 학습 HIT:', text, '→', fbData131.text);
+        return fbData131.text;
+      }
+    }
+  } catch(e){ console.warn('[박입 131] Firebase fetch fail:', e); }
+
+  // ═══ 5단계: Groq AI API (폴백) ═══
   const fromName = (_LANGS[fromLang] || {}).groq || fromLang;
   const toName = (_LANGS[toLang] || {}).groq || toLang;
   
@@ -20894,6 +21022,25 @@ async function translateForCall(text, fromLang, toLang){
     if(result && result !== text){
       _translateMemCache[cacheKey] = result;
       try { localStorage.setItem(cacheKey, result); } catch(e){}
+      // ★ 박입 131 — Firebase 중앙 학습 박입 (다른 사용자 박입 무료)
+      try {
+        if(window._cgoFb){
+          const toShort131b = _cgoShortLang(toLang);
+          const fromShort131b = _cgoShortLang(fromLang);
+          const fbKey131b = fromShort131b + '_' + toShort131b;
+          const fbPath131b = '_translateDB/' + fbKey131b + '/' + encodeURIComponent(text).substring(0, 200);
+          window._cgoFb.ref(fbPath131b).set({
+            text: result,
+            src_text: text,
+            ts: Date.now(),
+            src: 'groq-llama-3.1-8b-instant'
+          }).then(function(){
+            console.log('[박입 131] 💾 Firebase 중앙 박입 저장:', text);
+          }).catch(function(err){
+            console.warn('[박입 131] Firebase 저장 실패:', err);
+          });
+        }
+      } catch(e){ /* Firebase 실패해도 박입 그대로 */ }
     }
     return result;
   } catch(e){
@@ -21958,9 +22105,28 @@ window.addEventListener('appinstalled', function(){
         return translated;
       }
     } catch(e){ console.warn('[C-40 박입 ⑧] DB fetch fail:', e); }
-    
-    // ═══ 4단계: GROQ 17b 폴백 (DB miss 시만 · 품질 보장 + 비용 절감) ═══
+
+    // ═══ ★ 박입 131 — 4단계: Firebase 중앙 학습 박입 (사용자 공동 학습) ⭐ ═══
+    //   진짜 박입: cgo-voice-db = read-only (GitHub Pages) → 사용자 단어 안 쌓임
+    //   진짜 fix: Firebase Realtime DB 박입 → 사용자 박입 자동 저장 → 다른 사용자 무료 박입
+    //   진짜 효과: 사용자 늘어날수록 DB miss 박입 ↓ → 한 달 비용 95% 박입 박입
+    try {
+      if(window._cgoFb){
+        var fbPath = '_translateDB/' + langShort + '/' + encodeURIComponent(text).substring(0, 200);
+        var fbSnap = await window._cgoFb.ref(fbPath).once('value');
+        var fbData = fbSnap.val();
+        if(fbData && fbData.text){
+          window._c19_transMemCache[cacheKey] = fbData.text;
+          try { localStorage.setItem(cacheKey, fbData.text); } catch(e){}
+          console.log('[박입 131] 🔥 Firebase 중앙 학습 HIT:', text, '→', fbData.text);
+          return fbData.text;
+        }
+      }
+    } catch(e){ console.warn('[박입 131] Firebase fetch fail:', e); }
+
+    // ═══ 5단계: GROQ 17b 폴백 (DB miss 시만 · 품질 보장 + 비용 절감) ═══
     // ★ C-40 박입 ⑨ — 대장님 명령: 70b → 17b (Llama 4 Scout) · 비용 1/5 + 한국어 품질 충분
+    // ★ 박입 131 — Groq 박입 후 Firebase 박입 저장 (다른 사용자 박입 무료)
     console.log('[C-40 박입 ⑧] 🔥 GROQ 17b 폴백 (DB miss):', text);
     var sysPrompt = [
       '당신은 전문 번역가입니다.',
@@ -21989,6 +22155,22 @@ window.addEventListener('appinstalled', function(){
         if(cleaned){
           window._c19_transMemCache[cacheKey] = cleaned;
           try { localStorage.setItem(cacheKey, cleaned); } catch(e){}
+          // ★ 박입 131 — Firebase 중앙 학습 박입 (다른 사용자 박입 무료)
+          try {
+            if(window._cgoFb){
+              var fbPath = '_translateDB/' + langShort + '/' + encodeURIComponent(text).substring(0, 200);
+              window._cgoFb.ref(fbPath).set({
+                text: cleaned,
+                ko: text,
+                ts: Date.now(),
+                src: 'groq-llama-4-scout-17b'
+              }).then(function(){
+                console.log('[박입 131] 💾 Firebase 중앙 박입 저장:', text);
+              }).catch(function(err){
+                console.warn('[박입 131] Firebase 저장 실패:', err);
+              });
+            }
+          } catch(e){ /* Firebase 실패해도 박입 그대로 박입 */ }
         }
         return cleaned;
       } catch(e){ return ''; }
@@ -23592,39 +23774,10 @@ function hfuRenderSteps(){
     }
 
 function setupHfuIntro(){
-    var _pop = document.getElementById('hfu-intro-pop');
-    if(!_pop) return;
-    // ★ FIX: page-algo-v2 active 시 부모 hidden 영향 X — body 직속 보장
-    if(_pop.parentNode !== document.body){
-      document.body.appendChild(_pop);
-    }
-    var _pg = document.getElementById('page-algo-v2');
-    if(!_pg) return;
-    // ★ 진입 시 1회만 표시 가드 (카드 클릭 등 false positive 방지)
-    var _wasActive = _pg.classList.contains('active');
-    var _shownThisVisit = false;
-    if(_wasActive){
-      _pop.style.display = 'block';
-      _pop.scrollTop = 0;
-      _shownThisVisit = true;
-    }
-    // active 토글 감시 — *false → true 전환* 시에만 표시
-    new MutationObserver(function(){
-      var nowActive = _pg.classList.contains('active');
-      if(nowActive && !_wasActive){
-        // 진입! 한 번만 표시
-        if(!_shownThisVisit){
-          _pop.style.display = 'block';
-          _pop.scrollTop = 0;
-          _shownThisVisit = true;
-        }
-      } else if(!nowActive && _wasActive){
-        // 페이지 떠남 → 다음 진입 시 다시 표시되도록 리셋
-        _shownThisVisit = false;
-      }
-      _wasActive = nowActive;
-    }).observe(_pg, {attributes:true, attributeFilter:['class']});
-  }
+    // ★ 박입 126 — 자동 팝업 박입 제거 (파트너 진단: 자동 박입 X · 사용법 보기 버튼만 박입)
+    //   진짜 박입: 박입 126 의 사용법 보기 버튼 (line 15762) 으로 사용자 의향 시 박입
+    return;
+}
 
 function drawRPPG(){
   // 🛡️ [정직 모드 by C-20] Math.random 가짜 그래프 제거
