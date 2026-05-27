@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj92-svi-gloss" name="c41-version"/>
+<meta content="2026-05-26-c44-inj93-c44-rename" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -3682,34 +3682,56 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 
 /* ─── 3. 히어로 글씨 강제 흰색 + 강한 그림자 (가독성 최대) ─── */
+/* ★ 박입 93 — overlay 강화 + 글씨 영역 반투명 박스 박입 (이미지에 글씨 묻힘 fix) */
+#scrSkinage .svi-c41-hero-overlay,
+.svi-c41-hero-overlay {
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0.75) 0%,
+    rgba(0,0,0,0.55) 60%,
+    rgba(0,0,0,0.35) 100%) !important;
+}
+
+#scrSkinage .svi-c41-hero-text,
+.svi-c41-hero-text {
+  background: rgba(0,0,0,0.35) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  border-radius: 24px !important;
+  padding: 24px 32px !important;
+  border: 1px solid rgba(255,255,255,0.15) !important;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5) !important;
+}
+
 #scrSkinage .svi-c41-signature,
 .svi-c41-signature {
   color: #ffffff !important;
   text-shadow:
-    0 0 20px rgba(255,255,255,0.75),
-    0 0 40px rgba(0,0,0,0.6),
-    0 4px 16px rgba(0,0,0,0.9) !important;
+    0 0 20px rgba(255,255,255,0.85),
+    0 0 40px rgba(0,0,0,0.95),
+    0 4px 16px rgba(0,0,0,1),
+    0 0 60px rgba(212,168,67,0.6) !important;
 }
 
 #scrSkinage .svi-c41-hero-title,
 .svi-c41-hero-title {
   color: #ffffff !important;
   text-shadow:
-    0 3px 18px rgba(0,0,0,0.95),
-    0 0 35px rgba(0,0,0,0.6),
-    0 0 50px rgba(244,114,182,0.4) !important;
+    0 3px 18px rgba(0,0,0,1),
+    0 0 35px rgba(0,0,0,0.95),
+    0 0 50px rgba(244,114,182,0.5),
+    0 6px 24px rgba(0,0,0,0.9) !important;
 }
 
 #scrSkinage .svi-c41-hero-sub,
 .svi-c41-hero-sub {
-  color: rgba(255,255,255,0.96) !important;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.9), 0 0 16px rgba(0,0,0,0.6) !important;
+  color: rgba(255,255,255,0.98) !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.9) !important;
 }
 
 #scrSkinage .svi-c41-hero-tag,
 .svi-c41-hero-tag {
   color: #fbbf24 !important;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.9) !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8) !important;
 }
 </style>
 <!-- ════ C-41 박입 ㉘ — scrSkinage 옛 영역 정리 (RMAI·svi-cam-wrap·옛 결과) ════ -->
@@ -14517,9 +14539,9 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div class="svi-c41-hero-bg"></div>
 <div class="svi-c41-hero-overlay"></div>
 <div class="svi-c41-hero-text">
-<div class="svi-c41-signature">C-42</div>
+<div class="svi-c41-signature">C-44</div>
 <h2 class="svi-c41-hero-title">나의 피부 탄력</h2>
-<p class="svi-c41-hero-sub">SVI · 광학 점탄성 × 한방 융합</p>
+<p class="svi-c41-hero-sub">SVI · 광학 점탄성 × rPPG 융합</p>
 <p class="svi-c41-hero-tag">— WORLD FIRST · SVI TECHNOLOGY —</p>
 </div>
 </div><div style="padding:14px 16px;background:rgba(0,0,0,.25);border:1px solid rgba(56,189,248,.2);border-radius:14px;margin-bottom:14px;">
@@ -24540,12 +24562,12 @@ function _cgoSviIntroPopup(){
   h += '<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">WORLD FIRST · SVI</div>';
   h += '<div style="font-size:54px;margin-bottom:8px;">💪</div>';
   h += '<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">피부 탄력 분석</h1>';
-  h += '<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">Skin Vitality Index · 카메라 점탄성 분석<br>한방 융합 맞춤 처방</div>';
+  h += '<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">Skin Vitality Index · 카메라 점탄성 분석<br>rPPG 융합 맞춤 처방</div>';
   h += '</div>';
 
   // 핵심 소개
   h += '<div style="background:rgba(255,255,255,0.7);border-radius:18px;padding:18px 22px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">';
-  h += '<div style="font-size:13px;color:rgba(13,58,58,0.85);line-height:1.85;">세계 최초! 카메라 기반 <b style="color:#059669;">광학 점탄성 분석</b>으로 <b style="color:#0284c7;">SVI(피부활력지수)</b>를 수치화하고, <b style="color:#059669;">한방 융합</b> 맞춤 수분·운동·식단 처방을 제공합니다.</div>';
+  h += '<div style="font-size:13px;color:rgba(13,58,58,0.85);line-height:1.85;">세계 최초! 카메라 기반 <b style="color:#059669;">광학 점탄성 분석</b>으로 <b style="color:#0284c7;">SVI(피부활력지수)</b>를 수치화하고, <b style="color:#059669;">rPPG 융합</b> 맞춤 수분·운동·식단 처방을 제공합니다.</div>';
   h += '</div>';
 
   // 4단계 사용법
