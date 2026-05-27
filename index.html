@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj100-canvas-mirror" name="c41-version"/>
+<meta content="2026-05-26-c44-inj101-hair-bypass" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -25019,7 +25019,23 @@ if(typeof window.cgoCameraCheck !== 'function'){
             //    별도 베이스 polygon 그리기 X → 코 잔상 X
             var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
             if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
-              window.drawFresnelWaterGlow(c41hCtx, c41hCanvas, landmarks, glossLevel);
+              // ★ 박입 101 — 헤어 / 립 / 볼 / 아이 wrap 우회 (피부 페이지는 베이스만)
+              //   파트너 진단: 헤어 칸도 지워서 잔상 검증
+              //   메커니즘: _rmaiAr.appliedColors 임시 비움 → wrap 통과해도 색 박입 X
+              //   결과: drawFresnelWaterGlow 의 원본 (베이스 광택 + Fresnel + 박입 45 코) 만 작동
+              var savedAppliedColors = null;
+              if(typeof _rmaiAr !== 'undefined' && _rmaiAr.appliedColors){
+                savedAppliedColors = _rmaiAr.appliedColors;
+                _rmaiAr.appliedColors = {};  // 비움 (wrap 통과해도 색 박입 X)
+              }
+              try {
+                window.drawFresnelWaterGlow(c41hCtx, c41hCanvas, landmarks, glossLevel);
+              } finally {
+                // 복구 (AR 메이크업 페이지 영향 0)
+                if(savedAppliedColors){
+                  _rmaiAr.appliedColors = savedAppliedColors;
+                }
+              }
             }
 
             c41hCtx.restore();
