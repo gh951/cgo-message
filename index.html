@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj86-no-hero" name="c41-version"/>
+<meta content="2026-05-26-c44-inj92-svi-gloss" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -13309,14 +13309,20 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <script>
     // ★ 페이지 활성화 감지 → 첫 인사 자동 + 진입 팝업
     (function(){
-      var p = document.getElementById('page-rppg-ar');
+      // ★ 박입 91 — 진짜 진범 fix: 'page-rppg-ar' 존재 X → 'scrMakeup' 로 교체
+      //   이전 코드 (var p = document.getElementById('page-rppg-ar')) 는 null 반환
+      //   → if(!p) return → IIFE 종료 → 팝업 함수 호출 자체 안 됨
+      //   박입 88 (차단 제거), 90 (localStorage) 다 도달 못 했던 진짜 원인
+      var p = document.getElementById('scrMakeup');
       if(!p) return;
 
       // 진입 팝업 박제
       window.rmaiShowIntroPopup = function(){
-        // localStorage 체크 (다시 보지 않기)
+        // ★ 박입 90 — localStorage 체크 제거 (옛 cgo_rmai_intro_skip 잔재 무력화)
+        //   이전에 "다음부터 보지 않기" 체크한 사용자 영원히 못 봄 → 차단 제거
+        //   사용자 원할 시만 체크 → 다음 세션도 강제 표시
         try {
-          if(localStorage.getItem('cgo_rmai_intro_skip') === '1') return;
+          localStorage.removeItem('cgo_rmai_intro_skip');  // 옛 잔재 정리
         } catch(e){}
 
         if(document.getElementById('rmai-intro-pop')) return;
@@ -13340,7 +13346,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
         // 핵심 설명
         html += '<div style="font-size:12px;color:rgba(255,250,235,.8);line-height:1.7;padding:12px 14px;background:rgba(251,191,36,.05);border-radius:12px;border-left:3px solid rgba(251,191,36,.5);margin-bottom:14px;">';
-        html += '세계 최초로 <b style="color:#fbbf24;">카메라 기반 rPPG 기술</b>과 <b style="color:#fbbf24;">동양 역학(오행)</b>을 융합한 메이크업 분석 + AR 적용 + AI 컨설턴트 통합 도구입니다.';
+        html += '세계 최초로 <b style="color:#fbbf24;">카메라 기반 rPPG 생체 측정</b>과 <b style="color:#fbbf24;">AR 메이크업 + 헤어</b>를 단일 캔버스에서 동시 구동하는 글로벌 1위 AR 기술입니다.';
         html += '</div>';
 
         // 사용법 4단계
@@ -13349,7 +13355,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
         html += '<div style="display:flex;flex-direction:column;gap:6px;">';
         var steps = [
           ['①','<b style="color:#fbbf24;">화장 전 사진</b>을 한 장 촬영하세요. 분석 시작점이 됩니다.'],
-          ['②','<b style="color:#fbbf24;">화장 후 30초 스캔</b>으로 MAI 점수 + 사주 오행 분석.'],
+          ['②','<b style="color:#fbbf24;">화장 후 30초 스캔</b>으로 MAI 점수 + 피부 톤 분석.'],
           ['③','<b style="color:#fbbf24;">AR 카메라 모드</b>로 실시간 색을 얼굴에 미리보기.'],
           ['④','<b style="color:#fbbf24;">C-29 컨설턴트</b>에게 상황별 색을 물어보세요.']
         ];
@@ -13398,13 +13404,9 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
       function tryGreet(){
         if(p.classList.contains('active')){
-          // ★ 정보 입력 검증 — 미입력 시 차단 + 대시보드로 이동
-          var r = window.calcResult || {};
-          if(!r.y || !r.name){
-            alert('먼저 정보를 입력하고 ⚡ 자동 계산을 눌러주세요!\n\nC-29 AR 메이크업은 사주 오행 + 생년월일 기반으로 작동합니다.');
-            if(typeof cgoGoPage === 'function') goScreen('scrHome');
-            return true;
-          }
+          // ★ 박입 88 — 사주 정보 강제 차단 제거 (박입 76 후속: 순수 기술 페이지로 전환)
+          //   기존: y/name 없으면 alert + 홈 강제 이동
+          //   변경: 정보 없어도 그대로 진입 가능 (AR 기술 + rPPG 만 사용)
           // ★ 즉시 호출 — setTimeout 제거 (본 페이지 깜빡임 방지, yeogi 패턴)
           rmaiShowIntroPopup();
           // C-29 챗 인사는 약간 후 (팝업이 떠 있을 때 배경)
@@ -18116,39 +18118,10 @@ window.addEventListener('DOMContentLoaded', ()=>{
 });
 
 // ══ 🚨 로컬 파일로 열었을 때 감지 (file://) ══
+// ★ 박입 89 — 함수 본체 자체 무력화 (안전망)
 function detectLocalFile(){
-  if(location.protocol !== 'file:') return;
-  // 이미 배너 있으면 스킵
-  if(document.getElementById('c19_localFileBanner')) return;
-  
-  const query = location.search || '';
-  const targetUrl = 'https://www.cgo-message.com/' + query;
-  
-  const banner = document.createElement('div');
-  banner.id = 'c19_localFileBanner';
-  banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:100001;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;padding:14px 16px;font-size:14px;font-weight:700;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.4);line-height:1.6;';
-  banner.innerHTML = [
-    '🚨 <b>잘못된 방식으로 열렸어요!</b>',
-    '<div style="font-size:12px;margin-top:6px;font-weight:500;">',
-    '  지금 이 화면은 <b>컴퓨터 파일</b>이라서<br>',
-    '  친구 초대·메시지 전송이 작동하지 않아요',
-    '</div>',
-    '<div style="font-size:11px;margin-top:8px;opacity:.9;">👇 아래 주소를 눌러주세요 👇</div>',
-    '<a href="' + targetUrl + '" style="display:inline-block;margin-top:10px;padding:14px 22px;background:#fff;color:#dc2626;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.25);line-height:1.3;">',
-    '  🌐 www.cgo-message.com<br>',
-    '  <span style="font-size:11px;font-weight:600;opacity:.75;">탭하여 이동하기</span>',
-    '</a>',
-    '<div style="margin-top:10px;">',
-    '  <button id="c19_localDismiss" style="padding:6px 14px;background:transparent;color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.3);border-radius:8px;font-weight:600;font-size:11px;cursor:pointer;font-family:inherit;">그냥 이 화면에서 계속 (권장 X)</button>',
-    '</div>'
-  ].join('');
-  document.body.appendChild(banner);
-  document.body.style.paddingTop = banner.offsetHeight + 'px';
-  
-  document.getElementById('c19_localDismiss').addEventListener('click', function(){
-    banner.style.display = 'none';
-    document.body.style.paddingTop = '0';
-  });
+  // 박입 89: 어떤 경우에도 빨간 배너 안 뜨게 강제 무력화
+  return;
 }
 
 // ══ 🚨 카카오톡 인앱 브라우저 감지 및 크롬 유도 ══
@@ -23330,6 +23303,67 @@ function _sviInitFaceMesh(videoEl){
         if(v && v.videoWidth){
           _sviProcess6Zones(_svi.faceLandmarks, v.videoWidth, v.videoHeight);
         }
+
+        // ★★ 박입 92 — AR 메이크업의 잔상 0 + 자연 물광 박입 ━━━━━━━━━━━━━━━━━━━━━━━
+        //  목적: 피부 나이 페이지에도 베이스 + 물광 효과 동일 박입
+        //  핵심 박입:
+        //    ① 격프레임 (frameCounter % 2) — CPU 50% 절감 (박입 27 패턴)
+        //    ② 영역 한정 (FaceOval bounding box) — 연산 95% 절감
+        //    ③ drawFresnelWaterGlow 호출 — 박입 87 자연 물광 (피부톤 자동 + soft-light)
+        //    ④ _rmaiAr.glossLevel 공유 — 슬라이더 값 그대로 적용
+        try {
+          if(!window._svi92FrameCounter) window._svi92FrameCounter = 0;
+          window._svi92FrameCounter++;
+          if(window._svi92FrameCounter % 2 !== 0) return;  // 격프레임
+
+          // 캔버스 / 비디오 가져오기
+          var sviCanvas = document.getElementById('svi-canvas');
+          var sviVideo = document.getElementById('svi-video');
+          if(!sviCanvas || !sviVideo || !sviVideo.videoWidth) return;
+
+          // 캔버스 사이즈 동기화
+          if(sviCanvas.width !== sviVideo.videoWidth){
+            sviCanvas.width = sviVideo.videoWidth;
+            sviCanvas.height = sviVideo.videoHeight;
+          }
+
+          var sviCtx = sviCanvas.getContext('2d');
+          if(!sviCtx) return;
+
+          // 비디오 영상을 캔버스에 그리기 (베이스)
+          sviCtx.save();
+          sviCtx.setTransform(1, 0, 0, 1, 0, 0);
+          // 좌우 반전 (selfie mode)
+          sviCtx.scale(-1, 1);
+          sviCtx.drawImage(sviVideo, -sviCanvas.width, 0, sviCanvas.width, sviCanvas.height);
+          sviCtx.restore();
+
+          // 캔버스 보이게
+          if(sviCanvas.style.display === 'none'){
+            sviCanvas.style.display = 'block';
+            sviCanvas.style.position = 'absolute';
+            sviCanvas.style.top = '0';
+            sviCanvas.style.left = '0';
+            sviCanvas.style.width = '100%';
+            sviCanvas.style.height = 'auto';
+            sviCanvas.style.borderRadius = '16px';
+            sviCanvas.style.transform = 'scaleX(-1)';  // 거울 모드
+          }
+
+          // 물광 + 베이스 렌더링 (drawFresnelWaterGlow 활용)
+          var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
+          if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
+            // 좌표 반전 (mirrored landmarks)
+            var mirroredLandmarks = _svi.faceLandmarks.map(function(lm){
+              return {x: 1.0 - lm.x, y: lm.y, z: lm.z};
+            });
+            window.drawFresnelWaterGlow(sviCtx, sviCanvas, mirroredLandmarks, glossLevel);
+          }
+        } catch(e){
+          // 박입 92 실패 시 무시 (원본 측정에 영향 X)
+        }
+        // ★★ 박입 92 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
       } else {
         _svi.zoneDetected = false;
       }
@@ -28682,7 +28716,46 @@ window.rmaiArCapture = function(){
     ctx.clip();
 
     // ─── ② 얼굴 전체 큰 radial grad (부드러운 광택 베이스) ───
-    ctx.globalCompositeOperation = 'screen';
+    //   박입 87 — A) 피부톤 샘플링 후 그 색 + 밝기 ↑ (옐로 베이스 보정)
+    //          B) screen → soft-light (어두운 부위 보호)
+    //          D) 강도 ↓ (0.32 → 0.18)
+    //
+    // 피부톤 샘플링: 코 양옆 + 볼 중심 RGB 평균 → 살색 보존
+    var skinTone = (function(){
+      // 캐시 (10프레임마다 갱신)
+      if(!window._skinSampleCache) window._skinSampleCache = {ts:0, color:null};
+      var now = Date.now();
+      if(window._skinSampleCache.color && now - window._skinSampleCache.ts < 333){
+        return window._skinSampleCache.color;
+      }
+      try{
+        // 코 옆 + 볼 중심 4점 픽셀 샘플링
+        var samplePoints = [landmarks[50], landmarks[280], landmarks[117], landmarks[346]];
+        var rSum=0, gSum=0, bSum=0, n=0;
+        for(var sp=0; sp<samplePoints.length; sp++){
+          var pt = samplePoints[sp];
+          if(!pt) continue;
+          var px = Math.round(pt.x * canvas.width);
+          var py = Math.round(pt.y * canvas.height);
+          if(px<0 || py<0 || px>=canvas.width || py>=canvas.height) continue;
+          var pix = ctx.getImageData(px, py, 1, 1).data;
+          rSum += pix[0]; gSum += pix[1]; bSum += pix[2]; n++;
+        }
+        if(n === 0) return {r:255, g:240, b:220};  // 기본 살색
+        // 평균 + 밝기 1.2배 (광택 표현)
+        var r = Math.min(255, Math.round(rSum/n * 1.18));
+        var g = Math.min(255, Math.round(gSum/n * 1.15));
+        var b = Math.min(255, Math.round(bSum/n * 1.10));
+        var c = {r:r, g:g, b:b};
+        window._skinSampleCache = {ts:now, color:c};
+        return c;
+      } catch(e){
+        return {r:255, g:240, b:220};
+      }
+    })();
+    var skinColor = skinTone.r + ',' + skinTone.g + ',' + skinTone.b;
+
+    ctx.globalCompositeOperation = 'soft-light';  // ★ 박입 87B — screen → soft-light
     var noseCenter = landmarks[1];
     var foreheadTop = landmarks[10];
     var chinBottom = landmarks[152];
@@ -28690,16 +28763,18 @@ window.rmaiArCapture = function(){
       var cx = noseCenter.x * canvas.width;
       var cy = noseCenter.y * canvas.height;
       var faceH = Math.abs((chinBottom.y - foreheadTop.y) * canvas.height);
-      var baseAlpha = glossLevel * glossiness * pulse * 0.32;
+      var baseAlpha = glossLevel * glossiness * pulse * 0.18;  // ★ 박입 87D — 0.32 → 0.18
       var gradBase = ctx.createRadialGradient(cx, cy*0.92, 0, cx, cy, faceH * 0.75);
-      gradBase.addColorStop(0,    'rgba(255,250,240,' + baseAlpha + ')');
-      gradBase.addColorStop(0.45, 'rgba(255,250,240,' + (baseAlpha*0.6) + ')');
-      gradBase.addColorStop(1,    'rgba(255,255,255,0)');
+      gradBase.addColorStop(0,    'rgba(' + skinColor + ',' + baseAlpha + ')');
+      gradBase.addColorStop(0.45, 'rgba(' + skinColor + ',' + (baseAlpha*0.55) + ')');
+      gradBase.addColorStop(1,    'rgba(' + skinColor + ',0)');
       ctx.fillStyle = gradBase;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     // ─── ③ 12 핵심 highlight (N·V 프레넬 cross product) ───
+    //   박입 87 — composite 'screen' 으로 highlight 만 살림 (베이스는 soft-light)
+    ctx.globalCompositeOperation = 'screen';
     var glowAreas = [
       {c: 117, n1: 50,  n2: 187, r: 48},   // 좌측 광대
       {c: 346, n1: 280, n2: 411, r: 48},   // 우측 광대
@@ -28734,15 +28809,16 @@ window.rmaiArCapture = function(){
       // 프레넬 pow(1-N·V, 3)
       var fresnel = Math.pow(1.0 - Nz, 3.0);
       var intensity = fresnel * glossiness * pulse * glossLevel;
-      var alpha = Math.min(1, intensity * 1.6);
+      var alpha = Math.min(1, intensity * 0.7);  // ★ 박입 87D — 1.6 → 0.7
       if(alpha < 0.015) return;
 
       var x = p0.x * canvas.width;
       var y = p0.y * canvas.height;
       var grad = ctx.createRadialGradient(x, y, 0, x, y, area.r);
-      grad.addColorStop(0,    'rgba(255,255,255,' + alpha + ')');
-      grad.addColorStop(0.45, 'rgba(255,250,240,' + (alpha*0.55) + ')');
-      grad.addColorStop(1,    'rgba(255,255,255,0)');
+      // ★ 박입 87A — 중심은 살색-밝게, 가장자리는 살색-자연
+      grad.addColorStop(0,    'rgba(255,253,247,' + alpha + ')');
+      grad.addColorStop(0.45, 'rgba(' + skinColor + ',' + (alpha*0.5) + ')');
+      grad.addColorStop(1,    'rgba(' + skinColor + ',0)');
       ctx.fillStyle = grad;
       ctx.beginPath();
       ctx.arc(x, y, area.r, 0, Math.PI*2);
