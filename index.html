@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj112-real-load" name="c41-version"/>
+<meta content="2026-05-26-c44-inj113-retry" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14446,66 +14446,18 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       s108.faceLostTime = 0;
     }
 
-    // FaceMesh 박입 (없으면 초기화) — ★ 박입 112: AR 패턴 그대로 동적 로드 박입
-    if(!s108.faceMesh){
-      if(typeof FaceMesh === 'undefined'){
-        // ★ 박입 112 — FaceMesh 동적 CDN 로드 (AR 메이크업 패턴 그대로)
-        //   파트너 진단: 박입 110/111 "얼굴 안 보입니다" 거짓 메시지 → 진짜 진범 = FaceMesh 라이브러리 로드 X
-        if(!document.querySelector('script[data-eye112-facemesh]')){
-          eyeDebug('⏳ FaceMesh 라이브러리 로드 중...');
-          var s = document.createElement('script');
-          s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js';
-          s.setAttribute('data-eye112-facemesh', '1');
-          s.crossOrigin = 'anonymous';
-          s.onload = function(){ eyeDebug('✓ FaceMesh 로드 완료'); };
-          s.onerror = function(){ eyeDebug('⚠️ FaceMesh CDN 로드 실패 — 인터넷 확인'); };
-          document.head.appendChild(s);
-        }
-        // 로드 대기 — 다음 interval 에서 다시 시도
-      } else {
-        // FaceMesh 로드 OK → 초기화
-        try {
-          s108.faceMesh = new FaceMesh({locateFile:function(file){
-            return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/'+file;
-          }});
-          s108.faceMesh.setOptions({
-            maxNumFaces:1, refineLandmarks:true,
-            minDetectionConfidence:0.5, minTrackingConfidence:0.5
-          });
-          s108.faceMesh.onResults(function(results){
-            if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
-              var lm = results.multiFaceLandmarks[0];
-              var video = document.getElementById('eye-video');
-              if(!video || !video.videoWidth){
-                s108.faceDetected = false;
-                return;
-              }
-              // ★ 양쪽 눈 외측 꼭짓점 (33 = 왼쪽 / 263 = 오른쪽)
-              var eyeL = lm[33], eyeR = lm[263];
-              if(!eyeL || !eyeR){
-                s108.faceDetected = false;
-                return;
-              }
-              var dx = (eyeR.x - eyeL.x) * video.videoWidth;
-              var dy = (eyeR.y - eyeL.y) * video.videoHeight;
-              var pixelDist = Math.sqrt(dx*dx + dy*dy);
-              // ★ 캘리브레이션: pixelDist 200 ≈ 30cm / 150 ≈ 40cm / 120 ≈ 50cm
-              var distCm = pixelDist > 10 ? Math.round(6000 / pixelDist) : 0;
-              s108.eyeDist = distCm;
-              s108.faceDetected = true;
-              s108.faceLostTime = 0;
-            } else {
-              // 얼굴 안 보임 (FaceMesh 가 못 잡음)
-              s108.faceDetected = false;
-              s108.eyeDist = 0;
-            }
-          });
-          eyeDebug('✓ FaceMesh 초기화 완료');
-        } catch(e){
-          console.warn('[박입 112] FaceMesh 박입 실패:', e);
-          eyeDebug('⚠️ FaceMesh 박입 실패 — 거리 측정 X');
-        }
-      }
+    // FaceMesh 박입 (없으면 초기화) — ★ 박입 113 (진짜 fix): 동적 로드 시작만 박입
+    //   파트너 진단: 박입 112 "준비 중" 만 떠 있음 → 진짜 진범 = 동적 로드 후 재시도 박입 X
+    //   진짜 fix: CDN 스크립트 박입만 여기서, 초기화는 setInterval 안에서 매번 시도
+    if(typeof FaceMesh === 'undefined' && !document.querySelector('script[data-eye112-facemesh]')){
+      eyeDebug('⏳ FaceMesh 라이브러리 로드 중...');
+      var s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js';
+      s.setAttribute('data-eye112-facemesh', '1');
+      s.crossOrigin = 'anonymous';
+      s.onload = function(){ eyeDebug('✓ FaceMesh 로드 완료'); };
+      s.onerror = function(){ eyeDebug('⚠️ FaceMesh CDN 로드 실패 — 인터넷 확인'); };
+      document.head.appendChild(s);
     }
 
     // FaceMesh 매 프레임 호출 (40Hz — 박입 97 패턴)
@@ -14518,6 +14470,44 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
     eyeState.rppgInterval = setInterval(function(){
       if(!eyeState.started) return;
+
+      // ★ 박입 113 — FaceMesh 자동 재시도 박입 (CDN 로드 후 매번 시도)
+      //   파트너 진단: 박입 112 의 fail point = 동적 로드 후 초기화 박입 X
+      //   진짜 fix: setInterval 안에서 매번 typeof FaceMesh 체크 → 박힘 시 즉시 초기화
+      if(!s108.faceMesh && typeof FaceMesh !== 'undefined'){
+        try {
+          s108.faceMesh = new FaceMesh({locateFile:function(file){
+            return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/'+file;
+          }});
+          s108.faceMesh.setOptions({
+            maxNumFaces:1, refineLandmarks:true,
+            minDetectionConfidence:0.5, minTrackingConfidence:0.5
+          });
+          s108.faceMesh.onResults(function(results){
+            if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+              var lm = results.multiFaceLandmarks[0];
+              var video = document.getElementById('eye-video');
+              if(!video || !video.videoWidth){ s108.faceDetected = false; return; }
+              var eyeL = lm[33], eyeR = lm[263];
+              if(!eyeL || !eyeR){ s108.faceDetected = false; return; }
+              var dx = (eyeR.x - eyeL.x) * video.videoWidth;
+              var dy = (eyeR.y - eyeL.y) * video.videoHeight;
+              var pixelDist = Math.sqrt(dx*dx + dy*dy);
+              var distCm = pixelDist > 10 ? Math.round(6000 / pixelDist) : 0;
+              s108.eyeDist = distCm;
+              s108.faceDetected = true;
+              s108.faceLostTime = 0;
+            } else {
+              s108.faceDetected = false;
+              s108.eyeDist = 0;
+            }
+          });
+          eyeDebug('✓ FaceMesh 초기화 완료 — 거리 측정 시작');
+        } catch(e){
+          console.warn('[박입 113] FaceMesh 초기화 실패:', e);
+        }
+      }
+
       // BPM / HRV / 동공 (현재 시뮬레이션 그대로)
       var bpm = 68 + Math.random() * 12;
       var hrv = 38 + Math.random() * 18;
