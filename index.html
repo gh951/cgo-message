@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj93-c44-rename" name="c41-version"/>
+<meta content="2026-05-26-c44-inj94-c41h-gloss" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -23326,65 +23326,9 @@ function _sviInitFaceMesh(videoEl){
           _sviProcess6Zones(_svi.faceLandmarks, v.videoWidth, v.videoHeight);
         }
 
-        // ★★ 박입 92 — AR 메이크업의 잔상 0 + 자연 물광 박입 ━━━━━━━━━━━━━━━━━━━━━━━
-        //  목적: 피부 나이 페이지에도 베이스 + 물광 효과 동일 박입
-        //  핵심 박입:
-        //    ① 격프레임 (frameCounter % 2) — CPU 50% 절감 (박입 27 패턴)
-        //    ② 영역 한정 (FaceOval bounding box) — 연산 95% 절감
-        //    ③ drawFresnelWaterGlow 호출 — 박입 87 자연 물광 (피부톤 자동 + soft-light)
-        //    ④ _rmaiAr.glossLevel 공유 — 슬라이더 값 그대로 적용
-        try {
-          if(!window._svi92FrameCounter) window._svi92FrameCounter = 0;
-          window._svi92FrameCounter++;
-          if(window._svi92FrameCounter % 2 !== 0) return;  // 격프레임
-
-          // 캔버스 / 비디오 가져오기
-          var sviCanvas = document.getElementById('svi-canvas');
-          var sviVideo = document.getElementById('svi-video');
-          if(!sviCanvas || !sviVideo || !sviVideo.videoWidth) return;
-
-          // 캔버스 사이즈 동기화
-          if(sviCanvas.width !== sviVideo.videoWidth){
-            sviCanvas.width = sviVideo.videoWidth;
-            sviCanvas.height = sviVideo.videoHeight;
-          }
-
-          var sviCtx = sviCanvas.getContext('2d');
-          if(!sviCtx) return;
-
-          // 비디오 영상을 캔버스에 그리기 (베이스)
-          sviCtx.save();
-          sviCtx.setTransform(1, 0, 0, 1, 0, 0);
-          // 좌우 반전 (selfie mode)
-          sviCtx.scale(-1, 1);
-          sviCtx.drawImage(sviVideo, -sviCanvas.width, 0, sviCanvas.width, sviCanvas.height);
-          sviCtx.restore();
-
-          // 캔버스 보이게
-          if(sviCanvas.style.display === 'none'){
-            sviCanvas.style.display = 'block';
-            sviCanvas.style.position = 'absolute';
-            sviCanvas.style.top = '0';
-            sviCanvas.style.left = '0';
-            sviCanvas.style.width = '100%';
-            sviCanvas.style.height = 'auto';
-            sviCanvas.style.borderRadius = '16px';
-            sviCanvas.style.transform = 'scaleX(-1)';  // 거울 모드
-          }
-
-          // 물광 + 베이스 렌더링 (drawFresnelWaterGlow 활용)
-          var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
-          if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
-            // 좌표 반전 (mirrored landmarks)
-            var mirroredLandmarks = _svi.faceLandmarks.map(function(lm){
-              return {x: 1.0 - lm.x, y: lm.y, z: lm.z};
-            });
-            window.drawFresnelWaterGlow(sviCtx, sviCanvas, mirroredLandmarks, glossLevel);
-          }
-        } catch(e){
-          // 박입 92 실패 시 무시 (원본 측정에 영향 X)
-        }
-        // ★★ 박입 92 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        // ★★ 박입 92 → 박입 94 로 이동 (svi-video 는 숨김 영역 / 진짜 카메라는 c41h-video)
+        //   박입 94 위치: c41h FaceDetection onResults (line ~24967)
+        //   여기는 측정만 (사용자 화면 X)
 
       } else {
         _svi.zoneDetected = false;
@@ -24960,25 +24904,106 @@ if(typeof window.cgoCameraCheck !== 'function'){
 
   // ━━━ MediaPipe 얼굴 감지 ━━━
   function initFaceDetection(){
-    if(typeof FaceDetection === 'undefined') return null;
+    // ★ 박입 94 — FaceDetection → FaceMesh 교체 (랜드마크 필요 for 물광)
+    //   원본: FaceDetection (bounding box 만)
+    //   변경: FaceMesh (468 랜드마크 — drawFresnelWaterGlow 호출 가능)
+    //   기존 _c41hFaceBox 도 호환 유지 (FaceMesh 결과에서 bounding box 계산)
+    if(typeof FaceMesh === 'undefined'){
+      // FaceMesh 없으면 폴백: 옛 FaceDetection 사용
+      if(typeof FaceDetection === 'undefined') return null;
+      try {
+        var fdOld = new FaceDetection({locateFile:function(file){return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/'+file;}});
+        fdOld.setOptions({model:'short', minDetectionConfidence:0.5});
+        fdOld.onResults(function(results){
+          if(results.detections && results.detections.length > 0){
+            var d = results.detections[0];
+            if(d.boundingBox){
+              _c41hFaceBox = {
+                x: d.boundingBox.xCenter - d.boundingBox.width/2,
+                y: d.boundingBox.yCenter - d.boundingBox.height/2,
+                w: d.boundingBox.width, h: d.boundingBox.height
+              };
+              _c41hFaceDetected = true;
+            }
+          } else { _c41hFaceDetected = false; }
+        });
+        return fdOld;
+      } catch(e){ console.error('[c41h] FD fallback err:', e); return null; }
+    }
+
     try {
-      var fd = new FaceDetection({locateFile:function(file){return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/'+file;}});
-      fd.setOptions({model:'short', minDetectionConfidence:0.5});
-      fd.onResults(function(results){
-        if(results.detections && results.detections.length > 0){
-          var d = results.detections[0];
-          if(d.boundingBox){
-            _c41hFaceBox = {
-              x: d.boundingBox.xCenter - d.boundingBox.width/2,
-              y: d.boundingBox.yCenter - d.boundingBox.height/2,
-              w: d.boundingBox.width, h: d.boundingBox.height
-            };
-            _c41hFaceDetected = true;
+      var fm = new FaceMesh({locateFile:function(file){return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/'+file;}});
+      fm.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5
+      });
+      fm.onResults(function(results){
+        if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+          var landmarks = results.multiFaceLandmarks[0];
+          // bounding box 계산 (기존 _c41hFaceBox 호환)
+          var minX = 1, maxX = 0, minY = 1, maxY = 0;
+          for(var i = 0; i < landmarks.length; i++){
+            var lm = landmarks[i];
+            if(lm.x < minX) minX = lm.x;
+            if(lm.x > maxX) maxX = lm.x;
+            if(lm.y < minY) minY = lm.y;
+            if(lm.y > maxY) maxY = lm.y;
           }
+          _c41hFaceBox = {
+            x: minX, y: minY,
+            w: maxX - minX, h: maxY - minY
+          };
+          _c41hFaceDetected = true;
+
+          // ★★ 박입 94 핵심 — c41h-canvas 에 베이스 + 자연 물광 박입 ━━━━━━━━━━━
+          //  목적: 피부 페이지에도 AR 메이크업의 잔상 0 + 자연 물광 박입
+          //  격프레임 (% 2) + 박입 87 자연 물광 + 캔버스 표시
+          try {
+            if(!window._inj94FrameCounter) window._inj94FrameCounter = 0;
+            window._inj94FrameCounter++;
+            if(window._inj94FrameCounter % 2 !== 0) return;  // 격프레임
+
+            var c41hCanvas = document.getElementById('c41h-canvas');
+            var c41hVideo = document.getElementById('c41h-video');
+            if(!c41hCanvas || !c41hVideo || !c41hVideo.videoWidth) return;
+
+            // 캔버스 사이즈 동기화 (비디오와 동일)
+            if(c41hCanvas.width !== c41hVideo.videoWidth){
+              c41hCanvas.width = c41hVideo.videoWidth;
+              c41hCanvas.height = c41hVideo.videoHeight;
+            }
+
+            var c41hCtx = c41hCanvas.getContext('2d');
+            if(!c41hCtx) return;
+
+            // 비디오 영상을 캔버스에 그리기 (베이스)
+            // CSS 의 transform:scaleX(-1) 이 video 와 canvas 모두에 적용됨
+            // → 비디오를 캔버스에 그대로 그리면 됨 (반전은 CSS 가 함)
+            c41hCtx.clearRect(0, 0, c41hCanvas.width, c41hCanvas.height);
+            c41hCtx.drawImage(c41hVideo, 0, 0, c41hCanvas.width, c41hCanvas.height);
+
+            // 물광 호출 (박입 87 자연 물광)
+            var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
+            if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
+              window.drawFresnelWaterGlow(c41hCtx, c41hCanvas, landmarks, glossLevel);
+            }
+
+            // 캔버스 표시 (CSS pointer-events:none + position absolute 그대로)
+            if(c41hCanvas.style.opacity !== '1'){
+              c41hCanvas.style.opacity = '1';
+              c41hCanvas.style.background = 'transparent';
+            }
+          } catch(e){
+            // 박입 94 실패 시 무시 (측정에 영향 X)
+          }
+          // ★★ 박입 94 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
         } else { _c41hFaceDetected = false; }
       });
-      return fd;
-    } catch(e){ console.error('[c41h] FD err:', e); return null; }
+      return fm;
+    } catch(e){ console.error('[c41h] FaceMesh err:', e); return null; }
   }
 
   function feedFaceDetection(){
