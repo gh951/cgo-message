@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj108-eye-dist" name="c41-version"/>
+<meta content="2026-05-26-c44-inj109-dist-state" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14486,29 +14486,48 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       var now = Date.now();
       var distInRange = (dist >= 30 && dist <= 40);  // 표준 30~40cm
       var distOK = (dist >= 30 && dist <= 50);       // 최대 50cm 까지 OK
-      if(distOK){
-        if(!s108.distOK){
-          // 처음 OK 진입 → 딩동댕 (1번)
-          s108.distOK = true;
-          if(now - s108.lastDistOKBeep > 2000){
-            eyeBeepDistOK();
-            s108.lastDistOKBeep = now;
-            eyeDebug('🔔 딩동댕 — 거리 ' + dist + 'cm OK');
-          }
+
+      // ★ 박입 109 — 거리 상태 변경 시 비프 박입 (파트너 진단)
+      //   파트너 진단: "처음만 딩동, 중간에 멀어져도 소리 X"
+      //   진짜 fix:
+      //     ① 거리 상태 (OK / 가까움 / 멈) 박입
+      //     ② 상태 변경될 때마다 비프 (재진입 시 딩동댕 / 이탈 시 삐)
+      //     ③ 이탈 상태 지속 시 반복 삐 (3초마다)
+      var prevState = s108.distState || 'init';
+      var nowState = 'unknown';
+      if(dist === 0 || dist > 200) nowState = 'unknown';
+      else if(dist < 30) nowState = 'tooClose';
+      else if(dist > 50) nowState = 'tooFar';
+      else nowState = 'ok';
+
+      // 상태 변경 박입
+      if(nowState !== prevState && nowState !== 'unknown'){
+        if(nowState === 'ok'){
+          // OK 재진입 → 딩동댕 (매번)
+          eyeBeepDistOK();
+          eyeDebug('🔔 딩동댕 — 거리 ' + dist + 'cm OK');
+          s108.lastBeepTime = now;
+        } else {
+          // 이탈 → 삐 (즉시)
+          eyeBeepDistWarn();
+          var msg = nowState === 'tooClose' ? '너무 가깝습니다' : '너무 멉니다';
+          eyeDebug('⚠️ ' + msg + ' — 현재 ' + dist + 'cm');
+          s108.lastBeepTime = now;
         }
-      } else if(dist > 0){
-        // 거리 안 맞음 → 삐 (3초마다)
-        s108.distOK = false;
+        s108.distState = nowState;
+      } else if(nowState !== 'ok' && nowState !== 'unknown'){
+        // 이탈 지속 → 3초마다 삐 반복
         if(now - s108.lastBeepTime > 3000){
           eyeBeepDistWarn();
+          var msg2 = nowState === 'tooClose' ? '너무 가깝습니다' : '너무 멉니다';
+          eyeDebug('⚠️ ' + msg2 + ' — 현재 ' + dist + 'cm (반복)');
           s108.lastBeepTime = now;
-          var msg = dist < 30 ? '너무 가깝습니다 (30~40cm 권장)' : '너무 멉니다 (30~40cm 권장)';
-          eyeDebug('⚠️ ' + msg + ' — 현재 ' + dist + 'cm');
         }
       }
+      s108.distOK = (nowState === 'ok');
 
       eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist + 'cm' + (distOK ? ' ✓' : ' ⚠️'));
-    }, 800);
+    }, 300);  // ★ 박입 109 — 800ms → 300ms (거리 변경 빠른 감지)
   }
   // ★ 박입 108 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
