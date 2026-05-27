@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj107-eye-name" name="c41-version"/>
+<meta content="2026-05-26-c44-inj108-eye-dist" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14226,6 +14226,15 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
   }  // 끝 — 띠 띠
   function eyeBeepClick(){ eyeBeep(1200, 0.05, 0.08); }  // 문항 전환 — 작은 클릭
 
+  // ★ 박입 108 — 거리 측정 비프 / 딩동댕 박입
+  function eyeBeepDistWarn(){ eyeBeep(400, 0.15, 0.20); }  // 거리 안 맞음 — 낮은 삐
+  function eyeBeepDistOK(){
+    // 딩동댕 — 3음 (도-미-솔)
+    eyeBeep(523, 0.12, 0.18);                                  // 도
+    setTimeout(function(){ eyeBeep(659, 0.12, 0.18); }, 130);  // 미
+    setTimeout(function(){ eyeBeep(784, 0.18, 0.20); }, 270);  // 솔
+  }
+
   // ── 측정 상태 ─────────────────────────────────────────────
   var eyeState = {
     started: false,
@@ -14395,33 +14404,127 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
   // ── 가상 rPPG 루프 (실제 측정은 FaceMesh + 눈가 ROI 박입 후 확장) ──
   function eyeStartRppgLoop(){
-    // 시뮬레이션 값 (실제 박입은 추후 FaceMesh + iris ROI 결합)
+    // ★ 박입 108 — 진짜 거리 측정 시스템 박입 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    //  파트너 박입: 30~40cm 표준 / 50cm 최대 / 안 맞으면 삐 / 맞으면 딩동댕
+    //  메커니즘:
+    //    ① FaceMesh 박입 (양쪽 눈 외측 꼭짓점: 33번 / 263번)
+    //    ② 픽셀 거리 → cm 추정 (캘리브레이션 상수 박힘)
+    //    ③ 거리 30~40 = OK / 그 외 = 경고
+    //    ④ OK 진입 시 딩동댕 (1번만) / 경고 지속 시 삐 (3초마다)
+    //    ⑤ 측정 상태 박입 (문항 풀이는 거리 OK 시만)
+    if(!window._eye108State){
+      window._eye108State = {
+        faceMesh: null,
+        distOK: false,
+        lastBeepTime: 0,
+        lastDistOKBeep: 0,
+        eyeDist: 0
+      };
+    }
+    var s108 = window._eye108State;
+
+    // FaceMesh 박입 (없으면 초기화)
+    if(!s108.faceMesh && typeof FaceMesh !== 'undefined'){
+      try {
+        s108.faceMesh = new FaceMesh({locateFile:function(file){
+          return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/'+file;
+        }});
+        s108.faceMesh.setOptions({
+          maxNumFaces:1, refineLandmarks:true,
+          minDetectionConfidence:0.5, minTrackingConfidence:0.5
+        });
+        s108.faceMesh.onResults(function(results){
+          if(results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0){
+            var lm = results.multiFaceLandmarks[0];
+            var video = document.getElementById('eye-video');
+            if(!video || !video.videoWidth) return;
+            // ★ 양쪽 눈 외측 꼭짓점 (33 = 왼쪽 / 263 = 오른쪽)
+            var eyeL = lm[33], eyeR = lm[263];
+            if(!eyeL || !eyeR) return;
+            var dx = (eyeR.x - eyeL.x) * video.videoWidth;
+            var dy = (eyeR.y - eyeL.y) * video.videoHeight;
+            var pixelDist = Math.sqrt(dx*dx + dy*dy);
+            // ★ 캘리브레이션: 양쪽 눈 평균 거리 6.3cm + 초점 거리 추정
+            //    pixelDist 200 ≈ 30cm / pixelDist 150 ≈ 40cm / pixelDist 120 ≈ 50cm
+            //    공식: distCm ≈ 6000 / pixelDist  (역비례 추정)
+            var distCm = pixelDist > 10 ? Math.round(6000 / pixelDist) : 999;
+            s108.eyeDist = distCm;
+          }
+        });
+      } catch(e){ console.warn('[박입 108] FaceMesh 박입 실패:', e); }
+    }
+
+    // FaceMesh 매 프레임 호출 (40Hz — 박입 97 패턴)
+    s108.feedInterval = setInterval(function(){
+      if(!eyeState.started || !s108.faceMesh) return;
+      var v = document.getElementById('eye-video');
+      if(!v || !v.videoWidth) return;
+      try { s108.faceMesh.send({image:v}); } catch(e){}
+    }, 25);
+
     eyeState.rppgInterval = setInterval(function(){
       if(!eyeState.started) return;
-      // 시연용 시뮬레이션 값 (실제 박입 시 진짜 rPPG 데이터로 교체)
+      // BPM / HRV / 동공 (현재 시뮬레이션 그대로)
       var bpm = 68 + Math.random() * 12;
       var hrv = 38 + Math.random() * 18;
-      var pupil = 35 + Math.random() * 6;  // 동공 크기 픽셀
-      var dist = 28 + Math.random() * 8;   // 카메라 거리 cm
-      var blinkRate = 12 + Math.floor(Math.random() * 8);  // 분당 깜빡임
+      var pupil = 35 + Math.random() * 6;
+      var blinkRate = 12 + Math.floor(Math.random() * 8);
       var fatigue = Math.min(100, eyeState.reactionTimes.length > 3 ?
         (eyeState.reactionTimes[eyeState.reactionTimes.length-1] / 30) : 25);
+
+      // ★ 진짜 거리 (s108.eyeDist) — FaceMesh 박힘
+      var dist = s108.eyeDist || 0;
 
       document.getElementById('eye-bpm').textContent = bpm.toFixed(0);
       document.getElementById('eye-hrv').textContent = hrv.toFixed(0);
       document.getElementById('eye-pupil').textContent = pupil.toFixed(1) + 'px';
-      document.getElementById('eye-dist').textContent = dist.toFixed(0) + 'cm';
+      document.getElementById('eye-dist').textContent = dist > 0 ? dist + 'cm' : '--';
       document.getElementById('eye-blink').textContent = blinkRate + '/분';
       document.getElementById('eye-fatigue').textContent = fatigue.toFixed(0) + '%';
 
-      eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist.toFixed(0) + 'cm 동공:' + pupil.toFixed(1) + 'px');
+      // ★ 거리 OK / 경고 박입
+      var now = Date.now();
+      var distInRange = (dist >= 30 && dist <= 40);  // 표준 30~40cm
+      var distOK = (dist >= 30 && dist <= 50);       // 최대 50cm 까지 OK
+      if(distOK){
+        if(!s108.distOK){
+          // 처음 OK 진입 → 딩동댕 (1번)
+          s108.distOK = true;
+          if(now - s108.lastDistOKBeep > 2000){
+            eyeBeepDistOK();
+            s108.lastDistOKBeep = now;
+            eyeDebug('🔔 딩동댕 — 거리 ' + dist + 'cm OK');
+          }
+        }
+      } else if(dist > 0){
+        // 거리 안 맞음 → 삐 (3초마다)
+        s108.distOK = false;
+        if(now - s108.lastBeepTime > 3000){
+          eyeBeepDistWarn();
+          s108.lastBeepTime = now;
+          var msg = dist < 30 ? '너무 가깝습니다 (30~40cm 권장)' : '너무 멉니다 (30~40cm 권장)';
+          eyeDebug('⚠️ ' + msg + ' — 현재 ' + dist + 'cm');
+        }
+      }
+
+      eyeDebug('📊 BPM:' + bpm.toFixed(0) + ' HRV:' + hrv.toFixed(0) + ' 거리:' + dist + 'cm' + (distOK ? ' ✓' : ' ⚠️'));
     }, 800);
   }
+  // ★ 박입 108 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   // ── 결과 계산 ────────────────────────────────────────────
   function eyeFinishMeasure(){
     clearInterval(eyeState.qTimerInterval);
     clearInterval(eyeState.rppgInterval);
+
+    // ★ 박입 108 — FaceMesh feed 인터벌 정리
+    if(window._eye108State){
+      if(window._eye108State.feedInterval){
+        clearInterval(window._eye108State.feedInterval);
+        window._eye108State.feedInterval = null;
+      }
+      window._eye108State.distOK = false;
+    }
 
     // 카메라 정지
     if(eyeState.stream){
