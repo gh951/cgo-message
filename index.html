@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj110-face-detect" name="c41-version"/>
+<meta content="2026-05-26-c44-inj111-dot-block" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14049,10 +14049,21 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <video id="eye-video" autoplay playsinline muted style="width:100%;display:block;"></video>
 <canvas id="eye-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
 <div style="position:absolute;top:8px;left:8px;padding:4px 10px;background:rgba(0,0,0,.6);border-radius:6px;font-size:10px;color:#fff;font-weight:800;">👁️ 측정 중...</div>
+<!-- ★ 박입 111 — 거리 상태 표지 (빨강/파랑 점) -->
+<div id="eye-dist-dot" style="position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:6px;padding:6px 10px;background:rgba(0,0,0,.6);border-radius:8px;">
+<div id="eye-dist-dot-circle" style="width:10px;height:10px;border-radius:50%;background:#666;box-shadow:0 0 8px rgba(0,0,0,.5);transition:all .2s;"></div>
+<div id="eye-dist-dot-text" style="font-size:10px;color:#fff;font-weight:800;">대기 중</div>
+</div>
 </div>
 
 <!-- 문항 영역 (25 문항) -->
-<div id="eye-question-area" style="display:none;background:#fff;border:2px solid #0f766e;border-radius:14px;padding:20px;margin-bottom:14px;">
+<div id="eye-question-area" style="display:none;background:#fff;border:2px solid #0f766e;border-radius:14px;padding:20px;margin-bottom:14px;position:relative;">
+<!-- ★ 박입 111 — 거리 이탈 시 문제 차단 오버레이 -->
+<div id="eye-block-overlay" style="display:none;position:absolute;inset:0;background:rgba(239,68,68,.94);border-radius:12px;z-index:50;align-items:center;justify-content:center;flex-direction:column;color:#fff;text-align:center;padding:20px;">
+<div style="font-size:48px;margin-bottom:8px;">⚠️</div>
+<div id="eye-block-msg" style="font-size:16px;font-weight:900;margin-bottom:6px;">거리를 맞춰주세요</div>
+<div id="eye-block-sub" style="font-size:12px;opacity:.9;">30~40cm 표준 거리에서만 측정됩니다</div>
+</div>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #ccfbf1;">
 <div style="font-size:11px;font-weight:800;color:#0f766e;letter-spacing:.06em;">📋 문항 <span id="eye-q-num">1</span> / <span id="eye-q-total">25</span></div>
 <div style="font-size:11px;color:#666;">반응: <span id="eye-q-timer" style="font-weight:800;color:#134e4a;">0.0</span>s</div>
@@ -14512,9 +14523,34 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       // ★ 박입 110 — rPPG 패턴 그대로 박입 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
       //   얼굴 안 보이면 → 거리 측정 차단 + 명확한 메시지
       //   얼굴 보이면 → 거리 상태 박입 + 비프
+
+      // ★ 박입 111 — 빨강/파랑 점 + 문제 차단 헬퍼
+      function _eye111UpdateDot(color, text){
+        var c = document.getElementById('eye-dist-dot-circle');
+        var t = document.getElementById('eye-dist-dot-text');
+        if(c) c.style.background = color;
+        if(c) c.style.boxShadow = '0 0 12px ' + color;
+        if(t) t.textContent = text;
+      }
+      function _eye111BlockQuestion(show, msg, sub){
+        var ov = document.getElementById('eye-block-overlay');
+        if(!ov) return;
+        if(show){
+          ov.style.display = 'flex';
+          var m = document.getElementById('eye-block-msg');
+          var s = document.getElementById('eye-block-sub');
+          if(m) m.textContent = msg || '거리를 맞춰주세요';
+          if(s) s.textContent = sub || '30~40cm 표준 거리에서만 측정됩니다';
+        } else {
+          ov.style.display = 'none';
+        }
+      }
+
       if(!s108.faceDetected){
         // 얼굴 안 보임
         document.getElementById('eye-dist').textContent = '얼굴 X';
+        _eye111UpdateDot('#ef4444', '얼굴 X');
+        _eye111BlockQuestion(true, '얼굴이 안 보입니다', '카메라 정면을 바라봐 주세요');
         if(s108.faceLostTime === 0) s108.faceLostTime = now;
         var lostSec = Math.floor((now - s108.faceLostTime) / 1000);
         // 3초마다 삐 (얼굴 안 보임 경고)
@@ -14539,15 +14575,28 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       else if(dist > 50) nowState = 'tooFar';
       else nowState = 'ok';
 
-      // 상태 변경 박입
+      // ★ 박입 111 — 점 + 차단 박입
+      if(nowState === 'ok'){
+        _eye111UpdateDot('#3b82f6', '측정 OK · ' + dist + 'cm');  // 파란 점
+        _eye111BlockQuestion(false);
+      } else if(nowState === 'tooClose'){
+        _eye111UpdateDot('#ef4444', '너무 가까움 · ' + dist + 'cm');  // 빨간 점
+        _eye111BlockQuestion(true, '너무 가깝습니다', '30~40cm 로 떨어져 주세요');
+      } else if(nowState === 'tooFar'){
+        _eye111UpdateDot('#ef4444', '너무 멈 · ' + dist + 'cm');  // 빨간 점
+        _eye111BlockQuestion(true, '너무 멉니다', '30~40cm 로 가까이 와 주세요');
+      } else {
+        _eye111UpdateDot('#666', '측정 중...');
+        _eye111BlockQuestion(false);
+      }
+
+      // 상태 변경 박입 (비프)
       if(nowState !== prevState && nowState !== 'unknown'){
         if(nowState === 'ok'){
-          // OK 재진입 → 딩동댕 (매번)
           eyeBeepDistOK();
           eyeDebug('🔔 딩동댕 — 거리 ' + dist + 'cm OK');
           s108.lastBeepTime = now;
         } else {
-          // 이탈 → 삐 (즉시)
           eyeBeepDistWarn();
           var msg = nowState === 'tooClose' ? '너무 가깝습니다' : '너무 멉니다';
           eyeDebug('⚠️ ' + msg + ' — 현재 ' + dist + 'cm');
