@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj98-nose-fix" name="c41-version"/>
+<meta content="2026-05-26-c44-inj99-40hz" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -25518,15 +25518,16 @@ if(typeof window.cgoCameraCheck !== 'function'){
 
     var stage = STAGES[c41hState.stage];
 
-    // ★ 박입 97 — AR 렌더링 60Hz 분리 (잔상 0 진짜 fix) ━━━━━━━━━━━━━━━━━━━━━━━
-    //  파트너 진단: 30Hz feedFaceDetection 으로는 머리 도리도리 잔상 발생
-    //  진짜 진범: AR 메이크업 = 매 프레임 (60Hz) FaceMesh, 피부 = 30Hz 측정 제한
-    //  fix: feedFaceDetection 을 매 프레임 호출 (FaceMesh 가 throttle 자체 박혀 있음)
-    //       측정은 30Hz sampleFromVideo 만 유지
-    if(stage.useFace){
-      feedFaceDetection();  // 매 프레임 (60Hz) — AR 잔상 0
+    // ★ 박입 99 — AR 호출 40Hz 박입 (60Hz 너무 빠르고 코 잔상 발생) ━━━━━━━━━━━
+    //  파트너 진단: 물광 100% 시 코 잔상 발생
+    //  진단: 60Hz feedFaceDetection → MediaPipe throttle 충돌 → 코 좌표 일부 누락
+    //  fix: 25ms 간격 (40Hz) — AR 메이크업과 유사 + MediaPipe 적정 throttle
+    if(!window._inj99LastFeed) window._inj99LastFeed = 0;
+    if(stage.useFace && (now - window._inj99LastFeed >= 25)){
+      window._inj99LastFeed = now;
+      feedFaceDetection();
     }
-    // ★ 박입 97 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // ★ 박입 99 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
     // 측정만 30Hz 제한 (FCI / BPM / HRV 정확도)
     if(now - _rPPG.lastSampleTime >= interval){
