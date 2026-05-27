@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj94-c41h-gloss" name="c41-version"/>
+<meta content="2026-05-26-c44-inj96-ar-base-copy" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -3682,56 +3682,86 @@ input[type=range].sec-range::-moz-range-thumb{
 }
 
 /* ─── 3. 히어로 글씨 강제 흰색 + 강한 그림자 (가독성 최대) ─── */
-/* ★ 박입 93 — overlay 강화 + 글씨 영역 반투명 박스 박입 (이미지에 글씨 묻힘 fix) */
+/* ★ 박입 95 — 박입 93 의 톤 다운 / 박스 카드 제거 + 글씨 아래로 + 흰색 유지 */
+/*   파트너 요청: 이미지 톤 원래대로 / 박스 X / 글씨 아래로 / 흰색 */
+
+/* overlay: 박입 93 의 radial-gradient 제거 → 원래 톤 복귀 (그라데이션 약하게) */
 #scrSkinage .svi-c41-hero-overlay,
 .svi-c41-hero-overlay {
-  background: radial-gradient(ellipse at center,
-    rgba(0,0,0,0.75) 0%,
-    rgba(0,0,0,0.55) 60%,
-    rgba(0,0,0,0.35) 100%) !important;
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.55) 100%) !important;
+}
+
+/* 글씨 영역: 박스 / blur / border / shadow 모두 제거 → 일체감 + 글씨 아래로 */
+#scrSkinage .svi-c41-hero,
+.svi-c41-hero {
+  align-items: flex-end !important;  /* 글씨를 아래쪽으로 */
+  padding-bottom: 20px !important;
 }
 
 #scrSkinage .svi-c41-hero-text,
 .svi-c41-hero-text {
-  background: rgba(0,0,0,0.35) !important;
-  backdrop-filter: blur(2px) !important;
-  -webkit-backdrop-filter: blur(2px) !important;
-  border-radius: 24px !important;
-  padding: 24px 32px !important;
-  border: 1px solid rgba(255,255,255,0.15) !important;
-  box-shadow: 0 0 40px rgba(0,0,0,0.5) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  padding: 0 24px !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
+/* 글씨 색: 순수 흰색 + 그림자만 (이미지 가독성용) */
+/* ★ 박입 96 — 글씨 크기 ↓ (이미지 효과 살리기) */
 #scrSkinage .svi-c41-signature,
 .svi-c41-signature {
+  font-size: 16px !important;
   color: #ffffff !important;
+  margin: 0 auto 6px !important;
   text-shadow:
-    0 0 20px rgba(255,255,255,0.85),
-    0 0 40px rgba(0,0,0,0.95),
-    0 4px 16px rgba(0,0,0,1),
-    0 0 60px rgba(212,168,67,0.6) !important;
+    0 2px 8px rgba(0,0,0,0.85),
+    0 0 16px rgba(0,0,0,0.6) !important;
 }
 
 #scrSkinage .svi-c41-hero-title,
 .svi-c41-hero-title {
+  font-size: 20px !important;
   color: #ffffff !important;
+  margin: 0 0 5px 0 !important;
   text-shadow:
-    0 3px 18px rgba(0,0,0,1),
-    0 0 35px rgba(0,0,0,0.95),
-    0 0 50px rgba(244,114,182,0.5),
-    0 6px 24px rgba(0,0,0,0.9) !important;
+    0 2px 10px rgba(0,0,0,0.9),
+    0 0 18px rgba(0,0,0,0.6) !important;
 }
 
 #scrSkinage .svi-c41-hero-sub,
 .svi-c41-hero-sub {
-  color: rgba(255,255,255,0.98) !important;
-  text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.9) !important;
+  font-size: 10px !important;
+  color: #ffffff !important;
+  margin: 0 0 3px 0 !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.85) !important;
 }
 
 #scrSkinage .svi-c41-hero-tag,
 .svi-c41-hero-tag {
-  color: #fbbf24 !important;
-  text-shadow: 0 2px 12px rgba(0,0,0,1), 0 0 20px rgba(0,0,0,0.8) !important;
+  font-size: 8px !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.85) !important;
+}
+
+/* 데스크탑에서도 작게 유지 (기존 @media min-width:768px 의 42px override) */
+@media (min-width: 768px){
+  #scrSkinage .svi-c41-signature,
+  .svi-c41-signature { font-size: 20px !important; }
+
+  #scrSkinage .svi-c41-hero-title,
+  .svi-c41-hero-title { font-size: 26px !important; }
+
+  #scrSkinage .svi-c41-hero-sub,
+  .svi-c41-hero-sub { font-size: 12px !important; }
+
+  #scrSkinage .svi-c41-hero-tag,
+  .svi-c41-hero-tag { font-size: 9px !important; }
 }
 </style>
 <!-- ════ C-41 박입 ㉘ — scrSkinage 옛 영역 정리 (RMAI·svi-cam-wrap·옛 결과) ════ -->
@@ -24957,14 +24987,15 @@ if(typeof window.cgoCameraCheck !== 'function'){
           };
           _c41hFaceDetected = true;
 
-          // ★★ 박입 94 핵심 — c41h-canvas 에 베이스 + 자연 물광 박입 ━━━━━━━━━━━
-          //  목적: 피부 페이지에도 AR 메이크업의 잔상 0 + 자연 물광 박입
-          //  격프레임 (% 2) + 박입 87 자연 물광 + 캔버스 표시
+          // ★★ 박입 96 — AR 메이크업 베이스 구조 그대로 복제 (잔상 0 진짜 박입) ━━━
+          //  파트너 진단: 박입 94 잔상 그대로 → AR 베이스 구조 그대로 가져가야
+          //  AR 베이스 핵심:
+          //    ① results.image 로 영상 그리기 (video 아님!) — MediaPipe 가 동기화한 영상
+          //    ② face oval polygon clip → soft-light blend (베이스)
+          //    ③ drawFresnelWaterGlow (박입 87 자연 물광)
+          //  잔상 0 핵심: results.image = FaceMesh 가 처리한 프레임 = 랜드마크와 동기화
+          //               (raw video 그리면 랜드마크와 시간차 → 잔상)
           try {
-            if(!window._inj94FrameCounter) window._inj94FrameCounter = 0;
-            window._inj94FrameCounter++;
-            if(window._inj94FrameCounter % 2 !== 0) return;  // 격프레임
-
             var c41hCanvas = document.getElementById('c41h-canvas');
             var c41hVideo = document.getElementById('c41h-video');
             if(!c41hCanvas || !c41hVideo || !c41hVideo.videoWidth) return;
@@ -24978,27 +25009,58 @@ if(typeof window.cgoCameraCheck !== 'function'){
             var c41hCtx = c41hCanvas.getContext('2d');
             if(!c41hCtx) return;
 
-            // 비디오 영상을 캔버스에 그리기 (베이스)
-            // CSS 의 transform:scaleX(-1) 이 video 와 canvas 모두에 적용됨
-            // → 비디오를 캔버스에 그대로 그리면 됨 (반전은 CSS 가 함)
+            // ★ AR 베이스 구조 시작 (_rmaiArOnResults 그대로) ━━━━━━━━━━━━━━━━━
+            c41hCtx.save();
             c41hCtx.clearRect(0, 0, c41hCanvas.width, c41hCanvas.height);
-            c41hCtx.drawImage(c41hVideo, 0, 0, c41hCanvas.width, c41hCanvas.height);
 
-            // 물광 호출 (박입 87 자연 물광)
+            // ① 원본 영상 그대로 그림 (results.image = MediaPipe 동기화 프레임)
+            //    raw video 그리면 랜드마크와 시간차 → 잔상
+            //    results.image 사용 = 랜드마크와 같은 프레임 → 잔상 0
+            c41hCtx.drawImage(results.image, 0, 0, c41hCanvas.width, c41hCanvas.height);
+
+            // ② 베이스 (face oval polygon + soft-light blend, _rmaiArDrawBase 그대로)
+            //    물광 슬라이더 값으로 베이스 강도 박입
             var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
+            if(glossLevel > 0 && typeof _rmaiArFaceOval !== 'undefined'){
+              c41hCtx.beginPath();
+              _rmaiArFaceOval.forEach(function(idx, i){
+                var lm = landmarks[idx];
+                if(!lm) return;
+                var x = lm.x * c41hCanvas.width;
+                var y = lm.y * c41hCanvas.height;
+                if(i === 0) c41hCtx.moveTo(x, y);
+                else c41hCtx.lineTo(x, y);
+              });
+              c41hCtx.closePath();
+              c41hCtx.globalCompositeOperation = 'soft-light';
+              c41hCtx.globalAlpha = glossLevel * 0.3;  // 베이스 강도
+              c41hCtx.fillStyle = '#ffefdc';  // 자연 베이스 톤 (피부 보호)
+              c41hCtx.fill();
+              c41hCtx.globalAlpha = 1;
+              c41hCtx.globalCompositeOperation = 'source-over';
+            }
+
+            // ③ 물광 (박입 87 자연 물광) — drawFresnelWaterGlow 호출
             if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
               window.drawFresnelWaterGlow(c41hCtx, c41hCanvas, landmarks, glossLevel);
             }
 
-            // 캔버스 표시 (CSS pointer-events:none + position absolute 그대로)
+            c41hCtx.restore();
+            // ★ AR 베이스 구조 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+            // 캔버스 보이게 (CSS pointer-events:none 그대로)
             if(c41hCanvas.style.opacity !== '1'){
               c41hCanvas.style.opacity = '1';
               c41hCanvas.style.background = 'transparent';
             }
+            // video 숨기기 (canvas 가 영상 그림) — 잔상 0 핵심
+            if(c41hVideo.style.opacity !== '0'){
+              c41hVideo.style.opacity = '0';
+            }
           } catch(e){
-            // 박입 94 실패 시 무시 (측정에 영향 X)
+            // 박입 96 실패 시 무시 (측정에 영향 X)
           }
-          // ★★ 박입 94 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // ★★ 박입 96 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         } else { _c41hFaceDetected = false; }
       });
