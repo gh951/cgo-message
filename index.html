@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj103-svi-gloss" name="c41-version"/>
+<meta content="2026-05-26-c44-inj104-canvas-test" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -24986,6 +24986,36 @@ if(typeof window.cgoCameraCheck !== 'function'){
             w: maxX - minX, h: maxY - minY
           };
           _c41hFaceDetected = true;
+
+          // ★★ 박입 104 — c41h 진짜 작동 검증 박입 ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          //  파트너 진단: 박입 96~101 잔상 그대로 → 진짜 작동 X 가능성
+          //  검증: c41h-canvas 에 빨간 박스 + "박입104" 텍스트 박입
+          //        보이면 → 코드 진짜 작동 → 박입 96~101 자체 진단
+          //        안 보이면 → c41h 진짜 진범 (FaceMesh 호출 자체 X)
+          try {
+            var c41hCanvas = document.getElementById('c41h-canvas');
+            var c41hVideo = document.getElementById('c41h-video');
+            if(!c41hCanvas || !c41hVideo || !c41hVideo.videoWidth) return;
+
+            if(c41hCanvas.width !== c41hVideo.videoWidth){
+              c41hCanvas.width = c41hVideo.videoWidth;
+              c41hCanvas.height = c41hVideo.videoHeight;
+            }
+
+            var c41hCtx = c41hCanvas.getContext('2d');
+            if(!c41hCtx) return;
+
+            // ★ 진짜 작동 검증 — 빨간 박스 + 텍스트
+            c41hCtx.clearRect(0, 0, c41hCanvas.width, c41hCanvas.height);
+            c41hCtx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+            c41hCtx.fillRect(20, 20, 200, 60);
+            c41hCtx.fillStyle = '#ffffff';
+            c41hCtx.font = 'bold 20px sans-serif';
+            c41hCtx.fillText('🚫 박입104 🚫', 35, 55);
+          } catch(e){
+            // 박입 104 검증 박입 실패
+          }
+          // ★★ 박입 104 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
           // ★★ 박입 98 — AR 정확한 구조 박입 (베이스 polygon 제거) ━━━━━━━━━━━━━━
           //  파트너 진단: 코/콧대 잔상 → 베이스 polygon 이 원본 landmark 사용
