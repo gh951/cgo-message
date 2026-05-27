@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj96-ar-base-copy" name="c41-version"/>
+<meta content="2026-05-26-c44-inj98-nose-fix" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -24987,14 +24987,13 @@ if(typeof window.cgoCameraCheck !== 'function'){
           };
           _c41hFaceDetected = true;
 
-          // ★★ 박입 96 — AR 메이크업 베이스 구조 그대로 복제 (잔상 0 진짜 박입) ━━━
-          //  파트너 진단: 박입 94 잔상 그대로 → AR 베이스 구조 그대로 가져가야
-          //  AR 베이스 핵심:
-          //    ① results.image 로 영상 그리기 (video 아님!) — MediaPipe 가 동기화한 영상
-          //    ② face oval polygon clip → soft-light blend (베이스)
-          //    ③ drawFresnelWaterGlow (박입 87 자연 물광)
-          //  잔상 0 핵심: results.image = FaceMesh 가 처리한 프레임 = 랜드마크와 동기화
-          //               (raw video 그리면 랜드마크와 시간차 → 잔상)
+          // ★★ 박입 98 — AR 정확한 구조 박입 (베이스 polygon 제거) ━━━━━━━━━━━━━━
+          //  파트너 진단: 코/콧대 잔상 → 베이스 polygon 이 원본 landmark 사용
+          //  진짜 진단: drawFresnelWaterGlow 자체에 face oval clipping + 베이스 광택 박혀 있음
+          //             (line 28823~ : clip + radial grad + Fresnel)
+          //             박입 45 (코 super smooth DAMP 0.98) 도 그 안에서 작동
+          //  fix: 박입 96 의 ② 베이스 polygon 제거 → drawFresnelWaterGlow 만 호출
+          //       → AR 메이크업과 동일한 잔상 0
           try {
             var c41hCanvas = document.getElementById('c41h-canvas');
             var c41hVideo = document.getElementById('c41h-video');
@@ -25009,58 +25008,35 @@ if(typeof window.cgoCameraCheck !== 'function'){
             var c41hCtx = c41hCanvas.getContext('2d');
             if(!c41hCtx) return;
 
-            // ★ AR 베이스 구조 시작 (_rmaiArOnResults 그대로) ━━━━━━━━━━━━━━━━━
+            // ★ AR 정확한 구조 (_rmaiArOnResults 그대로) ━━━━━━━━━━━━━━━━━━━━━━━
             c41hCtx.save();
             c41hCtx.clearRect(0, 0, c41hCanvas.width, c41hCanvas.height);
 
-            // ① 원본 영상 그대로 그림 (results.image = MediaPipe 동기화 프레임)
-            //    raw video 그리면 랜드마크와 시간차 → 잔상
-            //    results.image 사용 = 랜드마크와 같은 프레임 → 잔상 0
+            // ① 원본 영상 (results.image = MediaPipe 동기화 프레임)
             c41hCtx.drawImage(results.image, 0, 0, c41hCanvas.width, c41hCanvas.height);
 
-            // ② 베이스 (face oval polygon + soft-light blend, _rmaiArDrawBase 그대로)
-            //    물광 슬라이더 값으로 베이스 강도 박입
+            // ② drawFresnelWaterGlow 만 호출 (이 안에 face oval clip + 베이스 광택 + Fresnel + 박입 45 코 smooth 모두 박힘)
+            //    별도 베이스 polygon 그리기 X → 코 잔상 X
             var glossLevel = (typeof _rmaiAr !== 'undefined' && _rmaiAr.glossLevel) ? _rmaiAr.glossLevel : 0;
-            if(glossLevel > 0 && typeof _rmaiArFaceOval !== 'undefined'){
-              c41hCtx.beginPath();
-              _rmaiArFaceOval.forEach(function(idx, i){
-                var lm = landmarks[idx];
-                if(!lm) return;
-                var x = lm.x * c41hCanvas.width;
-                var y = lm.y * c41hCanvas.height;
-                if(i === 0) c41hCtx.moveTo(x, y);
-                else c41hCtx.lineTo(x, y);
-              });
-              c41hCtx.closePath();
-              c41hCtx.globalCompositeOperation = 'soft-light';
-              c41hCtx.globalAlpha = glossLevel * 0.3;  // 베이스 강도
-              c41hCtx.fillStyle = '#ffefdc';  // 자연 베이스 톤 (피부 보호)
-              c41hCtx.fill();
-              c41hCtx.globalAlpha = 1;
-              c41hCtx.globalCompositeOperation = 'source-over';
-            }
-
-            // ③ 물광 (박입 87 자연 물광) — drawFresnelWaterGlow 호출
             if(glossLevel > 0 && typeof window.drawFresnelWaterGlow === 'function'){
               window.drawFresnelWaterGlow(c41hCtx, c41hCanvas, landmarks, glossLevel);
             }
 
             c41hCtx.restore();
-            // ★ AR 베이스 구조 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            // ★ AR 구조 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-            // 캔버스 보이게 (CSS pointer-events:none 그대로)
+            // 캔버스 보이게 + video 숨김
             if(c41hCanvas.style.opacity !== '1'){
               c41hCanvas.style.opacity = '1';
               c41hCanvas.style.background = 'transparent';
             }
-            // video 숨기기 (canvas 가 영상 그림) — 잔상 0 핵심
             if(c41hVideo.style.opacity !== '0'){
               c41hVideo.style.opacity = '0';
             }
           } catch(e){
-            // 박입 96 실패 시 무시 (측정에 영향 X)
+            // 박입 98 실패 시 무시 (측정에 영향 X)
           }
-          // ★★ 박입 96 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          // ★★ 박입 98 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
         } else { _c41hFaceDetected = false; }
       });
@@ -25539,11 +25515,23 @@ if(typeof window.cgoCameraCheck !== 'function'){
     if(!BS.on) return;
     var now = Date.now();
     var interval = 1000 / _rPPG.sampleRate;
+
+    var stage = STAGES[c41hState.stage];
+
+    // ★ 박입 97 — AR 렌더링 60Hz 분리 (잔상 0 진짜 fix) ━━━━━━━━━━━━━━━━━━━━━━━
+    //  파트너 진단: 30Hz feedFaceDetection 으로는 머리 도리도리 잔상 발생
+    //  진짜 진범: AR 메이크업 = 매 프레임 (60Hz) FaceMesh, 피부 = 30Hz 측정 제한
+    //  fix: feedFaceDetection 을 매 프레임 호출 (FaceMesh 가 throttle 자체 박혀 있음)
+    //       측정은 30Hz sampleFromVideo 만 유지
+    if(stage.useFace){
+      feedFaceDetection();  // 매 프레임 (60Hz) — AR 잔상 0
+    }
+    // ★ 박입 97 끝 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    // 측정만 30Hz 제한 (FCI / BPM / HRV 정확도)
     if(now - _rPPG.lastSampleTime >= interval){
       _rPPG.lastSampleTime = now;
-      var stage = STAGES[c41hState.stage];
       if(stage.useFace){
-        feedFaceDetection();
         sampleFromVideo();
       }
     }
