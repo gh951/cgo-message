@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj116-vision-chart" name="c41-version"/>
+<meta content="2026-05-26-c44-inj117-vision" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14393,7 +14393,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
         // 자동 통과 (정답 처리)
         var rt = Date.now() - eyeState.questionStartTime;
         eyeState.reactionTimes.push(rt);
-        eyeState.answers.push({q:idx, opt:0, correct:true, rt:rt, cat:q.cat, auto:true});
+        eyeState.answers.push({q:idx, opt:0, correct:true, rt:rt, cat:q.cat, level:q.level||0, auto:true});
         eyeBeepClick();
         eyeUpdateLiveStats();
         setTimeout(function(){ eyeShowQuestion(idx + 1); }, 300);
@@ -14423,7 +14423,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     var rt = Date.now() - eyeState.questionStartTime;
     eyeState.reactionTimes.push(rt);
     var q = EYE_QUESTIONS[qIdx];
-    eyeState.answers.push({q:qIdx, opt:optIdx, correct: optIdx === q.correct, rt: rt, cat: q.cat});
+    eyeState.answers.push({q:qIdx, opt:optIdx, correct: optIdx === q.correct, rt: rt, cat: q.cat, level: q.level||0});
 
     clearInterval(eyeState.qTimerInterval);
 
@@ -14701,6 +14701,23 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
       window._eye108State.distOK = false;
     }
 
+    // ★ 박입 117 — 눈 사진 캡처 (카메라 정지 전, AI 분석용)
+    //   파트너 박입: "최적의 조건의 사진 찍어서 AI 분석"
+    //   메커니즘: video → off-canvas 320x240 → dataURL (로컬만, 서버 전송 X)
+    var eyePhotoDataUrl = null;
+    try {
+      var capV = document.getElementById('eye-video');
+      if(capV && capV.videoWidth){
+        var capCv = document.createElement('canvas');
+        capCv.width = 320;
+        capCv.height = 240;
+        var capCtx = capCv.getContext('2d');
+        capCtx.drawImage(capV, 0, 0, 320, 240);
+        eyePhotoDataUrl = capCv.toDataURL('image/jpeg', 0.85);
+        eyeDebug('📸 눈 사진 캡처 완료 (320x240 · 로컬만)');
+      }
+    } catch(e){ console.warn('[박입 117] 사진 캡처 실패:', e); }
+
     // 카메라 정지
     if(eyeState.stream){
       eyeState.stream.getTracks().forEach(function(t){t.stop();});
@@ -14712,12 +14729,23 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     document.getElementById('eye-camera-area').style.display = 'none';
     document.getElementById('eye-question-area').style.display = 'none';
 
-    // 점수 계산
+    // ★ 박입 117 — 시력 추정 + AI 분석 박입 (파트너 박입 의향 그대로)
+    //  파트너 박입: "점수 → 시력 · AI 분석 · 법적 둘레"
+    //  변경 박입:
+    //    ① EyeAns 점수 제거 → 시력 추정 (Level 1~5 정답률)
+    //    ② 카테고리별 결과 박입 그대로
+    //    ③ AI 분석 박입 (8B 수준 — 충혈 / 다크서클 / 안검부종 / 결막)
+    //    ④ 법적 둘레 강화 ("의료기기 아님 · 가까운 병원")
+
+    // 점수 계산 (전체)
     var totalCorrect = eyeState.answers.filter(function(a){return a.correct;}).length;
     var accuracy = totalCorrect / EYE_QUESTIONS.length * 100;
-    var avgRt = eyeState.reactionTimes.reduce(function(a,b){return a+b;},0) / eyeState.reactionTimes.length;
+    var avgRt = eyeState.reactionTimes.length > 0 ? eyeState.reactionTimes.reduce(function(a,b){return a+b;},0) / eyeState.reactionTimes.length : 0;
 
-    // 카테고리별 정답률 (박입 78 — 신규 카테고리)
+    // ★ 박입 117 — 시력 추정 (Level 1~5 정답률 → 시력 단계)
+    //   Level 1~5 = 시력 0.1 / 0.2 / 0.32 / 0.5 / 0.8
+    //   각 단계 정답률 80% 이상 = 통과 → 그 단계까지 시력 OK
+    var levelStats = {1:{c:0,t:0}, 2:{c:0,t:0}, 3:{c:0,t:0}, 4:{c:0,t:0}, 5:{c:0,t:0}};
     var catStats = {shape:{c:0,t:0,rt:[]}, color:{c:0,t:0,rt:[]}, symbol:{c:0,t:0,rt:[]},
                     direction:{c:0,t:0,rt:[]}, contrast:{c:0,t:0,rt:[]}, fixation:{c:0,t:0,rt:[]}};
     eyeState.answers.forEach(function(a){
@@ -14727,35 +14755,80 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
         if(a.correct) s.c++;
         s.rt.push(a.rt);
       }
+      // 시력 레벨 통계 (level 1~5만)
+      if(a.level && a.level >= 1 && a.level <= 5){
+        levelStats[a.level].t++;
+        if(a.correct) levelStats[a.level].c++;
+      }
     });
 
-    // EyeAns 지수 (CogAns 와 같은 패턴)
-    //   = 정확도 50% + 반응 속도 30% + 일관성 20%
-    var rtScore = Math.max(0, 100 - (avgRt - 800) / 50);  // 800ms 가 100점 기준
-    var consistencyVar = eyeState.reactionTimes.reduce(function(a,b){return a + Math.pow(b - avgRt, 2);}, 0) / eyeState.reactionTimes.length;
-    var consistency = Math.max(0, 100 - Math.sqrt(consistencyVar) / 10);
-    var eyeAns = (accuracy * 0.5 + rtScore * 0.3 + consistency * 0.2).toFixed(0);
-    document.getElementById('eye-eyeans').textContent = eyeAns;
+    // 시력 추정 — 가장 높은 통과 레벨
+    var visionLevels = [
+      {lv:1, vision:'0.1', label:'매우 낮음', desc:'시력 저하 추정 — 안과 진료 권장'},
+      {lv:2, vision:'0.2', label:'낮음', desc:'시력 저하 추정 — 안과 진료 권장'},
+      {lv:3, vision:'0.3', label:'보통', desc:'중간 시력 추정'},
+      {lv:4, vision:'0.5', label:'양호', desc:'양호한 시력 추정'},
+      {lv:5, vision:'0.8', label:'우수', desc:'좋은 시력 추정'}
+    ];
+    var estVision = '0.1';
+    var estLabel = '측정 부족';
+    var estDesc = '';
+    var estColor = '#888';
+    for(var lv = 5; lv >= 1; lv--){
+      var ls = levelStats[lv];
+      if(ls.t > 0 && (ls.c / ls.t) >= 0.7){  // 70% 이상 정답 = 통과
+        var vi = visionLevels[lv-1];
+        estVision = vi.vision;
+        estLabel = vi.label;
+        estDesc = vi.desc;
+        estColor = lv >= 4 ? '#10b981' : lv >= 3 ? '#0f766e' : lv >= 2 ? '#f97316' : '#ef4444';
+        break;
+      }
+    }
+
+    // EyeAns 점수 화면 제거 (구 박입 호환)
+    var eyeAnsEl = document.getElementById('eye-eyeans');
+    if(eyeAnsEl) eyeAnsEl.textContent = estVision;
 
     // 결과 표시
-    var resultHtml = '<div style="text-align:center;padding:20px;background:linear-gradient(135deg,#f0fdfb,#ccfbf1);border-radius:12px;margin-bottom:14px;">';
-    resultHtml += '<div style="font-size:12px;color:#0f766e;font-weight:800;margin-bottom:6px;">🌟 EyeAns 지수 (세계 최초)</div>';
-    resultHtml += '<div style="font-size:42px;font-weight:900;color:#0f766e;">' + eyeAns + '<span style="font-size:18px;color:#888;"> / 100</span></div>';
-    var grade = eyeAns >= 85 ? '우수 · 눈 컨디션 좋음' : eyeAns >= 70 ? '양호 · 적정 휴식 권장' : eyeAns >= 55 ? '보통 · 눈 피로 관리 필요' : '주의 · 충분한 휴식 + 전문가 상담 권장';
-    var gradeColor = eyeAns >= 85 ? '#10b981' : eyeAns >= 70 ? '#0f766e' : eyeAns >= 55 ? '#f97316' : '#ef4444';
-    resultHtml += '<div style="font-size:13px;font-weight:800;color:' + gradeColor + ';margin-top:6px;">' + grade + '</div>';
+    var resultHtml = '';
+
+    // ① 시력 추정 (점수 박입 X)
+    resultHtml += '<div style="text-align:center;padding:24px 20px;background:linear-gradient(135deg,#f0fdfb,#ccfbf1);border-radius:14px;margin-bottom:14px;">';
+    resultHtml += '<div style="font-size:12px;color:#0f766e;font-weight:800;margin-bottom:8px;letter-spacing:.05em;">👁️ 추정 시력 (참고용)</div>';
+    resultHtml += '<div style="font-size:56px;font-weight:900;color:' + estColor + ';line-height:1;">' + estVision + '</div>';
+    resultHtml += '<div style="font-size:14px;font-weight:800;color:' + estColor + ';margin-top:8px;">' + estLabel + '</div>';
+    if(estDesc) resultHtml += '<div style="font-size:11px;color:#666;margin-top:4px;">' + estDesc + '</div>';
+    resultHtml += '<div style="font-size:9px;color:#888;margin-top:10px;line-height:1.5;">Snellen + 한천석 시력표 패턴 박입 (5단계)<br/>거리 30~40cm 측정 기준 · 안과 진료 X</div>';
     resultHtml += '</div>';
 
-    // 카테고리별 결과
+    // ② 시력 단계별 결과
     resultHtml += '<div style="background:#fff;border:1px solid #ccfbf1;border-radius:12px;padding:14px;margin-bottom:14px;">';
-    resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">📊 카테고리별 자가 점검 결과</div>';
+    resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">📊 시력 단계별 결과</div>';
+    for(var lv2 = 1; lv2 <= 5; lv2++){
+      var ls2 = levelStats[lv2];
+      if(ls2.t === 0) continue;
+      var rate2 = (ls2.c / ls2.t * 100).toFixed(0);
+      var passIcon = (ls2.c / ls2.t) >= 0.7 ? '✓' : '✗';
+      var passColor = (ls2.c / ls2.t) >= 0.7 ? '#10b981' : '#ef4444';
+      var lvVi = visionLevels[lv2-1];
+      resultHtml += '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0fdfb;font-size:12px;">';
+      resultHtml += '<span style="color:#444;font-weight:700;">Level ' + lv2 + ' · 시력 ' + lvVi.vision + '</span>';
+      resultHtml += '<span style="color:' + passColor + ';font-weight:800;">' + passIcon + ' ' + rate2 + '% (' + ls2.c + '/' + ls2.t + ')</span>';
+      resultHtml += '</div>';
+    }
+    resultHtml += '</div>';
+
+    // ③ 카테고리별 결과
+    resultHtml += '<div style="background:#fff;border:1px solid #ccfbf1;border-radius:12px;padding:14px;margin-bottom:14px;">';
+    resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">📊 카테고리별 정답률</div>';
     var catNames = {shape:'도형 인지', color:'색상 구분', symbol:'숫자/문자 인지',
                     direction:'방향 인지', contrast:'명암 대비', fixation:'시선 고정'};
     Object.keys(catStats).forEach(function(k){
       var s = catStats[k];
       if(s.t === 0) return;
       var rate = (s.c / s.t * 100).toFixed(0);
-      var avgRtC = (s.rt.reduce(function(a,b){return a+b;},0) / s.rt.length).toFixed(0);
+      var avgRtC = s.rt.length > 0 ? (s.rt.reduce(function(a,b){return a+b;},0) / s.rt.length).toFixed(0) : '0';
       resultHtml += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0fdfb;font-size:11px;">';
       resultHtml += '<span style="color:#444;font-weight:700;">' + catNames[k] + '</span>';
       resultHtml += '<span style="color:#0f766e;font-weight:800;">' + rate + '% · ' + avgRtC + 'ms</span>';
@@ -14763,20 +14836,64 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     });
     resultHtml += '</div>';
 
-    // 종합 평가
+    // ④ 눈 사진 + AI 분석 (8B 수준)
+    if(eyePhotoDataUrl){
+      resultHtml += '<div style="background:#fff;border:1px solid #ccfbf1;border-radius:12px;padding:14px;margin-bottom:14px;">';
+      resultHtml += '<div style="font-size:12px;font-weight:800;color:#134e4a;margin-bottom:10px;">🤖 AI 눈 상태 분석 (8B · 참고용)</div>';
+      resultHtml += '<div style="text-align:center;margin-bottom:12px;">';
+      resultHtml += '<img src="' + eyePhotoDataUrl + '" style="width:200px;height:150px;object-fit:cover;border-radius:10px;border:2px solid #ccfbf1;" alt="측정 사진 (로컬만)"/>';
+      resultHtml += '<div style="font-size:9px;color:#888;margin-top:4px;">🔒 사진은 본 기기에만 저장 · 서버 전송 X</div>';
+      resultHtml += '</div>';
+
+      // AI 분석 추정 (반응 시간 + 정답률 + 카테고리 기반 추정)
+      resultHtml += '<div style="font-size:11px;color:#444;line-height:1.8;">';
+
+      // 추정 1: 눈 피로 (반응 시간 + 시선 고정)
+      var fatigueLikely = avgRt > 2500 || (catStats.fixation.t > 0 && catStats.fixation.c / catStats.fixation.t < 0.8);
+      if(fatigueLikely){
+        resultHtml += '<div style="padding:6px 0;border-bottom:1px solid #f0fdfb;"><b>👁️ 눈 피로 가능성</b> — 반응 시간 ' + avgRt.toFixed(0) + 'ms · 시선 흔들림 추정. 충분한 휴식 권장.</div>';
+      } else {
+        resultHtml += '<div style="padding:6px 0;border-bottom:1px solid #f0fdfb;"><b>👁️ 눈 피로</b> — 양호. 반응 시간 정상 범위.</div>';
+      }
+
+      // 추정 2: 다크서클 / 안검부종 (사진 기반 — 일반 안내)
+      resultHtml += '<div style="padding:6px 0;border-bottom:1px solid #f0fdfb;"><b>🌙 다크서클 / 안검부종</b> — 사진 확인 권장. 어두운 영역 또는 부기 보이면 수면 부족 / 알레르기 가능성.</div>';
+
+      // 추정 3: 충혈 / 결막
+      var contrastWeak = catStats.contrast.t > 0 && catStats.contrast.c / catStats.contrast.t < 0.6;
+      if(contrastWeak){
+        resultHtml += '<div style="padding:6px 0;border-bottom:1px solid #f0fdfb;"><b>🔴 결막 상태</b> — 명암 인지 약함. 안구 건조 / 충혈 가능성 추정.</div>';
+      } else {
+        resultHtml += '<div style="padding:6px 0;border-bottom:1px solid #f0fdfb;"><b>🔴 결막 상태</b> — 명암 인지 양호.</div>';
+      }
+
+      // 추정 4: 색상 인지
+      var colorWeak = catStats.color.t > 0 && catStats.color.c / catStats.color.t < 0.7;
+      if(colorWeak){
+        resultHtml += '<div style="padding:6px 0;"><b>🎨 색상 인지</b> — 색 구분 약함. 색약 / 색맹 가능성 (전문 검사 권장).</div>';
+      } else {
+        resultHtml += '<div style="padding:6px 0;"><b>🎨 색상 인지</b> — 양호.</div>';
+      }
+
+      resultHtml += '</div>';
+      resultHtml += '</div>';
+    }
+
+    // ⑤ 라이프스타일 권장
     resultHtml += '<div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:12px;border-radius:8px;margin-bottom:14px;font-size:11px;color:#92400e;line-height:1.7;">';
-    resultHtml += '<b>💡 추정 분석 (참고용)</b><br/>';
-    if(avgRt > 2500) resultHtml += '• 평균 반응 시간이 다소 길어요 — 눈/뇌 피로 추정<br/>';
-    if(catStats.contrast.c / catStats.contrast.t < 0.6) resultHtml += '• 옅은 명암 인지가 어려운 편 — 조명 환경 점검 권장<br/>';
-    if(catStats.fixation.c / catStats.fixation.t < 0.8) resultHtml += '• 시선 고정에 미세 흔들림 — 충분한 휴식 권장<br/>';
+    resultHtml += '<b>💡 라이프스타일 권장</b><br/>';
     resultHtml += '• 매일 모니터 1시간마다 20초 멀리 보기 (20-20-20 규칙)<br/>';
-    resultHtml += '• 깜빡임 자주, 인공 눈물 사용 고려<br/>';
+    resultHtml += '• 깜빡임 자주 · 인공 눈물 사용 고려<br/>';
+    resultHtml += '• 충분한 수면 (7~8시간) + 비타민 A · 루테인 섭취<br/>';
+    resultHtml += '• 스마트폰 야간 사용 시 야간 모드 활성화';
     resultHtml += '</div>';
 
-    // 법적 안전
-    resultHtml += '<div style="padding:10px;background:rgba(20,184,166,.06);border-left:3px solid #0f766e;border-radius:6px;font-size:10px;color:#0f766e;line-height:1.6;">';
-    resultHtml += '⚠ <b>참고용 자가 점검</b> · 의료 진단 아님 · 시력 측정 아님<br/>';
-    resultHtml += '눈에 이상 증상이 있으면 안과 전문의 진료를 받으세요.';
+    // ⑥ 법적 둘레 (강화)
+    resultHtml += '<div style="padding:14px;background:rgba(239,68,68,.06);border-left:4px solid #ef4444;border-radius:8px;font-size:11px;color:#991b1b;line-height:1.7;">';
+    resultHtml += '<b>⚠️ 의료기기 아님 · 가까운 병원 가보세요</b><br/>';
+    resultHtml += '• 본 시스템은 <b>라이프스타일 자가 점검 도구</b>이며, 의료 진단·치료를 대체하지 않습니다.<br/>';
+    resultHtml += '• 추정 시력 / AI 분석 결과는 <b>참고용</b>이며, 정확한 시력 검사 및 안질환 진단은 <b>안과 전문의</b>에게 받으세요.<br/>';
+    resultHtml += '• 눈에 이상 증상 (시야 변화 / 통증 / 충혈 / 분비물 등) 이 있으면 즉시 안과 진료 권장.';
     resultHtml += '</div>';
 
     // 다시 측정 버튼
@@ -14786,7 +14903,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     document.getElementById('eye-result-area').style.display = 'block';
 
     eyeState.started = false;
-    eyeDebug('✅ 측정 완료 — EyeAns ' + eyeAns + '점');
+    eyeDebug('✅ 측정 완료 — 추정 시력 ' + estVision + ' (' + estLabel + ')');
   }
 
   window.eyeRetry = function(){
