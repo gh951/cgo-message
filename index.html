@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj181-music-refresh" name="c41-version"/>
+<meta content="2026-05-26-c44-inj193-food-rppg" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8091,13 +8091,101 @@ var Q_POOL = {
 <!-- ════════════════════════════════════════════════════════ -->
 <!-- ★ C-40 박입 ㉑ — scrFood 페이지 (FULI에서 통째 박제) -->
 <div class="screen" id="scrFood" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<!-- ★ 박입 185 — 음식 자동 팝업 (민트색 객관적 수준) -->
+<div id="food-intro-pop" style="display:none;position:fixed;inset:0;z-index:29950;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<button onclick="document.getElementById('food-intro-pop').style.display='none';" style="position:fixed;top:18px;right:18px;z-index:29951;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+<div style="text-align:center;margin-bottom:24px;">
+<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">C-44 · 2026</div>
+<div style="font-size:54px;margin-bottom:8px;">🍱</div>
+<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">음식 궁합</h1>
+<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">rPPG 생체 측정 × 진료 차트 × 영양 분석<br/>지금 내 몸에 맞는 음식 (세계 최초)</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">✨ 이 분석의 특별함</div>
+<div style="display:grid;gap:12px;">
+<div style="display:flex;gap:12px;align-items:flex-start;"><div style="font-size:24px;flex-shrink:0;">🏥</div><div><div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">진료 차트 연동</div><div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">기저질환·알레르기·복용 약물을 반영해 안전한 음식만 추천.</div></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;"><div style="font-size:24px;flex-shrink:0;">💗</div><div><div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">rPPG 생체 융합</div><div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">실측 심박·자율신경 값으로 지금 컨디션에 맞는 음식을 매칭.</div></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;"><div style="font-size:24px;flex-shrink:0;">🧬</div><div><div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">생체 대사 매칭</div><div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">혈당·혈압·대사 상태를 안정시키는 음식을 영양소 기반으로 분석.</div></div></div>
+<div style="display:flex;gap:12px;align-items:flex-start;"><div style="font-size:24px;flex-shrink:0;">📸</div><div><div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">사진 AI 인식</div><div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">음식 사진을 찍으면 AI가 영양 성분을 자동 분석.</div></div></div>
+</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">📊 객관적 수준</div>
+<div style="font-size:10px;color:rgba(13,58,58,0.55);margin-bottom:14px;line-height:1.5;">(Claude AI · Gemini AI · GPT AI · Grok AI · 구글 포탈 AI 등 평가)</div>
+<div style="display:grid;gap:10px;">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">일반 식단 관리 앱 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#059669;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#059669;">비교 불가</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">글로벌 푸드테크 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#0284c7;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#0284c7;">독보적 최상위</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">영양·식이요법 보조</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#7c3aed;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#7c3aed;">전문가급 표준</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">병원 임상 영양 진단 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#b45309;letter-spacing:2px;font-size:13px;">★★★☆☆</span><span style="font-size:11px;color:#b45309;">스크리닝·자가 조절용</span></span></div>
+</div>
+<div style="margin-top:12px;padding:10px 14px;background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:10px;font-size:11px;color:#059669;font-weight:700;line-height:1.6;text-align:center;">🛡️ 향후 임상 데이터 확보 및 식약처 SaMD 인증 추진 예정</div>
+</div>
+<div style="background:rgba(251,191,36,0.08);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(251,191,36,0.25);">
+<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:10px;letter-spacing:.05em;">⚠️ 솔직한 한계</div>
+<div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">• 사진 영양 분석은 추정치이며 실제 성분과 차이가 있을 수 있습니다<br/>• 음식 추천은 참고용이며 의학적 식이 처방이 아닙니다<br/>• 알레르기·기저질환은 입력값 기반으로만 필터링됩니다</div>
+</div>
+<div style="background:rgba(248,113,113,0.06);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(248,113,113,0.2);">
+<div style="font-size:13px;font-weight:900;color:#b91c1c;margin-bottom:10px;letter-spacing:.05em;">⚖️ 안내</div>
+<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">본 기능은 <b style="color:#b91c1c;">영양·웰니스 자가 관리 도구</b>입니다. 질병의 진단·치료를 대체하지 않으며, 식이 조절이 필요하면 의사·영양사와 상담하시기 바랍니다.</div>
+</div>
+<div style="text-align:center;padding:18px 12px;margin-bottom:18px;background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(56,189,248,0.08));border-radius:18px;border:1px solid rgba(5,150,105,0.2);">
+<div style="font-size:15px;font-weight:800;color:#059669;line-height:1.6;font-style:italic;">"오늘 내 몸에 맞는<br/>생체 대사 맞춤 음식"</div>
+</div>
+<button onclick="document.getElementById('food-intro-pop').style.display='none';" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35);">✓ 안내 확인 — 페이지로 이동</button>
+<div style="text-align:center;margin-top:18px;font-size:10px;color:rgba(13,58,58,0.45);letter-spacing:.08em;">CGO-MESSAGE · C-44 · 특허 10-2026-0060113</div>
+</div>
+</div>
+<!-- ★ 박입 185 — 음식 사용법 보기 팝업 (민트색) -->
+<div id="food-usage-pop" style="display:none;position:fixed;inset:0;z-index:29960;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<button onclick="document.getElementById('food-usage-pop').style.display='none';" style="position:fixed;top:18px;right:18px;z-index:29961;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+<div style="text-align:center;margin-bottom:24px;">
+<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">📖 USAGE GUIDE</div>
+<div style="font-size:54px;margin-bottom:8px;">🍱</div>
+<h1 style="font-size:26px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">음식 궁합 사용 안내</h1>
+<div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">진료 차트 + rPPG + AI 영양 분석</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">⏱️ 사용 흐름 (4단계)</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);margin-bottom:16px;">화면 안내에 따라 진행됩니다</div>
+<div style="display:grid;gap:14px;">
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">1</div>
+<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">🏥 진료 차트 입력 (선택)</div><div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">기저질환·알레르기·복용 약물을 입력하면 더 안전하고 정밀한 추천을 받습니다. (입력 안 해도 분석 가능)</div></div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">2</div>
+<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">📸 음식 촬영 또는 입력</div><div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">음식을 카메라로 찍거나 음식명을 입력하면 AI가 영양 성분을 분석합니다.</div></div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">3</div>
+<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">🧬 대사 분석 결과</div><div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">기저질환·생체 신호와 영양소를 매칭해 종합 대사 평가와 대체 음식을 제안합니다.</div></div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">4</div>
+<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">🤖 C-44 AI 영양 상담</div><div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">분석 결과를 바탕으로 대체 음식·종합 평가를 AI에게 추가로 물어볼 수 있습니다.</div></div>
+</div>
+</div>
+</div>
+<div style="background:rgba(56,189,248,0.08);border-radius:18px;padding:18px 24px;margin-bottom:14px;border:1px solid rgba(56,189,248,0.25);">
+<div style="font-size:13px;font-weight:900;color:#0284c7;margin-bottom:10px;letter-spacing:.05em;">💾 저장 안내</div>
+<div style="font-size:13px;color:#0d3a3a;line-height:1.8;">현재는 입력 데이터를 <b style="color:#0284c7;">서버에 저장하지 않습니다</b>. 향후 회원 동의 시 본인 기기에 측정 기록을 저장하는 기능이 추가될 예정입니다.</div>
+</div>
+<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:14px;padding:14px 18px;margin-bottom:18px;">
+<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">⚠️ <b style="color:#b91c1c;">안내</b> — 본 기능은 영양·웰니스 자가 관리 도구이며, 질병의 진단·치료를 대체하지 않습니다. 식이 조절이 필요하면 의사·영양사와 상담하세요.</div>
+</div>
+<button onclick="document.getElementById('food-usage-pop').style.display='none';" style="width:100%;padding:16px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);border:none;border-radius:18px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35);">✓ 안내 확인 — 닫기</button>
+</div>
+</div>
+
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
 <!-- ★ 음식 궁합 C-11 안내 팝업 (주파수 음악과 동일 패턴) -->
 <style>
   #fc-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(2,8,23,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .fci-wrap{max-width:560px;margin:0 auto;padding:0 0 80px;}
   .fci-top{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;padding:12px 16px;background:rgba(2,8,23,.98);}
-  .fci-x{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:36px;height:36px;color:rgba(240,230,200,.7);font-size:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
+  .fci-x{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:50%;width:36px;height:36px;color:#3a5a5a;font-size:16px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;}
   .fci-hero{text-align:center;padding:8px 20px 24px;}
   .fci-hero-icon{font-size:44px;margin-bottom:12px;}
   .fci-hero-title{font-size:20px;font-weight:900;color:#34d399;letter-spacing:.04em;margin-bottom:6px;}
@@ -8105,13 +8193,13 @@ var Q_POOL = {
   .fci-hero-tag{display:inline-block;margin-top:8px;padding:3px 10px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:10px;font-size:9px;color:#34d399;letter-spacing:.12em;font-weight:700;}
   .fci-body{padding:0 16px;}
   .fci-sec{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;}
-  .fci-lbl{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(240,230,200,.35);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);}
-  .fci-sec p{font-size:12px;color:rgba(240,230,200,.7);line-height:1.9;margin:0;}
+  .fci-lbl{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#7b9a9a;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+  .fci-sec p{font-size:12px;color:#3a5a5a;line-height:1.9;margin:0;}
   .fci-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
   .fci-step:last-child{margin-bottom:0;}
   .fci-step-n{width:24px;height:24px;border-radius:50%;background:rgba(52,211,153,.15);color:#34d399;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
-  .fci-step-tit{font-size:12px;font-weight:700;color:rgba(240,230,200,.9);margin-bottom:3px;}
-  .fci-step-desc{font-size:11px;color:rgba(240,230,200,.5);line-height:1.7;}
+  .fci-step-tit{font-size:12px;font-weight:700;color:#0d3a3a;margin-bottom:3px;}
+  .fci-step-desc{font-size:11px;color:#5b7a7a;line-height:1.7;}
   .fci-chart{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);}
   .fci-chart:last-child{border-bottom:none;padding-bottom:0;}
   .fci-chart-tag{font-size:9px;font-weight:900;letter-spacing:.06em;padding:3px 0;text-align:center;border-radius:5px;}
@@ -8120,23 +8208,23 @@ var Q_POOL = {
   .fci-chart-c3{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.3);}
   .fci-chart-c4{background:rgba(167,139,250,.12);color:#a78bfa;border:1px solid rgba(167,139,250,.3);}
   .fci-chart-c5{background:rgba(52,211,153,.12);color:#34d399;border:1px solid rgba(52,211,153,.3);}
-  .fci-chart-tit{font-size:12px;font-weight:700;color:rgba(240,230,200,.9);margin-bottom:2px;}
-  .fci-chart-desc{font-size:10px;color:rgba(240,230,200,.45);line-height:1.6;}
+  .fci-chart-tit{font-size:12px;font-weight:700;color:#0d3a3a;margin-bottom:2px;}
+  .fci-chart-desc{font-size:10px;color:#5b7a7a;line-height:1.6;}
   .fci-feat{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .fci-feat-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:11px 13px;}
   .fci-feat-t{font-size:11px;font-weight:700;margin-bottom:4px;}
-  .fci-feat-d{font-size:10px;color:rgba(240,230,200,.4);line-height:1.6;}
+  .fci-feat-d{font-size:10px;color:#6b8a8a;line-height:1.6;}
   .fci-oh{display:grid;grid-template-columns:32px 1fr auto;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05);}
   .fci-oh:last-child{border-bottom:none;padding-bottom:0;}
   .fci-oh-ico{font-size:18px;text-align:center;}
   .fci-oh-name{font-size:12px;font-weight:700;}
-  .fci-oh-meta{font-size:10px;color:rgba(240,230,200,.4);margin-top:2px;line-height:1.5;}
+  .fci-oh-meta{font-size:10px;color:#6b8a8a;margin-top:2px;line-height:1.5;}
   .fci-oh-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;}
-  .fci-tip{padding:11px 14px;background:rgba(52,211,153,.06);border-left:3px solid #34d399;border-radius:0 8px 8px 0;font-size:11px;color:rgba(240,230,200,.7);line-height:1.85;}
-  .fci-warn{padding:11px 14px;background:rgba(251,191,36,.05);border-left:3px solid #fbbf24;border-radius:0 8px 8px 0;font-size:11px;color:rgba(240,230,200,.7);line-height:1.85;margin-top:8px;}
+  .fci-tip{padding:11px 14px;background:rgba(52,211,153,.06);border-left:3px solid #34d399;border-radius:0 8px 8px 0;font-size:11px;color:#3a5a5a;line-height:1.85;}
+  .fci-warn{padding:11px 14px;background:rgba(251,191,36,.05);border-left:3px solid #fbbf24;border-radius:0 8px 8px 0;font-size:11px;color:#3a5a5a;line-height:1.85;margin-top:8px;}
   .fci-btn-wrap{padding:0 16px 16px;}
   .fci-btn{width:100%;padding:14px;background:linear-gradient(135deg,rgba(52,211,153,.28),rgba(34,197,94,.18));border:2px solid rgba(52,211,153,.7);border-radius:14px;color:#34d399;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.04em;}
-  .fci-credit{margin-top:10px;font-size:9px;color:rgba(240,230,200,.25);text-align:center;letter-spacing:.06em;}
+  .fci-credit{margin-top:10px;font-size:9px;color:#8baaaa;text-align:center;letter-spacing:.06em;}
   </style>
 <div id="fc-intro-pop"><div class="fci-wrap">
 <div class="fci-top"><button class="fci-x" onclick="document.getElementById('fc-intro-pop').style.display='none';">✕</button></div>
@@ -8151,14 +8239,14 @@ var Q_POOL = {
 <!-- ① 무엇이 다른가 -->
 <div class="fci-sec">
 <div class="fci-lbl">① 무엇이 다른가?</div>
-<p>일반 식단 앱은 칼로리만 봅니다. 음식 궁합 <b style="color:#34d399">C-11</b>은 <b style="color:#34d399">rPPG 생체 반응 + 사주 일간 + 오행 + 진료 차트</b>를 모두 종합해 — <b style="color:#f0e0a8">"오늘 내 몸에 맞는 음식"</b>을 찾아드립니다. 같은 음식이라도 어제와 오늘이 다르고, 사람마다 다 달라요.</p>
+<p>일반 식단 앱은 칼로리만 봅니다. 음식 궁합 <b style="color:#34d399">C-11</b>은 <b style="color:#34d399">rPPG 생체 반응 + 진료 차트 + 영양 분석</b>를 모두 종합해 — <b style="color:#f0e0a8">"오늘 내 몸에 맞는 음식"</b>을 찾아드립니다. 같은 음식이라도 어제와 오늘이 다르고, 사람마다 다 달라요.</p>
 </div>
 <!-- ② 사용법 5단계 -->
 <div class="fci-sec">
 <div class="fci-lbl">② 사용법 — 5단계</div>
 <div class="fci-step">
 <div class="fci-step-n">1</div>
-<div><div class="fci-step-tit">대시보드에서 정보 입력</div><div class="fci-step-desc">이름·생년월일·성별 → ⚡ 자동 계산. 이게 사주 일간·오행의 기초가 됩니다.</div></div>
+<div><div class="fci-step-tit">대시보드에서 정보 입력</div><div class="fci-step-desc">음주·흡연·활동량·기저질환 → 생체 대사 분석의 기초가 됩니다.</div></div>
 </div>
 <div class="fci-step">
 <div class="fci-step-n">2</div>
@@ -8174,7 +8262,7 @@ var Q_POOL = {
 </div>
 <div class="fci-step">
 <div class="fci-step-n">5</div>
-<div><div class="fci-step-tit">C-11 분석 결과 받기</div><div class="fci-step-desc">오행 매칭·체질 적합도·시간대 처방·금기 성분 체크 → 맞춤 결과를 한눈에 확인.</div></div>
+<div><div class="fci-step-tit">C-11 분석 결과 받기</div><div class="fci-step-desc">대사 적합도·시간대 추천·금기 성분 체크 → 맞춤 결과를 한눈에 확인.</div></div>
 </div>
 </div>
 <!-- ③ 5단계 진료 차트 -->
@@ -8182,7 +8270,7 @@ var Q_POOL = {
 <div class="fci-lbl">③ 5단계 진료 차트 (CGO-FULI MEDICAL RECORD)</div>
 <div class="fci-chart">
 <div class="fci-chart-tag fci-chart-c1">①</div>
-<div><div class="fci-chart-tit">BACKGROUND · 건강 기저</div><div class="fci-chart-desc">음주·흡연·활동량·가족력·기본 체질 오행 — 평소 컨디션의 출발선</div></div>
+<div><div class="fci-chart-tit">BACKGROUND · 건강 기저</div><div class="fci-chart-desc">음주·흡연·활동량·가족력·기저질환 — 평소 컨디션의 출발선</div></div>
 </div>
 <div class="fci-chart">
 <div class="fci-chart-tag fci-chart-c2">②</div>
@@ -8201,33 +8289,33 @@ var Q_POOL = {
 <div><div class="fci-chart-tit">CONSENT · 디지털 승인</div><div class="fci-chart-desc">데이터 활용 동의 — 모든 데이터는 기기 내 저장, 서버 미전송</div></div>
 </div>
 </div>
-<!-- ④ 5오행 음식 매칭 -->
+<!-- ④ 대사 맞춤 음식 (오행 제거 → 생체 대사 매칭) -->
 <div class="fci-sec">
-<div class="fci-lbl">④ 5오행 음식 매칭 — 내 일간에 맞는 맛</div>
+<div class="fci-lbl">④ 생체 대사 맞춤 음식 — 측정값 기반</div>
 <div class="fci-oh">
-<div class="fci-oh-ico">🌳</div>
-<div><div class="fci-oh-name" style="color:#4ade80">목(木) · 신맛</div><div class="fci-oh-meta">간·담 보호 — 식초·매실·시금치·녹색 채소</div></div>
-<div class="fci-oh-tag" style="background:rgba(74,222,128,.12);color:#4ade80;">봄</div>
+<div class="fci-oh-ico">🩸</div>
+<div><div class="fci-oh-name" style="color:#4ade80">혈당 안정</div><div class="fci-oh-meta">식이섬유·저당 — 채소·통곡물·콩류</div></div>
+<div class="fci-oh-tag" style="background:rgba(74,222,128,.12);color:#4ade80;">당뇨</div>
 </div>
 <div class="fci-oh">
-<div class="fci-oh-ico">🔥</div>
-<div><div class="fci-oh-name" style="color:#f87171">화(火) · 쓴맛</div><div class="fci-oh-meta">심장·소장 — 도라지·쑥·고들빼기·붉은 음식</div></div>
-<div class="fci-oh-tag" style="background:rgba(248,113,113,.12);color:#f87171;">여름</div>
+<div class="fci-oh-ico">💗</div>
+<div><div class="fci-oh-name" style="color:#f87171">혈압·혈류</div><div class="fci-oh-meta">저나트륨·오메가3 — 등푸른 생선·견과</div></div>
+<div class="fci-oh-tag" style="background:rgba(248,113,113,.12);color:#f87171;">고혈압</div>
 </div>
 <div class="fci-oh">
-<div class="fci-oh-ico">🪨</div>
-<div><div class="fci-oh-name" style="color:#fbbf24">토(土) · 단맛</div><div class="fci-oh-meta">비장·위 — 호박·고구마·꿀·황색 음식</div></div>
-<div class="fci-oh-tag" style="background:rgba(251,191,36,.12);color:#fbbf24;">환절기</div>
+<div class="fci-oh-ico">🧘</div>
+<div><div class="fci-oh-name" style="color:#fbbf24">자율신경 안정</div><div class="fci-oh-meta">마그네슘·트립토판 — 바나나·우유·견과</div></div>
+<div class="fci-oh-tag" style="background:rgba(251,191,36,.12);color:#fbbf24;">스트레스</div>
 </div>
 <div class="fci-oh">
-<div class="fci-oh-ico">⚙️</div>
-<div><div class="fci-oh-name" style="color:#94a3b8">금(金) · 매운맛</div><div class="fci-oh-meta">폐·대장 — 마늘·생강·파·흰색 음식</div></div>
-<div class="fci-oh-tag" style="background:rgba(148,163,184,.12);color:#94a3b8;">가을</div>
+<div class="fci-oh-ico">⚡</div>
+<div><div class="fci-oh-name" style="color:#94a3b8">대사·활력</div><div class="fci-oh-meta">단백질·비타민B — 살코기·달걀·잡곡</div></div>
+<div class="fci-oh-tag" style="background:rgba(148,163,184,.12);color:#94a3b8;">피로</div>
 </div>
 <div class="fci-oh">
 <div class="fci-oh-ico">💧</div>
-<div><div class="fci-oh-name" style="color:#60a5fa">수(水) · 짠맛</div><div class="fci-oh-meta">신장·방광 — 검은콩·미역·해산물·검은 음식</div></div>
-<div class="fci-oh-tag" style="background:rgba(96,165,250,.12);color:#60a5fa;">겨울</div>
+<div><div class="fci-oh-name" style="color:#60a5fa">수분·순환</div><div class="fci-oh-meta">수분·칼륨 — 오이·수박·미역·해조류</div></div>
+<div class="fci-oh-tag" style="background:rgba(96,165,250,.12);color:#60a5fa;">부종</div>
 </div>
 </div>
 <!-- ⑤ 6가지 핵심 기능 -->
@@ -8235,7 +8323,7 @@ var Q_POOL = {
 <div class="fci-lbl">⑤ 6가지 핵심 기능</div>
 <div class="fci-feat">
 <div class="fci-feat-item"><div class="fci-feat-t" style="color:#34d399;">🧬 rPPG 생체 융합</div><div class="fci-feat-d">실측 BPM·HRV가 음식 처방에 직접 반영</div></div>
-<div class="fci-feat-item"><div class="fci-feat-t" style="color:#fbbf24;">☯️ 오행 매칭</div><div class="fci-feat-d">사주 일간 오행과 음식 오행 궁합 분석</div></div>
+<div class="fci-feat-item"><div class="fci-feat-t" style="color:#fbbf24;">🧬 대사 매칭</div><div class="fci-feat-d">기저질환·생체 신호와 음식 영양소 매칭 분석</div></div>
 <div class="fci-feat-item"><div class="fci-feat-t" style="color:#60a5fa;">🏥 5단계 진료 차트</div><div class="fci-feat-d">병원 차트 형식의 정밀 데이터 입력</div></div>
 <div class="fci-feat-item"><div class="fci-feat-t" style="color:#a78bfa;">🚫 알레르기 차단</div><div class="fci-feat-d">개인 금기 성분 사전 자동 필터링</div></div>
 <div class="fci-feat-item"><div class="fci-feat-t" style="color:#f87171;">📷 사진 인식</div><div class="fci-feat-d">음식 사진 → AI 자동 인식 + 분석</div></div>
@@ -8251,7 +8339,7 @@ var Q_POOL = {
         </div>
 <div class="fci-warn">
           ⚠️ <b style="color:#fbbf24">의료 행위가 아닙니다.</b><br/>
-          본 분석은 전통 한방 + 오행 + 현대 영양학 기반의 <b>맞춤 추천</b>입니다. 진단·치료는 의사·한의사와 상담하세요.
+          본 분석은 영양학 + 생체 측정값 기반의 <b>맞춤 추천</b>입니다. 진단·치료는 의사·영양사와 상담하세요.
         </div>
 </div>
 </div>
@@ -8266,10 +8354,10 @@ var Q_POOL = {
 <div style="text-align:center;margin-bottom:20px;">
 <div style="font-size:32px;margin-bottom:8px;">🍱</div>
 <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#059669;font-weight:900;margin-bottom:4px;">음식 궁합</div>
-<div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;">rPPG × 오행 × 생체 에너지 — 세계 최초 음식-생체 융합</div>
+<div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;">rPPG × 생체 대사 × 영양 분석 — 세계 최초 음식-생체 융합</div>
 <!-- ★ 박입 126 — 사용법 보기 버튼 (전체 통일) -->
 <div style="margin-top:12px;">
-<button onclick="document.getElementById('fc-intro-pop').style.display='block';" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#059669;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+<button onclick="document.getElementById('food-usage-pop').style.display='block';" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#059669;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
 </div>
 </div>
 <!-- ══ CGO-FULI 실시간 진료 차트 (5단계) ══ -->
@@ -8310,43 +8398,35 @@ var Q_POOL = {
 <div style="border:1px solid rgba(96,165,250,.2);border-radius:10px;overflow:hidden;">
 <div onclick="foodToggleSection('sec1')" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(96,165,250,.07);cursor:pointer;">
 <span style="font-size:10px;font-weight:900;color:#60a5fa;letter-spacing:.08em;">① BACKGROUND · 건강 기저 데이터</span>
-<span style="font-size:9px;color:rgba(96,165,250,.5);margin-left:4px;">사회력 · 가족력 · 기본 체질</span>
-<span id="sec1-arrow" style="margin-left:auto;font-size:10px;color:rgba(96,165,250,.5);transition:transform .25s;">▼</span>
+<span style="font-size:9px;color:#0284c7;margin-left:4px;">사회력 · 가족력 · 기본 체질</span>
+<span id="sec1-arrow" style="margin-left:auto;font-size:10px;color:#0284c7;transition:transform .25s;">▼</span>
 </div>
 <div id="sec1" style="display:none;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
 <div style="display:flex;gap:8px;flex-wrap:wrap;">
 <div style="flex:1;min-width:120px;">
-<div style="font-size:10px;color:rgba(96,165,250,.6);margin-bottom:4px;">🍺 음주</div>
+<div style="font-size:10px;color:#0284c7;margin-bottom:4px;">🍺 음주</div>
 <select id="fp-drink" style="width:100%;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:6px;padding:6px 8px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;">
 <option value="">선택</option><option value="안함">안 함</option><option value="가끔">가끔(월 1~2)</option><option value="주1~2회">주 1~2회</option><option value="매일">매일</option>
 </select>
 </div>
 <div style="flex:1;min-width:120px;">
-<div style="font-size:10px;color:rgba(96,165,250,.6);margin-bottom:4px;">🚬 흡연</div>
+<div style="font-size:10px;color:#0284c7;margin-bottom:4px;">🚬 흡연</div>
 <select id="fp-smoke" style="width:100%;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:6px;padding:6px 8px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;">
 <option value="">선택</option><option value="비흡연">비흡연</option><option value="과거흡연">과거 흡연</option><option value="흡연중">흡연 중</option>
 </select>
 </div>
 <div style="flex:1;min-width:120px;">
-<div style="font-size:10px;color:rgba(96,165,250,.6);margin-bottom:4px;">🏃 평소 활동량</div>
+<div style="font-size:10px;color:#0284c7;margin-bottom:4px;">🏃 평소 활동량</div>
 <select id="fp-activity" style="width:100%;background:rgba(96,165,250,.06);border:1px solid rgba(96,165,250,.2);border-radius:6px;padding:6px 8px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;">
 <option value="">선택</option><option value="적음">적음(좌식)</option><option value="보통">보통</option><option value="많음">많음(운동)</option>
 </select>
 </div>
 </div>
 <div>
-<div style="font-size:10px;color:rgba(96,165,250,.6);margin-bottom:4px;">👨‍👩‍👧 가족력 (유전 질환)</div>
+<div style="font-size:10px;color:#0284c7;margin-bottom:4px;">👨‍👩‍👧 가족력 (유전 질환)</div>
 <input id="fp-family" placeholder="예: 부 고혈압, 모 당뇨, 형 고지혈증" style="width:100%;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div>
-<div style="font-size:10px;color:rgba(96,165,250,.6);margin-bottom:4px;">☯️ 기본 체질 오행</div>
-<div style="display:flex;gap:5px;flex-wrap:wrap;">
-<button class="fp-oh-btn" onclick="foodSetOh(this,'목')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.06);color:#4ade80;font-size:11px;cursor:pointer;font-family:inherit;">🌳 목(木)</button>
-<button class="fp-oh-btn" onclick="foodSetOh(this,'화')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(248,113,113,.3);background:rgba(248,113,113,.06);color:#f87171;font-size:11px;cursor:pointer;font-family:inherit;">🔥 화(火)</button>
-<button class="fp-oh-btn" onclick="foodSetOh(this,'토')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);color:#fbbf24;font-size:11px;cursor:pointer;font-family:inherit;">🪨 토(土)</button>
-<button class="fp-oh-btn" onclick="foodSetOh(this,'금')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.06);color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit;">⚙️ 금(金)</button>
-<button class="fp-oh-btn" onclick="foodSetOh(this,'수')" style="padding:5px 10px;border-radius:6px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.06);color:#60a5fa;font-size:11px;cursor:pointer;font-family:inherit;">💧 수(水)</button>
-</div>
 <input id="fp-constitution" type="hidden"/>
 </div>
 </div>
@@ -8370,7 +8450,7 @@ var Q_POOL = {
 <!-- rPPG 생체 데이터 -->
 <div id="fp-rppg-row" style="padding:8px 10px;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-radius:8px;">
 <div style="font-size:10px;color:rgba(52,211,153,.7);font-weight:700;margin-bottom:5px;">🔬 Physical Exam · rPPG 생체 측정값</div>
-<div id="fp-rppg-data" style="font-size:11px;color:rgba(240,230,200,.5);">생체 스캔 페이지에서 측정 후 자동 연동됩니다.</div>
+<div id="fp-rppg-data" style="font-size:11px;color:#5b7a7a;">생체 스캔 페이지에서 측정 후 자동 연동됩니다.</div>
 </div>
 </div>
 </div>
@@ -8454,40 +8534,89 @@ var Q_POOL = {
 <!-- ⑤ 디지털 서명 -->
 <div style="border:1px solid rgba(52,211,153,.25);border-radius:10px;padding:10px 12px;background:rgba(52,211,153,.04);">
 <div style="font-size:10px;color:rgba(52,211,153,.6);letter-spacing:.07em;margin-bottom:8px;">⑤ CONSENT &amp; SIGNATURE · 디지털 승인</div>
-<div style="font-size:10px;color:rgba(240,230,200,.45);line-height:1.7;margin-bottom:10px;">
-              본 데이터는 음식 분석 시 AI의 판단 기준으로 사용되며,<br/>
-              저장 즉시 <strong style="color:rgba(52,211,153,.8);">나의 건강 기억소</strong>에 누적되어 다음 분석에 가중치로 작용합니다.
+<div style="font-size:10px;color:#5b7a7a;line-height:1.7;margin-bottom:10px;">
+              본 데이터는 음식 분석 시 AI의 판단 기준으로 사용되며, <strong style="color:#059669;">서버에는 전송·저장되지 않습니다.</strong>
             </div>
+<!-- ★ 박입 190 — FULI식 정보 저장 체크박스 -->
+<div style="margin-bottom:10px;padding:10px 12px;background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:10px;display:flex;align-items:center;gap:10px;">
+<input type="checkbox" id="chkFoodSaveInfo" onchange="foodSaveInfoToggle()" style="width:18px;height:18px;cursor:pointer;accent-color:#34d399;flex-shrink:0;"/>
+<div>
+<div style="font-size:12px;font-weight:700;color:#059669;">💾 이 정보를 저장해서 다음에도 자동 입력</div>
+<div style="font-size:10px;color:#5b7a7a;margin-top:2px;">체크하면 본인 기기에만 저장되어 다음 방문 시 자동으로 입력됩니다</div>
+</div>
+</div>
 <button onclick="foodSaveProfile()" onmouseout="this.style.background='linear-gradient(135deg,rgba(52,211,153,.22),rgba(52,211,153,.08))'" onmouseover="this.style.background='rgba(52,211,153,.28)'" style="width:100%;padding:11px;background:linear-gradient(135deg,rgba(52,211,153,.22),rgba(52,211,153,.08));border:1px solid rgba(52,211,153,.55);border-radius:10px;color:#34d399;font-size:12px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.1em;">
-              ✅ CONFIRM &amp; SAVE  ·  차트 확정 저장
+              ✅ 입력 완료 · 분석에 반영
             </button>
-<div id="food-profile-saved" style="display:none;margin-top:8px;font-size:11px;color:#34d399;text-align:center;letter-spacing:.06em;">💾 차트 저장 완료 — 다음 분석부터 반영됩니다</div>
+<div id="food-profile-saved" style="display:none;margin-top:8px;font-size:11px;color:#34d399;text-align:center;letter-spacing:.06em;">✓ 입력 완료</div>
 </div>
 </div><!-- /padding -->
 </div><!-- /food-profile-body -->
 </div><!-- /food-profile-card -->
+<!-- ★ 박입 193 — 음식 전용 간단 rPPG 카메라 (얼굴 30초 + 호흡 가이드) -->
+<div style="background:linear-gradient(135deg,rgba(52,211,153,.08),rgba(56,189,248,.05));border:1px solid rgba(52,211,153,.35);border-radius:16px;padding:16px;margin-bottom:14px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+<div style="font-size:13px;font-weight:800;color:#059669;">💗 식전·식후 생체 측정 (rPPG)</div>
+<button onclick="document.getElementById('frppg-manual').style.display=document.getElementById('frppg-manual').style.display==='none'?'block':'none';" style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#059669;font-size:10px;font-weight:700;padding:4px 10px;border-radius:7px;cursor:pointer;font-family:inherit;">📖 사용법</button>
+</div>
+<div style="font-size:11px;color:#5b7a7a;margin-bottom:10px;line-height:1.5;">얼굴을 30초간 비추면 심박·혈색을 측정합니다. 식사 전후로 측정하면 <b style="color:#059669;">이 음식이 내 몸에 준 실제 변화</b>를 기록할 수 있어요.</div>
+
+<!-- 자체 매뉴얼 (접힘) -->
+<div id="frppg-manual" style="display:none;margin-bottom:12px;padding:12px;background:rgba(255,255,255,.5);border:1px solid rgba(52,211,153,.2);border-radius:10px;">
+<div style="font-size:11px;font-weight:800;color:#059669;margin-bottom:8px;">📖 측정 방법</div>
+<div style="display:flex;flex-direction:column;gap:7px;">
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">①</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;"><b>밝은 곳</b>에서 얼굴을 화면 원 안에 맞춰주세요</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">②</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;">30초간 <b>움직이지 말고</b> 화면의 호흡 가이드를 따라 천천히 호흡하세요 (들이쉬기 4초 · 내쉬기 6초)</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">③</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;"><b>식사 전</b> 한 번, <b>식사 30분 후</b> 한 번 측정하면 변화를 비교할 수 있어요</div></div>
+</div>
+<div style="margin-top:8px;padding:7px 10px;background:rgba(251,191,36,.08);border-radius:7px;font-size:10px;color:#b45309;line-height:1.5;">⚠️ 측정값은 카메라 기반 추정치이며 참고용입니다. 의료 진단이 아닙니다.</div>
+</div>
+
+<!-- 카메라 뷰 -->
+<div id="frppg-cam-wrap" style="position:relative;background:#0a1a1a;border-radius:12px;overflow:hidden;margin-bottom:10px;min-height:200px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(52,211,153,.2);">
+<video autoplay="" id="frppg-video" muted="" playsinline="" style="width:100%;max-height:260px;object-fit:cover;display:none;"></video>
+<canvas id="frppg-canvas" style="display:none;"></canvas>
+<!-- 얼굴 가이드 원 + 호흡 -->
+<div id="frppg-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;">
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:170px;border:2px dashed rgba(52,211,153,.6);border-radius:50%;"></div>
+<div id="frppg-breath" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(52,211,153,.25);transition:all 1s ease-in-out;"></div>
+<div id="frppg-breath-txt" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:13px;color:#34d399;font-weight:800;text-shadow:0 0 8px rgba(52,211,153,.8);">준비</div>
+<div id="frppg-timer" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:22px;color:#fff;font-weight:900;font-family:'Orbitron',monospace;text-shadow:0 0 10px rgba(0,0,0,.8);">30</div>
+</div>
+<!-- idle -->
+<div id="frppg-idle" style="text-align:center;padding:24px;">
+<div style="font-size:40px;margin-bottom:8px;">💗</div>
+<div style="font-size:13px;font-weight:700;color:#7b9a9a;">얼굴 30초 측정 준비</div>
+<div style="font-size:11px;color:#5b7a7a;margin-top:4px;">아래 버튼을 눌러 시작하세요</div>
+</div>
+</div>
+<!-- 버튼 -->
+<button id="frppg-btn" onclick="frppgStart()" style="width:100%;padding:12px;background:linear-gradient(135deg,rgba(52,211,153,.22),rgba(56,189,248,.12));border:2px solid rgba(52,211,153,.6);border-radius:11px;color:#059669;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.03em;">💗 30초 측정 시작</button>
+
+<!-- 결과 -->
+<div id="frppg-result" style="display:none;margin-top:12px;"></div>
+</div>
+
 <!-- 음식 입력 섹션 -->
 <div style="background:var(--bg-card);border:1px solid rgba(251,191,36,.3);border-radius:16px;padding:16px;margin-bottom:14px;">
 <div style="font-size:13px;font-weight:800;color:#fbbf24;margin-bottom:4px;">🍽️ 음식 스캔 &amp; 분석</div>
-<div style="font-size:11px;color:rgba(240,230,200,.45);margin-bottom:12px;">카메라를 음식에 가져다 대고 📸 촬영 버튼을 누르세요</div>
+<div style="font-size:11px;color:#5b7a7a;margin-bottom:12px;">카메라를 음식에 가져다 대고 📸 촬영 버튼을 누르세요</div>
 <!-- 단계 안내 (카메라 미사용 시) -->
-<div id="food-step-guide" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;padding:12px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:10px;">
-<div style="font-size:11px;font-weight:700;color:rgba(251,191,36,.8);margin-bottom:4px;">📋 사용 방법 (3단계)</div>
-<div style="display:flex;align-items:center;gap:10px;">
-<div style="width:22px;height:22px;border-radius:50%;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fbbf24;flex-shrink:0;">1</div>
-<div style="font-size:12px;color:rgba(240,230,200,.75);">📷 <strong style="color:#fbbf24;">카메라 시작</strong> 버튼 → 음식에 가져다 대기</div>
+<div id="food-step-guide" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;padding:14px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.15);border-radius:10px;">
+<div style="font-size:12px;font-weight:800;color:#b45309;margin-bottom:6px;">🍽️ 음식 분석 — 3가지 방법 (편한 것 선택)</div>
+<div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(251,191,36,.06);border-radius:8px;">
+<div style="width:24px;height:24px;border-radius:50%;background:rgba(251,191,36,.2);border:1px solid rgba(251,191,36,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#b45309;flex-shrink:0;">📷</div>
+<div style="flex:1;"><div style="font-size:12px;color:#0d3a3a;font-weight:700;">카메라로 사진 찍기</div><div style="font-size:10.5px;color:#5b7a7a;line-height:1.5;">일반 카메라처럼 <b style="color:#b45309;">사진 한 장 찰칵</b>! ① 카메라 시작 → ② 음식이 화면에 보이면 🔴 촬영 → 끝. (들고 있을 필요 없어요)</div></div>
 </div>
-<div style="display:flex;align-items:center;gap:10px;">
-<div style="width:22px;height:22px;border-radius:50%;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#34d399;flex-shrink:0;">2</div>
-<div style="font-size:12px;color:rgba(240,230,200,.75);">🔴 <strong style="color:#34d399;">촬영</strong> 버튼 → 음식이 선명하게 보일 때 찰칵!</div>
+<div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(96,165,250,.06);border-radius:8px;">
+<div style="width:24px;height:24px;border-radius:50%;background:rgba(96,165,250,.2);border:1px solid rgba(96,165,250,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#0284c7;flex-shrink:0;">🖼️</div>
+<div style="flex:1;"><div style="font-size:12px;color:#0d3a3a;font-weight:700;">갤러리에서 사진 선택</div><div style="font-size:10.5px;color:#5b7a7a;line-height:1.5;">미리 찍어둔 사진으로 분석 → 나중에 천천히 확인할 때 편리</div></div>
 </div>
-<div style="display:flex;align-items:center;gap:10px;">
-<div style="width:22px;height:22px;border-radius:50%;background:rgba(167,139,250,.2);border:1px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#a78bfa;flex-shrink:0;">3</div>
-<div style="font-size:12px;color:rgba(240,230,200,.75);">⚡ <strong style="color:#a78bfa;">분석 시작</strong> → AI 영양·오행 분석 &amp; 맞춤 활동 처방</div>
+<div style="display:flex;align-items:flex-start;gap:10px;padding:9px;background:rgba(52,211,153,.06);border-radius:8px;">
+<div style="width:24px;height:24px;border-radius:50%;background:rgba(52,211,153,.2);border:1px solid rgba(52,211,153,.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#059669;flex-shrink:0;">⌨️</div>
+<div style="flex:1;"><div style="font-size:12px;color:#0d3a3a;font-weight:700;">음식명 직접 입력</div><div style="font-size:10.5px;color:#5b7a7a;line-height:1.5;">"삼겹살" 처럼 이름만 타이핑 → 가장 빠르고 간편 (사진 불필요)</div></div>
 </div>
-<div style="margin-top:4px;padding:6px 10px;background:rgba(96,165,250,.07);border-radius:7px;font-size:11px;color:rgba(96,165,250,.7);">
-          💡 갤러리에서 기존 사진을 불러와도 됩니다
-        </div>
+<div style="margin-top:4px;padding:8px 12px;background:rgba(5,150,105,.08);border-radius:7px;font-size:11px;color:#059669;line-height:1.5;">💡 셋 중 <b>어느 방법이든</b> 마지막에 <b>⚡ 분석 시작</b> 버튼을 누르면 결과가 나옵니다.</div>
 </div>
 <!-- 카메라 뷰 -->
 <div id="food-cam-wrap" style="position:relative;background:rgba(0,0,0,.85);border-radius:12px;overflow:hidden;margin-bottom:10px;min-height:180px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.08);">
@@ -8499,7 +8628,7 @@ var Q_POOL = {
 <div style="position:absolute;top:12px;right:12px;width:20px;height:20px;border-top:2px solid #34d399;border-right:2px solid #34d399;border-radius:2px;"></div>
 <div style="position:absolute;bottom:12px;left:12px;width:20px;height:20px;border-bottom:2px solid #34d399;border-left:2px solid #34d399;border-radius:2px;"></div>
 <div style="position:absolute;bottom:12px;right:12px;width:20px;height:20px;border-bottom:2px solid #34d399;border-right:2px solid #34d399;border-radius:2px;"></div>
-<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#34d399;letter-spacing:.1em;font-weight:700;text-shadow:0 0 8px rgba(52,211,153,.8);">● SCANNING</div>
+<div style="position:absolute;top:8px;left:50%;transform:translateX(-50%);font-size:10px;color:#34d399;letter-spacing:.1em;font-weight:700;text-shadow:0 0 8px rgba(52,211,153,.8);">📷 음식을 화면에 맞추고 🔴 촬영</div>
 </div>
 <!-- 미리보기 -->
 <div id="food-preview-wrap" style="display:none;width:100%;text-align:center;position:relative;">
@@ -8510,8 +8639,8 @@ var Q_POOL = {
 <!-- 초기 안내 -->
 <div id="food-cam-idle" style="text-align:center;padding:24px;">
 <div style="font-size:44px;margin-bottom:10px;">📷</div>
-<div style="font-size:13px;font-weight:700;color:rgba(240,230,200,.7);margin-bottom:6px;">카메라를 시작해주세요</div>
-<div style="font-size:11px;color:rgba(240,230,200,.35);">아래 버튼을 눌러 카메라를 켜거나<br/>갤러리에서 사진을 선택하세요</div>
+<div style="font-size:13px;font-weight:700;color:#3a5a5a;margin-bottom:6px;">카메라를 시작해주세요</div>
+<div style="font-size:11px;color:#7b9a9a;">아래 버튼을 눌러 카메라를 켜거나<br/>갤러리에서 사진을 선택하세요</div>
 </div>
 </div>
 <!-- 버튼 행 -->
@@ -8526,7 +8655,7 @@ var Q_POOL = {
 <input id="food-name-input" onkeydown="if(event.key==='Enter') foodAnalyze()" placeholder="또는 음식명 직접 입력 (예: 오레오, 삼겹살, 된장찌개...)" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(251,191,36,.25);border-radius:9px;padding:10px 14px;color:#e2e8f0;font-size:13px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <button onclick="foodAnalyze()" style="width:100%;padding:14px;background:linear-gradient(135deg,rgba(251,191,36,.28),rgba(212,168,67,.15));border:2px solid rgba(251,191,36,.75);border-radius:12px;color:#fbbf24;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.05em;">
-        ⚡ 분석 시작 — AI 영양·오행 분석 &amp; 활동 처방
+        ⚡ 분석 시작 — AI 영양·대사 분석 &amp; 맞춤 추천
       </button>
 </div>
 <!-- 분석 결과 -->
@@ -8543,7 +8672,7 @@ var Q_POOL = {
 </div>
 <div style="margin-left:auto;text-align:center;">
 <div id="food-res-cal" style="font-size:28px;font-weight:900;color:#fbbf24;font-family:'Orbitron',monospace;"></div>
-<div style="font-size:10px;color:rgba(240,230,200,.5);">kcal</div>
+<div style="font-size:10px;color:#5b7a7a;">kcal</div>
 </div>
 </div>
 <!-- 영양소 바 -->
@@ -8568,7 +8697,7 @@ var Q_POOL = {
 </div>
 <div id="food-log-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;"></div>
 <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;margin-bottom:10px;">
-<div style="font-size:12px;color:rgba(240,230,200,.7);">🔥 오늘 총 섭취 칼로리</div>
+<div style="font-size:12px;color:#3a5a5a;">🔥 오늘 총 섭취 칼로리</div>
 <div style="display:flex;align-items:baseline;gap:3px;">
 <div id="food-log-total" style="font-size:24px;font-weight:900;color:#fbbf24;font-family:'Orbitron',monospace;">0</div>
 <div style="font-size:11px;color:rgba(251,191,36,.6);">kcal</div>
@@ -8588,7 +8717,7 @@ var Q_POOL = {
 </div>
 <div id="food-bio-current" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:8px 10px;background:rgba(52,211,153,.05);border-radius:8px;border:1px solid rgba(52,211,153,.15);"></div>
 <div id="food-bio-predictions" style="display:flex;flex-direction:column;gap:6px;"></div>
-<div style="margin-top:10px;font-size:9px;color:rgba(240,230,200,.25);text-align:right;">⚕️ 본 예측은 역학·생체 에너지 참고용입니다</div>
+<div style="margin-top:10px;font-size:9px;color:#8baaaa;text-align:right;">⚕️ 본 예측은 역학·생체 에너지 참고용입니다</div>
 </div>
 <!-- 로딩 -->
 <div id="food-loading" style="display:none;text-align:center;padding:30px;">
@@ -8601,13 +8730,13 @@ var Q_POOL = {
 <span style="font-size:20px;">🤖</span>
 <div>
 <div style="font-size:13px;font-weight:800;color:#34d399;">음식 궁합 AI 영양사</div>
-<div style="font-size:10px;color:rgba(52,211,153,.6);">분석 결과 · 병명 · 오행을 알고 있는 맞춤 상담</div>
+<div style="font-size:10px;color:rgba(52,211,153,.6);">분석 결과 · 병명 · 기저질환을 아는 맞춤 상담</div>
 </div>
 <button onclick="foodChatClear()" style="margin-left:auto;margin-right:8px;padding:3px 8px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.25);border-radius:6px;color:rgba(248,113,113,.7);font-size:10px;cursor:pointer;font-family:inherit;">🗑 대화삭제</button>
 <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;">
 <button onclick="foodAskAI('대체 음식 추천해줘')" style="padding:3px 8px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);border-radius:6px;color:#34d399;font-size:10px;cursor:pointer;font-family:inherit;">🥗 대체 음식</button>
 <button onclick="foodAskAI('오늘 먹은 음식 종합 평가해줘')" style="padding:3px 8px;background:rgba(212,168,67,.12);border:1px solid rgba(212,168,67,.3);border-radius:6px;color:#d4a843;font-size:10px;cursor:pointer;font-family:inherit;">📊 종합 평가</button>
-<button onclick="foodAskAI('내 오행에 맞는 음식 뭐야?')" style="padding:3px 8px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:6px;color:#a78bfa;font-size:10px;cursor:pointer;font-family:inherit;">🔮 오행 음식</button>
+<button onclick="foodAskAI('내 컨디션에 맞는 음식 뭐야?')" style="padding:3px 8px;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:6px;color:#a78bfa;font-size:10px;cursor:pointer;font-family:inherit;">🧬 대사 맞춤</button>
 </div>
 </div>
 <div id="food-chat-messages" style="height:260px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin;scrollbar-color:rgba(52,211,153,0.3) transparent;"></div>
@@ -8617,7 +8746,1930 @@ var Q_POOL = {
 </div>
 </div>
 </div>
-</div><!-- /page-food -->
+</div>
+<script>
+/* ★ 박입 193 — 음식 전용 간단 rPPG 엔진 (얼굴 30초 + 호흡 가이드) */
+var _frppgStream=null, _frppgRAF=null, _frppgTimer=null, _frppgBreathTimer=null;
+var _frppgSignal=[], _frppgT0=0;
+
+function frppgStart(){
+  if(_frppgStream){ frppgStop(); return; }
+  var video=document.getElementById('frppg-video');
+  var idle=document.getElementById('frppg-idle');
+  var overlay=document.getElementById('frppg-overlay');
+  var btn=document.getElementById('frppg-btn');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
+    .then(function(stream){
+      _frppgStream=stream; video.srcObject=stream; video.style.display='block';
+      if(overlay) overlay.style.display='block';
+      if(idle) idle.style.display='none';
+      btn.textContent='⏹ 측정 중단';
+      btn.style.borderColor='rgba(248,113,113,.5)'; btn.style.color='#f87171';
+      _frppgSignal=[]; _frppgT0=Date.now();
+      frppgBreathCycle();      // 호흡 가이드 시작
+      frppgSampleLoop(video);  // 신호 수집
+      frppgCountdown(30);      // 30초 카운트다운
+    }).catch(function(){
+      alert('카메라 접근이 거부되었습니다.\n📱 설정 > 카메라 권한을 허용해 주세요.');
+    });
+}
+
+function frppgStop(){
+  if(_frppgStream){ _frppgStream.getTracks().forEach(function(t){t.stop();}); _frppgStream=null; }
+  if(_frppgRAF) cancelAnimationFrame(_frppgRAF);
+  if(_frppgTimer) clearInterval(_frppgTimer);
+  if(_frppgBreathTimer) clearTimeout(_frppgBreathTimer);
+  var video=document.getElementById('frppg-video');
+  var overlay=document.getElementById('frppg-overlay');
+  var idle=document.getElementById('frppg-idle');
+  var btn=document.getElementById('frppg-btn');
+  if(video) video.style.display='none';
+  if(overlay) overlay.style.display='none';
+  if(idle) idle.style.display='block';
+  if(btn){ btn.textContent='💗 30초 측정 시작'; btn.style.borderColor='rgba(52,211,153,.6)'; btn.style.color='#059669'; }
+}
+
+// 호흡 가이드 (들이쉬기 4초 → 내쉬기 6초 반복)
+function frppgBreathCycle(){
+  var ball=document.getElementById('frppg-breath');
+  var txt=document.getElementById('frppg-breath-txt');
+  function inhale(){
+    if(!_frppgStream) return;
+    if(txt) txt.textContent='🌬️ 들이쉬기';
+    if(ball){ ball.style.transitionDuration='4s'; ball.style.width='130px'; ball.style.height='130px'; ball.style.background='rgba(56,189,248,.3)'; }
+    _frppgBreathTimer=setTimeout(exhale,4000);
+  }
+  function exhale(){
+    if(!_frppgStream) return;
+    if(txt) txt.textContent='😮‍💨 내쉬기';
+    if(ball){ ball.style.transitionDuration='6s'; ball.style.width='50px'; ball.style.height='50px'; ball.style.background='rgba(52,211,153,.25)'; }
+    _frppgBreathTimer=setTimeout(inhale,6000);
+  }
+  inhale();
+}
+
+// 신호 수집 (이마/볼 영역 녹색 채널 평균)
+function frppgSampleLoop(video){
+  var canvas=document.getElementById('frppg-canvas');
+  var ctx=canvas.getContext('2d',{willReadFrequently:true});
+  function loop(){
+    if(!_frppgStream) return;
+    if(video.videoWidth>0){
+      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+      ctx.drawImage(video,0,0);
+      // 화면 중앙(얼굴) 영역 샘플
+      var cx=Math.floor(canvas.width*0.35), cy=Math.floor(canvas.height*0.25);
+      var w=Math.floor(canvas.width*0.3), h=Math.floor(canvas.height*0.35);
+      try{
+        var d=ctx.getImageData(cx,cy,w,h).data;
+        var gSum=0,n=0;
+        for(var i=0;i<d.length;i+=16){ gSum+=d[i+1]; n++; } // 녹색 채널
+        _frppgSignal.push({t:Date.now()-_frppgT0, v:gSum/n});
+      }catch(e){}
+    }
+    _frppgRAF=requestAnimationFrame(loop);
+  }
+  loop();
+}
+
+// 카운트다운 + 완료
+function frppgCountdown(sec){
+  var el=document.getElementById('frppg-timer');
+  var remain=sec;
+  if(el) el.textContent=remain;
+  _frppgTimer=setInterval(function(){
+    remain--;
+    if(el) el.textContent=remain>0?remain:'✓';
+    if(remain<=0){ clearInterval(_frppgTimer); frppgFinish(); }
+  },1000);
+}
+
+// 심박 계산 (피크 검출)
+function frppgComputeBPM(signal){
+  if(signal.length<60) return 0;
+  // 값만 추출 + 디트렌드
+  var vals=signal.map(function(s){return s.v;});
+  var mean=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+  var det=vals.map(function(v){return v-mean;});
+  // 표준편차
+  var sd=Math.sqrt(det.reduce(function(a,b){return a+b*b;},0)/det.length);
+  if(sd<0.01) return 0; // 신호 너무 약함 (얼굴 없음)
+  var thr=sd*0.5;
+  // 피크 검출
+  var peaks=[], W=3;
+  for(var i=W;i<det.length-W;i++){
+    if(det[i]<thr) continue;
+    var isPk=true;
+    for(var w=1;w<=W;w++){ if(det[i]<det[i-w]||det[i]<det[i+w]){isPk=false;break;} }
+    if(isPk){ peaks.push(signal[i].t); i+=W; }
+  }
+  if(peaks.length<3) return 0;
+  // 평균 간격 → BPM
+  var intervals=[];
+  for(var p=1;p<peaks.length;p++){ intervals.push(peaks[p]-peaks[p-1]); }
+  var avgMs=intervals.reduce(function(a,b){return a+b;},0)/intervals.length;
+  var bpm=Math.round(60000/avgMs);
+  // HRV(간이): 간격 표준편차
+  var iMean=avgMs;
+  var hrv=Math.round(Math.sqrt(intervals.reduce(function(a,b){return a+(b-iMean)*(b-iMean);},0)/intervals.length));
+  return {bpm:(bpm>=45&&bpm<=180)?bpm:0, hrv:hrv, quality:peaks.length};
+}
+
+function frppgFinish(){
+  var sig=_frppgSignal.slice();
+  frppgStop();
+  var r=frppgComputeBPM(sig);
+  var resEl=document.getElementById('frppg-result');
+  if(!resEl) return;
+
+  if(!r || r.bpm===0){
+    resEl.style.display='block';
+    resEl.innerHTML='<div style="padding:12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:10px;font-size:12px;color:#b91c1c;line-height:1.6;">⚠️ 측정 실패 — 얼굴이 잘 안 잡혔어요. 밝은 곳에서 얼굴을 원 안에 맞추고 다시 시도해주세요.</div>';
+    return;
+  }
+
+  // 식전/식후 판정 (이전 측정 있으면 식후로 비교)
+  var prev=window._frppgPre;
+  var now={bpm:r.bpm, hrv:r.hrv, ts:Date.now()};
+  var isPost = prev && (now.ts - prev.ts < 3*3600*1000); // 3시간 이내면 식후로
+
+  // 음식 분석 엔진에 측정값 연동 (가짜 점수 방지 → 실측 반영)
+  window.BS = window.BS || {};
+  window.BS.bpm=r.bpm; window.BS.hrv=r.hrv; window.BS.fci=Math.min(95,50+Math.round(r.quality)); 
+  window._baiScanned=true;
+
+  var html='';
+  if(!isPost){
+    // 식전 측정
+    window._frppgPre=now;
+    html='<div style="padding:14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:12px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:10px;">✅ 식전 측정 완료</div>'
+      +'<div style="display:flex;gap:10px;margin-bottom:10px;">'
+      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.5);border-radius:10px;"><div style="font-size:22px;font-weight:900;color:#059669;font-family:\'Orbitron\',monospace;">'+r.bpm+'</div><div style="font-size:10px;color:#5b7a7a;">심박 BPM</div></div>'
+      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.5);border-radius:10px;"><div style="font-size:22px;font-weight:900;color:#0284c7;font-family:\'Orbitron\',monospace;">'+r.hrv+'</div><div style="font-size:10px;color:#5b7a7a;">HRV(참고)</div></div></div>'
+      +'<div style="font-size:11px;color:#3a5a5a;line-height:1.5;padding:8px 10px;background:rgba(56,189,248,.08);border-radius:8px;">🍽️ 이제 음식을 드신 후 <b>30분 뒤 다시 측정</b>하면, 이 음식이 내 몸에 준 변화를 비교해 드립니다.</div></div>';
+  } else {
+    // 식후 측정 → 비교
+    var dBpm=now.bpm-prev.bpm, dHrv=now.hrv-prev.hrv;
+    var msg='', mColor='#059669';
+    if(dBpm>15){ msg='식후 심박이 다소 올랐습니다. 소화 활동으로 자연스러운 변화일 수 있으나, 가벼운 산책을 권장합니다.'; mColor='#b45309'; }
+    else if(dBpm<-5){ msg='식후 심박이 안정적입니다. 편안한 상태로 소화가 진행되고 있어요.'; mColor='#059669'; }
+    else{ msg='식전과 비슷한 수준으로 안정적입니다.'; mColor='#059669'; }
+    html='<div style="padding:14px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.3);border-radius:12px;">'
+      +'<div style="font-size:12px;font-weight:800;color:#0284c7;margin-bottom:10px;">📊 식전 → 식후 변화</div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:10px;">'
+      +'<div style="flex:1;text-align:center;padding:8px;background:rgba(255,255,255,.5);border-radius:9px;"><div style="font-size:10px;color:#5b7a7a;">심박</div><div style="font-size:15px;font-weight:800;color:#3a5a5a;">'+prev.bpm+'→'+now.bpm+'</div><div style="font-size:11px;font-weight:700;color:'+(dBpm>0?'#f87171':'#059669')+';">'+(dBpm>0?'+':'')+dBpm+'</div></div>'
+      +'<div style="flex:1;text-align:center;padding:8px;background:rgba(255,255,255,.5);border-radius:9px;"><div style="font-size:10px;color:#5b7a7a;">HRV</div><div style="font-size:15px;font-weight:800;color:#3a5a5a;">'+prev.hrv+'→'+now.hrv+'</div><div style="font-size:11px;font-weight:700;color:'+(dHrv>0?'#059669':'#f87171')+';">'+(dHrv>0?'+':'')+dHrv+'</div></div></div>'
+      +'<div style="font-size:11px;color:'+mColor+';line-height:1.6;padding:8px 10px;background:rgba(255,255,255,.4);border-radius:8px;">'+msg+'</div>'
+      +'<div style="font-size:9px;color:#7b9a9a;margin-top:8px;line-height:1.5;">⚠️ 식후 변화는 음식 외 활동·환경 요인도 영향을 줍니다. 참고용 기록입니다.</div></div>';
+    window._frppgPre=null; // 비교 후 초기화
+  }
+  resEl.style.display='block';
+  resEl.innerHTML=html;
+  resEl.scrollIntoView({behavior:'smooth',block:'center'});
+}
+window.frppgStart=frppgStart;
+</script>
+
+<script>
+/* ★ 박입 182 — FULI 음식 궁합 엔진 (FOOD_DB + 함수 전체) */
+var FOOD_DB = {
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍚 한식 · 밥류 (20)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '흰쌀밥':{cal:190,c:42,p:4,f:0,na:3,oh:3,emoji:'🍚',risk:['당뇨','비만']},
+  '현미밥':{cal:160,c:34,p:4,f:1,na:3,oh:3,emoji:'🍚',risk:['당뇨']},
+  '잡곡밥':{cal:175,c:38,p:5,f:1,na:3,oh:3,emoji:'🍚',risk:['당뇨']},
+  '비빔밥':{cal:480,c:72,p:18,f:12,na:800,oh:2,emoji:'🥗',risk:['당뇨']},
+  '돌솥비빔밥':{cal:520,c:78,p:20,f:14,na:900,oh:2,emoji:'🥘',risk:['당뇨']},
+  '산채비빔밥':{cal:440,c:70,p:16,f:10,na:750,oh:2,emoji:'🥗',risk:[]},
+  '육회비빔밥':{cal:510,c:65,p:28,f:16,na:850,oh:1,emoji:'🥗',risk:['통풍']},
+  '볶음밥':{cal:420,c:65,p:12,f:14,na:900,oh:3,emoji:'🍚',risk:['당뇨','비만']},
+  '김치볶음밥':{cal:440,c:65,p:14,f:16,na:1200,oh:1,emoji:'🍚',risk:['고혈압','당뇨']},
+  '새우볶음밥':{cal:430,c:62,p:18,f:14,na:950,oh:4,emoji:'🍚',risk:['고혈압']},
+  '낙지볶음밥':{cal:420,c:60,p:20,f:14,na:1100,oh:1,emoji:'🍚',risk:['고혈압','위염']},
+  '오므라이스':{cal:520,c:65,p:18,f:22,na:900,oh:3,emoji:'🍳',risk:['비만','고지혈증']},
+  '김밥':{cal:340,c:52,p:12,f:10,na:780,oh:3,emoji:'🍙',risk:['고혈압']},
+  '참치김밥':{cal:370,c:52,p:16,f:12,na:800,oh:4,emoji:'🍙',risk:['고혈압']},
+  '소불고기덮밥':{cal:520,c:70,p:28,f:16,na:1000,oh:1,emoji:'🍚',risk:['고지혈증']},
+  '제육덮밥':{cal:540,c:68,p:30,f:20,na:1100,oh:1,emoji:'🍚',risk:['고지혈증','비만']},
+  '참치마요덮밥':{cal:480,c:60,p:22,f:18,na:850,oh:4,emoji:'🍚',risk:[]},
+  '연어덮밥':{cal:490,c:58,p:28,f:16,na:800,oh:4,emoji:'🍚',risk:[]},
+  '규동':{cal:480,c:62,p:25,f:16,na:1100,oh:3,emoji:'🍚',risk:['당뇨','고혈압']},
+  '가츠동':{cal:560,c:68,p:28,f:22,na:1000,oh:3,emoji:'🍚',risk:['비만']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥩 한식 · 구이·찜류 (30)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '삼겹살':{cal:520,c:0,p:28,f:44,na:500,oh:1,emoji:'🥩',risk:['고지혈증','비만','고혈압','간질환']},
+  '목살':{cal:480,c:0,p:30,f:40,na:480,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '항정살':{cal:510,c:0,p:26,f:44,na:450,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '오겹살':{cal:540,c:0,p:26,f:48,na:500,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '갈비구이':{cal:420,c:5,p:38,f:28,na:900,oh:1,emoji:'🥩',risk:['고지혈증','통풍']},
+  '양념갈비':{cal:450,c:18,p:36,f:26,na:1100,oh:1,emoji:'🥩',risk:['고지혈증','고혈압']},
+  '생갈비':{cal:400,c:0,p:38,f:28,na:400,oh:1,emoji:'🥩',risk:['고지혈증','통풍']},
+  '불고기':{cal:280,c:8,p:32,f:14,na:800,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '소불고기':{cal:300,c:10,p:34,f:14,na:850,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '차돌구이':{cal:480,c:0,p:22,f:44,na:400,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '꽃등심':{cal:450,c:0,p:28,f:38,na:380,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '안창살':{cal:320,c:0,p:32,f:22,na:380,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '닭갈비':{cal:320,c:18,p:35,f:14,na:1300,oh:1,emoji:'🍗',risk:['고혈압','위염']},
+  '뼈없는닭갈비':{cal:300,c:16,p:36,f:12,na:1200,oh:1,emoji:'🍗',risk:['고혈압']},
+  '닭구이':{cal:260,c:0,p:38,f:12,na:600,oh:2,emoji:'🍗',risk:[]},
+  '오리구이':{cal:350,c:0,p:28,f:26,na:550,oh:1,emoji:'🦆',risk:['고지혈증']},
+  '양념오리':{cal:380,c:12,p:26,f:26,na:1000,oh:1,emoji:'🦆',risk:['고혈압','고지혈증']},
+  '훈제오리':{cal:300,c:2,p:26,f:20,na:600,oh:1,emoji:'🦆',risk:['고지혈증']},
+  '족발':{cal:380,c:0,p:38,f:24,na:1200,oh:4,emoji:'🍖',risk:['고지혈증','고혈압']},
+  '앞다리살족발':{cal:350,c:0,p:40,f:20,na:1100,oh:4,emoji:'🍖',risk:['고지혈증']},
+  '보쌈':{cal:320,c:2,p:36,f:18,na:900,oh:4,emoji:'🍖',risk:['고지혈증']},
+  '수육':{cal:300,c:0,p:38,f:16,na:800,oh:4,emoji:'🥩',risk:['고지혈증']},
+  '닭볶음탕':{cal:380,c:18,p:32,f:20,na:1400,oh:1,emoji:'🍗',risk:['고혈압']},
+  '닭찜':{cal:350,c:15,p:34,f:18,na:1200,oh:1,emoji:'🍗',risk:['고혈압']},
+  '갈비찜':{cal:480,c:20,p:40,f:28,na:1300,oh:1,emoji:'🥘',risk:['고지혈증','고혈압']},
+  '아귀찜':{cal:280,c:12,p:32,f:12,na:1500,oh:1,emoji:'🐟',risk:['고혈압']},
+  '코다리찜':{cal:240,c:10,p:30,f:8,na:1200,oh:4,emoji:'🐟',risk:['고혈압']},
+  '간장게장':{cal:180,c:4,p:22,f:8,na:1600,oh:4,emoji:'🦀',risk:['고혈압','통풍','신장질환']},
+  '양념게장':{cal:200,c:12,p:20,f:8,na:1500,oh:1,emoji:'🦀',risk:['고혈압','위염']},
+  '꽃게찜':{cal:160,c:2,p:24,f:5,na:800,oh:4,emoji:'🦀',risk:['통풍']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥘 한식 · 볶음·무침·전 (20)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '제육볶음':{cal:380,c:12,p:30,f:24,na:1100,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '두루치기':{cal:360,c:10,p:28,f:22,na:1200,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '낙지볶음':{cal:180,c:8,p:22,f:6,na:1400,oh:1,emoji:'🐙',risk:['고혈압','위염']},
+  '오징어볶음':{cal:200,c:10,p:24,f:7,na:1300,oh:1,emoji:'🦑',risk:['고혈압','위염']},
+  '쭈꾸미볶음':{cal:190,c:8,p:22,f:7,na:1350,oh:1,emoji:'🐙',risk:['고혈압','위염']},
+  '오삼불고기':{cal:350,c:15,p:28,f:20,na:1200,oh:1,emoji:'🦑',risk:['고혈압']},
+  '두부김치':{cal:280,c:10,p:18,f:16,na:900,oh:1,emoji:'🟫',risk:['고혈압']},
+  '골뱅이무침':{cal:220,c:22,p:18,f:6,na:1000,oh:4,emoji:'🐚',risk:['고혈압','통풍']},
+  '잡채':{cal:380,c:52,p:12,f:14,na:800,oh:3,emoji:'🍜',risk:['당뇨']},
+  '파전':{cal:350,c:42,p:10,f:16,na:700,oh:2,emoji:'🥞',risk:['비만']},
+  '해물파전':{cal:380,c:40,p:18,f:18,na:800,oh:2,emoji:'🥞',risk:['비만']},
+  '김치전':{cal:320,c:38,p:8,f:16,na:750,oh:1,emoji:'🥞',risk:['고혈압','비만']},
+  '녹두전':{cal:340,c:36,p:14,f:16,na:650,oh:2,emoji:'🥞',risk:['비만']},
+  '빈대떡':{cal:350,c:38,p:14,f:16,na:700,oh:2,emoji:'🥞',risk:['비만']},
+  '육전':{cal:320,c:20,p:22,f:18,na:600,oh:1,emoji:'🥩',risk:['비만','고지혈증']},
+  '계란말이':{cal:180,c:2,p:14,f:13,na:400,oh:0,emoji:'🥚',risk:['고지혈증']},
+  '동그랑땡':{cal:220,c:12,p:16,f:12,na:600,oh:0,emoji:'🥚',risk:['고지혈증']},
+  '두부조림':{cal:200,c:8,p:16,f:12,na:700,oh:2,emoji:'🟫',risk:[]},
+  '감자조림':{cal:160,c:28,p:3,f:4,na:600,oh:3,emoji:'🥔',risk:['당뇨']},
+  '장조림':{cal:180,c:8,p:22,f:7,na:1400,oh:4,emoji:'🥩',risk:['고혈압','신장질환']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍜 한식 · 면류 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '냉면':{cal:380,c:72,p:14,f:4,na:1400,oh:4,emoji:'🍜',risk:['고혈압']},
+  '평양냉면':{cal:360,c:68,p:14,f:3,na:1300,oh:4,emoji:'🍜',risk:['고혈압']},
+  '함흥냉면':{cal:380,c:70,p:14,f:5,na:1350,oh:4,emoji:'🍜',risk:['고혈압']},
+  '비빔냉면':{cal:420,c:78,p:14,f:6,na:1300,oh:1,emoji:'🍜',risk:['위염','고혈압']},
+  '막국수':{cal:360,c:65,p:12,f:6,na:900,oh:2,emoji:'🍜',risk:[]},
+  '쫄면':{cal:400,c:72,p:12,f:8,na:1200,oh:1,emoji:'🍜',risk:['위염','고혈압']},
+  '비빔국수':{cal:380,c:70,p:12,f:7,na:1000,oh:1,emoji:'🍜',risk:['고혈압']},
+  '잔치국수':{cal:380,c:68,p:12,f:6,na:1100,oh:3,emoji:'🍜',risk:['당뇨']},
+  '칼국수':{cal:440,c:78,p:16,f:6,na:1200,oh:3,emoji:'🍜',risk:['고혈압','당뇨']},
+  '수제비':{cal:400,c:72,p:12,f:7,na:1100,oh:3,emoji:'🍜',risk:['당뇨']},
+  '라면':{cal:500,c:75,p:10,f:16,na:1900,oh:4,emoji:'🍜',risk:['고혈압','당뇨','비만','신장질환']},
+  '신라면':{cal:505,c:74,p:10,f:17,na:1930,oh:1,emoji:'🍜',risk:['고혈압','위염','신장질환']},
+  '짜파구리':{cal:620,c:88,p:14,f:24,na:2200,oh:3,emoji:'🍜',risk:['고혈압','비만']},
+  '비빔면':{cal:400,c:72,p:10,f:8,na:1300,oh:1,emoji:'🍜',risk:['위염','고혈압']},
+  '잡채':{cal:380,c:52,p:12,f:14,na:800,oh:3,emoji:'🍜',risk:['당뇨']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🐟 한식 · 해산물·회 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '모듬회':{cal:250,c:2,p:38,f:8,na:500,oh:4,emoji:'🐟',risk:['통풍']},
+  '광어회':{cal:180,c:0,p:30,f:5,na:300,oh:4,emoji:'🐟',risk:[]},
+  '연어회':{cal:208,c:0,p:28,f:12,na:300,oh:4,emoji:'🐟',risk:[]},
+  '참치회':{cal:190,c:0,p:30,f:6,na:350,oh:4,emoji:'🐟',risk:['통풍']},
+  '우럭회':{cal:170,c:0,p:28,f:5,na:280,oh:4,emoji:'🐟',risk:[]},
+  '전복회':{cal:100,c:6,p:18,f:1,na:250,oh:4,emoji:'🐚',risk:[]},
+  '조개구이':{cal:120,c:4,p:18,f:3,na:400,oh:4,emoji:'🐚',risk:['통풍']},
+  '가리비구이':{cal:100,c:3,p:18,f:1,na:300,oh:4,emoji:'🐚',risk:[]},
+  '해물모듬':{cal:200,c:8,p:30,f:5,na:700,oh:4,emoji:'🦐',risk:['고혈압','통풍']},
+  '새우구이':{cal:150,c:0,p:28,f:3,na:400,oh:4,emoji:'🦐',risk:['통풍']},
+  '고등어구이':{cal:250,c:0,p:30,f:14,na:400,oh:4,emoji:'🐟',risk:['통풍']},
+  '갈치구이':{cal:220,c:0,p:28,f:12,na:500,oh:4,emoji:'🐟',risk:[]},
+  '삼치구이':{cal:230,c:0,p:28,f:13,na:450,oh:4,emoji:'🐟',risk:[]},
+  '굴':{cal:70,c:5,p:8,f:2,na:280,oh:4,emoji:'🦪',risk:['통풍']},
+  '오징어통구이':{cal:180,c:4,p:28,f:4,na:600,oh:1,emoji:'🦑',risk:['고혈압']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥬 한식 · 채소·반찬 (10)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '김치':{cal:20,c:3,p:1,f:0,na:600,oh:1,emoji:'🥬',risk:['고혈압','신장질환']},
+  '깍두기':{cal:25,c:4,p:1,f:0,na:550,oh:1,emoji:'🥕',risk:['고혈압']},
+  '시금치나물':{cal:50,c:6,p:3,f:2,na:300,oh:2,emoji:'🥬',risk:[]},
+  '고사리나물':{cal:60,c:8,p:3,f:2,na:280,oh:2,emoji:'🌿',risk:[]},
+  '도라지나물':{cal:55,c:9,p:2,f:1,na:250,oh:2,emoji:'🌿',risk:[]},
+  '무생채':{cal:35,c:7,p:1,f:0,na:350,oh:0,emoji:'🥕',risk:[]},
+  '콩나물':{cal:30,c:4,p:3,f:0,na:200,oh:2,emoji:'🌿',risk:[]},
+  '계란찜':{cal:150,c:2,p:12,f:10,na:500,oh:0,emoji:'🥚',risk:['고지혈증']},
+  '두부':{cal:160,c:6,p:16,f:8,na:100,oh:2,emoji:'🟫',risk:[]},
+  '닭가슴살':{cal:165,c:0,p:35,f:3,na:220,oh:2,emoji:'🍗',risk:[]},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥡 중식 · 면류 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '짜장면':{cal:650,c:90,p:18,f:22,na:1800,oh:3,emoji:'🍜',risk:['고혈압','위염','당뇨','비만']},
+  '간짜장':{cal:700,c:92,p:20,f:26,na:1900,oh:3,emoji:'🍜',risk:['고혈압','비만']},
+  '삼선짜장':{cal:720,c:90,p:26,f:26,na:2000,oh:3,emoji:'🍜',risk:['고혈압','비만']},
+  '사천짜장':{cal:680,c:88,p:20,f:26,na:2000,oh:1,emoji:'🍜',risk:['고혈압','위염']},
+  '짬뽕':{cal:580,c:70,p:25,f:20,na:2200,oh:1,emoji:'🍜',risk:['고혈압','위염','역류성식도염']},
+  '삼선짬뽕':{cal:600,c:68,p:32,f:20,na:2300,oh:1,emoji:'🍜',risk:['고혈압','위염']},
+  '해물짬뽕':{cal:560,c:65,p:30,f:18,na:2100,oh:1,emoji:'🍜',risk:['고혈압','통풍']},
+  '울면':{cal:480,c:68,p:20,f:14,na:1800,oh:3,emoji:'🍜',risk:['고혈압']},
+  '쟁반짜장':{cal:800,c:110,p:28,f:26,na:2200,oh:3,emoji:'🍜',risk:['고혈압','비만']},
+  '냉짬뽕':{cal:540,c:72,p:24,f:16,na:2000,oh:1,emoji:'🍜',risk:['고혈압']},
+  '탕면':{cal:500,c:70,p:18,f:16,na:1900,oh:4,emoji:'🍜',risk:['고혈압']},
+  '기스면':{cal:460,c:66,p:16,f:14,na:1700,oh:3,emoji:'🍜',risk:['고혈압']},
+  '볶음짬뽕':{cal:620,c:72,p:28,f:24,na:2100,oh:1,emoji:'🍜',risk:['고혈압','위염']},
+  '짜장밥':{cal:620,c:88,p:18,f:20,na:1700,oh:3,emoji:'🍚',risk:['고혈압','위염','당뇨']},
+  '짬뽕밥':{cal:580,c:75,p:24,f:18,na:2000,oh:1,emoji:'🍚',risk:['고혈압','위염']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥢 중식 · 볶음·찜·만두 (30)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '탕수육':{cal:480,c:45,p:22,f:24,na:900,oh:3,emoji:'🍖',risk:['비만','고지혈증']},
+  '소스탕수육':{cal:520,c:55,p:22,f:26,na:1000,oh:3,emoji:'🍖',risk:['비만','고지혈증']},
+  '찹쌀탕수육':{cal:540,c:60,p:22,f:26,na:950,oh:3,emoji:'🍖',risk:['비만','고지혈증']},
+  '깐풍기':{cal:420,c:30,p:28,f:22,na:1100,oh:1,emoji:'🍗',risk:['비만']},
+  '깐소새우':{cal:380,c:28,p:26,f:18,na:1200,oh:0,emoji:'🦐',risk:['고혈압']},
+  '라조기':{cal:400,c:20,p:28,f:22,na:1200,oh:1,emoji:'🍗',risk:['위염','고혈압']},
+  '마파두부':{cal:280,c:12,p:16,f:18,na:1200,oh:1,emoji:'🥘',risk:['고혈압','위염']},
+  '팔보채':{cal:300,c:18,p:28,f:12,na:1300,oh:4,emoji:'🦐',risk:['고혈압']},
+  '양장피':{cal:350,c:30,p:22,f:16,na:1100,oh:0,emoji:'🥗',risk:['고혈압']},
+  '유린기':{cal:380,c:18,p:28,f:22,na:900,oh:0,emoji:'🍗',risk:['비만']},
+  '궁보계정':{cal:360,c:16,p:26,f:22,na:1000,oh:1,emoji:'🍗',risk:['위염']},
+  '동파육':{cal:580,c:8,p:30,f:48,na:1200,oh:1,emoji:'🥩',risk:['고지혈증','비만']},
+  '오향장육':{cal:320,c:6,p:32,f:18,na:1000,oh:4,emoji:'🥩',risk:['고지혈증']},
+  '어향가지볶음':{cal:200,c:16,p:6,f:12,na:900,oh:2,emoji:'🍆',risk:['고혈압']},
+  '중국식볶음밥':{cal:480,c:65,p:16,f:18,na:1100,oh:3,emoji:'🍚',risk:['비만']},
+  '삼선볶음밥':{cal:500,c:65,p:22,f:18,na:1200,oh:3,emoji:'🍚',risk:['비만']},
+  '마파두부덮밥':{cal:520,c:70,p:20,f:18,na:1400,oh:1,emoji:'🍚',risk:['고혈압','위염']},
+  '깐풍기덮밥':{cal:560,c:68,p:28,f:22,na:1200,oh:1,emoji:'🍚',risk:['비만']},
+  '물만두':{cal:280,c:32,p:14,f:10,na:700,oh:3,emoji:'🥟',risk:[]},
+  '군만두':{cal:350,c:36,p:14,f:16,na:700,oh:3,emoji:'🥟',risk:['비만']},
+  '찐만두':{cal:280,c:32,p:14,f:10,na:650,oh:3,emoji:'🥟',risk:[]},
+  '왕만두':{cal:320,c:36,p:16,f:12,na:700,oh:3,emoji:'🥟',risk:[]},
+  '샤오롱바오':{cal:300,c:30,p:16,f:12,na:650,oh:3,emoji:'🥟',risk:[]},
+  '딤섬':{cal:260,c:28,p:12,f:10,na:600,oh:3,emoji:'🥟',risk:[]},
+  '유산슬':{cal:320,c:20,p:24,f:16,na:1100,oh:4,emoji:'🦑',risk:['고혈압']},
+  '전가복':{cal:350,c:16,p:30,f:18,na:1200,oh:4,emoji:'🦐',risk:['고혈압','통풍']},
+  '홍소두부':{cal:220,c:10,p:14,f:14,na:900,oh:1,emoji:'🟫',risk:['고혈압']},
+  '빠스고구마':{cal:420,c:68,p:3,f:16,na:80,oh:3,emoji:'🍠',risk:['당뇨','비만']},
+  '빠스사과':{cal:380,c:62,p:2,f:14,na:60,oh:2,emoji:'🍎',risk:['당뇨','비만']},
+  '코스요리':{cal:900,c:80,p:50,f:40,na:2500,oh:3,emoji:'🥢',risk:['비만','고혈압','고지혈증']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍝 양식 · 파스타 (20)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '카르보나라':{cal:680,c:70,p:22,f:36,na:900,oh:3,emoji:'🍝',risk:['비만','고지혈증']},
+  '봉골레파스타':{cal:520,c:68,p:20,f:18,na:800,oh:4,emoji:'🍝',risk:['비만']},
+  '알리오올리오':{cal:500,c:68,p:14,f:18,na:600,oh:0,emoji:'🍝',risk:['비만']},
+  '아마트리치아나':{cal:540,c:70,p:18,f:20,na:850,oh:1,emoji:'🍝',risk:['비만']},
+  '토마토파스타':{cal:480,c:70,p:16,f:14,na:750,oh:1,emoji:'🍝',risk:['비만']},
+  '크림파스타':{cal:620,c:65,p:18,f:30,na:800,oh:0,emoji:'🍝',risk:['비만','고지혈증']},
+  '로제파스타':{cal:580,c:65,p:18,f:26,na:800,oh:1,emoji:'🍝',risk:['비만']},
+  '불닭파스타':{cal:560,c:68,p:20,f:22,na:1100,oh:1,emoji:'🍝',risk:['위염','고혈압']},
+  '해물파스타':{cal:520,c:66,p:24,f:18,na:850,oh:4,emoji:'🍝',risk:['고혈압']},
+  '베이컨파스타':{cal:600,c:66,p:20,f:28,na:1000,oh:1,emoji:'🍝',risk:['비만','고혈압']},
+  '버섯파스타':{cal:480,c:66,p:14,f:18,na:700,oh:2,emoji:'🍝',risk:['비만']},
+  '명란파스타':{cal:520,c:65,p:20,f:20,na:1100,oh:4,emoji:'🍝',risk:['고혈압']},
+  '연어크림파스타':{cal:620,c:62,p:28,f:28,na:850,oh:4,emoji:'🍝',risk:['비만','고지혈증']},
+  '랍스터파스타':{cal:580,c:64,p:32,f:22,na:900,oh:4,emoji:'🍝',risk:['통풍']},
+  '트러플파스타':{cal:560,c:64,p:16,f:24,na:750,oh:2,emoji:'🍝',risk:['비만']},
+  '사천파스타':{cal:540,c:66,p:18,f:22,na:1100,oh:1,emoji:'🍝',risk:['위염','고혈압']},
+  '펜네아라비아따':{cal:490,c:68,p:14,f:16,na:750,oh:1,emoji:'🍝',risk:['위염']},
+  '라자냐':{cal:620,c:60,p:28,f:28,na:1000,oh:3,emoji:'🍝',risk:['비만','고지혈증']},
+  '리가토니':{cal:510,c:68,p:16,f:18,na:780,oh:3,emoji:'🍝',risk:['비만']},
+  '뇨끼':{cal:480,c:72,p:12,f:16,na:700,oh:3,emoji:'🍝',risk:['당뇨','비만']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍕 양식 · 피자 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '마르게리따피자':{cal:680,c:82,p:24,f:26,na:1600,oh:1,emoji:'🍕',risk:['고혈압','비만']},
+  '페퍼로니피자':{cal:760,c:80,p:26,f:36,na:1900,oh:1,emoji:'🍕',risk:['고혈압','비만']},
+  '콤비네이션피자':{cal:750,c:82,p:26,f:32,na:1800,oh:3,emoji:'🍕',risk:['고혈압','비만']},
+  '포테이토피자':{cal:720,c:88,p:20,f:28,na:1600,oh:3,emoji:'🍕',risk:['비만','당뇨']},
+  '불고기피자':{cal:730,c:84,p:26,f:30,na:1700,oh:1,emoji:'🍕',risk:['고혈압','비만']},
+  '쉬림프피자':{cal:700,c:80,p:26,f:28,na:1700,oh:4,emoji:'🍕',risk:['고혈압','비만']},
+  '고르곤졸라피자':{cal:780,c:78,p:28,f:38,na:1800,oh:0,emoji:'🍕',risk:['고혈압','비만','고지혈증']},
+  '하와이안피자':{cal:710,c:86,p:22,f:28,na:1650,oh:3,emoji:'🍕',risk:['비만']},
+  '트러플피자':{cal:720,c:80,p:24,f:30,na:1600,oh:2,emoji:'🍕',risk:['비만']},
+  '나폴리피자':{cal:660,c:78,p:24,f:26,na:1500,oh:1,emoji:'🍕',risk:['고혈압','비만']},
+  '시카고피자':{cal:850,c:88,p:32,f:42,na:2000,oh:3,emoji:'🍕',risk:['비만','고혈압','고지혈증']},
+  '뉴욕피자':{cal:700,c:82,p:26,f:28,na:1700,oh:3,emoji:'🍕',risk:['고혈압','비만']},
+  '치즈피자':{cal:740,c:80,p:28,f:34,na:1700,oh:0,emoji:'🍕',risk:['비만','고지혈증']},
+  '미트피자':{cal:790,c:80,p:32,f:38,na:1900,oh:1,emoji:'🍕',risk:['비만','고혈압']},
+  '채소피자':{cal:640,c:80,p:20,f:24,na:1500,oh:2,emoji:'🍕',risk:['비만']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥩 양식 · 스테이크·육류 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '티본스테이크':{cal:520,c:0,p:48,f:34,na:500,oh:1,emoji:'🥩',risk:['고지혈증','통풍']},
+  '립아이스테이크':{cal:500,c:0,p:44,f:34,na:480,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '안심스테이크':{cal:380,c:0,p:42,f:22,na:420,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '등심스테이크':{cal:450,c:0,p:40,f:30,na:450,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '채끝스테이크':{cal:420,c:0,p:40,f:28,na:440,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '블랙앵거스스테이크':{cal:480,c:0,p:44,f:32,na:500,oh:1,emoji:'🥩',risk:['고지혈증']},
+  '바베큐립':{cal:550,c:8,p:42,f:38,na:900,oh:1,emoji:'🍖',risk:['고지혈증','비만']},
+  '폭립':{cal:580,c:10,p:42,f:40,na:950,oh:1,emoji:'🍖',risk:['고지혈증','비만']},
+  '풀드포크':{cal:480,c:12,p:36,f:32,na:800,oh:3,emoji:'🍖',risk:['고지혈증','비만']},
+  '포크립':{cal:560,c:8,p:38,f:40,na:900,oh:1,emoji:'🍖',risk:['고지혈증']},
+  '양갈비':{cal:440,c:0,p:36,f:30,na:420,oh:1,emoji:'🥩',risk:['고지혈증','통풍']},
+  '치킨스테이크':{cal:320,c:4,p:38,f:16,na:600,oh:2,emoji:'🍗',risk:[]},
+  '연어스테이크':{cal:350,c:0,p:36,f:20,na:500,oh:4,emoji:'🐟',risk:[]},
+  '참치스테이크':{cal:280,c:0,p:36,f:12,na:450,oh:4,emoji:'🐟',risk:['통풍']},
+  '오리스테이크':{cal:380,c:0,p:28,f:28,na:480,oh:1,emoji:'🦆',risk:['고지혈증']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍔 양식 · 버거·샌드위치 (15)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '클래식버거':{cal:520,c:48,p:26,f:26,na:1000,oh:3,emoji:'🍔',risk:['비만','고혈압']},
+  '치즈버거':{cal:570,c:50,p:28,f:30,na:1100,oh:3,emoji:'🍔',risk:['비만','고혈압','고지혈증']},
+  '베이컨버거':{cal:620,c:50,p:30,f:34,na:1200,oh:3,emoji:'🍔',risk:['비만','고혈압']},
+  '더블버거':{cal:750,c:52,p:46,f:44,na:1400,oh:3,emoji:'🍔',risk:['비만','고혈압','고지혈증']},
+  '새우버거':{cal:480,c:52,p:20,f:22,na:950,oh:4,emoji:'🍔',risk:['비만','고혈압']},
+  '치킨버거':{cal:500,c:52,p:26,f:22,na:1000,oh:3,emoji:'🍔',risk:['비만']},
+  '불고기버거':{cal:530,c:55,p:26,f:24,na:1050,oh:3,emoji:'🍔',risk:['비만']},
+  '아보카도버거':{cal:580,c:50,p:26,f:32,na:950,oh:2,emoji:'🍔',risk:['비만']},
+  '빅맥':{cal:550,c:48,p:28,f:28,na:1050,oh:3,emoji:'🍔',risk:['비만','고혈압']},
+  '와퍼':{cal:660,c:52,p:32,f:38,na:1100,oh:3,emoji:'🍔',risk:['비만','고혈압']},
+  '햄버거':{cal:480,c:48,p:22,f:22,na:900,oh:3,emoji:'🍔',risk:['비만','고혈압']},
+  'BLT샌드위치':{cal:420,c:36,p:20,f:22,na:900,oh:3,emoji:'🥪',risk:['고혈압']},
+  '클럽샌드위치':{cal:480,c:38,p:26,f:24,na:1000,oh:3,emoji:'🥪',risk:['고혈압']},
+  '에그샌드위치':{cal:350,c:32,p:16,f:18,na:700,oh:3,emoji:'🥪',risk:['고지혈증']},
+  '풀드포크샌드위치':{cal:450,c:40,p:28,f:20,na:900,oh:3,emoji:'🥪',risk:['비만']},
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🍣 양식 · 일식·기타 (25)
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '스시':{cal:380,c:60,p:18,f:6,na:700,oh:4,emoji:'🍣',risk:['신장질환']},
+  '모듬스시':{cal:420,c:65,p:22,f:8,na:800,oh:4,emoji:'🍣',risk:['신장질환']},
+  '연어스시':{cal:250,c:30,p:16,f:8,na:400,oh:4,emoji:'🍣',risk:[]},
+  '참치스시':{cal:240,c:30,p:16,f:6,na:380,oh:4,emoji:'🍣',risk:['통풍']},
+  '유부초밥':{cal:320,c:50,p:10,f:8,na:500,oh:3,emoji:'🍣',risk:[]},
+  '사시미':{cal:180,c:0,p:28,f:6,na:400,oh:4,emoji:'🐟',risk:[]},
+  '모둠사시미':{cal:220,c:2,p:34,f:8,na:500,oh:4,emoji:'🐟',risk:['통풍']},
+  '돈카츠':{cal:480,c:38,p:28,f:24,na:800,oh:3,emoji:'🍖',risk:['비만','고지혈증']},
+  '치즈돈카츠':{cal:560,c:42,p:30,f:30,na:900,oh:3,emoji:'🍖',risk:['비만','고지혈증']},
+  '가츠카레':{cal:680,c:88,p:28,f:24,na:1200,oh:3,emoji:'🍛',risk:['비만','당뇨']},
+  '오코노미야키':{cal:380,c:40,p:18,f:16,na:900,oh:3,emoji:'🥞',risk:['비만']},
+  '타코야키':{cal:280,c:32,p:12,f:12,na:700,oh:3,emoji:'🐙',risk:[]},
+  '라멘':{cal:550,c:72,p:22,f:18,na:2000,oh:4,emoji:'🍜',risk:['고혈압','비만']},
+  '미소라멘':{cal:520,c:68,p:22,f:16,na:1900,oh:4,emoji:'🍜',risk:['고혈압','신장질환']},
+  '쇼유라멘':{cal:510,c:68,p:22,f:15,na:1900,oh:4,emoji:'🍜',risk:['고혈압']},
+  '시저샐러드':{cal:280,c:10,p:12,f:22,na:700,oh:2,emoji:'🥗',risk:['고혈압']},
+  '그릭샐러드':{cal:200,c:8,p:8,f:16,na:500,oh:2,emoji:'🥗',risk:[]},
+  '리조또':{cal:520,c:65,p:16,f:20,na:900,oh:3,emoji:'🍚',risk:['당뇨','비만']},
+  '버섯리조또':{cal:500,c:63,p:14,f:18,na:850,oh:2,emoji:'🍚',risk:['비만']},
+  '해산물리조또':{cal:540,c:62,p:22,f:20,na:950,oh:4,emoji:'🍚',risk:['고혈압']},
+  '그라탱':{cal:420,c:35,p:18,f:24,na:800,oh:3,emoji:'🧀',risk:['비만','고지혈증']},
+  '에그베네딕트':{cal:480,c:28,p:22,f:30,na:900,oh:0,emoji:'🥚',risk:['비만','고지혈증']},
+  '스테이크플레이트':{cal:680,c:30,p:50,f:40,na:900,oh:1,emoji:'🥩',risk:['고지혈증','통풍']},
+  '브런치플레이트':{cal:550,c:40,p:28,f:28,na:800,oh:3,emoji:'🍽️',risk:['비만']},
+  '감자튀김':{cal:365,c:48,p:4,f:18,na:700,oh:3,emoji:'🍟',risk:['비만','고혈압']},
+
+
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // 🥬 채소·과일·수산·유제품·세계음식·건강식 (290) v2.0
+  // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  '시금치':{cal:23,c:3,p:3,f:0,na:79,oh:1,emoji:'🥬',risk:['신장결석']},
+  '브로콜리':{cal:34,c:7,p:3,f:0,na:33,oh:1,emoji:'🥦',risk:[]},
+  '당근':{cal:41,c:10,p:1,f:0,na:69,oh:3,emoji:'🥕',risk:['당뇨']},
+  '오이':{cal:15,c:4,p:1,f:0,na:2,oh:1,emoji:'🥒',risk:[]},
+  '양파':{cal:40,c:9,p:1,f:0,na:4,oh:0,emoji:'🧅',risk:[]},
+  '마늘':{cal:149,c:33,p:6,f:1,na:17,oh:0,emoji:'🧄',risk:['위염']},
+  '고추':{cal:40,c:9,p:2,f:0,na:9,oh:2,emoji:'🌶️',risk:['위염','역류성식도염']},
+  '파프리카':{cal:31,c:6,p:1,f:0,na:4,oh:2,emoji:'🫑',risk:[]},
+  '토마토':{cal:18,c:4,p:1,f:0,na:5,oh:2,emoji:'🍅',risk:[]},
+  '감자':{cal:77,c:17,p:2,f:0,na:6,oh:3,emoji:'🥔',risk:['당뇨','비만']},
+  '고구마':{cal:86,c:20,p:2,f:0,na:55,oh:3,emoji:'🍠',risk:['당뇨']},
+  '옥수수':{cal:86,c:19,p:3,f:1,na:15,oh:3,emoji:'🌽',risk:['당뇨']},
+  '호박':{cal:26,c:7,p:1,f:0,na:2,oh:3,emoji:'🎃',risk:[]},
+  '가지':{cal:25,c:6,p:1,f:0,na:2,oh:2,emoji:'🍆',risk:[]},
+  '버섯':{cal:22,c:3,p:3,f:0,na:5,oh:4,emoji:'🍄',risk:[]},
+  '표고버섯':{cal:34,c:7,p:3,f:0,na:9,oh:4,emoji:'🍄',risk:[]},
+  '배추':{cal:15,c:3,p:1,f:0,na:62,oh:1,emoji:'🥬',risk:[]},
+  '상추':{cal:15,c:3,p:1,f:0,na:28,oh:1,emoji:'🥗',risk:[]},
+  '깻잎':{cal:49,c:8,p:5,f:1,na:15,oh:1,emoji:'🌿',risk:[]},
+  '쑥갓':{cal:27,c:5,p:3,f:0,na:73,oh:1,emoji:'🌿',risk:[]},
+  '미나리':{cal:22,c:4,p:2,f:0,na:52,oh:1,emoji:'🌿',risk:[]},
+  '부추':{cal:33,c:5,p:3,f:0,na:5,oh:1,emoji:'🌿',risk:[]},
+  '콩나물':{cal:30,c:3,p:3,f:0,na:5,oh:1,emoji:'🌱',risk:[]},
+  '숙주나물':{cal:25,c:4,p:3,f:0,na:16,oh:1,emoji:'🌱',risk:[]},
+  '도라지':{cal:78,c:17,p:2,f:0,na:2,oh:0,emoji:'🌿',risk:[]},
+  '연근':{cal:74,c:17,p:3,f:0,na:40,oh:3,emoji:'🪷',risk:['당뇨']},
+  '우엉':{cal:85,c:17,p:3,f:0,na:18,oh:3,emoji:'🌿',risk:['당뇨']},
+  '죽순':{cal:27,c:5,p:3,f:0,na:4,oh:1,emoji:'🎍',risk:[]},
+  '아스파라거스':{cal:20,c:4,p:2,f:0,na:2,oh:1,emoji:'🌿',risk:['통풍']},
+  '셀러리':{cal:16,c:3,p:1,f:0,na:80,oh:1,emoji:'🥬',risk:['고혈압']},
+  '양배추':{cal:25,c:6,p:1,f:0,na:18,oh:1,emoji:'🥬',risk:[]},
+  '콜라비':{cal:27,c:6,p:2,f:0,na:20,oh:1,emoji:'🥬',risk:[]},
+  '비트':{cal:43,c:10,p:2,f:0,na:78,oh:2,emoji:'🟣',risk:['신장결석']},
+  '래디쉬':{cal:16,c:3,p:1,f:0,na:39,oh:0,emoji:'🔴',risk:[]},
+  '청경채':{cal:13,c:2,p:2,f:0,na:65,oh:1,emoji:'🥬',risk:[]},
+  '루꼴라':{cal:25,c:4,p:3,f:1,na:27,oh:1,emoji:'🌿',risk:[]},
+  '케일':{cal:35,c:7,p:3,f:1,na:38,oh:1,emoji:'🥬',risk:['신장결석']},
+  '로메인':{cal:17,c:3,p:1,f:0,na:8,oh:1,emoji:'🥬',risk:[]},
+  '딸기':{cal:33,c:8,p:1,f:0,na:1,oh:1,emoji:'🍓',risk:['당뇨']},
+  '토마토체리':{cal:18,c:4,p:1,f:0,na:5,oh:2,emoji:'🍅',risk:[]},
+  '무':{cal:18,c:4,p:1,f:0,na:21,oh:0,emoji:'⬜',risk:[]},
+  '무청':{cal:26,c:5,p:2,f:0,na:33,oh:1,emoji:'🌿',risk:[]},
+  '적채':{cal:31,c:7,p:1,f:0,na:38,oh:2,emoji:'🟣',risk:[]},
+  '완두콩':{cal:81,c:14,p:5,f:0,na:5,oh:1,emoji:'🫛',risk:['통풍']},
+  '에다마메':{cal:122,c:10,p:11,f:5,na:6,oh:1,emoji:'🫛',risk:[]},
+  '두부':{cal:76,c:2,p:8,f:5,na:7,oh:4,emoji:'🫙',risk:['통풍']},
+  '순두부':{cal:40,c:2,p:4,f:2,na:5,oh:4,emoji:'🫙',risk:[]},
+  '된장':{cal:186,c:24,p:12,f:5,na:3900,oh:4,emoji:'🫙',risk:['고혈압']},
+  '고추장':{cal:223,c:44,p:9,f:3,na:2400,oh:2,emoji:'🌶️',risk:['고혈압','위염']},
+  '간장':{cal:78,c:10,p:8,f:0,na:5700,oh:4,emoji:'🫙',risk:['고혈압']},
+  '사과':{cal:52,c:14,p:0,f:0,na:1,oh:1,emoji:'🍎',risk:['당뇨']},
+  '배':{cal:57,c:15,p:0,f:0,na:1,oh:1,emoji:'🍐',risk:['당뇨']},
+  '포도':{cal:69,c:18,p:1,f:0,na:2,oh:1,emoji:'🍇',risk:['당뇨']},
+  '복숭아':{cal:39,c:10,p:1,f:0,na:0,oh:1,emoji:'🍑',risk:['당뇨','알레르기']},
+  '자두':{cal:46,c:11,p:1,f:0,na:0,oh:1,emoji:'🟣',risk:['당뇨']},
+  '체리':{cal:63,c:16,p:1,f:0,na:0,oh:2,emoji:'🍒',risk:['당뇨']},
+  '블루베리':{cal:57,c:14,p:1,f:0,na:1,oh:4,emoji:'🫐',risk:[]},
+  '수박':{cal:30,c:8,p:1,f:0,na:1,oh:2,emoji:'🍉',risk:['당뇨']},
+  '멜론':{cal:34,c:8,p:1,f:0,na:16,oh:3,emoji:'🍈',risk:['당뇨']},
+  '파인애플':{cal:50,c:13,p:1,f:0,na:1,oh:3,emoji:'🍍',risk:['당뇨']},
+  '망고':{cal:60,c:15,p:1,f:0,na:1,oh:3,emoji:'🥭',risk:['당뇨','알레르기']},
+  '바나나':{cal:89,c:23,p:1,f:0,na:1,oh:3,emoji:'🍌',risk:['당뇨','고칼륨']},
+  '키위':{cal:61,c:15,p:1,f:1,na:3,oh:1,emoji:'🥝',risk:['알레르기']},
+  '레몬':{cal:29,c:9,p:1,f:0,na:2,oh:1,emoji:'🍋',risk:['위염']},
+  '오렌지':{cal:47,c:12,p:1,f:0,na:0,oh:3,emoji:'🍊',risk:['당뇨']},
+  '귤':{cal:53,c:13,p:1,f:0,na:2,oh:3,emoji:'🍊',risk:['당뇨']},
+  '자몽':{cal:42,c:11,p:1,f:0,na:0,oh:1,emoji:'🍊',risk:['약물상호작용']},
+  '라임':{cal:30,c:11,p:1,f:0,na:2,oh:1,emoji:'🟢',risk:['위염']},
+  '무화과':{cal:74,c:19,p:1,f:0,na:1,oh:3,emoji:'🫐',risk:['당뇨']},
+  '석류':{cal:83,c:19,p:2,f:1,na:3,oh:2,emoji:'🔴',risk:['당뇨']},
+  '아보카도':{cal:160,c:9,p:2,f:15,na:7,oh:1,emoji:'🥑',risk:[]},
+  '코코넛':{cal:354,c:15,p:3,f:33,na:20,oh:0,emoji:'🥥',risk:['고지혈증']},
+  '두리안':{cal:147,c:27,p:2,f:5,na:2,oh:3,emoji:'🟡',risk:['당뇨','비만']},
+  '리치':{cal:66,c:17,p:1,f:0,na:1,oh:3,emoji:'🔴',risk:['당뇨']},
+  '구아바':{cal:68,c:14,p:3,f:1,na:2,oh:1,emoji:'🟢',risk:[]},
+  '파파야':{cal:43,c:11,p:0,f:0,na:8,oh:3,emoji:'🟠',risk:['알레르기']},
+  '패션후르츠':{cal:97,c:23,p:2,f:1,na:28,oh:3,emoji:'🟣',risk:['당뇨']},
+  '용과':{cal:50,c:13,p:1,f:0,na:39,oh:2,emoji:'🔴',risk:[]},
+  '대추':{cal:282,c:74,p:4,f:1,na:3,oh:3,emoji:'🟤',risk:['당뇨']},
+  '감':{cal:70,c:19,p:1,f:0,na:1,oh:3,emoji:'🟠',risk:['당뇨']},
+  '매실':{cal:29,c:7,p:1,f:0,na:2,oh:1,emoji:'🟢',risk:['위염']},
+  '살구':{cal:48,c:11,p:1,f:0,na:1,oh:3,emoji:'🟠',risk:['당뇨']},
+  '크랜베리':{cal:46,c:12,p:0,f:0,na:2,oh:2,emoji:'🔴',risk:[]},
+  '라즈베리':{cal:52,c:12,p:1,f:1,na:1,oh:2,emoji:'🔴',risk:[]},
+  '블랙베리':{cal:43,c:10,p:1,f:1,na:1,oh:4,emoji:'🫐',risk:[]},
+  '아사이베리':{cal:70,c:4,p:1,f:5,na:31,oh:2,emoji:'🟣',risk:[]},
+  '고지베리':{cal:349,c:77,p:14,f:0,na:298,oh:2,emoji:'🔴',risk:[]},
+  '흑포도':{cal:69,c:18,p:1,f:0,na:2,oh:4,emoji:'🍇',risk:['당뇨']},
+  '청포도':{cal:69,c:18,p:1,f:0,na:2,oh:1,emoji:'🍇',risk:['당뇨']},
+  '참외':{cal:31,c:8,p:1,f:0,na:4,oh:3,emoji:'🟡',risk:['당뇨']},
+  '연어':{cal:208,c:0,p:20,f:13,na:59,oh:4,emoji:'🐟',risk:['통풍','고지혈증']},
+  '참치':{cal:144,c:0,p:30,f:3,na:47,oh:4,emoji:'🐟',risk:['통풍','수은']},
+  '고등어':{cal:205,c:0,p:19,f:14,na:90,oh:4,emoji:'🐟',risk:['통풍','고지혈증']},
+  '갈치':{cal:167,c:0,p:19,f:10,na:105,oh:4,emoji:'🐟',risk:['통풍']},
+  '조기':{cal:105,c:0,p:19,f:3,na:70,oh:4,emoji:'🐟',risk:['통풍']},
+  '넙치':{cal:91,c:0,p:20,f:1,na:81,oh:4,emoji:'🐟',risk:[]},
+  '광어':{cal:91,c:0,p:20,f:1,na:81,oh:4,emoji:'🐟',risk:[]},
+  '우럭':{cal:97,c:0,p:20,f:2,na:50,oh:4,emoji:'🐟',risk:[]},
+  '민어':{cal:96,c:0,p:20,f:2,na:60,oh:4,emoji:'🐟',risk:[]},
+  '병어':{cal:147,c:0,p:20,f:8,na:72,oh:4,emoji:'🐟',risk:['통풍']},
+  '오징어':{cal:92,c:3,p:16,f:2,na:230,oh:4,emoji:'🦑',risk:['통풍','고혈압']},
+  '낙지':{cal:73,c:2,p:14,f:1,na:250,oh:4,emoji:'🐙',risk:['고혈압']},
+  '문어':{cal:82,c:2,p:15,f:1,na:230,oh:4,emoji:'🐙',risk:['통풍']},
+  '새우':{cal:99,c:0,p:24,f:1,na:111,oh:4,emoji:'🦐',risk:['통풍','알레르기']},
+  '랍스터':{cal:89,c:0,p:19,f:1,na:296,oh:4,emoji:'🦞',risk:['통풍','고혈압']},
+  '게':{cal:87,c:0,p:18,f:1,na:293,oh:4,emoji:'🦀',risk:['통풍','알레르기']},
+  '꽃게':{cal:83,c:1,p:17,f:2,na:304,oh:4,emoji:'🦀',risk:['통풍','알레르기']},
+  '조개':{cal:74,c:4,p:13,f:1,na:230,oh:4,emoji:'🐚',risk:['통풍']},
+  '바지락':{cal:51,c:3,p:8,f:1,na:300,oh:4,emoji:'🐚',risk:['고혈압']},
+  '굴':{cal:69,c:4,p:9,f:2,na:211,oh:4,emoji:'🦪',risk:['통풍','식중독']},
+  '홍합':{cal:86,c:4,p:12,f:2,na:290,oh:4,emoji:'🫙',risk:['통풍']},
+  '전복':{cal:105,c:8,p:17,f:1,na:227,oh:4,emoji:'🐚',risk:[]},
+  '해삼':{cal:31,c:0,p:7,f:0,na:218,oh:4,emoji:'🐛',risk:[]},
+  '미역':{cal:45,c:9,p:2,f:1,na:872,oh:4,emoji:'🌿',risk:['고혈압','갑상선']},
+  '김':{cal:302,c:44,p:35,f:5,na:925,oh:4,emoji:'🫙',risk:['고혈압']},
+  '다시마':{cal:43,c:9,p:2,f:1,na:2000,oh:4,emoji:'🌿',risk:['고혈압','갑상선']},
+  '톳':{cal:39,c:7,p:3,f:1,na:1200,oh:4,emoji:'🌿',risk:['고혈압']},
+  '가자미':{cal:92,c:0,p:20,f:1,na:90,oh:4,emoji:'🐟',risk:[]},
+  '명태':{cal:82,c:0,p:19,f:1,na:85,oh:4,emoji:'🐟',risk:[]},
+  '대구':{cal:82,c:0,p:18,f:1,na:58,oh:4,emoji:'🐟',risk:[]},
+  '삼치':{cal:153,c:0,p:19,f:8,na:78,oh:4,emoji:'🐟',risk:['통풍']},
+  '꽁치':{cal:197,c:0,p:19,f:13,na:61,oh:4,emoji:'🐟',risk:['통풍']},
+  '청어':{cal:203,c:0,p:18,f:14,na:90,oh:4,emoji:'🐟',risk:['통풍']},
+  '멸치':{cal:190,c:0,p:21,f:12,na:2124,oh:4,emoji:'🐟',risk:['고혈압','통풍']},
+  '정어리':{cal:208,c:0,p:25,f:11,na:307,oh:4,emoji:'🐟',risk:['통풍']},
+  '도미':{cal:128,c:0,p:21,f:5,na:62,oh:4,emoji:'🐟',risk:[]},
+  '황태':{cal:342,c:0,p:76,f:3,na:280,oh:4,emoji:'🐟',risk:['통풍']},
+  '아귀':{cal:79,c:0,p:15,f:2,na:66,oh:4,emoji:'🐟',risk:[]},
+  '임연수어':{cal:165,c:0,p:20,f:9,na:72,oh:4,emoji:'🐟',risk:['통풍']},
+  '홍어':{cal:106,c:0,p:21,f:2,na:120,oh:4,emoji:'🐟',risk:[]},
+  '우유':{cal:61,c:5,p:3,f:3,na:43,oh:0,emoji:'🥛',risk:['유당불내증']},
+  '두유':{cal:47,c:4,p:4,f:2,na:39,oh:4,emoji:'🥛',risk:[]},
+  '요거트':{cal:61,c:5,p:4,f:3,na:46,oh:0,emoji:'🫙',risk:['유당불내증']},
+  '그릭요거트':{cal:97,c:4,p:9,f:5,na:36,oh:0,emoji:'🫙',risk:[]},
+  '치즈':{cal:402,c:1,p:25,f:33,na:620,oh:0,emoji:'🧀',risk:['고지혈증','고혈압']},
+  '모짜렐라':{cal:280,c:2,p:28,f:17,na:373,oh:0,emoji:'🧀',risk:['고지혈증']},
+  '버터':{cal:717,c:0,p:1,f:81,na:11,oh:0,emoji:'🧈',risk:['고지혈증','비만']},
+  '생크림':{cal:340,c:3,p:2,f:35,na:38,oh:0,emoji:'🍦',risk:['비만','고지혈증']},
+  '달걀':{cal:155,c:1,p:13,f:11,na:124,oh:3,emoji:'🥚',risk:['고지혈증']},
+  '달걀흰자':{cal:52,c:1,p:11,f:0,na:166,oh:0,emoji:'🥚',risk:[]},
+  '달걀노른자':{cal:322,c:4,p:16,f:27,na:48,oh:3,emoji:'🥚',risk:['고지혈증']},
+  '메추리알':{cal:158,c:0,p:13,f:11,na:141,oh:3,emoji:'🥚',risk:['고지혈증']},
+  '아몬드':{cal:579,c:22,p:21,f:50,na:1,oh:0,emoji:'🌰',risk:['비만','신장결석']},
+  '호두':{cal:654,c:14,p:15,f:65,na:2,oh:4,emoji:'🌰',risk:['비만']},
+  '피스타치오':{cal:562,c:28,p:20,f:45,na:1,oh:0,emoji:'🌰',risk:['비만']},
+  '캐슈넛':{cal:553,c:30,p:18,f:44,na:12,oh:0,emoji:'🌰',risk:['비만']},
+  '땅콩':{cal:567,c:16,p:26,f:49,na:18,oh:3,emoji:'🥜',risk:['알레르기','비만']},
+  '잣':{cal:673,c:13,p:14,f:68,na:2,oh:0,emoji:'🌰',risk:['비만']},
+  '해바라기씨':{cal:584,c:20,p:21,f:51,na:9,oh:0,emoji:'🌻',risk:['비만']},
+  '호박씨':{cal:446,c:54,p:19,f:19,na:18,oh:3,emoji:'🎃',risk:['비만']},
+  '참깨':{cal:573,c:23,p:18,f:50,na:11,oh:0,emoji:'⚪',risk:['비만']},
+  '들깨':{cal:565,c:12,p:20,f:52,na:5,oh:4,emoji:'⚫',risk:[]},
+  '올리브':{cal:145,c:4,p:1,f:15,na:735,oh:1,emoji:'🫒',risk:['고혈압']},
+  '코코아':{cal:228,c:58,p:20,f:14,na:21,oh:2,emoji:'🍫',risk:['비만']},
+  '콩':{cal:349,c:30,p:36,f:18,na:2,oh:1,emoji:'🫘',risk:['통풍']},
+  '검은콩':{cal:341,c:24,p:33,f:16,na:5,oh:4,emoji:'⚫',risk:['통풍']},
+  '팥':{cal:328,c:58,p:20,f:1,na:5,oh:2,emoji:'🫘',risk:['통풍','당뇨']},
+  '녹두':{cal:347,c:63,p:24,f:1,na:15,oh:1,emoji:'🟢',risk:['통풍']},
+  '렌틸콩':{cal:352,c:60,p:26,f:1,na:6,oh:1,emoji:'🫘',risk:[]},
+  '병아리콩':{cal:364,c:61,p:19,f:6,na:24,oh:3,emoji:'🫘',risk:[]},
+  '두부김치':{cal:180,c:8,p:12,f:11,na:980,oh:4,emoji:'🫙',risk:['고혈압']},
+  '청국장':{cal:232,c:20,p:19,f:10,na:2800,oh:4,emoji:'🫙',risk:['고혈압']},
+  '템페':{cal:193,c:8,p:19,f:11,na:14,oh:1,emoji:'🫙',risk:[]},
+  '낫토':{cal:212,c:14,p:18,f:11,na:2,oh:4,emoji:'🫙',risk:['혈액희석제']},
+  '아이스크림':{cal:207,c:24,p:4,f:11,na:80,oh:3,emoji:'🍦',risk:['당뇨','비만']},
+  '요거트아이스크림':{cal:159,c:27,p:4,f:4,na:70,oh:3,emoji:'🍦',risk:['당뇨']},
+  '초콜릿':{cal:546,c:60,p:5,f:31,na:79,oh:2,emoji:'🍫',risk:['비만','당뇨','고지혈증']},
+  '다크초콜릿':{cal:598,c:46,p:8,f:43,na:20,oh:2,emoji:'🍫',risk:['비만']},
+  '프로틴바':{cal:380,c:40,p:20,f:15,na:250,oh:3,emoji:'🍫',risk:[]},
+  '에너지바':{cal:400,c:55,p:10,f:15,na:150,oh:3,emoji:'🍫',risk:['비만']},
+  '짜장면':{cal:550,c:92,p:18,f:12,na:1200,oh:4,emoji:'🍜',risk:['당뇨','비만','고혈압']},
+  '짬뽕':{cal:520,c:75,p:24,f:14,na:2200,oh:2,emoji:'🍜',risk:['고혈압','위염']},
+  '탕수육':{cal:480,c:45,p:22,f:22,na:780,oh:3,emoji:'🥩',risk:['비만','고지혈증']},
+  '볶음면':{cal:450,c:65,p:15,f:16,na:1100,oh:2,emoji:'🍜',risk:['비만','고혈압']},
+  '마파두부':{cal:260,c:15,p:18,f:14,na:1100,oh:2,emoji:'🫙',risk:['고혈압','위염']},
+  '청경채볶음':{cal:80,c:8,p:5,f:4,na:600,oh:1,emoji:'🥬',risk:['고혈압']},
+  '딤섬':{cal:220,c:28,p:10,f:8,na:680,oh:3,emoji:'🥟',risk:['비만']},
+  '샤오롱바오':{cal:180,c:22,p:10,f:6,na:520,oh:3,emoji:'🥟',risk:[]},
+  '군만두':{cal:270,c:30,p:12,f:12,na:740,oh:3,emoji:'🥟',risk:['비만']},
+  '쌀국수':{cal:350,c:65,p:14,f:4,na:900,oh:3,emoji:'🍜',risk:['당뇨']},
+  '팟타이':{cal:520,c:65,p:20,f:20,na:1200,oh:3,emoji:'🍜',risk:['당뇨','비만']},
+  '그린커리':{cal:380,c:18,p:20,f:28,na:900,oh:1,emoji:'🍛',risk:['비만']},
+  '레드커리':{cal:400,c:20,p:20,f:28,na:950,oh:2,emoji:'🍛',risk:['비만','위염']},
+  '나시고렝':{cal:450,c:60,p:18,f:16,na:1100,oh:3,emoji:'🍚',risk:['비만','고혈압']},
+  '미고렝':{cal:420,c:55,p:16,f:16,na:1050,oh:3,emoji:'🍜',risk:['비만']},
+  '스프링롤':{cal:110,c:13,p:4,f:5,na:280,oh:3,emoji:'🫙',risk:[]},
+  '월남쌈':{cal:120,c:18,p:8,f:2,na:240,oh:1,emoji:'🌯',risk:[]},
+  '반미':{cal:380,c:50,p:18,f:12,na:950,oh:3,emoji:'🥖',risk:['고혈압']},
+  '인도카레':{cal:300,c:28,p:18,f:14,na:780,oh:2,emoji:'🍛',risk:[]},
+  '라씨':{cal:150,c:20,p:6,f:4,na:80,oh:0,emoji:'🥛',risk:['당뇨']},
+  '마살라차이':{cal:120,c:15,p:4,f:5,na:60,oh:3,emoji:'☕',risk:[]},
+  '탄두리치킨':{cal:220,c:5,p:32,f:8,na:680,oh:0,emoji:'🍗',risk:[]},
+  '사모사':{cal:308,c:34,p:7,f:17,na:450,oh:3,emoji:'🥟',risk:['비만']},
+  '훔무스':{cal:177,c:20,p:8,f:9,na:379,oh:3,emoji:'🫙',risk:[]},
+  '팔라펠':{cal:333,c:32,p:13,f:18,na:585,oh:1,emoji:'🟢',risk:['비만']},
+  '타불레':{cal:139,c:18,p:5,f:7,na:253,oh:1,emoji:'🥗',risk:[]},
+  '케밥':{cal:350,c:30,p:28,f:14,na:820,oh:1,emoji:'🥙',risk:['고지혈증']},
+  '도너케밥':{cal:400,c:35,p:24,f:18,na:950,oh:1,emoji:'🥙',risk:['고지혈증']},
+  '그리스샐러드':{cal:190,c:8,p:7,f:15,na:680,oh:1,emoji:'🥗',risk:['고혈압']},
+  '무사카':{cal:350,c:25,p:20,f:20,na:760,oh:2,emoji:'🥘',risk:['비만']},
+  '파에야':{cal:440,c:65,p:22,f:12,na:950,oh:4,emoji:'🍚',risk:['고혈압']},
+  '또르띠야':{cal:300,c:42,p:9,f:10,na:720,oh:3,emoji:'🌮',risk:['비만']},
+  '타코':{cal:250,c:26,p:14,f:11,na:580,oh:2,emoji:'🌮',risk:['비만']},
+  '부리또':{cal:470,c:60,p:22,f:16,na:1300,oh:3,emoji:'🌯',risk:['비만','고혈압']},
+  '과카몰리':{cal:160,c:9,p:2,f:15,na:7,oh:1,emoji:'🥑',risk:[]},
+  '살사소스':{cal:36,c:9,p:1,f:0,na:400,oh:2,emoji:'🍅',risk:['고혈압']},
+  '피쉬앤칩스':{cal:600,c:60,p:28,f:28,na:980,oh:4,emoji:'🐟',risk:['비만','고지혈증']},
+  '콥샐러드':{cal:380,c:15,p:28,f:24,na:850,oh:1,emoji:'🥗',risk:['고지혈증']},
+  '클램차우더':{cal:190,c:15,p:10,f:10,na:920,oh:4,emoji:'🍲',risk:['고혈압']},
+  '보르쉬':{cal:120,c:18,p:5,f:4,na:680,oh:2,emoji:'🍲',risk:['고혈압']},
+  '스시':{cal:200,c:38,p:10,f:2,na:480,oh:4,emoji:'🍣',risk:['고혈압']},
+  '라멘':{cal:450,c:65,p:20,f:14,na:2400,oh:4,emoji:'🍜',risk:['고혈압','당뇨']},
+  '돈까스':{cal:490,c:40,p:28,f:24,na:760,oh:3,emoji:'🍱',risk:['비만','고지혈증']},
+  '가라아게':{cal:307,c:12,p:26,f:17,na:580,oh:3,emoji:'🍗',risk:['비만']},
+  '에다마메소금':{cal:122,c:10,p:11,f:5,na:450,oh:1,emoji:'🫛',risk:['고혈압']},
+  '미소국':{cal:40,c:5,p:3,f:1,na:900,oh:4,emoji:'🍲',risk:['고혈압']},
+  '규카츠':{cal:480,c:32,p:30,f:24,na:680,oh:1,emoji:'🥩',risk:['비만']},
+  '타코야끼':{cal:320,c:40,p:14,f:12,na:840,oh:3,emoji:'🥚',risk:['비만','고혈압']},
+  '오코노미야끼':{cal:380,c:42,p:18,f:16,na:1100,oh:3,emoji:'🥞',risk:['비만','고혈압']},
+  '나베':{cal:280,c:12,p:30,f:12,na:1800,oh:4,emoji:'🍲',risk:['고혈압']},
+  '녹차':{cal:2,c:0,p:0,f:0,na:3,oh:1,emoji:'🍵',risk:[]},
+  '홍차':{cal:2,c:0,p:0,f:0,na:7,oh:1,emoji:'🍵',risk:[]},
+  '보이차':{cal:2,c:0,p:0,f:0,na:2,oh:4,emoji:'🍵',risk:[]},
+  '우롱차':{cal:2,c:0,p:0,f:0,na:3,oh:1,emoji:'🍵',risk:[]},
+  '커피블랙':{cal:5,c:0,p:0,f:0,na:5,oh:2,emoji:'☕',risk:['위염','불면증']},
+  '아메리카노':{cal:10,c:2,p:0,f:0,na:10,oh:2,emoji:'☕',risk:['위염','불면증']},
+  '라떼':{cal:120,c:12,p:6,f:5,na:70,oh:3,emoji:'☕',risk:['비만']},
+  '에스프레소':{cal:5,c:1,p:0,f:0,na:14,oh:2,emoji:'☕',risk:['위염','불면증','고혈압']},
+  '두유라떼':{cal:90,c:10,p:4,f:3,na:60,oh:4,emoji:'☕',risk:[]},
+  '오미자차':{cal:35,c:9,p:0,f:0,na:2,oh:0,emoji:'🍵',risk:[]},
+  '생강차':{cal:40,c:10,p:0,f:0,na:2,oh:0,emoji:'🍵',risk:['위염']},
+  '계피차':{cal:20,c:5,p:0,f:0,na:2,oh:0,emoji:'🍵',risk:[]},
+  '유자차':{cal:70,c:18,p:1,f:0,na:5,oh:3,emoji:'🍵',risk:['당뇨']},
+  '모과차':{cal:45,c:12,p:0,f:0,na:3,oh:3,emoji:'🍵',risk:[]},
+  '식혜':{cal:91,c:23,p:1,f:0,na:20,oh:3,emoji:'🫙',risk:['당뇨']},
+  '수정과':{cal:70,c:18,p:0,f:0,na:10,oh:3,emoji:'🍵',risk:['당뇨']},
+  '마테차':{cal:5,c:1,p:0,f:0,na:10,oh:1,emoji:'🍵',risk:[]},
+  '루이보스차':{cal:2,c:0,p:0,f:0,na:5,oh:3,emoji:'🍵',risk:[]},
+  '캐모마일차':{cal:2,c:0,p:0,f:0,na:2,oh:3,emoji:'🌼',risk:['알레르기']},
+  '페퍼민트차':{cal:2,c:0,p:0,f:0,na:2,oh:1,emoji:'🌿',risk:['위식도역류']},
+  '오렌지주스':{cal:45,c:11,p:1,f:0,na:1,oh:3,emoji:'🍊',risk:['당뇨']},
+  '사과주스':{cal:46,c:11,p:0,f:0,na:5,oh:3,emoji:'🍎',risk:['당뇨']},
+  '토마토주스':{cal:17,c:4,p:1,f:0,na:654,oh:2,emoji:'🍅',risk:['고혈압']},
+  '당근주스':{cal:40,c:9,p:1,f:0,na:68,oh:3,emoji:'🥕',risk:['당뇨']},
+  '케일주스':{cal:25,c:5,p:2,f:0,na:28,oh:1,emoji:'🥬',risk:[]},
+  '스무디':{cal:120,c:28,p:2,f:1,na:20,oh:3,emoji:'🥤',risk:['당뇨']},
+  '단백질쉐이크':{cal:180,c:10,p:25,f:4,na:200,oh:0,emoji:'🥤',risk:[]},
+  '이온음료':{cal:19,c:5,p:0,f:0,na:49,oh:3,emoji:'🥤',risk:['당뇨','고혈압']},
+  '탄산수':{cal:0,c:0,p:0,f:0,na:10,oh:0,emoji:'💧',risk:[]},
+  '미네랄워터':{cal:0,c:0,p:0,f:0,na:10,oh:4,emoji:'💧',risk:[]},
+  '콜라':{cal:42,c:11,p:0,f:0,na:4,oh:2,emoji:'🥤',risk:['당뇨','비만','골다공증']},
+  '사이다':{cal:42,c:11,p:0,f:0,na:10,oh:3,emoji:'🥤',risk:['당뇨','비만']},
+  '맥주':{cal:43,c:3,p:0,f:0,na:14,oh:1,emoji:'🍺',risk:['통풍','간질환','비만']},
+  '소주':{cal:167,c:0,p:0,f:0,na:3,oh:4,emoji:'🍶',risk:['간질환','고혈압']},
+  '막걸리':{cal:54,c:6,p:1,f:0,na:10,oh:4,emoji:'🍶',risk:['당뇨','간질환']},
+  '와인':{cal:83,c:3,p:0,f:0,na:5,oh:2,emoji:'🍷',risk:['간질환']},
+  '에너지드링크':{cal:45,c:11,p:0,f:0,na:100,oh:2,emoji:'🥤',risk:['고혈압','불면증','심장']},
+  '두유바나나':{cal:110,c:18,p:4,f:3,na:70,oh:3,emoji:'🥛',risk:['당뇨']},
+  '아몬드밀크':{cal:30,c:3,p:1,f:2,na:150,oh:0,emoji:'🥛',risk:[]},
+  '귀리밀크':{cal:46,c:7,p:1,f:2,na:90,oh:3,emoji:'🥛',risk:['당뇨']},
+  '오트밀':{cal:389,c:66,p:17,f:7,na:2,oh:3,emoji:'🥣',risk:['당뇨']},
+  '현미미음':{cal:80,c:18,p:2,f:0,na:2,oh:3,emoji:'🥣',risk:['당뇨']},
+  '죽(흰죽)':{cal:65,c:14,p:2,f:0,na:290,oh:3,emoji:'🥣',risk:['당뇨']},
+  '전복죽':{cal:110,c:18,p:9,f:1,na:380,oh:4,emoji:'🥣',risk:[]},
+  '야채죽':{cal:90,c:18,p:3,f:1,na:320,oh:1,emoji:'🥣',risk:[]},
+  '프로바이오틱스요거트':{cal:60,c:8,p:5,f:1,na:50,oh:0,emoji:'🫙',risk:[]},
+  '콤부차':{cal:30,c:7,p:0,f:0,na:10,oh:1,emoji:'🫙',risk:['위염']},
+  '아보카도토스트':{cal:250,c:24,p:7,f:14,na:320,oh:1,emoji:'🥑',risk:[]},
+  '연어샐러드':{cal:220,c:8,p:22,f:12,na:420,oh:4,emoji:'🥗',risk:[]},
+  '닭가슴살':{cal:165,c:0,p:31,f:4,na:74,oh:1,emoji:'🍗',risk:[]},
+  '닭가슴살샐러드':{cal:180,c:10,p:28,f:4,na:380,oh:1,emoji:'🥗',risk:[]},
+  '그릴연어':{cal:220,c:0,p:25,f:13,na:80,oh:4,emoji:'🐟',risk:[]},
+  '구운고구마':{cal:90,c:21,p:2,f:0,na:55,oh:3,emoji:'🍠',risk:['당뇨']},
+  '삶은달걀':{cal:155,c:1,p:13,f:11,na:124,oh:3,emoji:'🥚',risk:[]},
+  '과일샐러드':{cal:80,c:20,p:1,f:0,na:5,oh:3,emoji:'🥗',risk:['당뇨']},
+  '견과류믹스':{cal:600,c:20,p:18,f:52,na:5,oh:0,emoji:'🌰',risk:['비만']},
+  '그래놀라':{cal:471,c:64,p:10,f:20,na:48,oh:3,emoji:'🥣',risk:['비만','당뇨']},
+  '시리얼':{cal:360,c:80,p:8,f:2,na:550,oh:3,emoji:'🥣',risk:['당뇨','비만']},
+  '치아씨드':{cal:486,c:42,p:17,f:31,na:16,oh:4,emoji:'⚫',risk:[]},
+  '아마씨':{cal:534,c:29,p:18,f:42,na:30,oh:4,emoji:'⚫',risk:[]},
+  '퀴노아':{cal:368,c:64,p:14,f:6,na:5,oh:1,emoji:'🟡',risk:[]},
+  '병아리콩샐러드':{cal:200,c:28,p:10,f:7,na:280,oh:3,emoji:'🥗',risk:[]},
+  '두부샐러드':{cal:130,c:8,p:10,f:6,na:280,oh:4,emoji:'🥗',risk:[]},
+  '비빔국수':{cal:420,c:72,p:12,f:8,na:1100,oh:2,emoji:'🍜',risk:['당뇨','고혈압']},
+  '잡채':{cal:280,c:42,p:10,f:8,na:680,oh:1,emoji:'🍜',risk:['당뇨']},
+  '도시락(한식)':{cal:680,c:95,p:28,f:18,na:1800,oh:3,emoji:'🍱',risk:['당뇨','고혈압']},
+  '단백질도시락':{cal:480,c:45,p:38,f:14,na:950,oh:1,emoji:'🍱',risk:[]},
+  '샐러드도시락':{cal:320,c:30,p:18,f:14,na:580,oh:1,emoji:'🥗',risk:[]},
+  '다이어트도시락':{cal:380,c:45,p:28,f:10,na:720,oh:1,emoji:'🍱',risk:[]},
+  '영양죽':{cal:130,c:22,p:8,f:2,na:480,oh:3,emoji:'🥣',risk:[]}
+};
+
+// ── 오행 음식 속성 ──────────────────────────────────────
+var FOOD_OH_INFO = [
+  {name:'금(金)',color:'#94a3b8',emoji:'⚙️',nature:'매운맛·흰색 식품',organ:'폐·대장'},
+  {name:'화(火)',color:'#f87171',emoji:'🔥',nature:'쓴맛·붉은 식품',organ:'심장·소장'},
+  {name:'목(木)',color:'#34d399',emoji:'🌳',nature:'신맛·녹색 식품',organ:'간·담낭'},
+  {name:'토(土)',color:'#fbbf24',emoji:'🪨',nature:'단맛·노란 식품',organ:'비장·위장'},
+  {name:'수(水)',color:'#60a5fa',emoji:'💧',nature:'짠맛·검은 식품',organ:'신장·방광'},
+];
+
+// ── 병명별 나트륨 기준 & 성분 경고 ────────────────────
+var DISEASE_WARN = {
+  '고혈압':{na:1500,fat:null,sugar:null,msg:'나트륨을 엄격히 제한해야 합니다.'},
+  '당뇨':{na:null,fat:null,sugar:50,msg:'당류와 정제 탄수화물을 피해야 합니다.'},
+  '위염':{na:null,fat:null,spicy:true,msg:'자극적·기름진 음식이 위 점막을 손상시킵니다.'},
+  '역류성식도염':{na:null,fat:null,spicy:true,msg:'기름지고 산성 음식은 역류를 악화시킵니다.'},
+  '고지혈증':{na:null,fat:20,sugar:null,msg:'포화지방 섭취를 줄여야 합니다.'},
+  '비만':{na:null,fat:25,sugar:40,msg:'칼로리와 지방 섭취를 줄여야 합니다.'},
+  '신장질환':{na:1200,fat:null,sugar:null,msg:'나트륨·칼륨 섭취를 극도로 제한해야 합니다.'},
+  '간질환':{na:null,fat:20,sugar:null,msg:'지방과 알코올 성분을 피해야 합니다.'},
+  '통풍':{na:null,fat:null,sugar:null,msg:'퓨린 성분이 많은 육류·내장류를 피해야 합니다.'},
+  '불면증':{na:null,fat:null,caffeine:true,msg:'카페인과 자극적 음식을 저녁에 피해야 합니다.'},
+};
+
+// ── 활동 MET값 ─────────────────────────────────────────
+var ACTIVITY_LIST = [
+  {name:'빠른 걷기',met:4.3,emoji:'🚶',desc:'공원이나 실내에서 가능'},
+  {name:'자전거',met:6.0,emoji:'🚴',desc:'야외 또는 실내 자전거'},
+  {name:'가벼운 조깅',met:7.0,emoji:'🏃',desc:'숨이 약간 찰 정도'},
+  {name:'수영',met:7.0,emoji:'🏊',desc:'전신 유산소 운동'},
+  {name:'계단 오르기',met:8.0,emoji:'🪜',desc:'빌딩 계단 반복'},
+];
+
+// ── 카메라 관련 ─────────────────────────────────────────
+var _foodStream = null;
+
+function foodStartCamera() {
+  var btn = document.getElementById('food-cam-btn');
+  var snapBtn = document.getElementById('food-snap-btn');
+  var video = document.getElementById('food-video');
+  var idle = document.getElementById('food-cam-idle');
+  var overlay = document.getElementById('food-scan-overlay');
+  var guide = document.getElementById('food-step-guide');
+  if(_foodStream){ foodStopCamera(); return; }
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false})
+    .then(function(stream){
+      _foodStream = stream;
+      video.srcObject = stream;
+      video.style.display='block';
+      if(overlay) overlay.style.display='block';
+      idle.style.display='none';
+      if(guide) guide.style.display='none';
+      btn.textContent='⏹ 카메라 끄기';
+      btn.style.background='rgba(248,113,113,.15)';
+      btn.style.borderColor='rgba(248,113,113,.5)';
+      btn.style.color='#f87171';
+      snapBtn.style.display='flex';
+    }).catch(function(){
+      alert('카메라 접근이 거부되었습니다.\n📱 설정 > 브라우저 > 카메라 권한을 허용해 주세요.\n\n또는 갤러리에서 사진을 선택하세요.');
+    });
+}
+
+function foodStopCamera() {
+  if(_foodStream){ _foodStream.getTracks().forEach(function(t){t.stop();}); _foodStream=null; }
+  var video=document.getElementById('food-video'); video.style.display='none';
+  var overlay=document.getElementById('food-scan-overlay'); if(overlay) overlay.style.display='none';
+  document.getElementById('food-cam-idle').style.display='block';
+  var btn=document.getElementById('food-cam-btn');
+  btn.textContent='📷 카메라 시작';
+  btn.style.background='rgba(251,191,36,.15)';
+  btn.style.borderColor='rgba(251,191,36,.5)';
+  btn.style.color='#fbbf24';
+  document.getElementById('food-snap-btn').style.display='none';
+}
+
+function foodResetCamera() {
+  document.getElementById('food-preview-wrap').style.display='none';
+  document.getElementById('food-preview').src='';
+  document.getElementById('food-cam-idle').style.display='block';
+  var guide=document.getElementById('food-step-guide'); if(guide) guide.style.display='flex';
+}
+
+function foodCapture() {
+  var video=document.getElementById('food-video');
+  var canvas=document.getElementById('food-canvas');
+  canvas.width=video.videoWidth||640; canvas.height=video.videoHeight||480;
+  canvas.getContext('2d', { willReadFrequently: true }).drawImage(video,0,0);
+  var img=document.getElementById('food-preview');
+  img.src=canvas.toDataURL('image/jpeg',0.85);
+  document.getElementById('food-preview-wrap').style.display='block';
+  var guide=document.getElementById('food-step-guide'); if(guide) guide.style.display='none';
+  foodStopCamera();
+  // 촬영 시 텍스트 입력창 자동 초기화 (이전 검색어가 사진 분석 방해 방지)
+  var inp = document.getElementById('food-name-input');
+  if(inp) { inp.value=''; inp.placeholder='촬영 완료! ⚡ 분석 시작 버튼을 눌러주세요'; }
+}
+
+function foodFromGallery(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var img=document.getElementById('food-preview');
+    img.src=ev.target.result;
+    document.getElementById('food-preview-wrap').style.display='block';
+    document.getElementById('food-cam-idle').style.display='none';
+    // 갤러리 선택 시도 텍스트 초기화
+    var inp=document.getElementById('food-name-input');
+    if(inp){ inp.value=''; inp.placeholder='사진 선택 완료! ⚡ 분석 시작 버튼을 눌러주세요'; }
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── 프로필 저장/로드 ────────────────────────────────────
+function foodToggleSection(id) {
+  var el = document.getElementById(id);
+  var arrow = document.getElementById(id+'-arrow');
+  if (!el) return;
+  var isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'flex';
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
+function foodSetOh(btn, val) {
+  document.querySelectorAll('.fp-oh-btn').forEach(function(b){ b.style.opacity='0.45'; b.style.fontWeight='400'; });
+  btn.style.opacity='1'; btn.style.fontWeight='900';
+  var inp = document.getElementById('fp-constitution');
+  if (inp) inp.value = val;
+}
+function foodToggleProfile() {
+  var body = document.getElementById('food-profile-body');
+  var arrow = document.getElementById('food-profile-arrow');
+  if (!body) return;
+  var isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  arrow.textContent = isOpen ? '▼' : '▲';
+  arrow.style.transform = 'rotate(0deg)';
+}
+
+function foodUpdateSummary() {
+  var diseases = (document.getElementById('food-diseases')&&document.getElementById('food-diseases').value||'').trim();
+  var avoid = (document.getElementById('food-avoid')&&document.getElementById('food-avoid').value||'').trim();
+  var cc = (document.getElementById('fp-cc')&&document.getElementById('fp-cc').value||'').trim();
+  var el = document.getElementById('food-profile-summary');
+  if (!el) return;
+  var parts = [];
+  if (diseases) parts.push(diseases.split(',').length+'개 진단');
+  if (avoid) parts.push(avoid.split(',').length+'개 금기');
+  if (cc) parts.push('증상 있음');
+  el.textContent = parts.length ? parts.join(' · ') : '미입력';
+}
+function foodSaveInfoToggle() {
+  var chk = document.getElementById('chkFoodSaveInfo');
+  if (!chk) return;
+  if (chk.checked) {
+    foodSaveProfile(); // 체크 시 즉시 저장
+    localStorage.setItem('cgo_food_save_consent', '1');
+  } else {
+    localStorage.removeItem('cgo_food_profile');
+    localStorage.removeItem('cgo_food_save_consent');
+    var saved = document.getElementById('food-profile-saved');
+    if(saved){ saved.textContent='✓ 저장 해제됨 — 기기에서 삭제되었습니다'; saved.style.display='block'; setTimeout(function(){saved.style.display='none';saved.textContent='✓ 입력 완료';},1500); }
+  }
+}
+function foodSaveProfile() {
+  var g = function(id){ var el=document.getElementById(id); return el?(el.value||el.textContent||'').trim():''; };
+  var profile = {
+    diseases: g('food-diseases'), avoid: g('food-avoid'),
+    drink: g('fp-drink'), smoke: g('fp-smoke'), activity: g('fp-activity'),
+    family: g('fp-family'), constitution: g('fp-constitution'),
+    cc: g('fp-cc'), hpi: g('fp-hpi'),
+    past: g('fp-past'), bp: g('fp-bp'), sugar: g('fp-sugar'),
+    onset: g('fp-onset'), duration: g('fp-duration')
+  };
+  // ★ 박입 190 — 체크박스 동의 시에만 본인 기기에 저장
+  var chk = document.getElementById('chkFoodSaveInfo');
+  if (chk && chk.checked) {
+    localStorage.setItem('cgo_food_profile', JSON.stringify(profile));
+    localStorage.setItem('cgo_food_save_consent', '1');
+  }
+  var saved = document.getElementById('food-profile-saved');
+  if(saved){
+    saved.textContent = (chk && chk.checked) ? '✓ 본인 기기에 저장 완료 — 다음 방문 시 자동 입력' : '✓ 입력 완료 (저장하려면 위 체크박스를 선택하세요)';
+    saved.style.display = 'block';
+  }
+  setTimeout(function(){
+    if(saved) saved.style.display='none';
+    var body=document.getElementById('food-profile-body');
+    var arrow=document.getElementById('food-profile-arrow');
+    if(body){body.style.display='none'; if(arrow){arrow.textContent='▼';}}
+  }, 1500);
+}
+
+function foodLoadProfile() {
+  var noEl=document.getElementById('food-chart-no'), dtEl=document.getElementById('food-chart-date');
+  if(noEl) noEl.textContent=(window.calcResult&&window.calcResult.name?window.calcResult.name.charCodeAt(0).toString().padStart(6,'0'):Math.floor(Math.random()*900000+100000));
+  if(dtEl){var n=new Date();dtEl.textContent=n.getFullYear()+'.'+(n.getMonth()+1).toString().padStart(2,'0')+'.'+n.getDate().toString().padStart(2,'0');}
+  // rPPG 생체 데이터 연동
+  var bio = window._bioFinalData;
+  var rppgEl = document.getElementById('fp-rppg-data');
+  if(rppgEl && bio && bio.bpm) {
+    rppgEl.innerHTML = '<span style="color:#34d399;font-weight:700;">BPM '+bio.bpm+'</span> &nbsp;·&nbsp; '
+      +'<span style="color:#60a5fa;">HRV '+bio.hrv+'</span> &nbsp;·&nbsp; '
+      +'<span style="color:#a78bfa;">FCI '+bio.fci+'</span> &nbsp;·&nbsp; '
+      +'<span style="color:#fbbf24;">ILI '+(window._cgoILS&&window._cgoILS.total||'--')+'</span>';
+  }
+  try{
+    // ★ 박입 190 — 저장 동의(체크) 상태 복원
+    var _consent = localStorage.getItem('cgo_food_save_consent')==='1';
+    var _chk = document.getElementById('chkFoodSaveInfo');
+    if(_chk) _chk.checked = _consent;
+    if(!_consent){ foodUpdateSummary(); return; } // 동의 안 했으면 자동 입력 안 함
+    var p=JSON.parse(localStorage.getItem('cgo_food_profile')||'{}');
+    var s=function(id,v){var el=document.getElementById(id);if(el&&v)el.value=v;};
+    s('food-diseases',p.diseases); s('food-avoid',p.avoid);
+    s('fp-drink',p.drink); s('fp-smoke',p.smoke); s('fp-activity',p.activity);
+    s('fp-family',p.family); s('fp-cc',p.cc); s('fp-hpi',p.hpi);
+    s('fp-past',p.past); s('fp-bp',p.bp); s('fp-sugar',p.sugar);
+    s('fp-onset',p.onset); s('fp-duration',p.duration);
+    // 체질 오행 버튼 복원
+    if(p.constitution){
+      document.querySelectorAll('.fp-oh-btn').forEach(function(b){
+        if(b.textContent.indexOf(p.constitution)!==-1){b.style.opacity='1';b.style.fontWeight='900';}
+        else{b.style.opacity='0.45';}
+      });
+      var ci=document.getElementById('fp-constitution');
+      if(ci) ci.value=p.constitution;
+    }
+  }catch(e){}
+  foodUpdateSummary();
+}
+
+// ── 핵심 분석 함수 ──────────────────────────────────────
+function foodAnalyze() {
+  var nameInput=(document.getElementById('food-name-input').value||'').trim();
+  var previewSrc=document.getElementById('food-preview').src;
+  var hasImage = previewSrc && previewSrc.length > 100 && previewSrc !== window.location.href;
+
+  if(!nameInput && !hasImage){ alert('음식명을 입력하거나 사진을 촬영해 주세요.'); return; }
+
+  // 사진 있으면 텍스트 입력창 강제 초기화 (이전 검색어 잔존 방지)
+  if(hasImage){
+    var _ni = document.getElementById('food-name-input');
+    if(_ni) _ni.value = '';
+  }
+
+  document.getElementById('food-result').style.display='none';
+  document.getElementById('food-loading').style.display='block';
+  document.getElementById('food-loading-msg').textContent = hasImage ? '🔍 Gemini AI 음식 인식 중...' : '🔍 음식 DB 검색 중...';
+
+  // 📸 사진이 있으면 → Gemini 비전 우선, 텍스트는 전달 안 함 (오래된 입력값 오염 방지)
+  if (hasImage) {
+    foodAnalyzeWithAI('', previewSrc);
+    return;
+  }
+
+  // 텍스트만 있을 때 → 스마트 DB 검색
+  if(nameInput){
+    var found = _foodFuzzySearch(nameInput);
+    if(found){ setTimeout(function(){ foodRenderResult(found._key||nameInput, found); },300); return; }
+  }
+
+  // DB에 없으면 → AI 분석
+  foodAnalyzeWithAI(nameInput, null);
+}
+
+function _foodFuzzySearch(query) {
+  if (!query) return null;
+  var q = query.trim().replace(/\s+/g,'');
+  var found = null, bestScore = 0;
+
+  Object.keys(FOOD_DB).forEach(function(key) {
+    var k = key.replace(/\s+/g,'');
+    var score = 0;
+    // 1순위: 완전 포함
+    if (q.indexOf(k) !== -1) score = k.length * 10;
+    else if (k.indexOf(q) !== -1) score = q.length * 8;
+    // 2순위: 키 글자가 쿼리에 2글자 이상 연속 포함
+    else {
+      for (var i = 0; i <= k.length-2; i++) {
+        var sub = k.substring(i, i+2);
+        if (q.indexOf(sub) !== -1) score += 3;
+      }
+      for (var j = 0; j <= q.length-2; j++) {
+        var sub2 = q.substring(j, j+2);
+        if (k.indexOf(sub2) !== -1) score += 3;
+      }
+    }
+    if (score > bestScore) { bestScore = score; found = FOOD_DB[key]; found._key = key; }
+  });
+  // 최소 점수 미만이면 null (관련 없는 음식 방지)
+  return bestScore >= 6 ? found : null;
+}
+
+function foodShowNotFood() {
+  var loading = document.getElementById('food-loading');
+  if (loading) loading.style.display = 'none';
+  // 결과 영역에 "음식이 아님" 메시지 표시
+  var result = document.getElementById('food-result');
+  if (result) {
+    result.style.display = 'flex';
+    // 기존 카드들 숨기기
+    ['food-compat-card','food-energy-card','food-activity-card','food-nutrients'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='none';
+    });
+    var resEmoji = document.getElementById('food-res-emoji');
+    var resName = document.getElementById('food-res-name');
+    var resCal = document.getElementById('food-res-cal');
+    var resOh = document.getElementById('food-res-oh');
+    if(resEmoji) resEmoji.textContent = '🚫';
+    if(resName) { resName.textContent = '음식이 아닙니다'; resName.style.color='#f87171'; }
+    if(resCal) { resCal.textContent = '--'; resCal.style.color='rgba(255,255,255,.3)'; }
+    if(resOh) resOh.innerHTML = '<span style="color:rgba(240,230,200,.5);font-size:12px;">음식 사진을 찍어주세요 🍱</span>';
+    result.scrollIntoView({behavior:'smooth', block:'start'});
+    // 5초 후 자동으로 숨김 + 카드 복원
+    setTimeout(function(){
+      result.style.display = 'none';
+      ['food-compat-card','food-energy-card','food-activity-card','food-nutrients'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.display='';
+      });
+    }, 4000);
+  }
+}
+
+function _foodEstimate(name) {
+  // 키워드 기반 추정
+  var isRice=/밥|볶음밥|덮밥/.test(name), isNoodle=/면|국수|우동|소바/.test(name);
+  var isMeat=/고기|삼겹|갈비|불고기|스테이크/.test(name), isSalad=/샐러드|채소|야채/.test(name);
+  var cal=isRice?350:isNoodle?480:isMeat?480:isSalad?120:400;
+  var oh=isRice?3:isNoodle?4:isMeat?1:isSalad?2:3;
+  return {cal:cal,c:Math.round(cal*0.55/4),p:Math.round(cal*0.18/4),f:Math.round(cal*0.27/9),na:700,oh:oh,emoji:'🍽️',risk:[]};
+}
+
+async function foodAnalyzeWithAI(name, imageSrc) {
+
+  // ★ 새 분석 시작 시 이전 상태 완전 초기화
+  window._foodSimilar = [];
+  window._foodNotFood = false;
+
+  // 0단계: 사진 → Google Gemini Flash 비전 (정확도 최상)
+  if (imageSrc && imageSrc.startsWith('data:image')) {
+    try {
+      document.getElementById('food-loading-msg').textContent = '🔍 AI가 음식을 인식 중...';
+      // 800px 압축
+      var compressed = await new Promise(function(res) {
+        var img = new Image();
+        img.onload = function() {
+          var c = document.createElement('canvas');
+          var max=800, w=img.width, h=img.height;
+          if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}}
+          c.width=w; c.height=h;
+          c.getContext('2d', { willReadFrequently: true }).drawImage(img,0,0,w,h);
+          res(c.toDataURL('image/jpeg',0.8));
+        };
+        img.src = imageSrc;
+      });
+      var b64 = compressed.split(',')[1];
+      // ★ C-24(90초 정밀) 우선, BS(33초) 폴백
+      var _fr=window.calcResult||{};
+      var _fOh=_fr.domOh||'토';
+      var _c24d=window._c24||{};
+      var _fFci=_c24d.fci>0?_c24d.fci:((window.BS||{}).fci||0);
+      var _fBpm=_c24d.bpm>30?_c24d.bpm:((window.BS||{}).bpm||0);
+      var _fHrv=_c24d.hrv>0?_c24d.hrv:((window.BS||{}).hrv||0);
+      var _fLci=(window.BS||{}).lci||0;
+      var _fSrc=_c24d.fci>0?'C-24(90초 정밀)':'rPPG(33초)';
+      var _fDisease='';
+      var _dst=window._c24DiseaseState||{};
+      if(_dst.key&&_dst.results&&_dst.results.length>0){
+        var _card=window._c24Cards&&window._c24Cards[_dst.key];
+        _fDisease=(_card&&_card.title)||_dst.key;
+      }
+      var _fpRaw={}; try{_fpRaw=JSON.parse(localStorage.getItem('cgo_food_profile')||'{}');}catch(e){}
+      var _fHealth=[
+        _fpRaw.diseases?'진단:'+_fpRaw.diseases:'',
+        _fpRaw.avoid?'금기:'+_fpRaw.avoid:'',
+        _fpRaw.drink?'음주:'+_fpRaw.drink:'',
+        _fpRaw.bp?'혈압:'+_fpRaw.bp:'',
+        _fpRaw.sugar?'혈당:'+_fpRaw.sugar:'',
+        _fpRaw.constitution?'체질:'+_fpRaw.constitution:''
+      ].filter(Boolean).join(' | ');
+      var _fBase2=new Date(2000,0,1),_fNow2=new Date();
+      var _fDiff2=Math.floor((_fNow2-_fBase2)/86400000);
+      var _fIdx2=((_fDiff2+16)%60+60)%60;
+      var _fGan2=['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'][_fIdx2%10];
+      var _fIljinOh2={甲:'목',乙:'목',丙:'화',丁:'화',戊:'토',己:'토',庚:'금',辛:'금',壬:'수',癸:'수'}[_fGan2]||'토';
+      var vPrompt='당신은 음식 영양 분석 AI입니다. 사진을 정밀하게 보고 JSON만 반환 (코드블록 없이).\n\n'
+        +'【1단계 — 비식품 강력 차단 (가장 중요)】\n'
+        +'사진에 실제 "먹을 수 있는 음식/음료/식품"이 보이지 않으면 (예: 선풍기, 가전제품, 가구, 사람, 동물, 풍경, 사물, 빈 그릇, 손, 옷 등) 반드시 아래만 반환:\n'
+        +'{"name":"비식품","cal":0,"not_food":true}\n'
+        +'→ 음식이 아닌데 억지로 음식명을 지어내면 절대 안 됩니다. 확실히 음식일 때만 2단계로.\n\n'
+        +'【2단계 — 음식이 확실할 때만】\n'
+        +'{"name":"한국어음식명","cal":칼로리,"c":탄수화물g,"p":단백질g,"f":지방g,"na":나트륨mg,'
+        +'"emoji":"이모지","similar":"유사1|유사2|유사3",'
+        +'"nutri_note":"이 음식의 영양 특징 한줄 (당질/지방/나트륨 중심)"'
+        +(_fFci>0?',"health_note":"'+_fSrc+' FCI='+_fFci+'% HRV='+_fHrv+'ms 기준 이 음식 적합성 한줄 (생체 측정값 기반, 점술 금지)"':'')
+        +(_fDisease?',"disease_note":"'+_fDisease+' 환자 기준 이 음식 주의점 한줄 (영양소 기반)"':'')
+        +(_fHealth?',"profile_note":"입력된 건강정보 기준 이 음식 주의점 한줄"':'')
+        +'}\n'
+        +(_fHealth?'사용자 건강정보: '+_fHealth+'\n':'')
+        +(_fFci>0?'생체측정: '+_fSrc+' FCI='+_fFci+' HRV='+_fHrv+'ms\n':'')
+        +(_fDisease?'질환검사: '+_fDisease+'\n':'')
+        +'\n※ 절대 규칙: 오행·사주·일진·궁합·점술 용어 사용 금지. 오직 영양소·칼로리·생체측정값 기반 분석만. 포장식품도 분석 가능하나, 음식이 아니면 무조건 not_food 반환.';
+      // ★ Groq Vision (무한정 사용 가능)
+      var gResp = await fetch('/api/groq', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+          messages: [{
+            role: 'user',
+            content: [
+              {type: 'image_url', image_url: {url: 'data:image/jpeg;base64,' + b64}},
+              {type: 'text', text: vPrompt}
+            ]
+          }],
+          max_tokens: 300,
+          temperature: 0.1
+        })
+      });
+      var gData = await gResp.json();
+      if(gData.error){document.getElementById('food-loading-msg').textContent='⚠️ AI: '+(gData.error.message||'오류');}
+      var gTxt = (gData.choices&&gData.choices[0]&&gData.choices[0].message&&gData.choices[0].message.content)||'';
+      var gMatch = gTxt.replace(/```json\n?|```\n?/g,'').match(/\{[^{}]+\}/);
+      if (gMatch) {
+        try {
+          var gInfo = JSON.parse(gMatch[0]);
+          // 🚫 비식품 최우선 차단 (not_food 플래그 또는 비식품/식별불가)
+          if (gInfo.not_food === true || gInfo.name === '비식품' || gInfo.name === '식별불가' || !gInfo.name) {
+            window._foodNotFood = true;
+            document.getElementById('food-loading').style.display='none';
+            document.getElementById('food-loading-msg').textContent = '분석 중...';
+            foodShowNotFood();
+            return;
+          }
+          // ✅ 칼로리 있고 정상 음식명 → Gemini 결과 직접 사용 (DB 덮어쓰기 금지)
+          if (gInfo.name && gInfo.cal > 0 && gInfo.name !== '비식품' && gInfo.name !== '식별불가') {
+            gInfo.risk = gInfo.risk || [];
+            // DB에 완전 일치하는 음식이 있으면 risk 정보만 보완 (칼로리는 Gemini 우선)
+            var dbRef = FOOD_DB[gInfo.name] || FOOD_DB[gInfo.name.replace(/\s/g,'')];
+            if (dbRef && dbRef.risk) gInfo.risk = dbRef.risk; // risk 보완만
+            document.getElementById('food-loading-msg').textContent = '✅ 인식: ' + gInfo.name;
+            window._foodSimilar = gInfo.similar ? gInfo.similar.split('|').filter(Boolean) : [];
+            foodRenderResult(gInfo.name, gInfo);
+            return;
+          }
+          // 🔄 이름은 있지만 cal=0 → DB 퍼지 검색 후 텍스트 분석
+          if (gInfo.name && gInfo.name !== '비식품' && gInfo.name !== '식별불가') {
+            name = gInfo.name;
+            // DB 완전 일치만 허용 (퍼지 매칭 제거 — 오인식 방지)
+            var dbExact = FOOD_DB[gInfo.name] || FOOD_DB[gInfo.name.replace(/\s/g,'')];
+            if (dbExact) {
+              document.getElementById('food-loading').style.display='none';
+              foodRenderResult(gInfo.name, dbExact);
+              return;
+            }
+            document.getElementById('food-loading-msg').textContent = '🔍 ' + gInfo.name + ' 영양 정보 검색 중...';
+            // 바로 다음 단계(Open Food Facts → Groq)로 진행
+          } else {
+            // 🚫 진짜 비식품 (가방, 사람 등)
+            document.getElementById('food-loading').style.display='none';
+            document.getElementById('food-loading-msg').textContent = '분석 중...';
+            foodShowNotFood();
+            return;
+          }
+        } catch(pe) {}
+      }
+      // JSON 파싱 실패해도 이름 힌트 추출
+      if (!name) {
+        var nMatch = gTxt.match(/"name"\s*:\s*"([^"]+)"/);
+        if (nMatch && nMatch[1] && nMatch[1] !== '비식품' && nMatch[1] !== '식별불가') {
+          name = nMatch[1];
+          document.getElementById('food-loading-msg').textContent = '🤖 ' + name + ' 영양 분석 중...';
+        }
+      }
+    } catch(e) {
+      document.getElementById('food-loading-msg').textContent = '⚠️ 연결 오류 — 텍스트 분석으로 전환...';
+    }
+  }
+
+  // 1단계: Open Food Facts (브랜드 DB)
+  if (name) {
+    try {
+      document.getElementById('food-loading-msg').textContent = '🌐 글로벌 식품 DB 검색 중...';
+      var offResp = await fetch(
+        'https://world.openfoodfacts.org/cgi/search.pl?search_terms='
+        + encodeURIComponent(name) + '&search_simple=1&action=process&json=1&page_size=3',
+        {mode:'cors'}
+      );
+      if (offResp.ok) {
+        var offData = await offResp.json();
+        var products = offData.products || [];
+        for (var i = 0; i < products.length; i++) {
+          var nu = products[i].nutriments;
+          if (!nu) continue;
+          var kcal = nu['energy-kcal_100g'] || 0;
+          if (kcal <= 0) continue;
+          var serving = parseFloat(products[i].serving_size) || 100;
+          var factor = serving / 100;
+          var info = {
+            cal: Math.round(kcal * factor),
+            c: Math.round((nu['carbohydrates_100g']||0) * factor),
+            p: Math.round((nu['proteins_100g']||0) * factor),
+            f: Math.round((nu['fat_100g']||0) * factor),
+            na: Math.round((nu['sodium_100g']||0) * factor * 1000),
+            oh: _foodGuessOh(name), emoji: _foodGuessEmoji(name), risk: []
+          };
+          if (info.cal > 0) {
+            var fname = products[i].product_name_ko || products[i].product_name || name;
+            foodRenderResult(fname, info);
+            return;
+          }
+        }
+      }
+    } catch(e) {}
+  }
+
+  // 2단계: Groq 텍스트 AI
+  try {
+    document.getElementById('food-loading-msg').textContent = '🤖 AI 영양 분석 중...';
+    var foodHint = name || '알 수 없는 음식';
+    var profile2 = {};
+    try { profile2 = JSON.parse(localStorage.getItem('cgo_food_profile')||'{}'); } catch(e2) {}
+    var diseaseCtx = profile2.diseases ? '진단:'+profile2.diseases+(profile2.onset?'/발병:'+profile2.onset:'')+(profile2.duration?'/유병:'+profile2.duration:'') : '';
+    // 사진 없고 이름도 없으면 분석 중단 (오래된 입력값 오염 방지)
+    if (!name && !imageSrc) { document.getElementById('food-loading').style.display='none'; return; }
+    var prompt = '음식 "'+foodHint+'" 1인분 영양정보를 JSON만 반환 (다른 텍스트 없이):\n'
+      + '{"name":"정확한한국어명","cal":칼로리,"c":탄수화물g,"p":단백질g,"f":지방g,"na":나트륨mg,'
+      + '"oh":오행숫자(0=금,1=화,2=목,3=토,4=수),"emoji":"이모지","similar":"유사음식1|유사음식2|유사음식3"}\n'
+      + '실제 음식 이름을 정확히 사용하세요. 브랜드 제품은 공식 명칭으로.'
+      + (diseaseCtx ? '\n사용자 건강정보(참고): '+diseaseCtx : '');
+    var resp = await fetch('/api/groq', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama-3.1-8b-instant', messages:[{role:'user',content:prompt}], max_tokens:200, temperature:0.1})
+    });
+    var data = await resp.json();
+    var txt = (data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
+    var jMatch = txt.match(/\{[^{}]+\}/);
+    if (jMatch) {
+      var info = JSON.parse(jMatch[0]);
+      if (info.cal && info.cal > 0) {
+        info.risk = [];
+        window._foodSimilar = info.similar ? info.similar.split('|') : [];
+        foodRenderResult(info.name||name, info);
+        return;
+      }
+    }
+  } catch(e) {}
+
+  // ★ 박입 191 — 비식품으로 판정됐으면 최후 폴백(더미 400kcal) 금지
+  if (window._foodNotFood === true) {
+    window._foodNotFood = false;
+    foodShowNotFood();
+    return;
+  }
+  // 사진을 찍었는데 이름조차 못 얻었으면 = 인식 실패 → 더미 금지, 비식품 안내
+  if (!name) {
+    foodShowNotFood();
+    return;
+  }
+  // 3단계: 최후 추정 (이름이 있을 때만)
+  foodRenderResult(name, _foodEstimate(name));
+}
+
+function _foodGuessOh(n) {
+  if (/커피|콜라|검은|미역|된장|간장|블루/.test(n)) return 4;
+  if (/고추|토마토|딸기|육류|삼겹|불고기|치킨|피자/.test(n)) return 1;
+  if (/샐러드|브로콜리|시금치|오이|녹차|사과|키위/.test(n)) return 2;
+  if (/과자|빵|케이크|초콜릿|쿠키|사탕|도넛|와플/.test(n)) return 3;
+  return 0;
+}
+function _foodGuessEmoji(n) {
+  if (/커피/.test(n)) return '☕';
+  if (/피자/.test(n)) return '🍕';
+  if (/햄버거|버거/.test(n)) return '🍔';
+  if (/과자|칩|크래커/.test(n)) return '🍪';
+  if (/빵|케이크|도넛/.test(n)) return '🍞';
+  if (/초콜릿|초코/.test(n)) return '🍫';
+  if (/라면|면/.test(n)) return '🍜';
+  if (/밥/.test(n)) return '🍚';
+  if (/찌개|국/.test(n)) return '🥘';
+  if (/고기|삼겹/.test(n)) return '🥩';
+  if (/샐러드/.test(n)) return '🥗';
+  return '🍽️';
+}
+
+// ── 결과 렌더링 ─────────────────────────────────────────
+function foodRenderResult(foodName, data) {
+  document.getElementById('food-loading').style.display='none';
+
+  var profile={diseases:'',avoid:''};
+  try{profile=JSON.parse(localStorage.getItem('cgo_food_profile')||'{}');}catch(e){}
+  var myDiseases=(profile.diseases||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var myAvoid=(profile.avoid||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+
+  var oh=data.oh||3, ohInfo=FOOD_OH_INFO[oh];
+
+  // 기본 정보
+  document.getElementById('food-res-emoji').textContent=data.emoji||'🍽️';
+  document.getElementById('food-res-name').textContent=foodName;
+  document.getElementById('food-res-cal').textContent=data.cal||'--';
+  document.getElementById('food-res-oh').innerHTML='<span style="color:#5b7a7a;font-size:11px;">탄수 '+(data.c||0)+'g · 단백 '+(data.p||0)+'g · 지방 '+(data.f||0)+'g</span>';
+
+  // 영양소
+  var nEl=document.getElementById('food-nutrients');
+  nEl.innerHTML=[
+    ['탄수화물',data.c+'g','#60a5fa'],
+    ['단백질',data.p+'g','#34d399'],
+    ['지방',data.f+'g','#f87171'],
+    ['나트륨',data.na+'mg','#fbbf24']
+  ].map(function(n){
+    return '<span style="padding:4px 10px;border-radius:10px;font-size:11px;font-weight:700;background:'+n[2]+'18;border:1px solid '+n[2]+'44;color:'+n[2]+'">'+n[0]+' '+n[1]+'</span>';
+  }).join('');
+
+  // 개인 적합도 점수
+  var compatEl=document.getElementById('food-compat-card');
+  var warnings=[], compatScore=100;
+  var foodRiskDiseases=data.risk||[];
+
+  // ── ① (오행 궁합 제거 — 영양소·생체측정 기반으로만 평가) ──
+
+  // ── ★ C-24(90초 정밀) 우선 / rPPG(33초) 폴백 생체 데이터 반영 ──
+  var _c24r = window._c24||{};
+  var _fbs2 = window.BS||{};
+  var _fbFci = _c24r.fci>0 ? _c24r.fci : (_fbs2.fci||0);
+  var _fbBpm = _c24r.bpm>30 ? _c24r.bpm : (_fbs2.bpm||0);
+  var _fbHrv = _c24r.hrv>0 ? _c24r.hrv : (_fbs2.hrv||0);
+  var _fbLci = _fbs2.lci||0;
+  var _fbSrc = _c24r.fci>0?'C-24 90초':'rPPG';
+  // C-24 질환 연동 결과 반영
+  var _fbDisease='';
+  var _fdst=window._c24DiseaseState||{};
+  if(_fdst.key&&_fdst.results&&_fdst.results.length>0){
+    var _fcard=window._c24Cards&&window._c24Cards[_fdst.key];
+    _fbDisease=(_fcard&&_fcard.title)||_fdst.key;
+  }
+  if(_fbFci>0){
+    if(_fbFci<50&&(data.f>20||data.na>1000)){
+      compatScore-=12;
+      warnings.push({level:'warn',msg:'🩺 '+_fbSrc+': 안면혈색(FCI='+_fbFci+'%) 낮음 — 소화 부담 음식은 오늘 피하세요.'});
+    } else if(_fbFci>=75){
+      compatScore+=5;
+      warnings.push({level:'ok',msg:'🩺 '+_fbSrc+': 안면혈색 양호(FCI='+_fbFci+'%) — 오늘 에너지 상태 좋습니다.'});
+    }
+    if(_fbBpm>90&&data.na>800){
+      compatScore-=8;
+      warnings.push({level:'warn',msg:'🩺 '+_fbSrc+': 심박('+_fbBpm+'BPM) 높음 — 고나트륨 음식 오늘 자제하세요.'});
+    }
+    if(_fbHrv>0&&_fbHrv<30&&data.f>20){
+      compatScore-=8;
+      warnings.push({level:'warn',msg:'🩺 '+_fbSrc+': HRV('+_fbHrv+'ms) 낮음 — 자율신경 긴장 상태. 지방 과다 음식 주의.'});
+    }
+    if(_fbLci>0&&_fbLci<50&&data.f>15){
+      compatScore-=8;
+      warnings.push({level:'warn',msg:'🩺 rPPG: 입술혈색(LCI='+_fbLci+'%) 낮음 — 혈액순환 개선 음식을 추천드립니다.'});
+    }
+  }
+  if(_fbDisease){
+    warnings.push({level:'warn',msg:'🩺 C-24 질환검사: '+_fbDisease+' 관련 — 위 분석 결과를 참고하세요.'});
+    compatScore-=5;
+  }
+
+  // ── ② 영양 기반 기본 감점 (프로필 없어도 작동) ──
+  if(data.na>2000){ compatScore-=20; warnings.push({level:'danger',msg:'🚫 나트륨 '+data.na+'mg — WHO 하루 권장량(2000mg) 초과. 혈압·신장 주의.'}); }
+  else if(data.na>1500){ compatScore-=12; warnings.push({level:'warn',msg:'🔶 나트륨 '+data.na+'mg — 과다 섭취 주의. 물을 충분히 드세요.'}); }
+  else if(data.na>1000){ compatScore-=6; warnings.push({level:'warn',msg:'⚠️ 나트륨 '+data.na+'mg — 다소 높은 편입니다.'}); }
+
+  if(data.f>30){ compatScore-=15; warnings.push({level:'warn',msg:'🔶 지방 '+data.f+'g — 고지방 음식. 고지혈증·비만 주의.'}); }
+  else if(data.f>20){ compatScore-=8; warnings.push({level:'warn',msg:'⚠️ 지방 '+data.f+'g — 지방 함량이 높습니다.'}); }
+
+  if(data.cal>700){ compatScore-=10; warnings.push({level:'warn',msg:'⚠️ '+data.cal+'kcal — 고칼로리 음식. 활동량 조절이 필요합니다.'}); }
+  else if(data.cal>500){ compatScore-=5; }
+
+  // ── ③ 병명 기반 추가 감점 (프로필 있을 때) ──
+  myDiseases.forEach(function(d){
+    if(!d) return;
+    var dWarn=DISEASE_WARN[d];
+    if(foodRiskDiseases.some(function(r){return r.indexOf(d)!==-1||d.indexOf(r)!==-1;})){
+      compatScore-=25;
+      warnings.push({level:'danger',msg:'⚠️ '+d+' 환자에게 위험한 음식입니다.'+(dWarn?' '+dWarn.msg:'')});
+    } else if(dWarn){
+      if(dWarn.na && data.na>dWarn.na){ compatScore-=15; warnings.push({level:'warn',msg:'🔶 '+d+': 나트륨('+data.na+'mg)이 기준('+dWarn.na+'mg)을 초과합니다.'}); }
+      if(dWarn.fat && data.f>dWarn.fat){ compatScore-=10; warnings.push({level:'warn',msg:'🔶 '+d+': 지방('+data.f+'g)이 권장 기준을 초과합니다.'}); }
+    }
+  });
+
+  myAvoid.forEach(function(a){
+    if(!a) return;
+    if(foodName.indexOf(a)!==-1||a==='카페인'&&foodName.indexOf('커피')!==-1){
+      compatScore-=20; warnings.push({level:'danger',msg:'🚫 기피 성분 ['+a+']이 포함될 수 있습니다.'});
+    }
+  });
+
+  compatScore=Math.max(10,Math.min(100,compatScore)); // 영양·생체 기반 적합도
+
+  // ★ 건강 예측 연동 — 음식 분석 결과 저장 (C-24 2026.05)
+  window._lastFoodResult = {
+    name: foodName,
+    oh: oh,
+    ohName: ohInfo ? ohInfo.name : '?',
+    cal: data.cal||0,
+    na: data.na||0,
+    fat: data.f||0,
+    protein: data.p||0,
+    carb: data.c||0,
+    compatScore: compatScore,
+    warnings: warnings,
+    risk: data.risk||[],
+    emoji: data.emoji||'🍽️',
+    ts: Date.now()
+  };
+  // 건강 예측 페이지에 음식 영향 카드 업데이트
+  _foodUpdateHealthPage();
+  // 빈 카드 숨기기
+  var emptyCard = document.getElementById('hlt-food-empty');
+  if(emptyCard) emptyCard.style.display = 'none';
+  var scoreColor=compatScore>=75?'#34d399':compatScore>=50?'#fbbf24':'#f87171';
+  var scoreBg=compatScore>=75?'rgba(52,211,153,.1)':compatScore>=50?'rgba(251,191,36,.1)':'rgba(248,113,113,.1)';
+  var scoreLabel=compatScore>=75?'✅ 궁합 좋음':compatScore>=50?'⚠️ 주의 필요':'❌ 권장하지 않음';
+
+  // ★ 박입 192 — 개인 데이터(차트/rPPG) 유무 판정
+  var _hasPersonalData = (myDiseases.length>0) || (myAvoid.length>0) || (_fbFci>0) || (_fbDisease!=='');
+
+  compatEl.style.border='1px solid '+scoreColor+'44';
+
+  if (_hasPersonalData) {
+    // 차트 또는 rPPG가 있을 때만 "개인 궁합 점수" 표시
+    compatEl.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:'+(warnings.length?'12px':'0')+';">'
+      +'<div style="text-align:center;min-width:70px;padding:10px;background:'+scoreBg+';border-radius:12px;border:2px solid '+scoreColor+'44;">'
+      +'<div style="font-family:\'Orbitron\',monospace;font-size:28px;font-weight:900;color:'+scoreColor+';">'+compatScore+'</div>'
+      +'<div style="font-size:9px;color:'+scoreColor+';font-weight:700;">개인 적합도</div></div>'
+      +'<div><div style="font-size:13px;font-weight:800;color:'+scoreColor+';">'+scoreLabel+'</div>'
+      +'<div style="font-size:11px;color:#5b7a7a;margin-top:4px;">'+(myDiseases.length?myDiseases.join(' · ')+' 기준':'')+(_fbFci>0?' · '+_fbSrc+' 측정값 반영':'')+'</div>'
+      +'</div></div>'
+      +(warnings.length?'<div style="display:flex;flex-direction:column;gap:6px;">'+warnings.map(function(w){
+        var c=w.level==='danger'?'#f87171':'#fbbf24', bg=w.level==='danger'?'rgba(248,113,113,.08)':'rgba(251,191,36,.08)';
+        return '<div style="padding:8px 12px;background:'+bg+';border-left:3px solid '+c+';border-radius:6px;font-size:12px;color:'+c+';">'+w.msg+'</div>';
+      }).join('')+'</div>':'');
+  } else {
+    // 차트·rPPG 둘 다 없으면 → 개인 점수 대신 일반 영양 등급만 (정직)
+    var _na=data.na||0, _fat2=data.f||0, _cal2=data.cal||0;
+    var _grade='양호', _gColor='#34d399', _gMsg='나트륨·지방·칼로리가 일반 권장 범위입니다.';
+    if(_na>2000||_fat2>30||_cal2>700){ _grade='주의'; _gColor='#f87171'; _gMsg='나트륨·지방·칼로리 중 일부가 높습니다. 섭취량을 조절하세요.'; }
+    else if(_na>1000||_fat2>20||_cal2>500){ _grade='보통'; _gColor='#fbbf24'; _gMsg='평범한 수준입니다. 균형 잡힌 곁들임을 권장합니다.'; }
+    compatEl.innerHTML='<div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">'
+      +'<div style="text-align:center;min-width:70px;padding:10px;background:'+_gColor+'18;border-radius:12px;border:2px solid '+_gColor+'44;">'
+      +'<div style="font-size:20px;font-weight:900;color:'+_gColor+';">'+_grade+'</div>'
+      +'<div style="font-size:9px;color:'+_gColor+';font-weight:700;">일반 영양 등급</div></div>'
+      +'<div style="flex:1;"><div style="font-size:12px;color:#3a5a5a;line-height:1.5;">'+_gMsg+'</div></div></div>'
+      +'<div style="padding:10px 12px;background:rgba(56,189,248,0.07);border:1px solid rgba(56,189,248,0.25);border-radius:10px;font-size:12px;color:#0284c7;line-height:1.6;">'
+      +'💡 <b>개인 맞춤 적합도 점수</b>를 받으시려면 위 <b>진료 차트(기저질환·알레르기)</b>를 입력하거나 <b>생체 스캔(rPPG)</b>을 먼저 완료하세요. 그래야 내 몸 기준 정확한 점수가 나옵니다.</div>';
+  }
+
+  // 영양 균형 분석 (오행 제거 → 영양소 기반)
+  var energyEl=document.getElementById('food-energy-card');
+  var _carb=data.c||0, _prot=data.p||0, _fat=data.f||0;
+  var _totalMacro=_carb+_prot+_fat||1;
+  var _carbPct=Math.round(_carb/_totalMacro*100);
+  var _protPct=Math.round(_prot/_totalMacro*100);
+  var _fatPct=Math.round(_fat/_totalMacro*100);
+  var _balMsg='', _balColor='#34d399';
+  if(_fatPct>45){_balMsg='지방 비중이 높습니다. 채소·단백질과 함께 드시면 균형이 좋아집니다.';_balColor='#fbbf24';}
+  else if(_carbPct>70){_balMsg='탄수화물 비중이 높습니다. 식후 가벼운 활동을 권장합니다.';_balColor='#fbbf24';}
+  else if(_protPct>=25){_balMsg='단백질이 풍부해 포만감과 근육 유지에 좋습니다.';_balColor='#34d399';}
+  else{_balMsg='영양소 균형이 비교적 고른 편입니다.';_balColor='#34d399';}
+
+  energyEl.innerHTML='<div style="font-size:12px;font-weight:800;color:#a78bfa;margin-bottom:10px;">🧬 영양소 균형 분석</div>'
+    +'<div style="display:flex;gap:8px;margin-bottom:10px;">'
+    +'<div style="flex:1;text-align:center;padding:8px;background:rgba(251,191,36,.08);border-radius:8px;"><div style="font-size:18px;font-weight:900;color:#fbbf24;">'+_carbPct+'%</div><div style="font-size:10px;color:#7b9a9a;">탄수화물</div></div>'
+    +'<div style="flex:1;text-align:center;padding:8px;background:rgba(52,211,153,.08);border-radius:8px;"><div style="font-size:18px;font-weight:900;color:#34d399;">'+_protPct+'%</div><div style="font-size:10px;color:#7b9a9a;">단백질</div></div>'
+    +'<div style="flex:1;text-align:center;padding:8px;background:rgba(248,113,113,.08);border-radius:8px;"><div style="font-size:18px;font-weight:900;color:#f87171;">'+_fatPct+'%</div><div style="font-size:10px;color:#7b9a9a;">지방</div></div></div>'
+    +'<div style="font-size:12px;color:#3a5a5a;padding:8px 12px;background:rgba(167,139,250,.06);border-radius:8px;border-left:3px solid '+_balColor+';">'+_balMsg+'</div>';
+
+  // 활동 처방
+  var weight=65, actEl=document.getElementById('food-activity-card');
+  var actHtml='<div style="font-size:12px;font-weight:800;color:#38bdf8;margin-bottom:10px;">🏃 칼로리 소모 활동 처방</div>'
+    +'<div style="font-size:11px;color:rgba(240,230,200,.6);margin-bottom:10px;">섭취 칼로리 <span style="color:#fbbf24;font-weight:700;">'+(data.cal||400)+'kcal</span> 소모 예상 시간 (체중 65kg 기준)</div>'
+    +'<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">';
+  ACTIVITY_LIST.forEach(function(act){
+    var mins=Math.round((data.cal||400)/(act.met*weight*3.5/200));
+    actHtml+='<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(56,189,248,.06);border:1px solid rgba(56,189,248,.15);border-radius:8px;">'
+      +'<span style="font-size:18px;">'+act.emoji+'</span>'
+      +'<div style="flex:1"><div style="font-size:12px;font-weight:700;color:#38bdf8;">'+act.name+'</div>'
+      +'<div style="font-size:10px;color:rgba(240,230,200,.4);">'+act.desc+'</div></div>'
+      +'<div style="font-family:\'Orbitron\',monospace;font-size:15px;font-weight:900;color:#38bdf8;">'+mins+'<span style="font-size:10px;font-weight:400;">분</span></div></div>';
+  });
+  actHtml+='</div>';
+  // 소화 도움 처방
+  actHtml+='<div style="padding:10px 14px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.2);border-radius:10px;">'
+    +'<div style="font-size:11px;font-weight:700;color:#34d399;margin-bottom:6px;">💆 소화 촉진 처방</div>'
+    +'<div style="font-size:11px;color:rgba(240,230,200,.7);line-height:1.8;">'
+    +'• 식후 10분 뒤 <strong style="color:#34d399;">명치 부근(중완혈)</strong> 시계방향 지압 3분<br>'
+    +'• 식후 20분 산책 — 소화 효소 활성화에 가장 효과적<br>'
+    +'• <strong style="color:'+ohInfo.color+'">'+ohInfo.name+' 장기('+ohInfo.organ+')</strong> 강화를 위한 복식호흡 5분</div></div>';
+  actEl.innerHTML=actHtml;
+
+  document.getElementById('food-result').style.display='flex';
+  _foodLastAnalysis = {name: foodName, data: data};
+
+  // 🔬 rPPG 생체 반응 예측 렌더
+  foodRenderBioReaction(data);
+
+  // 유사 음식 제안 표시
+  var simEl = document.getElementById('food-similar-row');
+  var sims = window._foodSimilar || [];
+  if (simEl) {
+    if (sims.length > 0) {
+      simEl.style.display = 'flex';
+      simEl.innerHTML = '<span style="font-size:11px;color:rgba(240,230,200,.5);margin-right:6px;">🔍 유사:</span>'
+        + sims.filter(Boolean).map(function(s){
+          return '<button onclick="document.getElementById(\'food-name-input\').value=\''+s+'\';foodAnalyze();" '
+            +'style="padding:3px 10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:rgba(240,230,200,.7);font-size:11px;cursor:pointer;font-family:inherit;">'+s+'</button>';
+        }).join('');
+    } else { simEl.style.display='none'; }
+  }
+  window._foodSimilar = [];
+  setTimeout(function(){
+    document.getElementById('food-result').scrollIntoView({behavior:'smooth',block:'start'});
+  },100);
+}
+
+// ── 음식 AI 채팅 ────────────────────────────────────────
+var _foodChatHistory = [];
+var _foodLastAnalysis = null;
+
+// ════════════════════════════════════════════════════════
+// 🔬 세계 최초 — rPPG × 오행 × 음식 생체 반응 예측 · C-11
+// ════════════════════════════════════════════════════════
+// ★ 음식 궁합 → 건강 예측 연동 함수 (C-24 2026.05)
+function _foodUpdateHealthPage(){
+  var fr = window._lastFoodResult;
+  if(!fr) return;
+
+  var card = document.getElementById('hlt-food-card');
+  if(!card) return;
+
+  var cColor = fr.compatScore>=75?'#34d399':fr.compatScore>=50?'#fbbf24':'#f87171';
+  var cLabel = fr.compatScore>=75?'✅ 좋음':fr.compatScore>=50?'⚠️ 주의':'❌ 주의';
+
+  // 건강 예측에 미치는 영향 계산
+  var impact = [];
+  if(fr.na>1500) impact.push({c:'#f87171',t:'🧂 나트륨 과다 — 혈압 주의'});
+  if(fr.fat>20)  impact.push({c:'#fbbf24',t:'🫧 고지방 — 혈관 건강 주의'});
+  if(fr.cal>600) impact.push({c:'#fbbf24',t:'🔥 고칼로리 — 체중 관리 필요'});
+  if(fr.compatScore>=75) impact.push({c:'#34d399',t:'🌿 오행 궁합 좋음 — 소화 에너지 상승'});
+  if(fr.risk&&fr.risk.length) impact.push({c:'#f87171',t:'⚠️ '+fr.risk.join('·')+' 주의 음식'});
+  if(!impact.length) impact.push({c:'#34d399',t:'✅ 건강에 무리 없는 음식'});
+
+  var impactHtml = impact.map(function(it){
+    return '<div style="font-size:10px;color:'+it.c+';margin-top:4px;">'+it.t+'</div>';
+  }).join('');
+
+  var timeAgo = '방금';
+  card.style.display = 'block';
+  card.innerHTML =
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+    +'<span style="font-size:22px;">'+fr.emoji+'</span>'
+    +'<div style="flex:1;">'
+    +'<div style="font-size:12px;font-weight:800;color:#f0e6d3;">'+fr.name+'</div>'
+    +'<div style="font-size:10px;color:rgba(240,230,200,.5);">'+fr.ohName+' 오행 · '+fr.cal+'kcal · '+timeAgo+'</div>'
+    +'</div>'
+    +'<div style="font-size:20px;font-weight:900;color:'+cColor+';font-family:Orbitron,sans-serif;">'+fr.compatScore+'</div>'
+    +'</div>'
+    +'<div style="font-size:10px;color:'+cColor+';font-weight:700;margin-bottom:6px;">'+cLabel+'</div>'
+    + impactHtml
+    +'<button onclick="cgoGoPage(\'food\')" style="margin-top:10px;width:100%;padding:7px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:8px;color:#34d399;font-size:11px;font-weight:700;cursor:pointer;">🍱 음식 궁합 상세보기</button>';
+}
+
+function foodRenderBioReaction(foodData) {
+  var card = document.getElementById('food-bio-card');
+  if (!card) return;
+
+  // C-24(90초) 우선, rPPG(33초) 폴백
+  var c21 = window._c24 || {};
+  var bio = window._bioFinalData || {};
+  var bpm = c21.bpm > 30 ? c21.bpm : (parseInt(bio.bpm) || 0);
+  var hrv = c21.hrv > 0  ? c21.hrv : (parseInt(bio.hrv) || 0);
+  var fci = c21.fci > 0  ? c21.fci : (parseInt(bio.fci) || 0);
+  var src = c21.fci > 0  ? 'C-24 (90초 정밀)' : 'rPPG (33초)';
+  var bli = parseInt(bio.bli) || 0;
+
+  card.style.display = 'block';
+
+  // ── 데이터 없으면 안내 카드 ──
+  if (!bpm && !fci) {
+    var _hdone = !!(
+      (window._bioFinalData && (window._bioFinalData.fci>0||window._bioFinalData.hrv>0))
+      || (window._c24 && window._c24.fci>0)
+    );
+    var _s1bg  = _hdone ? 'rgba(52,211,153,.1)' : 'rgba(52,211,153,.05)';
+    var _s1nb  = _hdone ? '#34d399' : 'rgba(52,211,153,.3)';
+    var _s1nc  = _hdone ? '#020817' : '#34d399';
+    var _s1num = _hdone ? '✅' : '1';
+    var _s1done= _hdone ? '<div style="font-size:10px;color:#34d399;font-weight:700;margin-top:3px;">✅ 측정 완료 — 생체 데이터 준비됨!</div>' : '';
+    var _btnEl = document.createElement('div');
+    if(_hdone){
+      _btnEl.innerHTML = '<div style="padding:10px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:10px;text-align:center;font-size:12px;font-weight:800;color:#34d399;">✅ 측정 완료 — 음식 분석 후 생체 반응 예측이 자동 생성됩니다</div>';
+    } else {
+      var _goBtn = document.createElement('button');
+      _goBtn.textContent = '🩺 1단계: AI 통합 건강 예측 측정하러 가기 →';
+      _goBtn.style.cssText = 'width:100%;padding:12px;background:linear-gradient(135deg,rgba(52,211,153,.2),rgba(52,211,153,.08));border:1px solid rgba(52,211,153,.6);border-radius:10px;color:#34d399;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;';
+      _goBtn.onclick = function(){ if(typeof _c24CompStart==='function') _c24CompStart(); };
+      _btnEl.appendChild(_goBtn);
+    }
+    var _btnHtml = _btnEl.innerHTML || _btnEl.outerHTML;
+
+    document.getElementById('food-bio-current').innerHTML =
+      '<div style="width:100%;padding:4px 0;">'
+      + '<div style="font-size:11px;font-weight:900;color:rgba(52,211,153,.8);margin-bottom:10px;">📋 사용 순서 — 반드시 이 순서대로</div>'
+      + '<div style="display:flex;flex-direction:column;gap:7px;margin-bottom:14px;">'
+      + '<div style="display:flex;gap:10px;padding:9px 12px;background:' + _s1bg + ';border-radius:8px;border-left:3px solid rgba(52,211,153,.5);">'
+      + '<div style="width:22px;height:22px;border-radius:50%;background:' + _s1nb + ';border:1px solid #34d399;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:' + _s1nc + ';flex-shrink:0;">' + _s1num + '</div>'
+      + '<div style="flex:1;"><div style="font-size:12px;font-weight:800;color:#34d399;">🩺 AI 통합 건강 예측 측정 (권장)</div>'
+      + '<div style="font-size:11px;color:rgba(240,230,200,.5);margin-top:2px;">대시보드 → <b style="color:#34d399;">CGO-FULI 전체 기능</b> → 🩺 AI 통합 건강 예측 → 90초 정밀 측정</div>'
+      + _s1done + '</div></div>'
+      + '<div style="display:flex;gap:10px;padding:9px 12px;background:rgba(251,191,36,.05);border-radius:8px;border-left:3px solid rgba(251,191,36,.4);">'
+      + '<div style="width:22px;height:22px;border-radius:50%;background:rgba(251,191,36,.2);border:1px solid #fbbf24;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fbbf24;flex-shrink:0;">2</div>'
+      + '<div><div style="font-size:12px;font-weight:800;color:#fbbf24;">🍱 음식 궁합으로 돌아오기</div>'
+      + '<div style="font-size:11px;color:rgba(240,230,200,.5);margin-top:2px;">음식 사진 촬영 → ⚡ 분석 시작</div></div></div>'
+      + '<div style="display:flex;gap:10px;padding:9px 12px;background:rgba(167,139,250,.05);border-radius:8px;border-left:3px solid rgba(167,139,250,.4);">'
+      + '<div style="width:22px;height:22px;border-radius:50%;background:rgba(167,139,250,.2);border:1px solid #a78bfa;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#a78bfa;flex-shrink:0;">3</div>'
+      + '<div><div style="font-size:12px;font-weight:800;color:#a78bfa;">🔮 생체 반응 예측 자동 생성</div>'
+      + '<div style="font-size:11px;color:rgba(240,230,200,.5);margin-top:2px;">C-24×나트륨·HRV×지방·오행×생체 에너지 융합 분석</div></div></div>'
+      + '</div>'
+      + _btnHtml
+      + '</div>';
+
+    document.getElementById('food-bio-predictions').innerHTML = '';
+    return;
+  }
+
+  // ── 데이터 있으면 수치 표시 ──
+  var bpmC = bpm > 100 ? '#f87171' : bpm > 85 ? '#fbbf24' : '#34d399';
+  var hrvC = hrv < 30  ? '#f87171' : hrv < 50  ? '#fbbf24' : '#34d399';
+  var fciC = fci < 50  ? '#f87171' : fci < 70  ? '#fbbf24' : '#34d399';
+
+  document.getElementById('food-bio-current').innerHTML =
+    '<span style="font-size:10px;color:rgba(240,230,200,.4);">' + src + ':</span>'
+    + (bpm ? '<span style="font-size:11px;font-weight:700;color:' + bpmC + ';">❤️ ' + bpm + 'bpm</span>' : '')
+    + (hrv ? '<span style="font-size:11px;font-weight:700;color:' + hrvC + ';">〰️ HRV ' + hrv + 'ms</span>' : '')
+    + (fci ? '<span style="font-size:11px;font-weight:700;color:' + fciC + ';">🧬 FCI ' + fci + '</span>' : '')
+    + (bli ? '<span style="font-size:11px;font-weight:700;color:#f472b6;">✋ BLI ' + bli + '</span>' : '');
+
+  // ── 예측 생성 ──
+  if (!foodData) { document.getElementById('food-bio-predictions').innerHTML = ''; return; }
+  var cal = foodData.cal || 0, na = foodData.na || 0;
+  var fat = foodData.f || 0, carb = foodData.c || 0;
+
+  var predictions = [];
+
+  // 심박 × 나트륨
+  if (bpm > 0 && na > 0) {
+    var naRisk = na > 800 && bpm > 85;
+    predictions.push({
+      icon: '❤️',
+      color: naRisk ? '#f87171' : '#34d399',
+      msg: '심박(' + bpm + 'bpm) × 나트륨(' + na + 'mg): '
+        + (naRisk ? '⚠️ 심박 높은 상태에서 고나트륨 — 혈압 부담 주의'
+                  : '✅ 심박-나트륨 균형 양호')
+    });
+  }
+
+  // HRV × 지방
+  if (hrv > 0 && fat > 0) {
+    var fatRisk = fat > 20 && hrv < 40;
+    predictions.push({
+      icon: '〰️',
+      color: fatRisk ? '#f87171' : '#34d399',
+      msg: 'HRV(' + hrv + 'ms) × 지방(' + fat + 'g): '
+        + (fatRisk ? '⚠️ 자율신경 긴장 상태에서 고지방 — 소화 부담'
+                   : '✅ 자율신경-지방 균형 양호')
+    });
+  }
+
+  // FCI × 칼로리
+  if (fci > 0 && cal > 0) {
+    var calRisk = cal > 600 && fci < 55;
+    predictions.push({
+      icon: '🧬',
+      color: calRisk ? '#fbbf24' : '#34d399',
+      msg: 'FCI(' + fci + '%) × 칼로리(' + cal + 'kcal): '
+        + (calRisk ? '⚠️ 기력 낮은 상태에서 고칼로리 — 소화 에너지 부족'
+                   : '✅ 혈색-칼로리 균형 양호')
+    });
+  }
+
+  document.getElementById('food-bio-predictions').innerHTML = predictions.map(function(p) {
+    return '<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 10px;background:' + p.color + '11;border:1px solid ' + p.color + '33;border-radius:8px;">'
+      + '<span style="font-size:16px;flex-shrink:0;">' + p.icon + '</span>'
+      + '<div style="font-size:12px;color:rgba(240,230,200,.85);line-height:1.6;">' + p.msg + '</div>'
+      + '</div>';
+  }).join('');
+}
+// ════════════════════════════════════════════════════════
+var _foodLog = [];
+
+function foodAddToLog() {
+  if (!_foodLastAnalysis) return;
+  var item = {
+    name: _foodLastAnalysis.name,
+    emoji: _foodLastAnalysis.data.emoji||'🍽️',
+    cal: _foodLastAnalysis.data.cal||0,
+    time: new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})
+  };
+  _foodLog.push(item);
+  try{ localStorage.setItem('cgo_food_log_'+new Date().toDateString(), JSON.stringify(_foodLog)); }catch(e){}
+  foodRenderLog();
+  var btn = event && event.target;
+  if (btn) {
+    btn.textContent='✅ 추가됨!'; btn.style.borderColor='rgba(52,211,153,.6)'; btn.style.color='#34d399';
+    setTimeout(function(){ btn.textContent='➕ 오늘 식사 기록에 추가'; btn.style.borderColor='rgba(251,191,36,.6)'; btn.style.color='#fbbf24'; },1500);
+  }
+}
+
+function foodClearLog() {
+  _foodLog=[];
+  try{ localStorage.removeItem('cgo_food_log_'+new Date().toDateString()); }catch(e){}
+  foodRenderLog();
+}
+
+function _foodLogRemove(idx) {
+  _foodLog.splice(idx,1);
+  try{ localStorage.setItem('cgo_food_log_'+new Date().toDateString(), JSON.stringify(_foodLog)); }catch(e){}
+  foodRenderLog();
+}
+
+function foodRenderLog() {
+  var logCard=document.getElementById('food-log-card');
+  var logList=document.getElementById('food-log-list');
+  var logTotal=document.getElementById('food-log-total');
+  var logAct=document.getElementById('food-log-activity');
+  if(!logCard) return;
+  if(_foodLog.length===0){ logCard.style.display='none'; return; }
+  logCard.style.display='block';
+  logList.innerHTML=_foodLog.map(function(item,i){
+    return '<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:8px;">'
+      +'<span style="font-size:18px;">'+item.emoji+'</span>'
+      +'<div style="flex:1;font-size:12px;color:#e2e8f0;font-weight:600;">'+item.name+'</div>'
+      +'<div style="font-size:12px;color:#fbbf24;font-weight:700;font-family:\'Orbitron\',monospace;">'+item.cal+'</div>'
+      +'<div style="font-size:10px;color:rgba(240,230,200,.35);">kcal</div>'
+      +'<div style="font-size:10px;color:rgba(240,230,200,.3);">'+item.time+'</div>'
+      +'<button onclick="_foodLogRemove('+i+')" style="background:none;border:none;color:rgba(248,113,113,.5);font-size:12px;cursor:pointer;padding:2px 4px;">✕</button>'
+      +'</div>';
+  }).join('');
+  var total=_foodLog.reduce(function(s,i){return s+(i.cal||0);},0);
+  logTotal.textContent=total;
+  var weight=65;
+  logAct.innerHTML='<div style="font-size:11px;font-weight:700;color:#38bdf8;margin-bottom:6px;">🏃 총 칼로리 소모 처방 ('+total+'kcal 기준)</div>'
+    +ACTIVITY_LIST.map(function(act){
+      var mins=Math.round(total/(act.met*weight*3.5/200));
+      var h=Math.floor(mins/60), m=mins%60;
+      var ts=h>0?h+'시간 '+(m>0?m+'분':''):m+'분';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.12);border-radius:7px;">'
+        +'<span style="font-size:16px;">'+act.emoji+'</span>'
+        +'<div style="flex:1;font-size:11px;color:rgba(240,230,200,.8);">'+act.name+'</div>'
+        +'<div style="font-size:13px;font-weight:900;color:#38bdf8;font-family:\'Orbitron\',monospace;">'+ts+'</div></div>';
+    }).join('');
+  setTimeout(function(){ logCard.scrollIntoView({behavior:'smooth',block:'nearest'}); },100);
+}
+
+function foodChatClear() {
+  _foodChatHistory = [];
+  try { localStorage.removeItem('cgo_food_chat'); } catch(e) {}
+  var box = document.getElementById('food-chat-messages');
+  if (box) box.innerHTML = '';
+}
+function foodChatEnter(e) {
+  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); foodChatSend(); }
+}
+function foodChatSend() {
+  var inp = document.getElementById('food-chat-input');
+  if (!inp) return;
+  var text = inp.value.trim(); if (!text) return;
+  inp.value = ''; foodAskAI(text);
+}
+function _foodAddBubble(role, text) {
+  var box = document.getElementById('food-chat-messages'); if (!box) return;
+  var isMe = role==='me';
+  var div = document.createElement('div');
+  div.style.cssText='display:flex;flex-direction:column;align-items:'+(isMe?'flex-end':'flex-start')+';';
+  div.innerHTML='<div style="max-width:85%;padding:9px 13px;border-radius:'+(isMe?'14px 14px 4px 14px':'14px 14px 14px 4px')+';background:'+(isMe?'rgba(52,211,153,0.15)':'rgba(255,255,255,0.06)')+';border:1px solid '+(isMe?'rgba(52,211,153,0.3)':'rgba(255,255,255,0.1)')+';font-size:13px;color:#e2e8f0;line-height:1.6;white-space:pre-wrap;">'+text+'</div>';
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+}
+function _foodAddTyping() {
+  var box=document.getElementById('food-chat-messages'); if(!box) return;
+  var div=document.createElement('div'); div.id='food-typing';
+  div.innerHTML='<div style="padding:9px 14px;border-radius:14px 14px 14px 4px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);font-size:13px;color:rgba(52,211,153,.7);">🤖 분석 중...</div>';
+  box.appendChild(div); box.scrollTop=box.scrollHeight;
+}
+function foodAskAI(userText) {
+  if (!userText) return;
+  _foodAddBubble('me', userText);
+  _foodChatHistory.push({role:'user',content:userText});
+  if (_foodChatHistory.length>10) _foodChatHistory=_foodChatHistory.slice(-10);
+  try { localStorage.setItem('cgo_food_chat', JSON.stringify(_foodChatHistory)); } catch(e) {}
+  var sendBtn=document.getElementById('food-chat-send');
+  if(sendBtn) sendBtn.disabled=true;
+  _foodAddTyping();
+  var profile={};
+  try{profile=JSON.parse(localStorage.getItem('cgo_food_profile')||'{}');}catch(e){}
+  var myName=(window.calcResult&&window.calcResult.name)||'사용자';
+  var myOh=(window.calcResult&&window.calcResult.domOh)||'미확인';
+  var ctx='## 현재 분석 음식\n';
+  if(_foodLastAnalysis){
+    var d=_foodLastAnalysis;
+    ctx+='음식: '+d.name+' / 칼로리: '+(d.data.cal||'?')+'kcal / 오행: '+FOOD_OH_INFO[d.data.oh||3].name+'\n';
+    ctx+='탄:'+d.data.c+'g 단:'+d.data.p+'g 지:'+d.data.f+'g 나트륨:'+d.data.na+'mg\n';
+    ctx+='위험병명: '+(d.data.risk&&d.data.risk.length?d.data.risk.join(','):'없음')+'\n';
+  }else{ctx+='아직 음식 미분석\n';}
+  ctx+='\n## 사용자\n이름:'+myName+' / 오행:'+myOh+'\n병명:'+(profile.diseases||'없음')+'\n기피성분:'+(profile.avoid||'없음')+'\n';
+  // ★ 신버전 CEI 생체 컨텍스트 추가
+  var _bioCtxFood = '';
+  if(typeof _cgoGetScore === 'function'){
+    var _gsF = _cgoGetScore();
+    if(_gsF.scanned){
+      _bioCtxFood = '\n## 현재 생체 상태 (실측)\n'
+        + '에너지지수(CEI) '+_gsF.score+'점 · 등급: '+_gsF.grade+' ('+_gsF.gradeMsg+')\n'
+        + '심박수(BPM): '+_gsF.bpm+' / 심박변이도(HRV): '+_gsF.hrv+'ms\n'
+        + '안면혈색(FCI): '+_gsF.fci+' / 손금생명지수(BLI): '+_gsF.bli+'\n'
+        + '→ 이 생체 수치와 음식의 관계를 쉽게 설명해주세요.\n';
+    }
+  }
+  var sys='당신은 CGO-FULI 전속 AI 음식·영양 상담사입니다. 동양 오행 역학과 현대 영양학을 융합합니다.\n\n'
+    +ctx+_bioCtxFood
+    +'\n## 원칙\n- 위 사용자 정보 반드시 반영\n- 오행 관점+영양학 관점 동시 제시\n- 병명 있으면 주의사항 포함\n- 대체 음식 추천 시 오행 궁합 설명\n- 일반인도 이해하기 쉬운 쉬운 언어 사용\n- 간결 실용적 답변 (300자 이내)\n- 한국어 답변';
+  fetch('/api/groq',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'system',content:sys}].concat(_foodChatHistory),max_tokens:400,temperature:0.7})
+  }).then(function(r){return r.json();}).then(function(data){
+    var t=document.getElementById('food-typing'); if(t) t.remove();
+    var reply=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'답변을 받지 못했습니다.';
+    _foodChatHistory.push({role:'assistant',content:reply});
+    _foodAddBubble('ai',reply);
+    // localStorage 저장
+    try { localStorage.setItem('cgo_food_chat', JSON.stringify(_foodChatHistory)); } catch(e) {}
+    if(sendBtn) sendBtn.disabled=false;
+  }).catch(function(){
+    var t=document.getElementById('food-typing'); if(t) t.remove();
+    _foodAddBubble('ai','❌ 연결 오류입니다. 잠시 후 다시 시도해 주세요.');
+    if(sendBtn) sendBtn.disabled=false;
+  });
+}
+
+</script>
+<!-- /page-food -->
 <!-- ══ 로또 행운 번호 추출기 ══ -->
 <!-- ★ C-40 박입 ㉑ — scrCouple 페이지 (FULI에서 통째 박제) -->
 <div class="screen" id="scrCouple" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -35050,6 +37102,15 @@ setTimeout(function(){
           setTimeout(function(){
             var mu179 = document.getElementById('music-intro-pop');
             if(mu179) mu179.style.display = 'block';
+          }, 50);
+        }
+        // ★ 박입 185 — 음식 궁합 자동 팝업 (매번 박입)
+        if(screenId === 'scrFood'){
+          setTimeout(function(){
+            var fd185 = document.getElementById('food-intro-pop');
+            if(fd185) fd185.style.display = 'block';
+            // ★ 박입 189 — 저장된 진료 차트 자동 로드 (본인 폰 localStorage)
+            if(typeof foodLoadProfile === 'function'){ try{ foodLoadProfile(); }catch(e){} }
           }, 50);
         }
       } catch(e){}
