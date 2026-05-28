@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj204-couple-easy" name="c41-version"/>
+<meta content="2026-05-26-c44-inj205-call-emotion" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -23673,6 +23673,11 @@ function openCallUI(){
     '<div style="flex:1;position:relative;background:#111;overflow:hidden;">',
     (_call.type === 'video' ? '<video id="callRemoteVideo" autoplay playsinline style="width:100%;height:100%;object-fit:cover;"></video>' : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:120px;opacity:.3;">📞</div>'),
     (_call.type === 'video' ? '<video id="callLocalVideo" autoplay playsinline muted style="position:absolute;bottom:16px;right:16px;width:100px;height:140px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:#000;"></video>' : ''),
+    // ★ 박입 205 — 실시간 호감도 바 (영상통화 중, 나만 보임)
+    (_call.type === 'video' ? '<div id="callEmotionBar" style="display:none;position:absolute;top:12px;left:12px;right:12px;max-width:340px;margin:0 auto;background:rgba(20,12,40,.78);backdrop-filter:blur(8px);border:1px solid rgba(167,139,250,.4);border-radius:14px;padding:10px 14px;pointer-events:none;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:800;color:#c4b5fd;">💗 지금 내 마음 (나만 보여요)</span><span id="callEmotionVal" style="font-size:15px;font-weight:900;color:#fff;font-family:Orbitron,monospace;">0</span></div>' +
+      '<div style="position:relative;height:10px;background:linear-gradient(90deg,#f87171,#fbbf24,#34d399);border-radius:5px;"><div id="callEmotionMarker" style="position:absolute;top:-3px;left:50%;width:5px;height:16px;background:#fff;border-radius:3px;transform:translateX(-50%);transition:left .6s;box-shadow:0 0 6px rgba(0,0,0,.5);"></div></div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.6);margin-top:3px;"><span>긴장</span><span>평온</span><span>설렘</span></div></div>' : ''),
     // 실시간 자막
     '  <div id="callCaptions" style="position:absolute;left:10px;right:10px;bottom:20px;display:flex;flex-direction:column;gap:6px;pointer-events:none;"></div>',
     '</div>',
@@ -23714,6 +23719,8 @@ function openCallUI(){
   if(_call.type === 'video' && _call.localStream){
     const localVideo = document.getElementById('callLocalVideo');
     if(localVideo) localVideo.srcObject = _call.localStream;
+    // ★ 박입 205 — 통화 중 실시간 호감도 측정 시작
+    if(typeof callStartEmotion === 'function'){ try{ callStartEmotion(localVideo); }catch(e){} }
   }
   
   // 힌트 5초 후 자동 사라짐
@@ -24390,10 +24397,65 @@ function stopRingtone(){
 }
 
 // ══ 📞 통화 종료 ══
+// ★ 박입 205 — 영상통화 중 실시간 호감도 측정 (내 얼굴 rPPG → 나만 보임)
+var _callEmoStream=null, _callEmoRAF=null, _callEmoSignal=[], _callEmoT0=0, _callEmoCanvas=null;
+function callStartEmotion(localVideo){
+  if(!localVideo) return;
+  var bar=document.getElementById('callEmotionBar');
+  if(bar) bar.style.display='block';
+  _callEmoSignal=[]; _callEmoT0=Date.now();
+  _callEmoCanvas=document.createElement('canvas');
+  var ctx=_callEmoCanvas.getContext('2d',{willReadFrequently:true});
+  function loop(){
+    if(!_call.active){ return; }
+    if(localVideo.videoWidth>0){
+      _callEmoCanvas.width=localVideo.videoWidth; _callEmoCanvas.height=localVideo.videoHeight;
+      ctx.drawImage(localVideo,0,0);
+      var cx=Math.floor(_callEmoCanvas.width*0.3), cy=Math.floor(_callEmoCanvas.height*0.15);
+      var w=Math.floor(_callEmoCanvas.width*0.4), h=Math.floor(_callEmoCanvas.height*0.45);
+      try{
+        var d=ctx.getImageData(cx,cy,w,h).data;
+        var gSum=0,n=0;
+        for(var i=0;i<d.length;i+=16){ gSum+=d[i+1]; n++; }
+        _callEmoSignal.push({t:Date.now()-_callEmoT0,v:gSum/n});
+        if(_callEmoSignal.length>300) _callEmoSignal.shift(); // 최근 10초만 유지
+        callUpdateEmotionBar();
+      }catch(e){}
+    }
+    _callEmoRAF=requestAnimationFrame(loop);
+  }
+  loop();
+}
+function callUpdateEmotionBar(){
+  if(_callEmoSignal.length<30) return;
+  var recent=_callEmoSignal.slice(-30).map(function(s){return s.v;});
+  var mean=recent.reduce(function(a,b){return a+b;},0)/recent.length;
+  var variance=recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length;
+  var sd=Math.sqrt(variance);
+  // 신호 안정(부드러움) → 평온/호감(+), 급변동 → 긴장(-)
+  var stability=Math.max(0,Math.min(100,100-sd*8));
+  var emotion=Math.max(-100,Math.min(100,Math.round((stability-50)*2)));
+  var marker=document.getElementById('callEmotionMarker');
+  var valEl=document.getElementById('callEmotionVal');
+  if(marker) marker.style.left=((emotion+100)/2)+'%';
+  if(valEl){
+    valEl.textContent=(emotion>0?'+':'')+emotion;
+    valEl.style.color=emotion>30?'#86efac':emotion<-30?'#fca5a5':'#fff';
+  }
+}
+function callStopEmotion(){
+  if(_callEmoRAF) cancelAnimationFrame(_callEmoRAF);
+  _callEmoStream=null; _callEmoSignal=[]; _callEmoCanvas=null;
+  var bar=document.getElementById('callEmotionBar');
+  if(bar) bar.style.display='none';
+}
+
 function endCall(notifyPeer){
   if(!_call.active) return;
   console.log('[통화 종료] notifyPeer=', notifyPeer);
   
+  // ★ 박입 205 — 호감도 측정 중단
+  if(typeof callStopEmotion === 'function'){ try{ callStopEmotion(); }catch(e){} }
   // ⭐ Step 0: 가장 먼저 active = false (STT onend 무한 루프 차단!)
   _call.active = false;
   
