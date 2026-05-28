@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj196-food-ux" name="c41-version"/>
+<meta content="2026-05-26-c44-inj197-food-camfix" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8837,16 +8837,16 @@ function frppgSampleLoop(video){
     if(video.videoWidth>0){
       canvas.width=video.videoWidth; canvas.height=video.videoHeight;
       ctx.drawImage(video,0,0);
-      var cx=Math.floor(canvas.width*0.35), cy=Math.floor(canvas.height*0.25);
-      var w=Math.floor(canvas.width*0.3), h=Math.floor(canvas.height*0.35);
+      var cx=Math.floor(canvas.width*0.28), cy=Math.floor(canvas.height*0.12);
+      var w=Math.floor(canvas.width*0.44), h=Math.floor(canvas.height*0.5);
       try{
         var d=ctx.getImageData(cx,cy,w,h).data;
         var rSum=0,gSum=0,bSum=0,n=0;
         for(var i=0;i<d.length;i+=16){ rSum+=d[i]; gSum+=d[i+1]; bSum+=d[i+2]; n++; }
         var rAvg=rSum/n, gAvg=gSum/n, bAvg=bSum/n;
-        // ★ 얼굴(피부) 감지: 피부톤은 R>G>B + 충분한 밝기
+        // ★ 얼굴(피부) 감지: 피부톤은 R이 가장 높음 + 충분한 밝기 (기준 완화)
         var bright=(rAvg+gAvg+bAvg)/3;
-        var isSkin = (rAvg>gAvg) && (gAvg>=bAvg) && (rAvg>60) && (bright>40) && (bright<245);
+        var isSkin = (rAvg>=gAvg) && (rAvg>50) && (bright>35) && (bright<250);
         var hint=document.getElementById('frppg-facehint');
         if(isSkin){
           _frppgNoFace=0;
@@ -8895,7 +8895,7 @@ function frppgComputeBPM(signal){
   var det=vals.map(function(v){return v-mean;});
   // 표준편차
   var sd=Math.sqrt(det.reduce(function(a,b){return a+b*b;},0)/det.length);
-  if(sd<0.01) return 0; // 신호 너무 약함 (얼굴 없음)
+  if(sd<0.003) return 0; // 신호 너무 약함 (얼굴 없음)
   var thr=sd*0.5;
   // 피크 검출
   var peaks=[], W=3;
