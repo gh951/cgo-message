@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj134-skin-white-force" name="c41-version"/>
+<meta content="2026-05-26-c44-inj135-skin-real-white" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -1260,23 +1260,33 @@ input[type=range].sec-range::-moz-range-thumb{
 #scrSkinage [style*="color:#818cf8"] { color: #4338ca !important; }
 #scrSkinage [style*="color:#f87171"] { color: #b91c1c !important; }
 #scrSkinage [style*="color:#f0f9ff"] { color: #0d3a3a !important; }
-#scrSkinage [style*="color:#fff"] { color: #0d3a3a !important; }
+/* ★ 박입 135 — 진짜 진범 제거 (옛 박입: #fff → #0d3a3a 강제 박입) */
+/*   진짜 진단: 이 박입 때문에 hero 영역의 흰색 박입이 박입 어두운 색으로 박입 박입 */
+/*   진짜 fix: 박입 자체 제거 (주석 처리) */
+/* #scrSkinage [style*="color:#fff"] { color: #0d3a3a !important; } ← 박입 135 제거 */
 #scrSkinage [style*="color:#f0e0a8"] { color: #075050 !important; }
 
 /* ★ 박입 134 — hero 영역 흰색 강제 박입 (파트너 의향: 전체 흰색) */
-/*   진짜 진단: line 1263 박입이 흰색 → 어두운 색 강제 박입 → hero 영역 안 보임 */
-/*   진짜 fix: hero 영역 (svi-c41-hero, svi-c41-signature, svi-c41-hero-title 등) 흰색 강제 박입 */
-#scrSkinage .svi-c41-hero,
-#scrSkinage .svi-c41-hero *,
-#scrSkinage .svi-c41-signature,
-#scrSkinage .svi-c41-hero-title,
-#scrSkinage .svi-c41-hero-sub,
-#scrSkinage .svi-c41-hero-tag,
-#scrSkinage .svi-c41-hero-text,
-#scrSkinage .svi-c41-hero-text * {
+/* ★ 박입 135 — 진짜 진짜 강제 (옛 모든 박입 박입 무시 · specificity 박입) */
+#scrSkinage div.svi-c41-hero,
+#scrSkinage div.svi-c41-hero div,
+#scrSkinage div.svi-c41-hero p,
+#scrSkinage div.svi-c41-hero h2,
+#scrSkinage div.svi-c41-hero h1,
+#scrSkinage div.svi-c41-hero h3,
+#scrSkinage div.svi-c41-hero span,
+#scrSkinage div.svi-c41-hero button,
+#scrSkinage div.svi-c41-hero .svi-c41-signature,
+#scrSkinage div.svi-c41-hero .svi-c41-hero-title,
+#scrSkinage div.svi-c41-hero .svi-c41-hero-sub,
+#scrSkinage div.svi-c41-hero .svi-c41-hero-tag,
+#scrSkinage div.svi-c41-hero .svi-c41-hero-text,
+#scrSkinage div.svi-c41-hero .svi-c41-hero-text *,
+html body #scrSkinage .svi-c41-hero *,
+html body #scrSkinage .svi-c41-hero-text * {
   color: #ffffff !important;
 }
-#scrSkinage .svi-c41-hero button {
+html body #scrSkinage .svi-c41-hero button {
   color: #ffffff !important;
   background: transparent !important;
   border: none !important;
@@ -15254,13 +15264,12 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div class="svi-c41-hero-bg"></div>
 <div class="svi-c41-hero-overlay"></div>
 <div class="svi-c41-hero-text">
-<div class="svi-c41-signature">C-44</div>
-<h2 class="svi-c41-hero-title">나의 피부 탄력</h2>
-<p class="svi-c41-hero-sub">SVI · 광학 점탄성 × rPPG 융합</p>
-<p class="svi-c41-hero-tag">— WORLD FIRST · SVI TECHNOLOGY —</p>
-<!-- ★ 박입 129 — 피부 페이지 사용법 보기 버튼 (전체 통일) -->
-<!-- ★ 박입 133 — 흰색 글씨만 (배경/테두리 제거 · 파트너 의향) -->
-<button onclick="document.getElementById('skinage-intro-pop').style.display='block';" style="margin-top:14px;background:transparent;border:none;color:#ffffff;font-size:13px;font-weight:800;padding:8px 16px;cursor:pointer;font-family:inherit;letter-spacing:.02em;text-shadow:0 2px 8px rgba(0,0,0,0.85);text-decoration:underline;">📖 사용법 보기</button>
+<div class="svi-c41-signature" style="color:#ffffff !important;">C-44</div>
+<h2 class="svi-c41-hero-title" style="color:#ffffff !important;">나의 피부 탄력</h2>
+<p class="svi-c41-hero-sub" style="color:#ffffff !important;">SVI · 광학 점탄성 × rPPG 융합</p>
+<p class="svi-c41-hero-tag" style="color:#ffffff !important;">— WORLD FIRST · SVI TECHNOLOGY —</p>
+<!-- ★ 박입 135 — 진짜 흰색 강제 박입 (인라인 + !important) -->
+<button onclick="document.getElementById('skinage-intro-pop').style.display='block';" style="margin-top:14px;background:transparent !important;border:none !important;color:#ffffff !important;font-size:14px;font-weight:800;padding:8px 16px;cursor:pointer;font-family:inherit;letter-spacing:.02em;text-decoration:underline;">📖 사용법 보기</button>
 </div>
 </div><div style="padding:14px 16px;background:rgba(0,0,0,.25);border:1px solid rgba(56,189,248,.2);border-radius:14px;margin-bottom:14px;">
 <div style="font-size:11px;font-weight:800;color:#38bdf8;margin-bottom:8px;display:flex;align-items:center;gap:6px;">📋 사용 방법</div>
