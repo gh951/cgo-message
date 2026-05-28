@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj200-food-pwv" name="c41-version"/>
+<meta content="2026-05-26-c44-inj201-food-clean" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8965,10 +8965,10 @@ function frppgFinish(){
     +'<div style="font-size:13px;font-weight:900;color:#047857;margin-bottom:8px;">✅ 1차 완료 — 안면 측정 (심박 '+r.bpm+' BPM)</div>'
     +'<div style="font-size:12px;color:#1a3a3a;line-height:1.7;margin-bottom:12px;">이제 <b style="color:#dc2626;">손바닥 측정</b>으로 넘어갑니다.<br/>얼굴(심장 근처)과 손바닥(말초 혈관)의 맥파 시간차로 <b>혈압을 정확히 추정(PWV)</b>합니다.</div>'
     +'<div style="padding:10px 12px;background:rgba(255,255,255,.6);border-radius:10px;margin-bottom:12px;font-size:11px;color:#3a5a5a;line-height:1.7;">'
-    +'📋 <b>손바닥 측정 방법</b><br/>① <b>후면 카메라</b>로 전환됩니다<br/>② <b>손바닥(또는 손가락 끝)</b>을 후면 카메라 렌즈에 <b>살짝 덮듯이</b> 대주세요<br/>③ 플래시가 켜지면 15초간 가만히 유지하세요</div>'
+    +'📋 <b>손바닥 측정 방법</b><br/>① <b>후면 카메라</b>로 전환됩니다<br/>② <b>손바닥(또는 손가락 끝)</b>을 후면 카메라 렌즈에 <b>살짝 덮듯이</b> 대주세요<br/>③ 15초간 가만히 유지하면 측정됩니다</div>'
     +'<div id="frppg-palm-countdown" style="font-size:13px;font-weight:800;color:#0284c7;text-align:center;margin-bottom:10px;">3초 후 손바닥 측정을 시작합니다...</div>'
     +'<button onclick="frppgStartPalm()" style="width:100%;padding:13px;background:linear-gradient(135deg,#059669,#0284c7);border:none;border-radius:11px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;">🖐️ 손바닥 측정 시작</button>'
-    +'<button onclick="frppgSkipPalm()" style="width:100%;padding:9px;margin-top:7px;background:transparent;border:1px solid rgba(120,120,120,.3);border-radius:9px;color:#5b7a7a;font-size:11px;cursor:pointer;font-family:inherit;">손바닥 측정 건너뛰기 (안면 단독 · 정확도 낮음)</button>'
+    +'<button onclick="frppgSkipPalm()" style="width:100%;padding:9px;margin-top:7px;background:transparent;border:1px solid rgba(120,120,120,.3);border-radius:9px;color:#5b7a7a;font-size:11px;cursor:pointer;font-family:inherit;">안면 측정만으로 진행</button>'
     +'</div>';
   resEl.scrollIntoView({behavior:'smooth',block:'center'});
 
