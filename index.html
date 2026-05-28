@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj195-food-bp" name="c41-version"/>
+<meta content="2026-05-26-c44-inj196-food-ux" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8270,11 +8270,11 @@ var Q_POOL = {
 <div class="fci-lbl">③ 5단계 진료 차트 (CGO-FULI MEDICAL RECORD)</div>
 <div class="fci-chart">
 <div class="fci-chart-tag fci-chart-c1">①</div>
-<div><div class="fci-chart-tit">BACKGROUND · 건강 기저</div><div class="fci-chart-desc">음주·흡연·활동량·가족력·기저질환 — 평소 컨디션의 출발선</div></div>
+<div><div class="fci-chart-tit">기본 건강 정보</div><div class="fci-chart-desc">음주·흡연·활동량·가족력·기저질환 — 평소 컨디션의 출발선</div></div>
 </div>
 <div class="fci-chart">
 <div class="fci-chart-tag fci-chart-c2">②</div>
-<div><div class="fci-chart-tit">C/C &amp; HPI · 주요 호소</div><div class="fci-chart-desc">오늘 가장 불편한 증상 + rPPG 실측 BPM·HRV — 지금 이 순간의 몸 상태</div></div>
+<div><div class="fci-chart-tit">지금 불편한 증상</div><div class="fci-chart-desc">오늘 가장 불편한 증상 + rPPG 실측 BPM·HRV — 지금 이 순간의 몸 상태</div></div>
 </div>
 <div class="fci-chart">
 <div class="fci-chart-tag fci-chart-c3">③</div>
@@ -8397,7 +8397,7 @@ var Q_POOL = {
 <!-- ① 건강 기저 데이터 (Background) -->
 <div style="border:1px solid rgba(96,165,250,.2);border-radius:10px;overflow:hidden;">
 <div onclick="foodToggleSection('sec1')" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(96,165,250,.07);cursor:pointer;">
-<span style="font-size:10px;font-weight:900;color:#60a5fa;letter-spacing:.08em;">① BACKGROUND · 건강 기저 데이터</span>
+<span style="font-size:13px;font-weight:900;color:#0284c7;letter-spacing:.02em;">① 기본 건강 정보</span>
 <span style="font-size:9px;color:#0284c7;margin-left:4px;">사회력 · 가족력 · 기본 체질</span>
 <span id="sec1-arrow" style="margin-left:auto;font-size:10px;color:#0284c7;transition:transform .25s;">▼</span>
 </div>
@@ -8434,22 +8434,22 @@ var Q_POOL = {
 <!-- ② 주요 호소 증상 C/C + rPPG -->
 <div style="border:1px solid rgba(251,191,36,.2);border-radius:10px;overflow:hidden;">
 <div onclick="foodToggleSection('sec2')" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(251,191,36,.07);cursor:pointer;">
-<span style="font-size:10px;font-weight:900;color:#fbbf24;letter-spacing:.08em;">② C/C &amp; HPI · 주요 호소 증상</span>
+<span style="font-size:13px;font-weight:900;color:#b45309;letter-spacing:.02em;">② 지금 불편한 증상</span>
 <span style="font-size:9px;color:rgba(251,191,36,.5);margin-left:4px;">현재 증상 · rPPG 생체 데이터</span>
 <span id="sec2-arrow" style="margin-left:auto;font-size:10px;color:rgba(251,191,36,.5);transition:transform .25s;">▼</span>
 </div>
 <div id="sec2" style="display:none;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
 <div>
-<div style="font-size:10px;color:rgba(251,191,36,.7);margin-bottom:4px;">🔴 Chief Complaint · 지금 가장 불편한 것</div>
+<div style="font-size:12px;color:#b45309;font-weight:700;margin-bottom:5px;">🔴 지금 가장 불편한 곳</div>
 <input id="fp-cc" placeholder="예: 속쓰림, 만성 피로, 소화불량, 부종" style="width:100%;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div>
-<div style="font-size:10px;color:rgba(251,191,36,.7);margin-bottom:4px;">⚡ HPI · 언제/무엇을 먹으면 악화되나요?</div>
+<div style="font-size:12px;color:#b45309;font-weight:700;margin-bottom:5px;">⚡ 언제 / 무엇을 먹으면 나빠지나요?</div>
 <input id="fp-hpi" placeholder="예: 식후 속쓰림, 기름진 것 먹으면 설사, 공복시 두통" style="width:100%;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <!-- rPPG 생체 데이터 -->
 <div id="fp-rppg-row" style="padding:8px 10px;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-radius:8px;">
-<div style="font-size:10px;color:rgba(52,211,153,.7);font-weight:700;margin-bottom:5px;">🔬 Physical Exam · rPPG 생체 측정값</div>
+<div style="font-size:12px;color:#059669;font-weight:700;margin-bottom:5px;">🔬 카메라 측정값 (심박·혈압)</div>
 <div id="fp-rppg-data" style="font-size:11px;color:#5b7a7a;">생체 스캔 페이지에서 측정 후 자동 연동됩니다.</div>
 </div>
 </div>
@@ -8457,22 +8457,22 @@ var Q_POOL = {
 <!-- ③ 과거력 & 진단 -->
 <div style="border:1px solid rgba(248,113,113,.2);border-radius:10px;overflow:hidden;">
 <div onclick="foodToggleSection('sec3')" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(248,113,113,.07);cursor:pointer;">
-<span style="font-size:10px;font-weight:900;color:#f87171;letter-spacing:.08em;">③ Dx &amp; Hx · 진단명 &amp; 과거력</span>
+<span style="font-size:10px;font-weight:900;color:#f87171;letter-spacing:.08em;">③ 진단받은 병 · 과거 병력</span>
 <span style="font-size:9px;color:rgba(248,113,113,.5);margin-left:4px;">확정 진단 · 수치 기준값</span>
 <span id="sec3-arrow" style="margin-left:auto;font-size:10px;color:rgba(248,113,113,.5);transition:transform .25s;">▼</span>
 </div>
 <div id="sec3" style="display:none;padding:10px 12px;display:flex;flex-direction:column;gap:8px;">
 <div>
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">📋 Diagnosis · 현재 진단명</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">📋 진단받은 병 이름</div>
 <input id="food-diseases" onblur="this.style.borderColor='rgba(248,113,113,.25)'" onfocus="this.style.borderColor='rgba(248,113,113,.6)'" oninput="foodUpdateSummary()" placeholder="예: 고혈압, 위염, 당뇨, 역류성식도염" style="width:100%;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.25);border-radius:6px;padding:7px 10px;color:#f0ece0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div style="display:flex;gap:8px;">
 <div style="flex:1;">
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">📅 발병 시기</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">📅 발병 시기</div>
 <input id="fp-onset" placeholder="예: 2022년 3월, 6개월 전" style="width:100%;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div style="flex:1;">
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">⏱️ 유병 기간</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">⏱️ 유병 기간</div>
 <select id="fp-duration" style="width:100%;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:7px 8px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;">
 <option value="">선택</option>
 <option value="1개월 미만">1개월 미만</option>
@@ -8506,16 +8506,16 @@ var Q_POOL = {
 </div>
 </div>
 <div>
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">🏥 Past History · 과거력 (수술·기왕증)</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">🏥 과거 수술 · 큰 병 이력</div>
 <input id="fp-past" placeholder="예: 2022년 맹장수술, 10년 전 위궤양" style="width:100%;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div style="display:flex;gap:8px;">
 <div style="flex:1;">
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">💉 혈압 (mmHg)</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">💉 혈압 (mmHg)</div>
 <input id="fp-bp" placeholder="예: 130/85" style="width:100%;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 <div style="flex:1;">
-<div style="font-size:10px;color:rgba(248,113,113,.7);margin-bottom:4px;">🩸 혈당 (mg/dL)</div>
+<div style="font-size:12px;color:#dc2626;font-weight:700;margin-bottom:5px;">🩸 혈당 (mg/dL)</div>
 <input id="fp-sugar" placeholder="예: 공복 110" style="width:100%;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-radius:6px;padding:7px 10px;color:#e2e8f0;font-size:12px;font-family:'Noto Sans KR',sans-serif;outline:none;box-sizing:border-box;"/>
 </div>
 </div>
@@ -8524,7 +8524,7 @@ var Q_POOL = {
 <!-- ④ 알레르기 & 금기 (Allergy/Avoid) -->
 <div style="border:1px solid rgba(167,139,250,.2);border-radius:10px;overflow:hidden;">
 <div onclick="foodToggleSection('sec4')" style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(167,139,250,.07);cursor:pointer;">
-<span style="font-size:10px;font-weight:900;color:#a78bfa;letter-spacing:.08em;">④ ALLERGY · 알레르기 &amp; 금기 성분</span>
+<span style="font-size:10px;font-weight:900;color:#a78bfa;letter-spacing:.08em;">④ 알레르기 · 못 먹는 음식</span>
 <span id="sec4-arrow" style="margin-left:auto;font-size:10px;color:rgba(167,139,250,.5);transition:transform .25s;">▼</span>
 </div>
 <div id="sec4" style="display:none;padding:10px 12px;">
@@ -8533,7 +8533,7 @@ var Q_POOL = {
 </div>
 <!-- ⑤ 디지털 서명 -->
 <div style="border:1px solid rgba(52,211,153,.25);border-radius:10px;padding:10px 12px;background:rgba(52,211,153,.04);">
-<div style="font-size:10px;color:rgba(52,211,153,.6);letter-spacing:.07em;margin-bottom:8px;">⑤ CONSENT &amp; SIGNATURE · 디지털 승인</div>
+<div style="font-size:10px;color:rgba(52,211,153,.6);letter-spacing:.07em;margin-bottom:8px;">⑤ 입력 완료 · 저장 선택</div>
 <div style="font-size:10px;color:#5b7a7a;line-height:1.7;margin-bottom:10px;">
               본 데이터는 음식 분석 시 AI의 판단 기준으로 사용되며, <strong style="color:#059669;">서버에는 전송·저장되지 않습니다.</strong>
             </div>
@@ -8579,7 +8579,7 @@ var Q_POOL = {
 <canvas id="frppg-canvas" style="display:none;"></canvas>
 <!-- 얼굴 가이드 사각형 + 호흡 -->
 <div id="frppg-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;">
-<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:170px;height:200px;border:3px solid rgba(52,211,153,.9);border-radius:14px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);"></div>
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:75%;max-width:300px;aspect-ratio:1/1;border:3px solid rgba(52,211,153,.9);border-radius:18px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);"></div>
 <div id="frppg-breath" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(52,211,153,.3);border:2px solid rgba(255,255,255,.6);transition:all 1s ease-in-out;"></div>
 <div id="frppg-breath-txt" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:14px;color:#fff;font-weight:900;background:rgba(5,150,105,.85);padding:5px 14px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.4);">준비</div>
 <div id="frppg-timer" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:26px;color:#fff;font-weight:900;font-family:'Orbitron',monospace;background:rgba(0,0,0,.6);padding:4px 18px;border-radius:14px;">30</div>
@@ -8850,21 +8850,14 @@ function frppgSampleLoop(video){
         var hint=document.getElementById('frppg-facehint');
         if(isSkin){
           _frppgNoFace=0;
+          window._frppgFaceOK=true;  // ★ 얼굴 감지됨 → 타이머 진행
           if(hint) hint.style.display='none';
           _frppgSignal.push({t:Date.now()-_frppgT0, v:gAvg});
         } else {
           _frppgNoFace++;
+          window._frppgFaceOK=false; // ★ 얼굴 없음 → 타이머만 멈춤 (카메라는 유지)
           if(hint) hint.style.display='block';
-          // ★ 얼굴 약 2.5초(75프레임) 이상 없으면 → 카메라 멈춤
-          if(_frppgNoFace>75){
-            frppgStop();
-            var resEl=document.getElementById('frppg-result');
-            if(resEl){
-              resEl.style.display='block';
-              resEl.innerHTML='<div style="padding:14px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.4);border-radius:12px;font-size:13px;color:#b91c1c;line-height:1.6;">📷 <b>얼굴이 감지되지 않아 측정을 멈췄습니다.</b><br/><span style="font-size:11px;">밝은 곳에서 얼굴을 사각형 안에 맞추고 다시 시작해 주세요.</span></div>';
-            }
-            return;
-          }
+          // ※ 카메라 닫지 않음 — 기존 앱처럼 켜둔 채 얼굴 다시 들어오면 자동 재개
         }
       }catch(e){}
     }
@@ -8873,12 +8866,20 @@ function frppgSampleLoop(video){
   loop();
 }
 
-// 카운트다운 + 완료
+// 카운트다운 + 완료 (얼굴 감지될 때만 진행)
 function frppgCountdown(sec){
   var el=document.getElementById('frppg-timer');
   var remain=sec;
+  window._frppgFaceOK=false;
   if(el) el.textContent=remain;
   _frppgTimer=setInterval(function(){
+    if(!_frppgStream){ clearInterval(_frppgTimer); return; }
+    // ★ 박입 196 — 얼굴 없으면 타이머 멈춤 (카메라는 계속 켜둠)
+    if(!window._frppgFaceOK){
+      if(el){ el.textContent='⏸'; el.style.color='#fbbf24'; }
+      return;
+    }
+    if(el) el.style.color='#fff';
     remain--;
     if(el) el.textContent=remain>0?remain:'✓';
     if(remain<=0){ clearInterval(_frppgTimer); frppgFinish(); }
