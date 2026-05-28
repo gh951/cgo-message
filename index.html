@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj177-music-db" name="c41-version"/>
+<meta content="2026-05-26-c44-inj178-music-json" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -11838,7 +11838,25 @@ var Q_POOL = {
   </script>
 <!-- ════ END page-algo-v2 ════ -->
 <script>
-/* ★ 박입 177 — FULI 음악 DB 연동 (검증DB 55곡 + AI 추천 함수 2개) */
+/* ★ 박입 178 — music-db.json (2,677곡) 로더 — GitHub에 올리면 자동 로드 */
+window.MUSIC_DB_FULL = null;
+(function loadMusicDB(){
+  try{
+    fetch('music-db.json', {cache:'no-store'})
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if(j && j.OH){
+          window.MUSIC_DB_FULL = j.OH;
+          var total = 0;
+          for(var k in j.OH){ total += (j.OH[k]||[]).length; }
+          console.log('[c44-inj178] music-db.json 로드 완료 — ' + total + '곡');
+        }
+      })
+      .catch(function(){ console.log('[c44-inj178] music-db.json 없음 — 55곡 폴백 사용'); });
+  }catch(e){}
+})();
+
+/* ★ 박입 177 — FULI 음악 DB 연동 (검증DB 55곡 폴백 + AI 추천 함수 2개) */
 window.MUSIC_WHITELIST_V1 = {
   // ━━━ 목(木) 성장·봄·평정 — 10곡 ━━━
   '목': [
@@ -12028,15 +12046,29 @@ function pmGroqFullMusic(oh,sj,season,ili,bpm,hrv,cid){
   var scanned=window._baiScanned||((window._bioFinalData||{}).fci>0);
   var bioTxt=scanned?'\n- 심박수: '+bpm+'BPM, HRV: '+hrv+'ms (생체 스캔 완료)':'';
   
-  // ★ 화이트리스트 50곡을 프롬프트에 포함 (28번째 — 환각 0% 보장)
-  var WL = window.MUSIC_WHITELIST_V1 || {};
+  // ★ 박입 178 — music-db.json(2,677곡) 우선, 없으면 55곡 폴백
+  //   2,677곡 전부 넣으면 프롬프트 과대 → 오행별 랜덤 12곡 샘플 (매번 다른 곡 = 무한대 효과)
+  var WL = window.MUSIC_DB_FULL || window.MUSIC_WHITELIST_V1 || {};
+  function _pickRand(arr, n){
+    if(!arr || !arr.length) return [];
+    var copy = arr.slice();
+    // Fisher-Yates 셔플
+    for(var i=copy.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=copy[i];copy[i]=copy[j];copy[j]=t; }
+    return copy.slice(0, n);
+  }
   var dbStr = '';
+  var _sampleMap = {}; // 샘플된 곡 저장 (q 매칭용)
   ['목','화','토','금','수','주파수'].forEach(function(k){
-    var arr = WL[k] || [];
-    if(!arr.length) return;
+    var full = WL[k] || [];
+    if(!full.length) return;
+    // 사용자 오행은 더 많이(15곡), 나머지는 6곡
+    var n = (k === oh) ? 15 : 6;
+    var arr = _pickRand(full, n);
+    arr.forEach(function(s){ _sampleMap[s.t+'|'+s.a] = s; });
     dbStr += '\n['+k+'] ';
     dbStr += arr.map(function(s,i){return (i+1)+'."'+s.t+'"·'+s.a;}).join(', ');
   });
+  window._mfuSampleMap = _sampleMap;
   
   var prompt='사용자 에너지:\n'
     +'- 오행: '+(_ohD[oh]||oh)+'\n'
