@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj173-black-pop-kill" name="c41-version"/>
+<meta content="2026-05-26-c44-inj174-loop-fix" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -19,7 +19,7 @@
 <link href="/icon-192.png" rel="icon" sizes="192x192" type="image/png"/>
 <link href="/icon-512.png" rel="icon" sizes="512x512" type="image/png"/>
 <!-- ★ 박입 143 — 피부 hero 이미지 박입 preload (찰나적 빨강 박입 박입 X) -->
-<link href="CGO-2.jpeg" rel="preload" as="image"/>
+<!-- ★ 박입 174 — CGO-2 preload 제거 (구글 경고: 로드 후 미사용 · 이미지는 정상 표시됨) -->
 <style>
 :root{
   --bg:#080808;--bg2:#111111;--bg3:#181818;
@@ -35751,12 +35751,20 @@ setTimeout(function(){
   }
 
   // ★ 매 2초마다 isAlive 검사 — DEAD 면 강제 재진입
-  setInterval(function(){
+  // ★ 박입 174 — 무한 루프 방지 (구글 분석: count 무한 증가 → 상한 5회 후 정지)
+  var _inj174Monitor = setInterval(function(){
     try {
       if(typeof window.drawFresnelWaterGlow !== 'function') return;
       var fnStr = window.drawFresnelWaterGlow.toString();
       var isAlive = (fnStr.indexOf('_inj51Stats') > -1);
       if(isAlive) return;  // 살아 있으면 skip
+
+      // ★ 박입 174 — 5회 재시도 후에도 DEAD면 monitor 정지 (무한 루프 차단)
+      if((window._inj55RewrapCount || 0) >= 5){
+        clearInterval(_inj174Monitor);
+        console.log('[c44-inj174] 재 wrap 5회 도달 — monitor 정지 (무한 루프 차단)');
+        return;
+      }
 
       // DEAD — 강제 재 wrap
       var prevGlow = window.drawFresnelWaterGlow;
