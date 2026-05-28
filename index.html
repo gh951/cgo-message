@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj133-skin-white" name="c41-version"/>
+<meta content="2026-05-26-c44-inj134-skin-white-force" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -1262,6 +1262,26 @@ input[type=range].sec-range::-moz-range-thumb{
 #scrSkinage [style*="color:#f0f9ff"] { color: #0d3a3a !important; }
 #scrSkinage [style*="color:#fff"] { color: #0d3a3a !important; }
 #scrSkinage [style*="color:#f0e0a8"] { color: #075050 !important; }
+
+/* ★ 박입 134 — hero 영역 흰색 강제 박입 (파트너 의향: 전체 흰색) */
+/*   진짜 진단: line 1263 박입이 흰색 → 어두운 색 강제 박입 → hero 영역 안 보임 */
+/*   진짜 fix: hero 영역 (svi-c41-hero, svi-c41-signature, svi-c41-hero-title 등) 흰색 강제 박입 */
+#scrSkinage .svi-c41-hero,
+#scrSkinage .svi-c41-hero *,
+#scrSkinage .svi-c41-signature,
+#scrSkinage .svi-c41-hero-title,
+#scrSkinage .svi-c41-hero-sub,
+#scrSkinage .svi-c41-hero-tag,
+#scrSkinage .svi-c41-hero-text,
+#scrSkinage .svi-c41-hero-text * {
+  color: #ffffff !important;
+}
+#scrSkinage .svi-c41-hero button {
+  color: #ffffff !important;
+  background: transparent !important;
+  border: none !important;
+  text-decoration: underline !important;
+}
 
 /* 옅은 카드 배경(rgba 어두운 톤)을 흰색으로 강제 */
 #scrSkinage [style*="background:rgba(0,0,0"] { background: rgba(255,255,255,0.5) !important; }
