@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj164-iq-hero" name="c41-version"/>
+<meta content="2026-05-26-c44-inj167-eye-vision" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -14391,41 +14391,168 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(20,184,166,.25),rgba(45,212,191,.15));border:2px solid rgba(20,184,166,.6);color:#0f766e;font-weight:800;font-size:13px;border-radius:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(8px);">✕ 나가기</button>
 
 <!-- 인트로 팝업 (C-39 패턴) -->
-<div id="eye-intro-pop">
-<div class="sip-wrap">
-<div class="sip-top"><button class="sip-close" onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}">×</button></div>
-<div class="sip-body">
-<div class="sip-hero">
-<div class="sip-badge">C-44 · EYE × rPPG FUSION · ★ 세계 최초</div>
-<div class="sip-title">👁️ C-44 나의 눈 건강</div>
-<div class="sip-sub">동공 추적 × 깜빡임 분석 × 눈가 rPPG × 세계 최초<br/><b style="color:#0f766e;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+<div id="eye-intro-pop" style="display:none;position:fixed;inset:0;z-index:29950;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<button onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}" style="position:fixed;top:18px;right:18px;z-index:29951;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+<div style="text-align:center;margin-bottom:24px;">
+<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">C-44 · 2026</div>
+<div style="font-size:54px;margin-bottom:8px;">👁️</div>
+<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">나의 눈 건강</h1>
+<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">동공 추적 × 깜빡임 분석 × 눈가 rPPG<br/>추정 시력 + AI 융합 분석</div>
 </div>
-<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">📸 정면 + 조명 충분</div><div class="sip-step-desc">정면을 바라보고 얼굴에 그림자 없게 조명 확보. 안경 착용 가능 (반사 적은 위치).</div></div></div>
-<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">👁️ 25문항 시각 자극 + 카메라 동시</div><div class="sip-step-desc">화면의 자극에 빠르게 반응. 카메라가 동공·깜빡임·눈가 혈류를 실시간 측정.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">⚡ 반응 시간 + 동공 안정성 측정</div><div class="sip-step-desc">자극 → 터치 반응 시간 (ms) + 동공 흔들림 (jitter) ms 단위로 정밀 기록.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">💗 정상 vs 피로 가중치 매칭</div><div class="sip-step-desc">반응 속도 + rPPG 자율신경 + 동공 안정성 융합. <b>추정 시력 + AI 분석</b> 도출.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">📊 종합 결과 + AI 가이드</div><div class="sip-step-desc">눈 피로도 · 시각 인지 속도 · 깜빡임 빈도 + 라이프스타일 추천.</div></div></div>
-<div style="margin-top:16px;padding:12px;background:rgba(20,184,166,.1);border-left:3px solid #0f766e;border-radius:8px;font-size:11px;color:#0f766e;line-height:1.6;">
-⚠ <b>참고용 자가 점검</b> · 의학적 진단 아님 · 시력 측정 아님<br/>측정 영상은 외부 전송 0% · 종료 시 즉시 파기
-</div>
-<button class="sip-cta" onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}">✓ 이해했어요, 시작하기</button>
-</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">✨ 이 측정의 특별함</div>
+<div style="display:grid;gap:12px;">
+<div style="display:flex;gap:12px;align-items:flex-start;">
+<div style="font-size:24px;flex-shrink:0;">👁️</div>
+<div>
+<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">동공 추적 + 깜빡임 분석</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">동공 흔들림(jitter)을 ms 단위로 정밀 추적. 카메라만으로.</div>
 </div>
 </div>
+<div style="display:flex;gap:12px;align-items:flex-start;">
+<div style="font-size:24px;flex-shrink:0;">⚡</div>
+<div>
+<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">시각 반응 속도 측정</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">25문항 시각 자극에 대한 반응 시간(ms)을 정밀 기록.</div>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:flex-start;">
+<div style="font-size:24px;flex-shrink:0;">💗</div>
+<div>
+<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">눈가 rPPG 자율신경 융합</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">눈가 미세 혈류 + 자율신경을 융합해 눈 피로도 분석.</div>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:flex-start;">
+<div style="font-size:24px;flex-shrink:0;">📏</div>
+<div>
+<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">추정 시력 + 거리 측정 (세계 최초)</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">거리 측정 + 시력 단계 + AI 분석을 융합한 추정 시력.</div>
+</div>
+</div>
+</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">📊 객관적 수준</div>
+<div style="font-size:10px;color:rgba(13,58,58,0.55);margin-bottom:14px;line-height:1.5;">(Claude AI · Gemini AI · GPT AI · Grok AI · 구글 포탈 AI 등 평가)</div>
+<div style="display:grid;gap:10px;">
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">일반 눈건강 앱 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#059669;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#059669;">비교 불가</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">글로벌 비전테크 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#0284c7;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#0284c7;">독보적 최상위</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">시각 스크리닝 보조</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#7c3aed;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#7c3aed;">전문가급 표준</span></span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">안과 의료기기 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#b45309;letter-spacing:2px;font-size:13px;">★★★☆☆</span><span style="font-size:11px;color:#b45309;">자가 모니터링·참고용</span></span></div>
+</div>
+<div style="margin-top:12px;padding:10px 14px;background:rgba(5,150,105,0.08);border:1px solid rgba(5,150,105,0.2);border-radius:10px;font-size:11px;color:#059669;font-weight:700;line-height:1.6;text-align:center;">🛡️ 향후 임상 데이터 확보 및 <b>식약처 의료용 소프트웨어(SaMD) 인증 추진 예정</b></div>
+</div>
+<div style="background:rgba(251,191,36,0.08);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(251,191,36,0.25);">
+<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:10px;letter-spacing:.05em;">⚠️ 솔직한 한계</div>
+<div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">• 동공 추적 — 조명·안경 반사에 따라 정확도 차이 있음<br/>• 추정 시력 — 측정 거리에 따라 오차 발생 가능<br/>• 시각 지수 — 자체 정의 지표, 학계 미표준화</div>
+</div>
+<div style="background:rgba(248,113,113,0.06);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(248,113,113,0.2);">
+<div style="font-size:13px;font-weight:900;color:#b91c1c;margin-bottom:10px;letter-spacing:.05em;">⚖️ 법적 고지</div>
+<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">본 시스템은 <b style="color:#b91c1c;">의료기기가 아닌 눈 건강 자가 점검 보조 도구</b>이며 정식 시력 측정이 아닙니다. 안과 전문의의 의학적 진단을 대체하지 않으며, 눈 이상 증상이 있을 경우 반드시 전문의 진료를 받으시기 바랍니다.</div>
+</div>
+<div style="text-align:center;padding:18px 12px;margin-bottom:18px;background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(56,189,248,0.08));border-radius:18px;border:1px solid rgba(5,150,105,0.2);">
+<div style="font-size:15px;font-weight:800;color:#059669;line-height:1.6;font-style:italic;">"스마트폰으로 할 수 있는<br/>최대치에 근접한 눈 건강 분석"</div>
+</div>
+<button onclick="document.getElementById('eye-intro-pop').style.display='none';var ep=document.getElementById('page-c44-eye');if(ep)ep.style.visibility='';try{localStorage.setItem('eye_intro_seen','1');}catch(e){}" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35);">✓ 안내 확인 — 페이지로 이동</button>
+<div style="text-align:center;margin-top:18px;font-size:10px;color:rgba(13,58,58,0.45);letter-spacing:.08em;">CGO-MESSAGE · C-44 · 특허 10-2026-0060113</div>
+</div>
+</div>
+<!-- ★ 박입 165 — 눈 건강 사용법 보기 별도 팝업 (박입 140 패턴) -->
+<div id="eye-usage-pop" style="display:none;position:fixed;inset:0;z-index:29960;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<button onclick="document.getElementById('eye-usage-pop').style.display='none';" style="position:fixed;top:18px;right:18px;z-index:29961;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+<div style="text-align:center;margin-bottom:24px;">
+<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">📖 USAGE GUIDE</div>
+<div style="font-size:54px;margin-bottom:8px;">👁️</div>
+<h1 style="font-size:26px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">나의 눈 건강 사용 안내</h1>
+<div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">동공 추적 + 깜빡임 + 눈가 rPPG 융합 — 약 1~2분 소요</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">🎯 측정 전 준비사항</div>
+<div style="font-size:13px;color:#0d3a3a;line-height:1.9;">
+• <b>밝은 실내 조명</b> 또는 자연광 아래에서 측정을 진행합니다<br/>
+• 얼굴에 그림자가 없도록 정면을 바라봅니다<br/>
+• 안경 착용 가능합니다 (조명 반사가 적은 위치로)<br/>
+• 화면과 <b>30~40cm 표준 거리</b>를 유지합니다<br/>
+• 측정 중 화면의 시각 자극에 빠르게 반응합니다
+</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">⏱️ 측정 흐름 (4단계)</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);margin-bottom:16px;">화면 안내에 따라 진행됩니다 · 약 1~2분 소요</div>
+<div style="display:grid;gap:14px;">
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">1</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">👁️ 측정할 눈 선택</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">왼쪽 눈 또는 오른쪽 눈을 선택하고, 반대쪽 눈을 가립니다.</div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">2</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">📏 거리 측정 + 카메라 활성화</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">30~40cm 표준 거리를 맞추면 카메라가 활성화되어 동공·눈가 혈류를 추적합니다.</div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">3</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">⚡ 25문항 시각 자극 + 반응</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">화면 시각 자극에 빠르게 반응합니다. 반응 시간(ms)과 동공 안정성을 측정합니다.</div>
+</div>
+</div>
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">4</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">💗 rPPG 융합 + 추정 시력 산출</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">반응 속도 + 자율신경 + 동공 안정성을 융합하여 추정 시력과 눈 피로도를 산출합니다.</div>
+</div>
+</div>
+</div>
+</div>
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">📊 측정 종료 후 결과 안내</div>
+<div style="display:grid;gap:10px;font-size:13px;color:#0d3a3a;line-height:1.8;">
+<div>• <b>추정 시력</b> (거리 측정 + 시력 단계 + AI 분석 융합)</div>
+<div>• <b>눈 피로도 · 시각 인지 속도 · 깜빡임 빈도</b></div>
+<div>• 동공 안정성 + 눈가 rPPG 자율신경 분석</div>
+<div>• 측정 결과 기반 <b>라이프스타일 추천</b> 제공</div>
+<div>• 측정 영상은 <b>외부 전송되지 않습니다</b> · 종료 시 즉시 파기</div>
+</div>
+</div>
+<div style="background:linear-gradient(135deg,rgba(5,150,105,0.08),rgba(56,189,248,0.06));border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(5,150,105,0.25);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:12px;letter-spacing:.05em;">🤖 AI 눈 건강 상담 연동</div>
+<div style="font-size:13px;color:#0d3a3a;line-height:1.8;">
+측정 결과에 대해 <b>추가적인 질문 또는 자세한 관리 방법</b>이 필요하신 경우, 결과 페이지 내 <b>"C-44 AI 컨설턴트"</b> 버튼을 통해 즉시 상담이 가능합니다. 측정된 모든 데이터가 AI에게 전달되어, 맞춤형 눈 건강 솔루션을 제공받으실 수 있습니다.
+</div>
+</div>
+<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:14px;padding:14px 18px;margin-bottom:18px;">
+<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">
+⚠️ <b style="color:#b91c1c;">의료기기 미해당 안내</b> — 본 시스템은 <b>눈 건강 자가 점검 보조 도구</b>이며 정식 시력 측정이 아닙니다. 안과 전문의의 의학적 진단을 대체하지 않습니다. 눈 이상 증상이 있으시면 반드시 전문의의 진료를 받으시기 바랍니다.
+</div>
+</div>
+<button onclick="document.getElementById('eye-usage-pop').style.display='none';" style="width:100%;padding:16px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);border:none;border-radius:18px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35);">✓ 안내 확인 — 닫기</button>
+</div>
+</div>
+
 
 <!-- ★ 박입 86 — Hero 이미지 영역 제거 (가볍게) -->
 
 <!-- 메인 페이지 (박입 79 — 폭 520 → 1200 확장, 치매 페이지 동일) -->
 <div id="page-c44-eye" style="background:#f0fdfb;min-height:100vh;padding:32px 20px 80px;">
 <div style="max-width:1200px;margin:0 auto;">
-<!-- Hero 타이틀 -->
-<div style="text-align:center;padding:20px 16px;background:linear-gradient(135deg,#fff,#f0fdfb);border:1px solid #ccfbf1;border-radius:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(20,184,166,.08);">
-<div style="font-size:10px;font-weight:800;color:#0f766e;letter-spacing:.2em;margin-bottom:8px;">C-44 · EYE × rPPG FUSION</div>
-<div style="font-size:26px;font-weight:900;color:#134e4a;margin-bottom:4px;letter-spacing:-.03em;">👁️ 나의 눈 건강</div>
-<div style="font-size:13px;color:#0f766e;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지<br/><b>거리 측정 + 시력 + AI 분석 융합</b></div>
-<!-- ★ 박입 123 — 사용법 다시 보기 버튼 (인트로 팝업 재진입) -->
-<div style="margin-top:12px;">
-<button onclick="document.getElementById('eye-intro-pop').style.display='block';" style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.3);color:#0f766e;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
+<!-- ★ 박입 166 — C-44 EYE 배지 제거 → CGO-6 16:9 hero (치매·IQ 동일 방식) -->
+<div style="position:relative;width:100%;height:0;padding-bottom:56.25%;overflow:hidden;background:#1a1408;border-radius:18px;margin-bottom:16px;">
+<img src="CGO-6.jpeg" alt="나의 눈 건강" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+<div style="display:none;position:absolute;inset:0;background:linear-gradient(135deg,#f0fdfb,#ccfbf1);align-items:center;justify-content:center;font-size:64px;">👁️</div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0.15) 0%,rgba(0,0,0,0.45) 100%);"></div>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;z-index:2;">
+<div style="font-size:30px;font-weight:900;letter-spacing:-.03em;color:#ffffff !important;margin-bottom:8px;">👁️ 나의 눈 건강</div>
+<div style="font-size:13px;color:#ffffff !important;line-height:1.5;">동공 추적 · 깜빡임 분석 · 눈가 rPPG · 시각 인지<br/>거리 측정 + 시력 + AI 분석 융합</div>
+<button onclick="document.getElementById('eye-usage-pop').style.display='block';" style="margin-top:14px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.6);color:#ffffff !important;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;backdrop-filter:blur(8px);">📖 사용법 보기</button>
 </div>
 </div>
 
@@ -14498,7 +14625,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div id="eye-block-sub" style="font-size:12px;opacity:.9;">30~40cm 표준 거리에서만 측정됩니다</div>
 </div>
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #ccfbf1;">
-<div style="font-size:11px;font-weight:800;color:#0f766e;letter-spacing:.06em;">📋 문항 <span id="eye-q-num">1</span> / <span id="eye-q-total">25</span></div>
+<div style="font-size:11px;font-weight:800;color:#0f766e;letter-spacing:.06em;">👁️ 측정 <span id="eye-q-num">1</span> / <span id="eye-q-total">25</span></div>
 <div style="font-size:11px;color:#666;">반응: <span id="eye-q-timer" style="font-weight:800;color:#134e4a;">0.0</span>s</div>
 </div>
 <div id="eye-question-text" style="font-size:22px;font-weight:900;color:#134e4a;text-align:center;margin-bottom:18px;line-height:1.6;min-height:80px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;"></div>
@@ -14842,9 +14969,8 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     var catLabel = catLabels[q.cat] || '';
 
     var qText = document.getElementById('eye-question-text');
-    qText.innerHTML = '<div style="font-size:10px;color:#0f766e;font-weight:800;letter-spacing:.15em;margin-bottom:4px;">' + catLabel.toUpperCase() + '</div>' +
-                      '<div style="font-size:14px;color:#444;margin-bottom:10px;font-weight:700;">' + q.q + '</div>' +
-                      '<div style="font-size:32px;">' + q.emoji + '</div>' +
+    qText.innerHTML = '<div style="font-size:10px;color:#0f766e;font-weight:800;letter-spacing:.15em;margin-bottom:14px;">' + catLabel.toUpperCase() + ' 식별</div>' +
+                      '<div style="display:flex;align-items:center;justify-content:center;min-height:110px;line-height:1;">' + q.emoji + '</div>' +
                       (q.hint ? '<div style="font-size:10px;color:#0f766e;margin-top:8px;background:rgba(20,184,166,.1);padding:6px 10px;border-radius:6px;display:inline-block;">💡 ' + q.hint + '</div>' : '');
 
     var grid = document.getElementById('eye-options-grid');
@@ -34378,6 +34504,13 @@ setTimeout(function(){
           setTimeout(function(){
             var iq157 = document.getElementById('iq-intro-pop');
             if(iq157) iq157.style.display = 'block';
+          }, 50);
+        }
+        // ★ 박입 165 — 눈 건강 자동 팝업 (매번 박입)
+        if(screenId === 'scrEyeHealth'){
+          setTimeout(function(){
+            var eye165 = document.getElementById('eye-intro-pop');
+            if(eye165) eye165.style.display = 'block';
           }, 50);
         }
       } catch(e){}
