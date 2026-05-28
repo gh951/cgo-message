@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj208-hybrid" name="c41-version"/>
+<meta content="2026-05-26-c44-inj210-peer-emotion" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -9190,7 +9190,17 @@ function cplSampleLoop(video){
           _cplNoFace=0; _cplFaceOK=true;
           if(hint)hint.style.display='none';
           _cplSignal.push({t:Date.now()-_cplT0,v:gAvg});
-          // 실시간 감정 바 업데이트 (최근 신호 변동성 → 감정 추정)
+          // ★ 박입 209 — 눈가·입 픽셀 신호 (참웃음 판정용)
+          try{
+            var ced=ctx.getImageData(Math.floor(canvas.width*0.25),Math.floor(canvas.height*0.3),Math.floor(canvas.width*0.5),Math.floor(canvas.height*0.15)).data;
+            var ceSum=0,cen=0;
+            for(var ce=0;ce<ced.length;ce+=16){ ceSum+=(ced[ce]+ced[ce+1]+ced[ce+2])/3; cen++; }
+            _cplEyeSig.push(ceSum/cen); if(_cplEyeSig.length>60)_cplEyeSig.shift();
+            var cmd=ctx.getImageData(Math.floor(canvas.width*0.3),Math.floor(canvas.height*0.62),Math.floor(canvas.width*0.4),Math.floor(canvas.height*0.2)).data;
+            var cmSum=0,cmn=0;
+            for(var cm=0;cm<cmd.length;cm+=16){ cmSum+=(cmd[cm]+cmd[cm+1]+cmd[cm+2])/3; cmn++; }
+            _cplMouthSig.push(cmSum/cmn); if(_cplMouthSig.length>60)_cplMouthSig.shift();
+          }catch(_se){}
           cplUpdateEmotionBar();
         } else {
           _cplNoFace++; _cplFaceOK=false;
@@ -9202,26 +9212,45 @@ function cplSampleLoop(video){
   }
   loop();
 }
-// 실시간 감정 바 (HRV 안정도 기반 -100~+100)
+// 실시간 감정 바 (HRV 안정도 기반 -100~+100) + 참웃음 판정
+var _cplEyeSig=[], _cplMouthSig=[];
 function cplUpdateEmotionBar(){
   if(_cplSignal.length<30) return;
   var recent=_cplSignal.slice(-30).map(function(s){return s.v;});
   var mean=recent.reduce(function(a,b){return a+b;},0)/recent.length;
   var variance=recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length;
   var sd=Math.sqrt(variance);
-  // 신호가 부드럽고 규칙적(낮은 변동) → 평온/호감(+), 급변동 → 긴장(-)
-  // 정규화: sd가 작을수록 +쪽
   var stability=Math.max(0,Math.min(100,100-sd*8));
-  var emotion=Math.round((stability-50)*2); // -100 ~ +100
+  var emotion=Math.round((stability-50)*2);
   emotion=Math.max(-100,Math.min(100,emotion));
+
+  // ★ 박입 209 — 참웃음 판정 (눈가+입 동시성)
+  var smileLabel='', smileColor='';
+  if(_cplEyeSig.length>=20 && _cplMouthSig.length>=20){
+    var ev=_cplVar(_cplEyeSig.slice(-20)), mv=_cplVar(_cplMouthSig.slice(-20));
+    if(mv>3){
+      if(ev>2 && stability>40){ smileLabel='😊 참웃음 (눈가까지 웃어요)'; smileColor='#059669'; emotion=Math.min(100,emotion+15); }
+      else { smileLabel='🙂 입만 웃는 중 (속은 긴장)'; smileColor='#b45309'; emotion=Math.max(-100,emotion-10); }
+    }
+  }
+
   var marker=document.getElementById('cpl-emotion-marker');
   var valEl=document.getElementById('cpl-emotion-val');
+  var smileEl=document.getElementById('cpl-smile-label');
   if(marker) marker.style.left=((emotion+100)/2)+'%';
   if(valEl){
     valEl.textContent=(emotion>0?'+':'')+emotion;
     valEl.style.color=emotion>30?'#059669':emotion<-30?'#dc2626':'#6d28d9';
   }
-  _cplEmotionData={emotion:emotion,stability:stability};
+  if(smileEl){
+    if(smileLabel){ smileEl.textContent=smileLabel; smileEl.style.color=smileColor; smileEl.style.display='block'; }
+    else { smileEl.style.display='none'; }
+  }
+  _cplEmotionData={emotion:emotion,stability:stability,smile:smileLabel};
+}
+function _cplVar(arr){
+  var m=arr.reduce(function(a,b){return a+b;},0)/arr.length;
+  return Math.sqrt(arr.reduce(function(a,b){return a+(b-m)*(b-m);},0)/arr.length);
 }
 function cplCountdown(sec){
   var el=document.getElementById('cpl-timer'); var remain=sec;
@@ -11176,10 +11205,9 @@ function foodAskAI(userText) {
 <div id="cpl-emotion-marker" style="position:absolute;top:-3px;left:50%;width:6px;height:20px;background:#1a1a2a;border-radius:3px;transform:translateX(-50%);transition:left .5s;"></div>
 </div>
 <div id="cpl-emotion-val" style="text-align:center;font-size:18px;font-weight:900;color:#6d28d9;margin-top:6px;font-family:'Orbitron',monospace;">0</div>
+<div id="cpl-smile-label" style="display:none;text-align:center;font-size:11px;font-weight:800;margin-top:6px;padding:4px 8px;background:rgba(0,0,0,.04);border-radius:8px;">😊 참웃음</div>
 </div>
-<button id="cpl-cam-btn" onclick="cplToggleCam()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#0284c7);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">💓 혼자 30초 감정 측정</button>
-<div style="margin-top:8px;padding:10px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:10px;font-size:11px;color:#0284c7;line-height:1.6;">🎥 <b>상대방과 떨어져 있나요?</b> 영상통화를 켜면 서로 얼굴을 보며 대화하는 동안, 화면 위에 <b>내 호감도</b>가 실시간으로 나타납니다 (나만 보임).</div>
-<button onclick="goScreen('scrHome');setTimeout(function(){if(typeof startGlobalCall==='function')startGlobalCall('video');},300);" style="width:100%;margin-top:8px;padding:12px;background:linear-gradient(135deg,#0284c7,#0369a1);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">🎥 영상통화로 함께 측정</button>
+<button id="cpl-cam-btn" onclick="cplToggleCam()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#0284c7);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">💓 30초 감정 측정 시작</button>
 </div>
 
 <!-- 분석 시작 -->
@@ -23398,6 +23426,12 @@ function listenIncomingCalls(){
       if(_call.active && _call.role === 'callee' && _call.roomId === roomId && data.captionsFromCaller){
         Object.values(data.captionsFromCaller).forEach(cap => displayCaption(cap, false));
       }
+      // ★ 박입 210 — 상대방 감정 데이터 수신 (영상통화 = 상대 감정 표시)
+      if(_call.active && _call.roomId === roomId && data.emotionFromPeer){
+        var peerEmo = data.emotionFromPeer;
+        // 내 화면의 호감도 바를 "상대방 감정"으로 표시 (내 감정은 상대 폰에 보임)
+        try{ if(typeof callRenderPeerEmotion === 'function') callRenderPeerEmotion(peerEmo); }catch(_pe){}
+      }
       if(_call.active && _call.roomId === roomId && data.ended){
         showToast('📞 통화 종료');
         endCall(false);
@@ -23679,7 +23713,7 @@ function openCallUI(){
     (_call.type === 'video' ? '<video id="callLocalVideo" autoplay playsinline muted style="position:absolute;bottom:16px;right:16px;width:100px;height:140px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.3);background:#000;"></video>' : ''),
     // ★ 박입 205 — 실시간 호감도 바 (영상통화 중, 나만 보임)
     (_call.type === 'video' ? '<div id="callEmotionBar" style="display:none;position:absolute;top:12px;left:12px;right:12px;max-width:340px;margin:0 auto;background:rgba(20,12,40,.78);backdrop-filter:blur(8px);border:1px solid rgba(167,139,250,.4);border-radius:14px;padding:10px 14px;pointer-events:none;">' +
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:800;color:#c4b5fd;">💗 지금 내 마음 (나만 보여요)</span><span id="callEmotionVal" style="font-size:15px;font-weight:900;color:#fff;font-family:Orbitron,monospace;">0</span></div>' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span id="callEmotionTitle" style="font-size:11px;font-weight:800;color:#c4b5fd;">💗 상대방 마음 (나만 보여요)</span><span id="callEmotionVal" style="font-size:15px;font-weight:900;color:#fff;font-family:Orbitron,monospace;">0</span></div>' +
       '<div style="position:relative;height:10px;background:linear-gradient(90deg,#f87171,#fbbf24,#34d399);border-radius:5px;"><div id="callEmotionMarker" style="position:absolute;top:-3px;left:50%;width:5px;height:16px;background:#fff;border-radius:3px;transform:translateX(-50%);transition:left .6s;box-shadow:0 0 6px rgba(0,0,0,.5);"></div></div>' +
       '<div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.6);margin-top:3px;"><span>긴장</span><span>평온</span><span>설렘</span></div>' +
       '<div id="callSmileLabel" style="display:none;text-align:center;font-size:11px;font-weight:800;margin-top:6px;padding:4px 8px;background:rgba(255,255,255,.12);border-radius:8px;">😊 참웃음</div></div>' : ''),
@@ -24483,25 +24517,37 @@ function callUpdateEmotionBar(){
   var stability=Math.max(0,Math.min(100,100-sd*8));
   var emotion=Math.max(-100,Math.min(100,Math.round((stability-50)*2)));
 
-  // ★ 참웃음 판정 — 눈가 움직임(뒤센) + 입 움직임 동시성
+  // ★ 참웃음 판정
   var smileLabel='', smileColor='';
   if(_callEyeSignal.length>=20 && _callMouthSignal.length>=20){
     var eyeVar=_callVariance(_callEyeSignal.slice(-20));
     var mouthVar=_callVariance(_callMouthSignal.slice(-20));
-    // 입이 움직이면(웃음 시도) → 눈가도 움직이는지 확인
-    if(mouthVar>3){ // 웃는 중 (입 변화 큼)
+    if(mouthVar>3){
       if(eyeVar>2 && stability>40){
-        // 입+눈 같이 움직임 + 심박 안정 = 진짜 웃음
-        smileLabel='😊 참웃음 (눈가까지 웃어요)'; smileColor='#059669';
+        smileLabel='😊 참웃음'; smileColor='#86efac';
         emotion=Math.min(100,emotion+15);
       } else {
-        // 입만 웃고 눈가 안 움직임 or 심박 긴장 = 거짓/억지 웃음
-        smileLabel='🙂 입만 웃는 중 (속은 긴장)'; smileColor='#b45309';
+        smileLabel='🙂 입만 웃음'; smileColor='#fcd34d';
         emotion=Math.max(-100,emotion-10);
       }
     }
   }
 
+  // ★ 박입 210 — 내 감정은 상대에게 전송 (내 화면엔 상대 감정만 표시)
+  try{
+    if(_call.signalRef && _call.role){
+      var key = _call.role==='caller' ? 'emotionFromCaller' : 'emotionFromCallee';
+      // 두 키 합쳐서 emotionFromPeer로도 표시되게 (역할 무관)
+      _call.signalRef.update({ emotionFromPeer:{emotion:emotion, smile:smileLabel, ts:Date.now(), from:_call.role} });
+    }
+  }catch(_se){}
+}
+
+// ★ 박입 210 — 상대방이 보낸 감정을 내 화면 바에 표시
+function callRenderPeerEmotion(peerEmo){
+  if(!peerEmo || peerEmo.from === _call.role) return; // 내가 보낸 건 무시
+  var emotion = peerEmo.emotion || 0;
+  var smileLabel = peerEmo.smile || '';
   var marker=document.getElementById('callEmotionMarker');
   var valEl=document.getElementById('callEmotionVal');
   var smileEl=document.getElementById('callSmileLabel');
@@ -24511,9 +24557,12 @@ function callUpdateEmotionBar(){
     valEl.style.color=emotion>30?'#86efac':emotion<-30?'#fca5a5':'#fff';
   }
   if(smileEl){
-    if(smileLabel){ smileEl.textContent=smileLabel; smileEl.style.color=smileColor; smileEl.style.display='block'; }
+    if(smileLabel){ smileEl.textContent=smileLabel; smileEl.style.color=smileLabel.indexOf('참')>=0?'#86efac':'#fcd34d'; smileEl.style.display='block'; }
     else { smileEl.style.display='none'; }
   }
+  // 라벨도 "상대방"으로
+  var labelEl=document.getElementById('callEmotionTitle');
+  if(labelEl) labelEl.textContent='💗 상대방 마음 (나만 보여요)';
 }
 function _callVariance(arr){
   var m=arr.reduce(function(a,b){return a+b;},0)/arr.length;
