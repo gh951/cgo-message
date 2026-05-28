@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj205-call-emotion" name="c41-version"/>
+<meta content="2026-05-26-c44-inj208-hybrid" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -9280,7 +9280,8 @@ function cplStartAnalysis(){
   // ★ 박입 203 — 나이차 통계 (통계청 공식 — 전면 표시 가능)
   var ageGapHtml='';
   if(aBirth && bBirth){
-    var ay=parseInt(aBirth.slice(0,4)), by=parseInt(bBirth.slice(0,4));
+    var ay=parseInt(aBirth), by=parseInt(bBirth);
+    if(ay>1900 && by>1900){
     var gap=Math.abs(ay-by);
     var gapMsg, gapColor;
     if(gap<=3){ gapMsg='나이차 '+gap+'세 — 통계적으로 가장 안정적인 구간입니다.'; gapColor='#059669'; }
@@ -9288,6 +9289,7 @@ function cplStartAnalysis(){
     else{ gapMsg='나이차 '+gap+'세 — 세대 경험 차이를 이해하는 대화가 도움이 됩니다.'; gapColor='#b45309'; }
     ageGapHtml='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:9px;"><span style="font-size:12px;color:#3a5a5a;">👫 나이차 통계</span><span style="font-size:12px;font-weight:800;color:'+gapColor+';">'+gap+'세</span></div>';
     window._cplAgeGapMsg=gapMsg;
+    }
   }
 
   // 1차: 즉시 로컬 결과 표시
@@ -11133,7 +11135,7 @@ function foodAskAI(userText) {
 <div style="flex:1;">
 <div style="font-size:11px;font-weight:700;color:#0284c7;margin-bottom:6px;">👤 나 (A)</div>
 <input id="cpl-a-name" placeholder="이름" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:8px 10px;color:#0d3a3a;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-a-birth" type="date" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
+<input id="cpl-a-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1990)" min="1920" max="2020" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-a-home" placeholder="고향 (예: 서울)" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-a-live" placeholder="사는 곳 (예: 부산)" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <div style="display:flex;gap:5px;"><button id="cpl-a-m" onclick="cplSetGender('a','m')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#0284c7;font-size:11px;cursor:pointer;font-family:inherit;">♂ 남</button><button id="cpl-a-f" onclick="cplSetGender('a','f')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.06);color:#db2777;font-size:11px;cursor:pointer;font-family:inherit;">♀ 여</button></div>
@@ -11141,7 +11143,7 @@ function foodAskAI(userText) {
 <div style="flex:1;">
 <div style="font-size:11px;font-weight:700;color:#db2777;margin-bottom:6px;">👤 상대방 (B)</div>
 <input id="cpl-b-name" placeholder="이름" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:8px 10px;color:#0d3a3a;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-b-birth" type="date" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
+<input id="cpl-b-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1992)" min="1920" max="2020" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-b-home" placeholder="고향 (예: 광주)" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-b-live" placeholder="사는 곳 (예: 부산)" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <div style="display:flex;gap:5px;"><button id="cpl-b-m" onclick="cplSetGender('b','m')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#0284c7;font-size:11px;cursor:pointer;font-family:inherit;">♂ 남</button><button id="cpl-b-f" onclick="cplSetGender('b','f')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.06);color:#db2777;font-size:11px;cursor:pointer;font-family:inherit;">♀ 여</button></div>
@@ -11175,7 +11177,9 @@ function foodAskAI(userText) {
 </div>
 <div id="cpl-emotion-val" style="text-align:center;font-size:18px;font-weight:900;color:#6d28d9;margin-top:6px;font-family:'Orbitron',monospace;">0</div>
 </div>
-<button id="cpl-cam-btn" onclick="cplToggleCam()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#0284c7);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">💓 30초 감정 측정 시작</button>
+<button id="cpl-cam-btn" onclick="cplToggleCam()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#0284c7);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">💓 혼자 30초 감정 측정</button>
+<div style="margin-top:8px;padding:10px 12px;background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.25);border-radius:10px;font-size:11px;color:#0284c7;line-height:1.6;">🎥 <b>상대방과 떨어져 있나요?</b> 영상통화를 켜면 서로 얼굴을 보며 대화하는 동안, 화면 위에 <b>내 호감도</b>가 실시간으로 나타납니다 (나만 보임).</div>
+<button onclick="goScreen('scrHome');setTimeout(function(){if(typeof startGlobalCall==='function')startGlobalCall('video');},300);" style="width:100%;margin-top:8px;padding:12px;background:linear-gradient(135deg,#0284c7,#0369a1);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">🎥 영상통화로 함께 측정</button>
 </div>
 
 <!-- 분석 시작 -->
@@ -23677,7 +23681,8 @@ function openCallUI(){
     (_call.type === 'video' ? '<div id="callEmotionBar" style="display:none;position:absolute;top:12px;left:12px;right:12px;max-width:340px;margin:0 auto;background:rgba(20,12,40,.78);backdrop-filter:blur(8px);border:1px solid rgba(167,139,250,.4);border-radius:14px;padding:10px 14px;pointer-events:none;">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><span style="font-size:11px;font-weight:800;color:#c4b5fd;">💗 지금 내 마음 (나만 보여요)</span><span id="callEmotionVal" style="font-size:15px;font-weight:900;color:#fff;font-family:Orbitron,monospace;">0</span></div>' +
       '<div style="position:relative;height:10px;background:linear-gradient(90deg,#f87171,#fbbf24,#34d399);border-radius:5px;"><div id="callEmotionMarker" style="position:absolute;top:-3px;left:50%;width:5px;height:16px;background:#fff;border-radius:3px;transform:translateX(-50%);transition:left .6s;box-shadow:0 0 6px rgba(0,0,0,.5);"></div></div>' +
-      '<div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.6);margin-top:3px;"><span>긴장</span><span>평온</span><span>설렘</span></div></div>' : ''),
+      '<div style="display:flex;justify-content:space-between;font-size:8px;color:rgba(255,255,255,.6);margin-top:3px;"><span>긴장</span><span>평온</span><span>설렘</span></div>' +
+      '<div id="callSmileLabel" style="display:none;text-align:center;font-size:11px;font-weight:800;margin-top:6px;padding:4px 8px;background:rgba(255,255,255,.12);border-radius:8px;">😊 참웃음</div></div>' : ''),
     // 실시간 자막
     '  <div id="callCaptions" style="position:absolute;left:10px;right:10px;bottom:20px;display:flex;flex-direction:column;gap:6px;pointer-events:none;"></div>',
     '</div>',
@@ -24397,28 +24402,71 @@ function stopRingtone(){
 }
 
 // ══ 📞 통화 종료 ══
-// ★ 박입 205 — 영상통화 중 실시간 호감도 측정 (내 얼굴 rPPG → 나만 보임)
+// ★ 박입 205+207+208 — 영상통화 호감도 + 참웃음 (얼굴좌표 추적 + 픽셀 스펙트럼 혼용)
 var _callEmoStream=null, _callEmoRAF=null, _callEmoSignal=[], _callEmoT0=0, _callEmoCanvas=null;
+var _callEyeSignal=[], _callMouthSignal=[];
+var _callFaceBox=null, _callFaceDet=null, _callFaceFrame=0; // 얼굴 위치 박스
 function callStartEmotion(localVideo){
   if(!localVideo) return;
   var bar=document.getElementById('callEmotionBar');
   if(bar) bar.style.display='block';
-  _callEmoSignal=[]; _callEmoT0=Date.now();
+  _callEmoSignal=[]; _callEyeSignal=[]; _callMouthSignal=[]; _callEmoT0=Date.now();
+  _callFaceBox=null; _callFaceFrame=0;
   _callEmoCanvas=document.createElement('canvas');
   var ctx=_callEmoCanvas.getContext('2d',{willReadFrequently:true});
+
+  // ★ 가벼운 FaceDetection으로 얼굴 위치만 추적 (통화 안 끊김 — bounding box만)
+  try{
+    if(typeof FaceDetection !== 'undefined' && !_callFaceDet){
+      _callFaceDet=new FaceDetection({locateFile:function(f){return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/'+f;}});
+      _callFaceDet.setOptions({model:'short',minDetectionConfidence:0.5});
+      _callFaceDet.onResults(function(res){
+        if(res.detections && res.detections.length>0){
+          var bb=res.detections[0].boundingBox;
+          _callFaceBox={x:bb.xCenter-bb.width/2, y:bb.yCenter-bb.height/2, w:bb.width, h:bb.height};
+        }
+      });
+    }
+  }catch(e){ _callFaceDet=null; }
+
   function loop(){
     if(!_call.active){ return; }
     if(localVideo.videoWidth>0){
       _callEmoCanvas.width=localVideo.videoWidth; _callEmoCanvas.height=localVideo.videoHeight;
       ctx.drawImage(localVideo,0,0);
-      var cx=Math.floor(_callEmoCanvas.width*0.3), cy=Math.floor(_callEmoCanvas.height*0.15);
-      var w=Math.floor(_callEmoCanvas.width*0.4), h=Math.floor(_callEmoCanvas.height*0.45);
+      var W=_callEmoCanvas.width, H=_callEmoCanvas.height;
+
+      // 얼굴 위치 추적 (5프레임마다 1번만 — 가볍게)
+      _callFaceFrame++;
+      if(_callFaceDet && _callFaceFrame%5===0){
+        try{ _callFaceDet.send({image:localVideo}); }catch(e){}
+      }
+
+      // 얼굴 박스 기준 영역 (박스 있으면 정확, 없으면 화면 비율 폴백)
+      var fb=_callFaceBox;
+      var fx,fy,fw,fh;
+      if(fb){ fx=fb.x*W; fy=fb.y*H; fw=fb.w*W; fh=fb.h*H; }
+      else { fx=W*0.25; fy=H*0.12; fw=W*0.5; fh=H*0.7; }
+
       try{
-        var d=ctx.getImageData(cx,cy,w,h).data;
-        var gSum=0,n=0;
-        for(var i=0;i<d.length;i+=16){ gSum+=d[i+1]; n++; }
-        _callEmoSignal.push({t:Date.now()-_callEmoT0,v:gSum/n});
-        if(_callEmoSignal.length>300) _callEmoSignal.shift(); // 최근 10초만 유지
+        // ① rPPG (이마 — 얼굴 상단 25%)
+        var fd=ctx.getImageData(Math.floor(fx+fw*0.25),Math.floor(fy+fh*0.05),Math.floor(fw*0.5),Math.floor(fh*0.2)).data;
+        var gSum=0,fn=0;
+        for(var i=0;i<fd.length;i+=16){ gSum+=fd[i+1]; fn++; }
+        _callEmoSignal.push({t:Date.now()-_callEmoT0,v:gSum/fn});
+        if(_callEmoSignal.length>300) _callEmoSignal.shift();
+        // ② 눈가 (얼굴 상단 30~48% — 뒤센 미소 핵심)
+        var ed=ctx.getImageData(Math.floor(fx+fw*0.1),Math.floor(fy+fh*0.3),Math.floor(fw*0.8),Math.floor(fh*0.18)).data;
+        var eSum=0,en=0;
+        for(var j=0;j<ed.length;j+=16){ eSum+=(ed[j]+ed[j+1]+ed[j+2])/3; en++; }
+        _callEyeSignal.push(eSum/en);
+        if(_callEyeSignal.length>60) _callEyeSignal.shift();
+        // ③ 입 (얼굴 하단 65~85%)
+        var md=ctx.getImageData(Math.floor(fx+fw*0.2),Math.floor(fy+fh*0.62),Math.floor(fw*0.6),Math.floor(fh*0.22)).data;
+        var mSum=0,mn=0;
+        for(var k=0;k<md.length;k+=16){ mSum+=(md[k]+md[k+1]+md[k+2])/3; mn++; }
+        _callMouthSignal.push(mSum/mn);
+        if(_callMouthSignal.length>60) _callMouthSignal.shift();
         callUpdateEmotionBar();
       }catch(e){}
     }
@@ -24428,24 +24476,52 @@ function callStartEmotion(localVideo){
 }
 function callUpdateEmotionBar(){
   if(_callEmoSignal.length<30) return;
+  // rPPG 안정도 (심박 변동 → 긴장/평온)
   var recent=_callEmoSignal.slice(-30).map(function(s){return s.v;});
   var mean=recent.reduce(function(a,b){return a+b;},0)/recent.length;
-  var variance=recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length;
-  var sd=Math.sqrt(variance);
-  // 신호 안정(부드러움) → 평온/호감(+), 급변동 → 긴장(-)
+  var sd=Math.sqrt(recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length);
   var stability=Math.max(0,Math.min(100,100-sd*8));
   var emotion=Math.max(-100,Math.min(100,Math.round((stability-50)*2)));
+
+  // ★ 참웃음 판정 — 눈가 움직임(뒤센) + 입 움직임 동시성
+  var smileLabel='', smileColor='';
+  if(_callEyeSignal.length>=20 && _callMouthSignal.length>=20){
+    var eyeVar=_callVariance(_callEyeSignal.slice(-20));
+    var mouthVar=_callVariance(_callMouthSignal.slice(-20));
+    // 입이 움직이면(웃음 시도) → 눈가도 움직이는지 확인
+    if(mouthVar>3){ // 웃는 중 (입 변화 큼)
+      if(eyeVar>2 && stability>40){
+        // 입+눈 같이 움직임 + 심박 안정 = 진짜 웃음
+        smileLabel='😊 참웃음 (눈가까지 웃어요)'; smileColor='#059669';
+        emotion=Math.min(100,emotion+15);
+      } else {
+        // 입만 웃고 눈가 안 움직임 or 심박 긴장 = 거짓/억지 웃음
+        smileLabel='🙂 입만 웃는 중 (속은 긴장)'; smileColor='#b45309';
+        emotion=Math.max(-100,emotion-10);
+      }
+    }
+  }
+
   var marker=document.getElementById('callEmotionMarker');
   var valEl=document.getElementById('callEmotionVal');
+  var smileEl=document.getElementById('callSmileLabel');
   if(marker) marker.style.left=((emotion+100)/2)+'%';
   if(valEl){
     valEl.textContent=(emotion>0?'+':'')+emotion;
     valEl.style.color=emotion>30?'#86efac':emotion<-30?'#fca5a5':'#fff';
   }
+  if(smileEl){
+    if(smileLabel){ smileEl.textContent=smileLabel; smileEl.style.color=smileColor; smileEl.style.display='block'; }
+    else { smileEl.style.display='none'; }
+  }
+}
+function _callVariance(arr){
+  var m=arr.reduce(function(a,b){return a+b;},0)/arr.length;
+  return Math.sqrt(arr.reduce(function(a,b){return a+(b-m)*(b-m);},0)/arr.length);
 }
 function callStopEmotion(){
   if(_callEmoRAF) cancelAnimationFrame(_callEmoRAF);
-  _callEmoStream=null; _callEmoSignal=[]; _callEmoCanvas=null;
+  _callEmoStream=null; _callEmoSignal=[]; _callEyeSignal=[]; _callMouthSignal=[]; _callEmoCanvas=null;
   var bar=document.getElementById('callEmotionBar');
   if(bar) bar.style.display='none';
 }
@@ -37272,6 +37348,26 @@ setTimeout(function(){
     var origGoScreen47 = window.goScreen;
     window.goScreen = function(screenId){
       try {
+        // ★ 박입 206 — 페이지 떠날 때 진행 중인 카메라/측정 정리 (나갔다 오면 초기화)
+        try{
+          // 음식 rPPG 정리
+          if(typeof frppgStop==='function' && window._frppgStream){ frppgStop(); }
+          if(typeof frppgStopPalm==='function' && window._frppgPalmStream){ frppgStopPalm(); }
+          // 커플 카메라 정리
+          if(typeof cplStopCam==='function' && window._cplStream){ cplStopCam(); }
+          // 음식 카메라 정리
+          if(typeof foodStopCamera==='function' && window._foodStream){ foodStopCamera(); }
+          // 커플 결과 초기화 (다시 들어오면 깨끗하게)
+          if(screenId !== 'scrCouple'){
+            var cr=document.getElementById('cpl-result'); if(cr){ cr.style.display='none'; cr.innerHTML=''; }
+            window._cplMeasure=null;
+          }
+          // 음식 결과 초기화
+          if(screenId !== 'scrFood'){
+            var fr=document.getElementById('frppg-result'); if(fr){ fr.style.display='none'; fr.innerHTML=''; }
+            window._frppgFaceData=null;
+          }
+        }catch(_ce){}
         if(screenId === 'scrSkinage'){
           // 동생 원본 캔버스로 복원
           var skVideo = document.getElementById('rmai-ar-video');
