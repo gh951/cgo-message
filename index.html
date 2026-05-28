@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj140-business-usage" name="c41-version"/>
+<meta content="2026-05-26-c44-inj145-skin-popup" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -18,6 +18,8 @@
 <link href="/icon-180.png" rel="apple-touch-icon"/>
 <link href="/icon-192.png" rel="icon" sizes="192x192" type="image/png"/>
 <link href="/icon-512.png" rel="icon" sizes="512x512" type="image/png"/>
+<!-- ★ 박입 143 — 피부 hero 이미지 박입 preload (찰나적 빨강 박입 박입 X) -->
+<link href="CGO-2.jpeg" rel="preload" as="image"/>
 <style>
 :root{
   --bg:#080808;--bg2:#111111;--bg3:#181818;
@@ -3612,8 +3614,8 @@ html body #scrSkinage .svi-c41-hero button {
   background-image: url('CGO-2.jpeg');
   background-size: cover;
   background-position: center;
-  /* CGO-2.jpeg 없을 때 폴백 — 핑크/보라 그라데이션 (피부 톤) */
-  background-color: #831843;
+  /* ★ 박입 143 — 폴백 색 박입 (빨강 → 민트 · 팝업과 통일) */
+  background-color: #9fe8e8;
 }
 .svi-c41-hero-bg::after {
   content: '';
@@ -15227,37 +15229,104 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div class="screen" id="scrSkinage" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:#080808;color:#f0ece0;">
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(212,168,67,.25),rgba(251,191,36,.15));border:2px solid rgba(212,168,67,.75);border-radius:22px;color:#d4a843;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(212,168,67,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
 
-<!-- ★ 박입 129 — 피부 페이지 인트로 팝업 (sip- 패턴 박입) -->
-<style>
-  #skinage-intro-pop{display:none;position:fixed;inset:0;z-index:29000;background:rgba(8,8,8,.98);overflow-y:auto;-webkit-overflow-scrolling:touch;}
-  #skinage-intro-pop .sip-title{color:#38bdf8;}
-  #skinage-intro-pop .sip-badge{background:rgba(56,189,248,.15);color:#38bdf8;border:1px solid rgba(56,189,248,.3);}
-  #skinage-intro-pop .sip-sub{color:rgba(220,240,255,.8);}
-  #skinage-intro-pop .sip-step{background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.2);}
-  #skinage-intro-pop .sip-step-num{background:#38bdf8;}
-  #skinage-intro-pop .sip-step-title{color:#38bdf8;}
-  #skinage-intro-pop .sip-step-desc{color:rgba(220,240,255,.75);}
-  #skinage-intro-pop .sip-cta{background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#fff;}
-</style>
-<div id="skinage-intro-pop">
-<div class="sip-wrap">
-<div class="sip-top"><button class="sip-close" onclick="document.getElementById('skinage-intro-pop').style.display='none';">×</button></div>
-<div class="sip-body">
-<div class="sip-hero">
-<div class="sip-badge">C-44 · SVI · WORLD FIRST</div>
-<div class="sip-title">✨ 나의 피부 탄력 (SVI)</div>
-<div class="sip-sub">광학 점탄성 × rPPG 융합 × 세계 최초<br/><b style="color:#38bdf8;">처음이세요? 아래 사용법을 꼭 읽어주세요</b></div>
+<!-- ★ 박입 141 — 피부 사용법 박입 (박입 140 패턴 박입 · 민트 컬러 통일) -->
+<div id="skinage-intro-pop" style="display:none;position:fixed;inset:0;z-index:29950;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;">
+<button onclick="document.getElementById('skinage-intro-pop').style.display='none';" style="position:fixed;top:18px;right:18px;z-index:29951;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>
+<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">
+
+<!-- 헤더 -->
+<div style="text-align:center;margin-bottom:24px;">
+<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">📖 USAGE GUIDE</div>
+<div style="font-size:54px;margin-bottom:8px;">✨</div>
+<h1 style="font-size:26px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">나의 피부 탄력 (SVI) 사용 안내</h1>
+<div style="font-size:12px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">세계 최초 광학 점탄성 × FaceMesh 468 융합 — 카메라 기반 비접촉 측정</div>
 </div>
-<div class="sip-step"><div class="sip-step-num">1</div><div class="sip-step-body"><div class="sip-step-title">🧴 세안 후 30분 이상 경과</div><div class="sip-step-desc">측정 정확도 위해 세안 후 피부 안정화 시간 필요. 화장 제거 + 보습 진행 후 측정.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">2</div><div class="sip-step-body"><div class="sip-step-title">💡 밝은 조명 + 정면 응시</div><div class="sip-step-desc">자연광 또는 밝은 실내 조명 아래. 얼굴을 화면 중앙에 정확히 맞추세요.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">3</div><div class="sip-step-body"><div class="sip-step-title">🤏 볼을 살짝 눌렀다 떼기</div><div class="sip-step-desc">측정 시작 시 볼을 손가락으로 살짝 누름 → 즉시 떼기. <b>복원 속도</b> 로 탄력 측정.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">4</div><div class="sip-step-body"><div class="sip-step-title">📊 SVI 점수 + 맞춤 분석</div><div class="sip-step-desc">피부 점탄성 (viscoelasticity) 원리 박입 — 빠를수록 탄력 좋음. SVI 점수 + 권장 성분 박입.</div></div></div>
-<div class="sip-step"><div class="sip-step-num">5</div><div class="sip-step-body"><div class="sip-step-title">💧 맞춤 화장품 성분 추천</div><div class="sip-step-desc">SVI 결과 기반 — 콜라겐 / 히알루론산 / 레티놀 / 비타민 C 등 진짜 박입 성분.</div></div></div>
-<div style="margin-top:16px;padding:12px;background:rgba(56,189,248,.1);border-left:3px solid #38bdf8;border-radius:8px;font-size:11px;color:rgba(220,240,255,.85);line-height:1.6;">
-⚠ <b>참고용 자가 점검</b> · 의학적 진단 아님 · 피부과 진료 대체 X<br/>측정 영상은 외부 전송 X · 종료 시 즉시 파기
+
+<!-- ① 측정 전 준비사항 -->
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">🎯 측정 전 준비사항</div>
+<div style="font-size:13px;color:#0d3a3a;line-height:1.9;">
+• <b>세안 후 30분 이상 경과</b>한 상태에서 측정합니다 (피부 안정화 시간 필요)<br/>
+• 화장은 제거 후, 기본 보습 정도만 적용한 상태가 가장 정확합니다<br/>
+• <b>밝은 실내 조명</b> 또는 자연광 아래에서 진행합니다<br/>
+• 얼굴을 화면 중앙에 정확히 위치시키고 정면을 응시합니다<br/>
+• 머리카락이 얼굴(특히 볼·이마)을 가리지 않도록 합니다
 </div>
-<button class="sip-cta" onclick="document.getElementById('skinage-intro-pop').style.display='none';">✓ 이해했어요, 시작하기</button>
 </div>
+
+<!-- ② 측정 흐름 (SVI 4단계) -->
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">⏱️ 측정 흐름 (4단계)</div>
+<div style="font-size:11px;color:rgba(13,58,58,0.65);margin-bottom:16px;">화면 안내에 따라 진행됩니다 · 총 약 1~2분 소요</div>
+
+<div style="display:grid;gap:14px;">
+
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">1</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">📷 카메라 활성화 + 얼굴 인식</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">"측정 시작" 버튼을 누르면 카메라가 활성화되며, FaceMesh 468 랜드마크가 얼굴을 자동 인식합니다.</div>
+</div>
+</div>
+
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">2</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">🤏 볼 누르기 테스트 (탄력 측정)</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">화면 안내 시 볼을 손가락으로 살짝 눌렀다가 즉시 떼주십시오. <b>피부 복원 속도</b>를 분석하여 탄력을 수치화합니다 (광학 점탄성 분석).</div>
+</div>
+</div>
+
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">3</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">🧬 6부위 자동 스캔</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">이마·왼쪽 볼·오른쪽 볼·코·턱·목 6개 부위를 자동으로 분리 스캔하여 부위별 피부 상태를 종합 분석합니다.</div>
+</div>
+</div>
+
+<div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:rgba(5,150,105,0.06);border-radius:12px;border-left:4px solid #059669;">
+<div style="flex-shrink:0;width:42px;height:42px;background:#059669;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;">4</div>
+<div style="flex:1;">
+<div style="font-size:14px;font-weight:900;color:#0d3a3a;margin-bottom:3px;">💗 rPPG 혈색 측정</div>
+<div style="font-size:11.5px;color:rgba(13,58,58,0.7);line-height:1.6;">CHROM rPPG 알고리즘으로 안면 미세 혈류를 측정하여 혈색 및 순환 상태를 평가합니다. 가만히 정면을 응시합니다.</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- ③ 측정 후 결과 -->
+<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">📊 측정 종료 후 결과 안내</div>
+<div style="display:grid;gap:10px;font-size:13px;color:#0d3a3a;line-height:1.8;">
+<div>• <b>SVI 종합 점수</b> (Skin Vitality Index · 피부활력지수)가 산출됩니다</div>
+<div>• <b>4가지 핵심 지표</b>: 콜라겐 · 수분 · 탄력 · 혈색 — 각 항목별 수치화</div>
+<div>• 6부위 (이마·양 볼·코·턱·목) 부위별 상세 분석 결과 제공</div>
+<div>• 측정 결과 기반 <b>CGO 맞춤 화장품 성분 추천</b> (콜라겐·히알루론산·레티놀·비타민C 등)</div>
+<div>• 측정 데이터는 <b>기기 내 임시 저장</b>되며, 외부 전송되지 않습니다</div>
+</div>
+</div>
+
+<!-- ④ AI 상담 연동 -->
+<div style="background:linear-gradient(135deg,rgba(5,150,105,0.08),rgba(56,189,248,0.06));border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(5,150,105,0.25);">
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:12px;letter-spacing:.05em;">🤖 AI 뷰티 상담 연동</div>
+<div style="font-size:13px;color:#0d3a3a;line-height:1.8;">
+SVI 측정 결과에 대해 <b>추가적인 질문 또는 자세한 관리 방법</b>이 필요하신 경우, 결과 페이지 내 <b>"C-44 AI 컨설턴트"</b> 버튼을 통해 즉시 상담이 가능합니다. 측정된 모든 지표가 AI에게 자동 전달되어, 맞춤형 스킨케어 솔루션을 제공받으실 수 있습니다.
+</div>
+</div>
+
+<!-- ⑤ 안내사항 -->
+<div style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:14px;padding:14px 18px;margin-bottom:18px;">
+<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">
+⚠️ <b style="color:#b91c1c;">의료기기 미해당 안내</b> — 본 시스템은 <b>피부 자가 점검 보조 도구</b>이며, 피부과 전문의의 의학적 진단을 대체하지 않습니다. 피부 이상 증상이 있으신 경우 반드시 전문의의 진료를 받으시기 바랍니다.
+</div>
+</div>
+
+<button onclick="document.getElementById('skinage-intro-pop').style.display='none';" style="width:100%;padding:16px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);border:none;border-radius:18px;color:#fff;font-size:15px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35);">
+✓ 안내 확인 — 닫기
+</button>
+
 </div>
 </div>
 <div style="max-width:480px;margin:0 auto;padding:0 4px 40px;"><div class="svi-c41-hero" id="svi-c41-hero">
@@ -15508,7 +15577,12 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     🔬 피부과 40명 · 한방 40명 · 영양사 20명 통합 지식
   </div>
 </div>
-<button id="svi-btn" onclick="if(typeof c41hStart==='function'){c41hStart('svi');}else{alert('엔진 로딩 중...');}" style="width:100%;padding:18px;background:linear-gradient(135deg,#ec4899,#be185d);border:none;border-radius:14px;color:#fff;font-size:16px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 4px 20px rgba(236,72,153,.45);letter-spacing:.04em;">💪 피부 탄력 분석 시작 (30초)</button>
+<!-- ★ 박입 144 — 시작 카드 박입 크게 박입 (사용자 박입 박입 박입) -->
+<button id="svi-btn" onclick="if(typeof c41hStart==='function'){c41hStart('svi');}else{alert('엔진 로딩 중...');}" style="width:100%;padding:48px 24px;background:linear-gradient(135deg,#ec4899,#be185d);border:none;border-radius:24px;color:#fff;font-size:26px;font-weight:900;cursor:pointer;font-family:inherit;box-shadow:0 8px 32px rgba(236,72,153,.55);letter-spacing:.04em;line-height:1.4;margin-bottom:8px;">
+<div style="font-size:48px;margin-bottom:12px;">💪</div>
+<div style="font-size:24px;font-weight:900;margin-bottom:8px;">피부 탄력 분석 시작</div>
+<div style="font-size:14px;font-weight:700;opacity:.9;letter-spacing:.02em;">SVI · 30초 비접촉 측정</div>
+</button>
 </div><div style="background:linear-gradient(135deg,rgba(255,255,255,0.85),rgba(252,231,243,0.75));border:1px solid rgba(236,72,153,0.2);border-radius:20px;padding:24px 22px;margin-bottom:18px;box-shadow:0 4px 18px rgba(236,72,153,0.12);overflow:hidden;position:relative;">
 <div style="display:inline-block;padding:4px 12px;background:rgba(236,72,153,0.12);border:1px solid rgba(236,72,153,0.3);border-radius:100px;font-size:10px;font-weight:900;color:#be185d;letter-spacing:.12em;margin-bottom:12px;">✨ CGO COSMETICS</div>
 <h3 style="font-size:18px;font-weight:900;color:#0d3a3a;margin:0 0 6px 0;letter-spacing:-.01em;">측정 후 맞춤 화장품 추천</h3>
@@ -15524,11 +15598,14 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
         💡 측정 완료 후 결과에 따라 <b style="color:#be185d;">맞춤 성분 카드</b>가 자동 추천됩니다
       </div>
 </div><div style="background:linear-gradient(135deg,#fef9f3,#fffbeb);border:1.5px solid #fbbf24;border-radius:16px;padding:18px;margin-bottom:16px;">
-<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:6px;display:flex;align-items:center;gap:6px;">✨ 화장품 시연 — AR 카메라 🚫박입102🚫</div>
+<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:6px;display:flex;align-items:center;gap:6px;">✨ 화장품 시연 — AR 카메라</div>
 <div style="font-size:11px;color:#78350f;line-height:1.65;margin-bottom:12px;">FaceMesh 468 랜드마크가 입술·볼·눈·베이스 영역을 추적합니다. 130색 명품 팔레트에서 원하는 색을 클릭하면 <b>얼굴 영역에 정확히</b> 시연됩니다.</div>
-<button id="rmai-ar-start-btn" onclick="rmaiArStart()" style="width:100%;padding:14px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:12px;color:#1a1408;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.04em;box-shadow:0 4px 16px rgba(251,191,36,.35);">
-          ✨ 화장품 시연 시작 (FaceMesh 468)
-        </button>
+<!-- ★ 박입 144 — 화장품 시연 시작 카드 박입 크게 박입 -->
+<button id="rmai-ar-start-btn" onclick="rmaiArStart()" style="width:100%;padding:48px 24px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;border-radius:24px;color:#1a1408;font-size:26px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.04em;box-shadow:0 8px 32px rgba(251,191,36,.45);line-height:1.4;">
+<div style="font-size:48px;margin-bottom:12px;">✨</div>
+<div style="font-size:24px;font-weight:900;margin-bottom:8px;">화장품 시연 시작</div>
+<div style="font-size:14px;font-weight:700;opacity:.8;letter-spacing:.02em;">FaceMesh 468 · 130색 명품 팔레트</div>
+</button>
 </div><div id="rmai-ar-section" style="display:none;background:#fff;border:1px solid #fbbf24;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 2px 12px rgba(251,191,36,.15);">
 <div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:14px;">🎥 화장품 시연 카메라 — 실시간 적용</div>
 <!-- AR 카메라 영역 — FaceMesh 468 랜드마크 추적 -->
@@ -15585,7 +15662,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 <div class="svi-section-title" style="color:#7c3aed;">🤖 통합 AI 상담사 <span style="font-size:10px;font-weight:700;color:rgba(13,58,58,0.6);">피부 · 화장품 · 라이프스타일</span></div>
 <div class="svi-ai-chat-messages" id="svi-ai-chat-messages">
 <div class="svi-ai-msg-ai">
-          안녕하세요! 저는 <b>CGO 통합 AI 상담사</b>입니다 ✨<br/><br/>
+          안녕하세요! 저는 <b>C-44 AI 컨설턴트</b>입니다 ✨<br/><br/>
           위에서 측정한 피부 상태, 선택한 화장품 색상, 그리고 일상 생활까지<br/>
           무엇이든 물어보세요. 통합적으로 답변해 드립니다 🌿
         </div>
@@ -25264,92 +25341,93 @@ function sviShowResult(oh){
 <script>
 // ★ 피부 탄력 분석 (SVI) 대문 가이드 팝업 — C-41 메신저 톤 통일 (민트 + 흰 카드)
 function _cgoSviIntroPopup(){
-  // "오늘 하루 안 보기" 체크되었으면 즉시 종료 (날짜 비교)
-  try{
-    var today = new Date().toISOString().slice(0, 10);
-    if(localStorage.getItem('cgo_svi_intro_skip_date') === today) return;
-  }catch(e){}
+  // ★ 박입 145 — 건강 예측 박입 구조 박입 (객관적 수준 + 강점 + 한계 + 법적 + 태그라인)
+  //   파트너 의향: 모든 카드 박입 구조 통일 (획일성)
   var old = document.getElementById('cgo-svi-pop'); if(old) old.remove();
   var pop = document.createElement('div');
   pop.id = 'cgo-svi-pop';
   pop.style.cssText = 'position:fixed;inset:0;z-index:19000;background:linear-gradient(135deg,#9fe8e8 0%,#b8f0f0 50%,#a0e8e0 100%);overflow-y:auto;-webkit-overflow-scrolling:touch;';
 
-  var h = '<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">';
-
-  // 닫기 버튼
+  var h = '';
   h += '<button onclick="document.getElementById(\'cgo-svi-pop\').remove();" style="position:fixed;top:18px;right:18px;z-index:19001;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.7);border:1px solid rgba(13,58,58,0.2);color:#0d3a3a;font-size:18px;cursor:pointer;font-family:inherit;backdrop-filter:blur(8px);font-weight:900;">✕</button>';
+  h += '<div style="max-width:780px;margin:0 auto;padding:60px 20px 40px;">';
 
-  // 히어로
+  // 헤더
   h += '<div style="text-align:center;margin-bottom:24px;">';
-  h += '<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">WORLD FIRST · SVI</div>';
+  h += '<div style="display:inline-block;padding:5px 14px;background:rgba(5,150,105,0.15);border:1px solid rgba(5,150,105,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#059669;letter-spacing:.12em;margin-bottom:14px;">C-44 · 2026</div>';
   h += '<div style="font-size:54px;margin-bottom:8px;">💪</div>';
-  h += '<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">피부 탄력 분석</h1>';
-  h += '<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">Skin Vitality Index · 카메라 점탄성 분석<br>rPPG 융합 맞춤 처방</div>';
+  h += '<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">나의 피부 탄력 (SVI)</h1>';
+  h += '<div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">광학 점탄성 × FaceMesh 468<br/>rPPG 혈색 + AI 융합 분석</div>';
   h += '</div>';
 
-  // 핵심 소개
-  h += '<div style="background:rgba(255,255,255,0.7);border-radius:18px;padding:18px 22px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">';
-  h += '<div style="font-size:13px;color:rgba(13,58,58,0.85);line-height:1.85;">세계 최초! 카메라 기반 <b style="color:#059669;">광학 점탄성 분석</b>으로 <b style="color:#0284c7;">SVI(피부활력지수)</b>를 수치화하고, <b style="color:#059669;">rPPG 융합</b> 맞춤 수분·운동·식단 처방을 제공합니다.</div>';
-  h += '</div>';
+  // ① 이 측정의 특별함
+  h += '<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">';
+  h += '<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">✨ 이 측정의 특별함</div>';
+  h += '<div style="display:grid;gap:12px;">';
 
-  // 4단계 사용법
-  h += '<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:20px 22px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);">';
-  h += '<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">📋 4단계 사용법</div>';
+  h += '<div style="display:flex;gap:12px;align-items:flex-start;">';
+  h += '<div style="font-size:24px;flex-shrink:0;">🤏</div>';
+  h += '<div>';
+  h += '<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">광학 점탄성 분석</div>';
+  h += '<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">볼 누르기 + 복원 속도로 진짜 탄력 수치화. 세계 최초.</div>';
+  h += '</div></div>';
+
+  h += '<div style="display:flex;gap:12px;align-items:flex-start;">';
+  h += '<div style="font-size:24px;flex-shrink:0;">🔬</div>';
+  h += '<div>';
+  h += '<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">FaceMesh 468 랜드마크</div>';
+  h += '<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">이마·양 볼·코·턱·목 6부위 자동 분리 스캔.</div>';
+  h += '</div></div>';
+
+  h += '<div style="display:flex;gap:12px;align-items:flex-start;">';
+  h += '<div style="font-size:24px;flex-shrink:0;">💗</div>';
+  h += '<div>';
+  h += '<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">CHROM rPPG 혈색 측정</div>';
+  h += '<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">애플워치·삼성워치와 동일 원리. 미세 혈류 비접촉 측정.</div>';
+  h += '</div></div>';
+
+  h += '<div style="display:flex;gap:12px;align-items:flex-start;">';
+  h += '<div style="font-size:24px;flex-shrink:0;">💧</div>';
+  h += '<div>';
+  h += '<div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">4지표 → 맞춤 화장품 추천</div>';
+  h += '<div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">콜라겐·수분·탄력·혈색 측정 + CGO 맞춤 성분 추천.</div>';
+  h += '</div></div>';
+
+  h += '</div></div>';
+
+  // ② 객관적 수준 (AI 평가)
+  h += '<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">';
+  h += '<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">📊 객관적 수준</div>';
+  h += '<div style="font-size:10px;color:rgba(13,58,58,0.55);margin-bottom:14px;line-height:1.5;">(Claude AI · Gemini AI · GPT AI · Grok AI · 구글 포탈 AI 등 평가)</div>';
   h += '<div style="display:grid;gap:10px;">';
-  [
-    {n:'①', t:'세안 후 30분 경과', d:'화장품·로션 흡수 후 자연 상태 (정확도 ↑)', c:'#059669'},
-    {n:'②', t:'밝은 조명 + 정면 응시', d:'자연광 또는 형광등 · 얼굴 화면 중앙', c:'#0284c7'},
-    {n:'③', t:'볼 살짝 눌렀다 떼기 ★', d:'손가락으로 볼 누른 후 복원 속도 측정', c:'#b91c1c'},
-    {n:'④', t:'30초 스캔 + 한방 처방', d:'SVI 점수 + 맞춤 수분·운동·식단', c:'#7c3aed'}
-  ].forEach(function(s){
-    h += '<div style="display:flex;gap:12px;align-items:flex-start;">';
-    h += '<span style="display:inline-flex;width:26px;height:26px;border-radius:50%;background:' + s.c + ';color:#fff;font-size:13px;font-weight:900;align-items:center;justify-content:center;flex-shrink:0;">' + s.n + '</span>';
-    h += '<div><div style="font-size:13px;font-weight:800;color:#0d3a3a;margin-bottom:2px;">' + s.t + '</div><div style="font-size:11px;color:rgba(13,58,58,0.65);line-height:1.5;">' + s.d + '</div></div>';
-    h += '</div>';
-  });
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">일반 뷰티앱 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#059669;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#059669;">최상위</span></span></div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">글로벌 스킨테크 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#0284c7;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#0284c7;">상위 1%</span></span></div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">피부과 보조 진단</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#7c3aed;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#7c3aed;">매우 우수</span></span></div>';
+  h += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">병원 의료기기 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#b45309;letter-spacing:2px;font-size:13px;">★★★☆☆</span><span style="font-size:11px;color:#b45309;">참고용</span></span></div>';
   h += '</div></div>';
 
-  // 4대 측정 지표
-  h += '<div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:18px 22px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);">';
-  h += '<div style="font-size:13px;font-weight:900;color:#0284c7;margin-bottom:12px;letter-spacing:.05em;">📊 4대 측정 지표</div>';
-  h += '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">';
-  ['✨ 피부 윤기', '💪 탄력 지수 ★', '🔬 피부결 균일도', '❤️ 혈색 활력'].forEach(function(item){
-    h += '<div style="padding:10px 12px;background:rgba(255,255,255,0.5);border-radius:10px;font-size:12px;font-weight:700;color:#0d3a3a;text-align:center;border:1px solid rgba(13,58,58,0.06);">' + item + '</div>';
-  });
-  h += '</div></div>';
-
-  // 점탄성 과학
-  h += '<div style="background:rgba(2,132,199,0.08);border-left:4px solid #0284c7;border-radius:12px;padding:14px 18px;margin-bottom:14px;">';
-  h += '<div style="font-size:13px;font-weight:900;color:#0284c7;margin-bottom:8px;">🔬 점탄성(Viscoelasticity) 원리</div>';
-  h += '<div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">피부 조직의 <b>압력 가했다 풀었을 때 복원 속도</b>가 탄력의 핵심 지표입니다. 콜라겐·엘라스틴이 풍부할수록 빠르게 복원되며, SVI는 이 광학 신호 변화를 0.1초 단위로 추적합니다.</div>';
+  // ③ 솔직한 한계
+  h += '<div style="background:rgba(251,191,36,0.08);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(251,191,36,0.25);">';
+  h += '<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:10px;letter-spacing:.05em;">⚠️ 솔직한 한계</div>';
+  h += '<div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">• 광학 점탄성 — 조명·각도에 따라 정확도 차이 있음<br/>• FaceMesh 468 — 마스크·짙은 화장 시 정확도 ↓<br/>• SVI 지수 — 자체 정의 지표, 학계 미표준화</div>';
   h += '</div>';
 
-  // 한방 맞춤 처방
-  h += '<div style="background:rgba(5,150,105,0.08);border-left:4px solid #059669;border-radius:12px;padding:14px 18px;margin-bottom:14px;">';
-  h += '<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:10px;">🌿 한방 맞춤 처방</div>';
-  h += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">';
-  ['💧 수분 처방', '🏃 운동 처방', '🍎 식단 처방'].forEach(function(item){
-    h += '<div style="padding:8px 6px;background:rgba(255,255,255,0.5);border-radius:8px;font-size:11px;font-weight:700;color:#0d3a3a;text-align:center;">' + item + '</div>';
-  });
-  h += '</div></div>';
-
-  // 정직 안내
-  h += '<div style="background:rgba(180,83,9,0.06);border-left:3px solid #b45309;border-radius:12px;padding:14px 18px;margin-bottom:18px;">';
-  h += '<div style="font-size:13px;font-weight:900;color:#b45309;margin-bottom:8px;">📌 정직 안내</div>';
-  h += '<div style="font-size:12px;color:rgba(13,58,58,0.8);line-height:1.7;">• SVI는 <b>뷰티 큐레이션 지표</b>입니다 (피부과 진단 X)<br>• 조명·카메라 품질에 따라 결과 차이가 있을 수 있습니다<br>• 처방은 <b>한방 큐레이션</b> 결과 (참고용)</div>';
+  // ④ 법적 고지
+  h += '<div style="background:rgba(248,113,113,0.06);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(248,113,113,0.2);">';
+  h += '<div style="font-size:13px;font-weight:900;color:#b91c1c;margin-bottom:10px;letter-spacing:.05em;">⚖️ 법적 고지</div>';
+  h += '<div style="font-size:12px;color:rgba(13,58,58,0.85);line-height:1.7;">본 시스템은 <b style="color:#b91c1c;">의료기기가 아닌 피부 자가 점검 보조 도구</b>입니다. 피부과 전문의의 의학적 진단을 대체하지 않으며, 피부 이상 증상이 있을 경우 반드시 전문의 진료를 받으시기 바랍니다.</div>';
   h += '</div>';
 
-  // 오늘 하루 안 보기 체크박스
-  h += '<label for="cgo-svi-skip-cb" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:14px;padding:12px 16px;background:rgba(255,255,255,0.5);border:1px solid rgba(13,58,58,0.12);border-radius:12px;font-size:13px;color:#0d3a3a;font-weight:600;user-select:none;">';
-  h += '<input type="checkbox" id="cgo-svi-skip-cb" style="width:18px;height:18px;cursor:pointer;accent-color:#059669;flex-shrink:0;">';
-  h += '<span>📅 오늘 하루 이 안내를 보지 않기</span>';
-  h += '</label>';
+  // ⑤ 태그라인
+  h += '<div style="text-align:center;padding:18px 12px;margin-bottom:18px;background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(56,189,248,0.08));border-radius:18px;border:1px solid rgba(5,150,105,0.2);">';
+  h += '<div style="font-size:15px;font-weight:800;color:#059669;line-height:1.6;font-style:italic;">"스마트폰으로 할 수 있는<br/>최대치에 근접한 피부 분석"</div>';
+  h += '</div>';
 
-  // 시작 버튼 (메신저 톤 그라데이션)
-  h += '<button onclick="(function(){var cb=document.getElementById(\'cgo-svi-skip-cb\');if(cb&&cb.checked){try{var today=new Date().toISOString().slice(0,10);localStorage.setItem(\'cgo_svi_intro_skip_date\',today);}catch(e){}}document.getElementById(\'cgo-svi-pop\').remove();})();" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);background-size:200% 100%;border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35),inset 0 1px 0 rgba(255,255,255,0.3);">✓ 안내 확인 — 페이지로 이동</button>';
+  // 시작 버튼
+  h += '<button onclick="document.getElementById(\'cgo-svi-pop\').remove();" style="width:100%;padding:18px 24px;background:linear-gradient(135deg,#059669 0%,#10b981 50%,#0284c7 100%);background-size:200% 100%;border:none;border-radius:18px;color:#fff;font-size:16px;font-weight:900;letter-spacing:.04em;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(5,150,105,0.35),inset 0 1px 0 rgba(255,255,255,0.3);">✓ 안내 확인 — 페이지로 이동</button>';
 
   // 시그니처
-  h += '<div style="text-align:center;margin-top:18px;font-size:10px;color:rgba(13,58,58,0.45);letter-spacing:.08em;">CGO-MESSAGE · C-41 · 피부 탄력 분석</div>';
+  h += '<div style="text-align:center;margin-top:18px;font-size:10px;color:rgba(13,58,58,0.45);letter-spacing:.08em;">CGO-MESSAGE · C-44 · 특허 10-2026-0060113</div>';
 
   h += '</div>';
   pop.innerHTML = h;
@@ -25363,13 +25441,16 @@ function _cgoSviIntroPopup(){
   var _origGoScreen = window.goScreen;
   if(typeof _origGoScreen !== 'function') return;
   window.goScreen = function(screenId){
-    var result = _origGoScreen.apply(this, arguments);
+    // ★ 박입 143 — 팝업 즉시 박입 (페이지 박입 박힘 전에 박입)
+    //   진짜 진단: 페이지 박입 → 350ms 후 팝업 → 찰나적 박입 박입
+    //   진짜 fix: 페이지 박입 박힘 박입 즉시 박입
     if(screenId === 'scrSkinage' && typeof _cgoSviIntroPopup === 'function'){
-      setTimeout(_cgoSviIntroPopup, 350);
+      _cgoSviIntroPopup();
     }
+    var result = _origGoScreen.apply(this, arguments);
     return result;
   };
-  console.log('🛡️ C-41: SVI 진입 팝업 자동 와이어링 완료');
+  console.log('🛡️ C-41: SVI 진입 팝업 즉시 박입 (박입 143)');
 })();
 </script>
 <!-- ════ C-41 박입 ④ — 시각 마커 + PWA Service Worker 자동 무효화 ════ -->
@@ -26928,7 +27009,8 @@ if(typeof window.cgoCameraCheck !== 'function'){
 </div>
 <!-- 객관적 수준 -->
 <div style="background:rgba(255,255,255,0.6);border-radius:18px;padding:22px 24px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.7);box-shadow:0 4px 14px rgba(5,150,105,0.08);">
-<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:14px;letter-spacing:.05em;">📊 객관적 수준</div>
+<div style="font-size:13px;font-weight:900;color:#059669;margin-bottom:6px;letter-spacing:.05em;">📊 객관적 수준</div>
+<div style="font-size:10px;color:rgba(13,58,58,0.55);margin-bottom:14px;line-height:1.5;">(Claude AI · Gemini AI · GPT AI · Grok AI · 구글 포탈 AI 등 평가)</div>
 <div style="display:grid;gap:10px;">
 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">일반 건강앱 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#059669;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#059669;">최상위</span></span></div>
 <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(13,58,58,0.08);"><span style="font-size:12px;color:#0d3a3a;font-weight:700;">글로벌 헬스테크 대비</span><span style="display:flex;align-items:center;gap:6px;"><span style="color:#0284c7;letter-spacing:2px;font-size:13px;">★★★★★</span><span style="font-size:11px;color:#0284c7;">상위 1%</span></span></div>
@@ -29609,7 +29691,7 @@ window.rmaiArCapture = function(){
     }
 
     var sysPrompt =
-      '당신은 CGO 통합 AI 상담사입니다. 피부·화장품·라이프스타일을 모두 통합한 전문가로,\n' +
+      '당신은 C-44 AI 컨설턴트입니다. 피부·화장품·라이프스타일을 모두 통합한 전문가로,\n' +
       '한국어로 친근하고 따뜻하게 답변하세요.\n\n' +
       '# 전문 분야 (통합)\n' +
       '1. 피부 관리 — 측정값(BPM/HRV/FCI) 기반 피부 상태 진단, 수분/탄력/혈색 조언\n' +
