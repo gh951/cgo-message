@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj160-hero-white" name="c41-version"/>
+<meta content="2026-05-26-c44-inj162-div-fix" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -9121,7 +9121,6 @@ var Q_POOL = {
 
 <!-- 본 페이지 본문 (두피 구조 모방) -->
 <!-- Hero 이미지 영역 (두피와 동일 구조) -->
-<div style="background:#fefce8;min-height:100vh;padding:0 0 80px;">
 <!-- ★ 박입 159 — 16:9 이미지 풀 hero + 글자 오버레이 (파트너 의향) -->
 <div style="position:relative;width:100%;aspect-ratio:16/9;max-height:520px;overflow:hidden;">
 <img src="CGO-4.jpeg" alt="치매 예방 체크" style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
@@ -9135,7 +9134,7 @@ var Q_POOL = {
 <button onclick="document.getElementById('dementia-usage-pop').style.display='block';" style="margin-top:14px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.6);color:#ffffff !important;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;backdrop-filter:blur(8px);">📖 사용법 보기</button>
 </div>
 </div>
-<div style="padding:32px 20px 0;">
+<div style="background:#fefce8;min-height:100vh;padding:32px 20px 80px;">
 <div style="max-width:1200px;margin:0 auto;">
 <!-- STEP 1: 코스 선택 -->
 <div style="background:#fff;border:1px solid #f0e6d4;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 2px 8px rgba(212,168,67,.06);">
@@ -17162,48 +17161,14 @@ async function doRefresh(mode){
   }
 }
 
-// 📍 드래그 가능하게 (선택 사항 - 터치로 위치 이동)
+// 📍 드래그 비활성화 — 항상 우측 하단 고정 (박입 161 · 원래대로)
 (function setupRefreshDrag(){
   const floater = document.getElementById('floatRefresh');
   if(!floater) return;
-  let dragging = false, startX, startY, startRight, startBottom;
-  
-  floater.addEventListener('touchstart', function(e){
-    if(e.target.id === 'floatRefreshBtn') return; // 버튼 클릭은 그대로
-    const t = e.touches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-    const rect = floater.getBoundingClientRect();
-    startRight = window.innerWidth - rect.right;
-    startBottom = window.innerHeight - rect.bottom;
-    dragging = true;
-  }, { passive: true });
-  
-  floater.addEventListener('touchmove', function(e){
-    if(!dragging) return;
-    const t = e.touches[0];
-    const dx = startX - t.clientX;
-    const dy = startY - t.clientY;
-    floater.style.right = Math.max(10, Math.min(window.innerWidth-54, startRight + dx)) + 'px';
-    floater.style.bottom = Math.max(10, Math.min(window.innerHeight-54, startBottom + dy)) + 'px';
-  }, { passive: true });
-  
-  floater.addEventListener('touchend', function(){
-    dragging = false;
-    // 위치 저장
-    try {
-      localStorage.setItem('cgm2_refresh_pos', JSON.stringify({
-        right: floater.style.right, bottom: floater.style.bottom
-      }));
-    } catch(e){}
-  });
-  
-  // 저장된 위치 복원
-  try {
-    const saved = JSON.parse(localStorage.getItem('cgm2_refresh_pos') || '{}');
-    if(saved.right) floater.style.right = saved.right;
-    if(saved.bottom) floater.style.bottom = saved.bottom;
-  } catch(e){}
+  // ★ 박입 161 — 옛 드래그 저장 위치 제거 + 항상 우측 하단 고정
+  try { localStorage.removeItem('cgm2_refresh_pos'); } catch(e){}
+  floater.style.right = '16px';
+  floater.style.bottom = '80px';
 })();
 </script>
 <!-- ══ 🎤 음성 녹음 오버레이 (할머니도 쓰기 쉽게) ══ -->
