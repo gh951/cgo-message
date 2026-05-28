@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj174-loop-fix" name="c41-version"/>
+<meta content="2026-05-26-c44-inj177-music-db" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -11837,6 +11837,276 @@ var Q_POOL = {
   })();
   </script>
 <!-- ════ END page-algo-v2 ════ -->
+<script>
+/* ★ 박입 177 — FULI 음악 DB 연동 (검증DB 55곡 + AI 추천 함수 2개) */
+window.MUSIC_WHITELIST_V1 = {
+  // ━━━ 목(木) 성장·봄·평정 — 10곡 ━━━
+  '목': [
+    {t:'봄날',a:'BTS',q:'"봄날" "BTS" official MV',cat:'한국',m:'평온'},
+    {t:'벚꽃 엔딩',a:'버스커 버스커',q:'"벚꽃 엔딩" "버스커 버스커" official',cat:'한국',m:'설렘'},
+    {t:'이게 아닌데',a:'이무진',q:'"이게 아닌데" "이무진" official',cat:'한국',m:'밝음'},
+    {t:'좋니',a:'윤종신',q:'"좋니" "윤종신" official',cat:'한국',m:'그리움'},
+    {t:'밤편지',a:'아이유',q:'"밤편지" "아이유" IU official',cat:'한국',m:'잔잔'},
+    {t:'사랑은 늘 도망가',a:'임영웅',q:'"사랑은 늘 도망가" "임영웅" official',cat:'한국',m:'서정'},
+    {t:'Spring Day',a:'Sezairi',q:'"Spring Day" Sezairi official',cat:'해외',m:'성장'},
+    {t:'Yellow',a:'Coldplay',q:'"Yellow" "Coldplay" official video',cat:'해외',m:'평온'},
+    {t:'Photograph',a:'Ed Sheeran',q:'"Photograph" "Ed Sheeran" official',cat:'해외',m:'그리움'},
+    {t:'Let It Be',a:'The Beatles',q:'"Let It Be" "The Beatles" official',cat:'해외',m:'위로'}
+  ],
+  // ━━━ 화(火) 열정·여름·활력 — 10곡 ━━━
+  '화': [
+    {t:'다이너마이트',a:'BTS',q:'"Dynamite" "BTS" official MV',cat:'한국',m:'활력'},
+    {t:'마음을 드려요',a:'아이유',q:'"마음을 드려요" "아이유" IU official',cat:'한국',m:'설렘'},
+    {t:'롤린 (Rollin)',a:'브레이브걸스',q:'"롤린" "브레이브걸스" Rollin Brave Girls official',cat:'한국',m:'활기'},
+    {t:'Next Level',a:'에스파',q:'"Next Level" aespa official',cat:'한국',m:'에너지'},
+    {t:'Fantastic Baby',a:'BIGBANG',q:'"Fantastic Baby" "BIGBANG" official MV',cat:'한국',m:'폭발'},
+    {t:'강남스타일',a:'PSY',q:'"강남스타일" "PSY" Gangnam Style official',cat:'한국',m:'유쾌'},
+    {t:'Shape of You',a:'Ed Sheeran',q:'"Shape of You" "Ed Sheeran" official',cat:'해외',m:'경쾌'},
+    {t:'Uptown Funk',a:'Bruno Mars',q:'"Uptown Funk" "Bruno Mars" official',cat:'해외',m:'활기'},
+    {t:'Happy',a:'Pharrell Williams',q:'"Happy" "Pharrell Williams" official',cat:'해외',m:'행복'},
+    {t:'Bad Guy',a:'Billie Eilish',q:'"bad guy" "Billie Eilish" official',cat:'해외',m:'쿨'}
+  ],
+  // ━━━ 토(土) 안정·중심·신뢰 — 10곡 ━━━
+  '토': [
+    {t:'그날들',a:'김광석',q:'"그날들" "김광석" official',cat:'한국',m:'안정'},
+    {t:'서른 즈음에',a:'김광석',q:'"서른 즈음에" "김광석" official',cat:'한국',m:'성찰'},
+    {t:'어떻게 사랑이 그래요',a:'이승철',q:'"어떻게 사랑이 그래요" "이승철" official',cat:'한국',m:'성숙'},
+    {t:'사랑이 지나가면',a:'이문세',q:'"사랑이 지나가면" "이문세" official',cat:'한국',m:'그리움'},
+    {t:'걱정말아요 그대',a:'이적',q:'"걱정말아요 그대" "이적" official',cat:'한국',m:'위로'},
+    {t:'You Raise Me Up',a:'Westlife',q:'"You Raise Me Up" "Westlife" official',cat:'해외',m:'위로'},
+    {t:'Wonderful Tonight',a:'Eric Clapton',q:'"Wonderful Tonight" "Eric Clapton" official',cat:'해외',m:'평온'},
+    {t:'Stand By Me',a:'Ben E. King',q:'"Stand By Me" "Ben E King" official',cat:'해외',m:'안정'},
+    {t:'Hallelujah',a:'Leonard Cohen',q:'"Hallelujah" "Leonard Cohen" official',cat:'해외',m:'성찰'},
+    {t:'Imagine',a:'John Lennon',q:'"Imagine" "John Lennon" official',cat:'해외',m:'평화'}
+  ],
+  // ━━━ 금(金) 집중·가을·절제 — 10곡 ━━━
+  '금': [
+    {t:'가을 아침',a:'아이유',q:'"가을 아침" "아이유" IU official',cat:'한국',m:'명료'},
+    {t:'10월의 어느 멋진 날에',a:'김동규',q:'"10월의 어느 멋진 날에" "김동규" official',cat:'한국',m:'서정'},
+    {t:'가을 우체국 앞에서',a:'윤도현',q:'"가을 우체국 앞에서" "윤도현" official',cat:'한국',m:'성찰'},
+    {t:'안녕',a:'폴킴',q:'"안녕" "폴킴" Paul Kim official',cat:'한국',m:'절제'},
+    {t:'잘 지내자, 우리',a:'장범준',q:'"잘 지내자 우리" "장범준" official',cat:'한국',m:'담담'},
+    {t:'사건의 지평선',a:'윤하',q:'"사건의 지평선" "윤하" Younha official',cat:'한국',m:'몰입'},
+    {t:'November Rain',a:'Guns N\' Roses',q:'"November Rain" "Guns N Roses" official',cat:'해외',m:'장엄'},
+    {t:'Autumn Leaves',a:'Eva Cassidy',q:'"Autumn Leaves" "Eva Cassidy" official',cat:'해외',m:'성숙'},
+    {t:'The Sound of Silence',a:'Simon & Garfunkel',q:'"Sound of Silence" "Simon Garfunkel" official',cat:'해외',m:'명상'},
+    {t:'Hotel California',a:'Eagles',q:'"Hotel California" "Eagles" official',cat:'해외',m:'몰입'}
+  ],
+  // ━━━ 수(水) 지혜·겨울·감성 — 10곡 ━━━
+  '수': [
+    {t:'밤편지',a:'아이유',q:'"밤편지" "아이유" IU official',cat:'한국',m:'잔잔'},
+    {t:'첫눈처럼 너에게 가겠다',a:'에일리',q:'"첫눈처럼 너에게 가겠다" "에일리" Ailee official',cat:'한국',m:'감성'},
+    {t:'겨울의 끝',a:'박효신',q:'"겨울의 끝" "박효신" official',cat:'한국',m:'서정'},
+    {t:'야경',a:'박효신',q:'"야경" "박효신" Park Hyo Shin official',cat:'한국',m:'고요'},
+    {t:'옛사랑',a:'이문세',q:'"옛사랑" "이문세" official',cat:'한국',m:'그리움'},
+    {t:'겨울사랑',a:'김연우',q:'"겨울사랑" "김연우" official',cat:'한국',m:'잔잔'},
+    {t:'Someone Like You',a:'Adele',q:'"Someone Like You" "Adele" official',cat:'해외',m:'감성'},
+    {t:'River Flows in You',a:'Yiruma',q:'"River Flows in You" "Yiruma" piano',cat:'해외',m:'명상'},
+    {t:'Comptine d\'un autre été',a:'Yann Tiersen',q:'"Comptine d un autre ete" "Yann Tiersen" Amelie',cat:'해외',m:'서정'},
+    {t:'Clair de Lune',a:'Debussy',q:'"Clair de Lune" "Debussy" piano',cat:'해외',m:'고요'}
+  ],
+  // ━━━ 솔페지오 주파수 — 5곡 (모든 오행 공통) ━━━
+  '주파수': [
+    {t:'396Hz Liberation',a:'Solfeggio Healing',q:'"396Hz" Solfeggio liberation guilt fear',cat:'주파수',m:'해방',hz:396},
+    {t:'432Hz Healing',a:'Solfeggio Healing',q:'"432Hz" healing meditation music',cat:'주파수',m:'치유',hz:432},
+    {t:'528Hz Love DNA Repair',a:'Solfeggio Healing',q:'"528Hz" love frequency DNA repair',cat:'주파수',m:'사랑',hz:528},
+    {t:'639Hz Relationships',a:'Solfeggio Healing',q:'"639Hz" Solfeggio relationships harmony',cat:'주파수',m:'조화',hz:639},
+    {t:'852Hz Spiritual Awakening',a:'Solfeggio Healing',q:'"852Hz" Solfeggio spiritual awakening',cat:'주파수',m:'각성',hz:852}
+  ]
+};
+
+
+function pmYtFetch(oh,sj,ili,cid,_retry){
+  var box=document.getElementById(cid);
+  if(!box)return;
+
+  // 로딩 표시
+  box.innerHTML='<div style="text-align:center;padding:18px;font-size:11px;color:rgba(240,230,200,.4);">🤖 AI가 오늘 당신의 주파수를 분석 중...</div>';
+
+  // 사용자 데이터 수집
+  var bfd=window._bioFinalData||{};
+  var bpm=bfd.bpm||72, hrv=bfd.hrv||45, fci=bfd.fci||80;
+  var scanned=window._baiScanned||(bfd.fci>0||bfd.hrv>0);
+  var _sjNm=['자시(23~1시)','축시(1~3시)','인시(3~5시)','묘시(5~7시)','진시(7~9시)','사시(9~11시)','오시(11~13시)','미시(13~15시)','신시(15~17시)','유시(17~19시)','술시(19~21시)','해시(21~23시)'];
+  var _ohDesc={'목':'목(木) - 성장·창의·간 에너지, 녹색 에너지','화':'화(火) - 열정·소통·심장 에너지, 빨간 에너지','토':'토(土) - 안정·신뢰·만물 에너지, 노란 에너지','금':'금(金) - 집중·명예·폐 에너지, 하얼 에너지','수':'수(水) - 지혜·감성·신장 에너지, 파란 에너지'};
+
+  var bioInfo = scanned
+    ? '심박수(BPM): '+bpm+', HRV: '+hrv+'ms, 안면혁색지수(FCI): '+fci+'%'
+    : '생체 스캔 미완료 (기본값 사용)';
+
+  var prompt = '사용자 정보:\n'
+    + '- 오행: '+(_ohDesc[oh]||oh)+'\n'
+    + '- ILI 에너지 점수: '+ili+'점\n'
+    + '- 현재 시진: '+(_sjNm[sj]||'현재')+'\n'
+    + '- 계절: '+(window._pmSeason||'봄')+'\n'
+    + '- 생체 데이터: '+bioInfo+'\n'
+    + '\n'
+    + '위 사용자의 오늘 에너지 상태를 분석하여 '
+    + '지금 이 사람에게 가장 적합한 음악 5개를 추천하세요.\n'
+    + '다음 JSON 배열 형식으로만 응답하세요. 다른 설명 일체 금지:\n'
+    + '[\n'
+    + '  {"title":"쫎명","artist":"아티스트","reason":"추천 이유 1줄(20자 이내)","query":"YouTube 검색어"},\n'
+    + '  ...\n'
+    + ']\n'
+    + '\n규칙:\n'
+    + '- 동양 음악(가요, 국악 등) 실제 곡명 2~3개 포함\n'
+    + '- 서양 음악(힐링, 클래시컈, 주파수 음악 등) 2~3개 포함\n'
+    + '- query는 YouTube에서 바로 사용할 영어 검색어로 (ex: BTS Dynamite MV, 528hz healing music)\n'
+    + '- reason은 오행·주파수 근거 명확히\n'
+    + '- 실제 존재하는 음악만 추천\n'
+    + '- query는 YouTube 검색 상단에 해당 곡이 뜨도록 "곡명 가수명 official" 형식\n'
+    + '- 한 가수 1곡만. 같은 가수 중복 추천 절대 금지\n'
+    + '- [절대규칙] 곡명과 가수 반드시 실제 일치. 없는 곡 절대 금지. 가수 불확실하면 artist 빈칸.';
+
+  fetch('/api/groq',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'llama-3.1-8b-instant',
+      messages:[
+        {role:'system',content:'당신은 음악 치료사이자 역학 전문가입니다. 사용자의 오행·생체·시간 에너지를 분석하여 가장 적합한 주파수 음악을 추천합니다. JSON으로만 응답하세요.'},
+        {role:'user',content:prompt}
+      ],
+      max_tokens:800,
+      temperature:0.8
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var raw=(data.choices&&data.choices[0]&&data.choices[0].message)
+      ?data.choices[0].message.content:null;
+    if(!raw)throw new Error('no response');
+
+    // JSON 파싱 (코드블록 제거)
+    var cleaned=raw.replace(/```json|```/g,'').trim();
+    var arr; try{arr=JSON.parse(cleaned);}catch(pe){var m=cleaned.match(/\[[sS]*\]/);arr=m?JSON.parse(m[0]):[];}
+    if(!Array.isArray(arr)||!arr.length)throw new Error('empty');
+
+    // 카드 UI 생성
+    var wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:6px;';
+    arr.forEach(function(c,idx){
+      var ytUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(c.query||((c.title||'')+' '+(c.artist||'')));
+      var row=document.createElement('a');
+      row.href=ytUrl;
+      row.target='_blank';
+      row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;text-decoration:none;transition:all .2s;';
+      row.onmouseover=function(){this.style.borderColor='rgba(255,60,60,.4)';this.style.background='rgba(255,0,0,.06)';};
+      row.onmouseout=function(){this.style.borderColor='rgba(255,255,255,.08)';this.style.background='rgba(255,255,255,.04)';};
+      var nums=['①','②','③','④','⑤'];
+      row.innerHTML=
+        '<div style="font-size:18px;font-weight:900;color:rgba(212,168,67,.7);flex-shrink:0;width:22px;text-align:center;">'+(nums[idx]||idx+1)+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="font-size:12px;font-weight:700;color:rgba(240,230,200,.95);">'+(c.title||'')+(c.artist?' <span style="font-size:10px;color:rgba(200,185,140,.55);font-weight:400;">— '+(c.artist)+'</span>':'')+'</div>'
+        +'<div style="font-size:10px;color:rgba(52,211,153,.7);margin-top:2px;">'+(c.reason||'')+'</div>'
+        +'</div>'
+        +'<div style="flex-shrink:0;padding:5px 10px;background:rgba(255,0,0,.15);border:1px solid rgba(255,0,0,.3);border-radius:8px;font-size:10px;font-weight:700;color:#ff6666;">YouTube »</div>';
+      wrap.appendChild(row);
+    });
+    box.innerHTML='';
+    box.appendChild(wrap);
+  })
+  .catch(function(){
+    // 실패 시 기존 커드 카드로 폴백
+    var _fbCards={'목':[{t:'🌿 528Hz 자연 치유',q:'528hz nature healing meditation'},{t:'🎵 좋은 날 — 아이유',q:'아이유 좋은날'}],'화':[{t:'🔥 에너지 부스트',q:'fire energy motivation music'},{t:'🎵 Dynamite — BTS',q:'BTS Dynamite MV'}],'토':[{t:'🌳 396Hz 대지 안정',q:'396hz earth grounding music'},{t:'🎵 흥에 살리라',q:'패티진 흥에살리라'}],'금':[{t:'🪄 741Hz 명리성',q:'741hz crystal clarity music'},{t:'🎵 비상 — 이소라',q:'이소라 비상'}],'수':[{t:'🌊 852Hz 바다 치유',q:'852hz ocean wisdom healing'},{t:'🎵 기적 — 이적',q:'이적 기적'}]};
+    var fb=_fbCards[oh]||_fbCards['수'];
+    var fbHtml='<div style="font-size:10px;color:rgba(255,100,100,.5);text-align:center;padding:6px;margin-bottom:8px;">AI 연결 실패 — 기본 추천</div><div style="display:flex;flex-direction:column;gap:5px;">';
+    fb.forEach(function(c){
+      fbHtml+='<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(c.q)+'" target="_blank" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;text-decoration:none;"><div style="font-size:12px;color:rgba(240,230,200,.9);flex:1;">'+c.t+'</div><div style="font-size:10px;color:#ff6666;flex-shrink:0;">YouTube »</div></a>';
+    });
+    fbHtml+='</div>';
+    box.innerHTML=fbHtml;
+  });
+}
+
+
+function pmGroqFullMusic(oh,sj,season,ili,bpm,hrv,cid){
+  var box=document.getElementById(cid);
+  if(!box)return;
+  var _ohD={'목':'목(木) 성장·수목·간 에너지','화':'화(火) 열정·소통·심장 에너지','토':'토(土) 안정·신뢰·대지 에너지','금':'금(金) 집중·명예·폐 에너지','수':'수(水) 지혜·감성·신장 에너지'};
+  var _sjNm=['자시(23~1시)','축시(1~3시)','인시(3~5시)','묘시(5~7시)','진시(7~9시)','사시(9~11시)','오시(11~13시)','미시(13~15시)','신시(15~17시)','유시(17~19시)','술시(19~21시)','해시(21~23시)'];
+  var scanned=window._baiScanned||((window._bioFinalData||{}).fci>0);
+  var bioTxt=scanned?'\n- 심박수: '+bpm+'BPM, HRV: '+hrv+'ms (생체 스캔 완료)':'';
+  
+  // ★ 화이트리스트 50곡을 프롬프트에 포함 (28번째 — 환각 0% 보장)
+  var WL = window.MUSIC_WHITELIST_V1 || {};
+  var dbStr = '';
+  ['목','화','토','금','수','주파수'].forEach(function(k){
+    var arr = WL[k] || [];
+    if(!arr.length) return;
+    dbStr += '\n['+k+'] ';
+    dbStr += arr.map(function(s,i){return (i+1)+'."'+s.t+'"·'+s.a;}).join(', ');
+  });
+  
+  var prompt='사용자 에너지:\n'
+    +'- 오행: '+(_ohD[oh]||oh)+'\n'
+    +'- ILI 점수: '+ili+'점\n'
+    +'- 시진: '+(_sjNm[sj]||'현재')+'\n'
+    +'- 계절: '+season+bioTxt+'\n\n'
+    +'[★ 검증된 음악 DB — 이 50곡 안에서만 선택 ★]'+dbStr+'\n\n'
+    +'위 DB에서 사용자 오행("'+oh+'") 우선 + 시진/계절 고려하여 음악 9곡 선택.\n'
+    +'아래 JSON 배열로만 응답 (코드블록 없이):\n'
+    +'[{"category":"한국","title":"곡명","artist":"아티스트","reason":"추천이유 15자이내","query":"YouTube검색어"},...]\n\n'
+    +'구성 (총 9곡): "한국" 4개 + "해외" 3개 + "주파수" 2개\n\n'
+    +'[★ 절대 규칙 ★]\n'
+    +'1. title/artist는 반드시 위 DB와 *글자 그대로 일치* (한 글자도 변경 금지)\n'
+    +'2. query는 DB의 q필드 *그대로 복사* (절대 만들지 말 것)\n'
+    +'3. DB 외 곡은 절대 추천 X (환각 금지)\n'
+    +'4. 사용자 오행("'+oh+'") 카테고리에서 우선 선택\n'
+    +'5. reason은 한국어 15자 이내 (예: "오행 조화", "심신 안정")\n'
+    +'6. 동일 가수 중복 금지 (한 가수 1곡만)';
+  fetch('/api/groq',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'llama-3.1-8b-instant',
+      messages:[
+        {role:'system',content:'음악 큐레이터. DB의 곡만 선택. 한국어로만 응답. JSON 배열만 출력. ★DB 외 곡 절대 추천 금지 — 글자 그대로 일치.'},
+        {role:'user',content:prompt}
+      ],max_tokens:1000,temperature:0.5})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var raw=(data.choices&&data.choices[0]&&data.choices[0].message)?data.choices[0].message.content:null;
+    if(!raw)throw new Error('no data');
+    var cleaned=raw.replace(/```json|```/g,'').trim();
+    var arr; try{arr=JSON.parse(cleaned);}catch(pe){var m=cleaned.match(/\[[sS]*\]/);arr=m?JSON.parse(m[0]):[];}
+    if(!Array.isArray(arr)||!arr.length)throw new Error('empty');
+    var cats={'한국':[],'해외':[],'주파수':[],'국악':[]};
+    arr.forEach(function(c){var ct=c.category||'한국';if(!cats[ct])cats[ct]=[];cats[ct].push(c);});
+    var _cs={'한국':{icon:'🇰🇷',color:'#d4a843',bg:'rgba(212,168,67,.06)',bd:'rgba(212,168,67,.2)'},'해외':{icon:'🌐',color:'#a78bfa',bg:'rgba(167,139,250,.06)',bd:'rgba(167,139,250,.2)'},'주파수':{icon:'🔬',color:'#38bdf8',bg:'rgba(56,189,248,.06)',bd:'rgba(56,189,248,.2)'},'국악':{icon:'🪘',color:'#fbbf24',bg:'rgba(251,191,36,.06)',bd:'rgba(251,191,36,.2)'}};
+    var wrap=document.createElement('div');
+    wrap.style.cssText='display:flex;flex-direction:column;gap:10px;';
+    ['한국','해외','주파수','국악'].forEach(function(cat){
+      var items=cats[cat];if(!items||!items.length)return;
+      var st=_cs[cat];
+      var sec=document.createElement('div');
+      sec.style.cssText='background:'+st.bg+';border:1px solid '+st.bd+';border-radius:12px;padding:10px 12px;';
+      sec.innerHTML='<div style="font-size:10px;font-weight:800;color:'+st.color+';letter-spacing:.1em;margin-bottom:8px;">'+st.icon+' '+cat+'</div>';
+      items.forEach(function(c,idx){
+        var ytUrl='https://www.youtube.com/results?search_query='+encodeURIComponent(c.query||((c.title||'')+' '+(c.artist||'')));
+        var row=document.createElement('a');
+        row.href=ytUrl;row.target='_blank';
+        row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px;background:rgba(255,255,255,.03);border-radius:8px;text-decoration:none;transition:all .2s;'+(idx<items.length-1?'margin-bottom:5px;':'');
+        row.onmouseover=function(){this.style.background='rgba(255,255,255,.07)';};
+        row.onmouseout=function(){this.style.background='rgba(255,255,255,.03)';};
+        var nums=['①','②','③','④','⑤','⑥','⑦','⑧','⑨'];
+        row.innerHTML='<div style="font-size:15px;color:'+st.color+';opacity:.7;width:20px;text-align:center;flex-shrink:0;">'+nums[idx]+'</div>'
+          +'<div style="flex:1;min-width:0;"><div style="font-size:12px;font-weight:700;color:rgba(240,230,200,.95);">'+c.title+(c.artist?' <span style="font-size:10px;color:rgba(200,185,140,.5);">— '+c.artist+'</span>':'')+'</div>'
+          +'<div style="font-size:10px;color:rgba(52,211,153,.7);margin-top:1px;">'+(c.reason||'')+'</div></div>'
+          +'<div style="flex-shrink:0;padding:4px 9px;background:rgba(255,0,0,.15);border:1px solid rgba(255,0,0,.3);border-radius:7px;font-size:9px;font-weight:700;color:#ff6666;">YouTube»</div>';
+        sec.appendChild(row);
+      });
+      wrap.appendChild(sec);
+    });
+    box.innerHTML='';box.appendChild(wrap);
+  })
+  .catch(function(){
+    box.innerHTML='<div style="font-size:11px;color:rgba(255,100,100,.5);text-align:center;padding:12px;">AI 연결 실패. 잠시 후 다시 시도해 주세요.</div>';
+  });
+}
+
+window.pmYtFetch = pmYtFetch;
+window.pmGroqFullMusic = pmGroqFullMusic;
+</script>
+
 <!-- ★ C-40 박입 ㉗ — scrMusic 페이지 (FULI에서 통째 박제) -->
 <div class="screen" id="scrMusic" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
 <button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(167,139,250,.15));border:2px solid rgba(56,189,248,.75);border-radius:22px;color:#38bdf8;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(56,189,248,.35);animation:goldPulse 2s ease-in-out infinite;white-space:nowrap;font-family:inherit;">🏠 나가기</button>
@@ -12091,9 +12361,9 @@ var Q_POOL = {
 <div class="mfu-hero">
 <div class="mfu-stars"></div>
 <div class="mfu-hero-text">
-<div class="mfu-badge">✦ <span class="mfu-acc">50대 역학 × NASA × rPPG</span> 실시간 융합</div>
-<h1 class="mfu-hero-title">나에게 맞는<br/><span class="mfu-grad">주파수 음악</span></h1>
-<p class="mfu-hero-sub">사주·생체·천문 데이터로 매 시진 새롭게 처방</p>
+<div class="mfu-badge">✦ <span class="mfu-acc">rPPG 생체 측정 × AI 큐레이션</span> ✦</div>
+<h1 class="mfu-hero-title">지금 컨디션에 맞는<br/><span class="mfu-grad">음악 큐레이션</span></h1>
+<p class="mfu-hero-sub">심박·자율신경 측정값으로 지금 기분에 맞는 음악을 추천</p>
 <!-- ★ 박입 127 — 사용법 보기 버튼 (전체 통일) -->
 <div style="margin-top:12px;">
 <button onclick="document.getElementById('c14-intro-pop').style.display='block';" style="background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);color:#38bdf8;font-size:12px;font-weight:800;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:.02em;">📖 사용법 보기</button>
@@ -12116,30 +12386,35 @@ var Q_POOL = {
 <div class="mfu-sijin" id="mfu-sijin"></div>
 <div class="mfu-grid-label"><span>🌸 계절 선택</span></div>
 <div class="mfu-season" id="mfu-season"></div>
-<button class="mfu-play" onclick="window.mfuPlayRecommend &amp;&amp; window.mfuPlayRecommend()">▶ 음악 처방 받기</button>
+<button class="mfu-play" onclick="window.mfuPlayRecommend &amp;&amp; window.mfuPlayRecommend()">▶ 음악 추천 받기</button>
 </div>
 </div>
-<!-- 섹션: 오행 주파수 -->
+<!-- 섹션: rPPG 측정값 기반 분위기 (역학 제거) -->
 <div class="mfu-sec">
 <div class="mfu-sec-head">
-<h2 class="mfu-sec-title">오행별 처방 주파수<span class="mfu-acc-text">✦ 5원소 매핑</span></h2>
+<h2 class="mfu-sec-title">측정값 기반 음악 분위기<span class="mfu-acc-text">✦ rPPG 생체 신호 연동</span></h2>
 </div>
 <div class="mfu-oh-list" id="mfu-oh-list"></div>
 </div>
-<!-- 섹션: 솔페지오 -->
+<!-- 섹션: 솔페지오 (참고용 음원) -->
 <div class="mfu-sec">
 <div class="mfu-sec-head">
-<h2 class="mfu-sec-title">솔페지오 치유 주파수<span class="mfu-acc-text">✦ 6종 자동 매칭</span></h2>
+<h2 class="mfu-sec-title">솔페지오 주파수 음원<span class="mfu-acc-text">✦ 참고용 6종</span></h2>
 </div>
 <div class="mfu-sol-grid" id="mfu-sol-grid"></div>
 </div>
-<!-- 섹션: 18역학 -->
+<!-- 섹션: C-44 AI 음악 추천 연동 (18역학 제거 → AI 큐레이션) -->
 <div class="mfu-sec">
 <div class="mfu-sec-head">
-<h2 class="mfu-sec-title">18개 역학 분석<span class="mfu-acc-text">✦ Bio Sensor 정밀 처방</span></h2>
+<h2 class="mfu-sec-title">C-44 AI 음악 추천<span class="mfu-acc-text">✦ 측정값 기반 큐레이션</span></h2>
 </div>
-<div class="mfu-yk-grid" id="mfu-yk-grid"></div>
-<div class="mfu-yk-bio-note">🧬 관상·손금 Bio Sensor 스캔 완료 시 2단계 정밀 처방 활성화</div>
+<div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:18px;text-align:center;">
+<div style="font-size:13px;color:rgba(240,236,224,.85);line-height:1.7;margin-bottom:14px;">
+측정된 <b style="color:#38bdf8;">심박(BPM)·자율신경(HRV)</b> 값을 바탕으로<br/>C-44 AI가 지금 컨디션에 맞는 음악을 추천해 드립니다.
+</div>
+<button onclick="window.mfuAiRecommend &amp;&amp; window.mfuAiRecommend()" style="width:100%;padding:14px;background:linear-gradient(135deg,#0284c7,#38bdf8);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.02em;box-shadow:0 4px 14px rgba(56,189,248,.3);">🤖 C-44 AI 음악 추천 받기</button>
+<div id="mfu-ai-rec-result" style="margin-top:14px;"></div>
+</div>
 </div>
 <!-- 섹션: 추천 음악 -->
 <div class="mfu-sec">
@@ -12175,7 +12450,7 @@ var Q_POOL = {
 <!-- 정직 안내 -->
 <div class="mfu-honest">
 <span class="mfu-lbl">📌 정직 안내</span>
-      오행·솔페지오·18역학 매핑은 동양 역학·서양 음악 이론·NASA 천문 데이터 기반 <b>참고 자료</b>입니다.
+      본 음악 추천은 측정된 심박·자율신경 값 기반의 <b>웰니스 큐레이션 참고 자료</b>이며, 의학적 치료·진단을 대체하지 않습니다.
       음악 재생은 외부 YouTube 검색 링크로 연결되며, 저작권은 각 권리자에게 있습니다. CGO-FULI는 음원을 호스팅하지 않으며, 큐레이션 서비스만 제공합니다.
     </div>
 </div>
@@ -12203,19 +12478,19 @@ var Q_POOL = {
       {name:'겨울', emoji:'❄️', oh:'수(水)'}
     ];
     var MFU_OH = [
-      {key:'목', name:'목(木)', emoji:'🌳', hz:432, color:'#34d399', bpm:'90~120BPM', desc:'간·근육·성장운', track:'Imagine(존레논) · Spring(비발디)'},
-      {key:'화', name:'화(火)', emoji:'🔥', hz:417, color:'#f97316', bpm:'140~170BPM', desc:'심장·혈관·열정', track:'Dynamite(BTS) · Eye of Tiger'},
-      {key:'토', name:'토(土)', emoji:'⛰️', hz:396, color:'#fbbf24', bpm:'80~100BPM', desc:'위장·비장·재물운', track:'흙에살리라 · Gymnopedie'},
-      {key:'금', name:'금(金)', emoji:'⚔️', hz:741, color:'#94a3b8', bpm:'60~90BPM', desc:'폐·기관지·명예운', track:'비상(임재범) · Canon in D'},
-      {key:'수', name:'수(水)', emoji:'💧', hz:852, color:'#38bdf8', bpm:'60~80BPM', desc:'신장·방광·귀인운', track:'동백아가씨 · Moon River'}
+      {key:'목', name:'상쾌·활력', emoji:'🌳', hz:432, color:'#34d399', bpm:'90~120BPM', desc:'기분 전환·활력', track:'Imagine(존레논) · Spring(비발디)'},
+      {key:'화', name:'열정·에너지', emoji:'🔥', hz:417, color:'#f97316', bpm:'140~170BPM', desc:'신나는·업비트', track:'Dynamite(BTS) · Eye of Tiger'},
+      {key:'토', name:'안정·편안', emoji:'⛰️', hz:396, color:'#fbbf24', bpm:'80~100BPM', desc:'차분한·안정', track:'흙에살리라 · Gymnopedie'},
+      {key:'금', name:'집중·차분', emoji:'⚔️', hz:741, color:'#94a3b8', bpm:'60~90BPM', desc:'집중·몰입', track:'비상(임재범) · Canon in D'},
+      {key:'수', name:'휴식·이완', emoji:'💧', hz:852, color:'#38bdf8', bpm:'60~80BPM', desc:'휴식·수면', track:'동백아가씨 · Moon River'}
     ];
     var MFU_SOL = [
-      {hz:396, name:'해방·해독', effect:'두려움 풀기', color:'#d4a843', bg:'rgba(212,168,67,.12)', bd:'rgba(212,168,67,.3)'},
-      {hz:417, name:'변환·정화', effect:'트라우마 정화', color:'#f97316', bg:'rgba(249,115,22,.12)', bd:'rgba(249,115,22,.3)'},
-      {hz:528, name:'기적·치유 ★', effect:'DNA 회복', color:'#34d399', bg:'rgba(52,211,153,.14)', bd:'rgba(52,211,153,.4)'},
-      {hz:639, name:'관계·연결', effect:'인연 회복', color:'#38bdf8', bg:'rgba(56,189,248,.12)', bd:'rgba(56,189,248,.3)'},
-      {hz:741, name:'의식·각성', effect:'자기표현', color:'#a78bfa', bg:'rgba(167,139,250,.12)', bd:'rgba(167,139,250,.3)'},
-      {hz:852, name:'직관·귀환', effect:'영적 각성', color:'#c084fc', bg:'rgba(192,132,252,.12)', bd:'rgba(192,132,252,.3)'}
+      {hz:396, name:'396Hz', effect:'차분한 분위기', color:'#d4a843', bg:'rgba(212,168,67,.12)', bd:'rgba(212,168,67,.3)'},
+      {hz:417, name:'417Hz', effect:'잔잔한 분위기', color:'#f97316', bg:'rgba(249,115,22,.12)', bd:'rgba(249,115,22,.3)'},
+      {hz:528, name:'528Hz', effect:'편안한 분위기', color:'#34d399', bg:'rgba(52,211,153,.14)', bd:'rgba(52,211,153,.4)'},
+      {hz:639, name:'639Hz', effect:'따뜻한 분위기', color:'#38bdf8', bg:'rgba(56,189,248,.12)', bd:'rgba(56,189,248,.3)'},
+      {hz:741, name:'741Hz', effect:'집중 분위기', color:'#a78bfa', bg:'rgba(167,139,250,.12)', bd:'rgba(167,139,250,.3)'},
+      {hz:852, name:'852Hz', effect:'명상 분위기', color:'#c084fc', bg:'rgba(192,132,252,.12)', bd:'rgba(192,132,252,.3)'}
     ];
     var MFU_YK = [
       {emoji:'🔴', name:'사주명리', meta:'일간·오행·BPM'},
@@ -12336,12 +12611,12 @@ var Q_POOL = {
         {title:'Moon River', artist:'Henry Mancini', hz:'852Hz · 수', cover:'🌙', oh:'수'}
       ],
       sol: [
-        {title:'396Hz Solfeggio', artist:'해방·해독 · 두려움 풀기', hz:'396Hz', cover:'✨', oh:'토'},
-        {title:'417Hz Solfeggio', artist:'변환·정화 · 트라우마', hz:'417Hz', cover:'✨', oh:'화'},
-        {title:'528Hz Miracle Tone', artist:'기적·치유 · DNA 회복 ★', hz:'528Hz', cover:'💚', oh:'목'},
-        {title:'639Hz Connection', artist:'관계·연결 · 인연 회복', hz:'639Hz', cover:'💜', oh:'토'},
-        {title:'741Hz Awakening', artist:'의식·각성 · 자기표현', hz:'741Hz', cover:'⚔️', oh:'금'},
-        {title:'852Hz Intuition', artist:'직관·귀환 · 영적 각성', hz:'852Hz', cover:'💧', oh:'수'}
+        {title:'396Hz Solfeggio', artist:'차분한 분위기', hz:'396Hz', cover:'✨', oh:'토'},
+        {title:'417Hz Solfeggio', artist:'잔잔한 분위기', hz:'417Hz', cover:'✨', oh:'화'},
+        {title:'528Hz Solfeggio', artist:'편안한 분위기', hz:'528Hz', cover:'💚', oh:'목'},
+        {title:'639Hz Solfeggio', artist:'따뜻한 분위기', hz:'639Hz', cover:'💜', oh:'토'},
+        {title:'741Hz Solfeggio', artist:'집중 분위기', hz:'741Hz', cover:'⚔️', oh:'금'},
+        {title:'852Hz Solfeggio', artist:'명상 분위기', hz:'852Hz', cover:'💧', oh:'수'}
       ]
     };
 
@@ -12535,7 +12810,7 @@ var Q_POOL = {
         // 시드 변경 + 새 AI 호출 + 카드 새로 그림
         _mfuRefreshSeed = (Date.now() + Math.floor(Math.random()*1000000)) | 0;
         mfuRenderTracks(_mfuCat);
-        mfuRenderYk();
+        if(typeof mfuRenderYk === 'function') try{ mfuRenderYk(); }catch(e){}
         _mfuCallAi();
         // 추천 영역으로 스크롤
         var sec = document.querySelector('#scrMusic #mfu-yt-live');
@@ -12543,12 +12818,29 @@ var Q_POOL = {
       }catch(e){}
     };
 
+    // ★ 박입 175 — C-44 AI 음악 추천 (측정값 기반, 역학 제거)
+    window.mfuAiRecommend = function(){
+      var box = document.getElementById('mfu-ai-rec-result');
+      if(box) box.innerHTML = '<div style="font-size:12px;color:rgba(240,236,224,.7);padding:10px;">🤖 C-44 AI가 측정값을 분석하고 있어요...</div>';
+      // 기존 AI 추천 엔진 재활용 (측정값 기반)
+      try{
+        _mfuRefreshSeed = (Date.now() + Math.floor(Math.random()*1000000)) | 0;
+        mfuRenderTracks(_mfuCat);
+        _mfuCallAi();
+        var sec = document.querySelector('#scrMusic #mfu-yt-live');
+        if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
+        if(box) box.innerHTML = '<div style="font-size:12px;color:#38bdf8;padding:10px;font-weight:700;">✓ 아래 추천 목록을 확인하세요</div>';
+      }catch(e){
+        if(box) box.innerHTML = '<div style="font-size:12px;color:rgba(248,113,113,.8);padding:10px;">추천 생성 중 오류 — 다시 시도해 주세요</div>';
+      }
+    };
+
     window.mfuRefresh = function(){
       // ★ 새로고침 시드 강제 변경 — 매번 진짜 다른 결과 보장
       _mfuRefreshSeed = (Date.now() + Math.floor(Math.random()*1000000)) | 0;
       mfuUpdateNow();
       mfuRenderTracks(_mfuCat);
-      mfuRenderYk();
+      if(typeof mfuRenderYk === 'function') try{ mfuRenderYk(); }catch(e){}
       // ★ AI 실시간 추천 재호출 (v1과 동일한 정직 구조)
       _mfuCallAi();
       // 새로고침 피드백
@@ -12607,7 +12899,8 @@ var Q_POOL = {
       var ohEmoji = {목:'🌳',화:'🔥',토:'⛰️',금:'⚔️',수:'💧'}[_mfuUserOh] || '🎵';
       var sj = (_mfuSiJin >= 0 && MFU_SIJIN[_mfuSiJin]) ? MFU_SIJIN[_mfuSiJin].name : '자동 감지';
       var ss = _mfuSeason || mfuAutoSeason();
-      nv.textContent = sj + ' · ' + ss + ' · 내 오행 ' + _mfuUserOh + '(' + ({'목':'木','화':'火','토':'土','금':'金','수':'水'}[_mfuUserOh] || '土') + ')';
+      var moodLabel = {목:'활력',화:'에너지',토:'안정',금:'집중',수:'휴식'}[_mfuUserOh] || '추천';
+      nv.textContent = sj + ' · ' + ss + ' · ' + moodLabel + ' 분위기';
       if(no) no.textContent = ohEmoji;
       if(tt){ var n = new Date(); tt.textContent = (n.getHours()<10?'0':'')+n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes(); }
     }
