@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj193-food-rppg" name="c41-version"/>
+<meta content="2026-05-26-c44-inj195-food-bp" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -8559,35 +8559,37 @@ var Q_POOL = {
 <div style="font-size:13px;font-weight:800;color:#059669;">💗 식전·식후 생체 측정 (rPPG)</div>
 <button onclick="document.getElementById('frppg-manual').style.display=document.getElementById('frppg-manual').style.display==='none'?'block':'none';" style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#059669;font-size:10px;font-weight:700;padding:4px 10px;border-radius:7px;cursor:pointer;font-family:inherit;">📖 사용법</button>
 </div>
-<div style="font-size:11px;color:#5b7a7a;margin-bottom:10px;line-height:1.5;">얼굴을 30초간 비추면 심박·혈색을 측정합니다. 식사 전후로 측정하면 <b style="color:#059669;">이 음식이 내 몸에 준 실제 변화</b>를 기록할 수 있어요.</div>
+<div style="font-size:11px;color:#3a5a5a;margin-bottom:10px;line-height:1.5;">먼저 <b style="color:#059669;">진료 차트를 입력</b>한 뒤, 얼굴을 30초간 비추면 심박·HRV·<b style="color:#dc2626;">혈압(추정)</b>을 측정합니다. 혈압을 모르시면 측정값이 차트에 자동 입력되어 음식 분석에 반영됩니다.</div>
 
 <!-- 자체 매뉴얼 (접힘) -->
-<div id="frppg-manual" style="display:none;margin-bottom:12px;padding:12px;background:rgba(255,255,255,.5);border:1px solid rgba(52,211,153,.2);border-radius:10px;">
+<div id="frppg-manual" style="display:none;margin-bottom:12px;padding:12px;background:rgba(255,255,255,.6);border:1px solid rgba(52,211,153,.25);border-radius:10px;">
 <div style="font-size:11px;font-weight:800;color:#059669;margin-bottom:8px;">📖 측정 방법</div>
 <div style="display:flex;flex-direction:column;gap:7px;">
-<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">①</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;"><b>밝은 곳</b>에서 얼굴을 화면 원 안에 맞춰주세요</div></div>
-<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">②</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;">30초간 <b>움직이지 말고</b> 화면의 호흡 가이드를 따라 천천히 호흡하세요 (들이쉬기 4초 · 내쉬기 6초)</div></div>
-<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">③</span><div style="font-size:11px;color:#3a5a5a;line-height:1.5;"><b>식사 전</b> 한 번, <b>식사 30분 후</b> 한 번 측정하면 변화를 비교할 수 있어요</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">①</span><div style="font-size:11px;color:#2a4a4a;line-height:1.5;"><b>진료 차트</b>(기저질환·혈압 등)를 먼저 입력하세요. 차트가 있어야 측정값과 결합해 정확한 분석이 됩니다</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">②</span><div style="font-size:11px;color:#2a4a4a;line-height:1.5;"><b>밝은 곳</b>에서 얼굴을 화면 <b>사각형 안</b>에 편하게 맞춰주세요</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">③</span><div style="font-size:11px;color:#2a4a4a;line-height:1.5;">30초간 <b>움직이지 말고</b> 화면의 호흡 가이드를 따라 천천히 호흡하세요 (들이쉬기 4초 · 내쉬기 6초)</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;"><span style="font-size:14px;">④</span><div style="font-size:11px;color:#2a4a4a;line-height:1.5;"><b>식사 전</b> 한 번, <b>식사 30분 후</b> 한 번 측정하면 변화를 비교할 수 있어요</div></div>
 </div>
-<div style="margin-top:8px;padding:7px 10px;background:rgba(251,191,36,.08);border-radius:7px;font-size:10px;color:#b45309;line-height:1.5;">⚠️ 측정값은 카메라 기반 추정치이며 참고용입니다. 의료 진단이 아닙니다.</div>
+<div style="margin-top:8px;padding:7px 10px;background:rgba(251,191,36,.1);border-radius:7px;font-size:10px;color:#8a6010;line-height:1.5;">⚠️ 측정값은 카메라 기반 추정치이며 참고용입니다. 의료 진단이 아닙니다. 얼굴이 사각형을 벗어나면 측정이 자동으로 멈춥니다.</div>
 </div>
 
 <!-- 카메라 뷰 -->
 <div id="frppg-cam-wrap" style="position:relative;background:#0a1a1a;border-radius:12px;overflow:hidden;margin-bottom:10px;min-height:200px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(52,211,153,.2);">
 <video autoplay="" id="frppg-video" muted="" playsinline="" style="width:100%;max-height:260px;object-fit:cover;display:none;"></video>
 <canvas id="frppg-canvas" style="display:none;"></canvas>
-<!-- 얼굴 가이드 원 + 호흡 -->
+<!-- 얼굴 가이드 사각형 + 호흡 -->
 <div id="frppg-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;">
-<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:140px;height:170px;border:2px dashed rgba(52,211,153,.6);border-radius:50%;"></div>
-<div id="frppg-breath" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;background:rgba(52,211,153,.25);transition:all 1s ease-in-out;"></div>
-<div id="frppg-breath-txt" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);font-size:13px;color:#34d399;font-weight:800;text-shadow:0 0 8px rgba(52,211,153,.8);">준비</div>
-<div id="frppg-timer" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:22px;color:#fff;font-weight:900;font-family:'Orbitron',monospace;text-shadow:0 0 10px rgba(0,0,0,.8);">30</div>
+<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:170px;height:200px;border:3px solid rgba(52,211,153,.9);border-radius:14px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);"></div>
+<div id="frppg-breath" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:54px;height:54px;border-radius:50%;background:rgba(52,211,153,.3);border:2px solid rgba(255,255,255,.6);transition:all 1s ease-in-out;"></div>
+<div id="frppg-breath-txt" style="position:absolute;top:12px;left:50%;transform:translateX(-50%);font-size:14px;color:#fff;font-weight:900;background:rgba(5,150,105,.85);padding:5px 14px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.4);">준비</div>
+<div id="frppg-timer" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:26px;color:#fff;font-weight:900;font-family:'Orbitron',monospace;background:rgba(0,0,0,.6);padding:4px 18px;border-radius:14px;">30</div>
+<div id="frppg-facehint" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#fff;font-weight:800;background:rgba(248,113,113,.92);padding:10px 16px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.5);text-align:center;line-height:1.5;">😀 얼굴을 사각형 안에<br/>맞춰주세요</div>
 </div>
 <!-- idle -->
 <div id="frppg-idle" style="text-align:center;padding:24px;">
 <div style="font-size:40px;margin-bottom:8px;">💗</div>
-<div style="font-size:13px;font-weight:700;color:#7b9a9a;">얼굴 30초 측정 준비</div>
-<div style="font-size:11px;color:#5b7a7a;margin-top:4px;">아래 버튼을 눌러 시작하세요</div>
+<div style="font-size:13px;font-weight:700;color:#9fdede;">얼굴 30초 측정 준비</div>
+<div style="font-size:11px;color:#7bbaba;margin-top:4px;">아래 버튼을 눌러 시작하세요</div>
 </div>
 </div>
 <!-- 버튼 -->
@@ -8750,10 +8752,28 @@ var Q_POOL = {
 <script>
 /* ★ 박입 193 — 음식 전용 간단 rPPG 엔진 (얼굴 30초 + 호흡 가이드) */
 var _frppgStream=null, _frppgRAF=null, _frppgTimer=null, _frppgBreathTimer=null;
-var _frppgSignal=[], _frppgT0=0;
+var _frppgSignal=[], _frppgT0=0, _frppgNoFace=0;
 
 function frppgStart(){
   if(_frppgStream){ frppgStop(); return; }
+  // ★ 박입 194 — 차트 입력 필수 (정확한 예측 위해)
+  var _dz=(document.getElementById('food-diseases')&&document.getElementById('food-diseases').value||'').trim();
+  var _bp=(document.getElementById('fp-bp')&&document.getElementById('fp-bp').value||'').trim();
+  var _cc=(document.getElementById('fp-cc')&&document.getElementById('fp-cc').value||'').trim();
+  var _hasChart = _dz || _bp || _cc || localStorage.getItem('cgo_food_save_consent')==='1';
+  if(!_hasChart){
+    var resEl=document.getElementById('frppg-result');
+    if(resEl){
+      resEl.style.display='block';
+      resEl.innerHTML='<div style="padding:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:13px;color:#b45309;line-height:1.7;">📋 <b>먼저 위의 진료 차트를 입력해 주세요.</b><br/><span style="font-size:11px;color:#7b6020;">기저질환·증상·혈압 중 하나 이상을 입력해야 측정값과 결합해 정확한 분석이 가능합니다. (차트 없이 측정하면 의미 있는 예측이 어렵습니다)</span></div>';
+      resEl.scrollIntoView({behavior:'smooth',block:'center'});
+    }
+    // 차트 카드 자동 펼치기
+    var body=document.getElementById('food-profile-body');
+    var arrow=document.getElementById('food-profile-arrow');
+    if(body){ body.style.display='block'; if(arrow) arrow.textContent='▲'; }
+    return;
+  }
   var video=document.getElementById('frppg-video');
   var idle=document.getElementById('frppg-idle');
   var overlay=document.getElementById('frppg-overlay');
@@ -8765,9 +8785,9 @@ function frppgStart(){
       if(idle) idle.style.display='none';
       btn.textContent='⏹ 측정 중단';
       btn.style.borderColor='rgba(248,113,113,.5)'; btn.style.color='#f87171';
-      _frppgSignal=[]; _frppgT0=Date.now();
+      _frppgSignal=[]; _frppgT0=Date.now(); _frppgNoFace=0;
       frppgBreathCycle();      // 호흡 가이드 시작
-      frppgSampleLoop(video);  // 신호 수집
+      frppgSampleLoop(video);  // 신호 수집 + 얼굴 감지
       frppgCountdown(30);      // 30초 카운트다운
     }).catch(function(){
       alert('카메라 접근이 거부되었습니다.\n📱 설정 > 카메라 권한을 허용해 주세요.');
@@ -8808,7 +8828,7 @@ function frppgBreathCycle(){
   inhale();
 }
 
-// 신호 수집 (이마/볼 영역 녹색 채널 평균)
+// 신호 수집 + 얼굴 감지 (이마/볼 영역 녹색 채널 평균)
 function frppgSampleLoop(video){
   var canvas=document.getElementById('frppg-canvas');
   var ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -8817,14 +8837,35 @@ function frppgSampleLoop(video){
     if(video.videoWidth>0){
       canvas.width=video.videoWidth; canvas.height=video.videoHeight;
       ctx.drawImage(video,0,0);
-      // 화면 중앙(얼굴) 영역 샘플
       var cx=Math.floor(canvas.width*0.35), cy=Math.floor(canvas.height*0.25);
       var w=Math.floor(canvas.width*0.3), h=Math.floor(canvas.height*0.35);
       try{
         var d=ctx.getImageData(cx,cy,w,h).data;
-        var gSum=0,n=0;
-        for(var i=0;i<d.length;i+=16){ gSum+=d[i+1]; n++; } // 녹색 채널
-        _frppgSignal.push({t:Date.now()-_frppgT0, v:gSum/n});
+        var rSum=0,gSum=0,bSum=0,n=0;
+        for(var i=0;i<d.length;i+=16){ rSum+=d[i]; gSum+=d[i+1]; bSum+=d[i+2]; n++; }
+        var rAvg=rSum/n, gAvg=gSum/n, bAvg=bSum/n;
+        // ★ 얼굴(피부) 감지: 피부톤은 R>G>B + 충분한 밝기
+        var bright=(rAvg+gAvg+bAvg)/3;
+        var isSkin = (rAvg>gAvg) && (gAvg>=bAvg) && (rAvg>60) && (bright>40) && (bright<245);
+        var hint=document.getElementById('frppg-facehint');
+        if(isSkin){
+          _frppgNoFace=0;
+          if(hint) hint.style.display='none';
+          _frppgSignal.push({t:Date.now()-_frppgT0, v:gAvg});
+        } else {
+          _frppgNoFace++;
+          if(hint) hint.style.display='block';
+          // ★ 얼굴 약 2.5초(75프레임) 이상 없으면 → 카메라 멈춤
+          if(_frppgNoFace>75){
+            frppgStop();
+            var resEl=document.getElementById('frppg-result');
+            if(resEl){
+              resEl.style.display='block';
+              resEl.innerHTML='<div style="padding:14px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.4);border-radius:12px;font-size:13px;color:#b91c1c;line-height:1.6;">📷 <b>얼굴이 감지되지 않아 측정을 멈췄습니다.</b><br/><span style="font-size:11px;">밝은 곳에서 얼굴을 사각형 안에 맞추고 다시 시작해 주세요.</span></div>';
+            }
+            return;
+          }
+        }
       }catch(e){}
     }
     _frppgRAF=requestAnimationFrame(loop);
@@ -8872,7 +8913,26 @@ function frppgComputeBPM(signal){
   // HRV(간이): 간격 표준편차
   var iMean=avgMs;
   var hrv=Math.round(Math.sqrt(intervals.reduce(function(a,b){return a+(b-iMean)*(b-iMean);},0)/intervals.length));
-  return {bpm:(bpm>=45&&bpm<=180)?bpm:0, hrv:hrv, quality:peaks.length};
+
+  // ★ 박입 195 — 혈압 추정 (FULI C37.estimateBP 공식 차용)
+  // 원리: 맥파 파형의 증가지수(AI) + 심박 → 혈관 강성 → 혈압
+  // 증가지수(AI) 간이 계산: 피크 진폭 대비 수축기 상승 특성
+  var maxV=Math.max.apply(null,det), minV=Math.min.apply(null,det);
+  var ampRange=maxV-minV;
+  // 상승시간(rise time) 근사: 디트렌드 신호의 평균 기울기
+  var riseSum=0,riseN=0;
+  for(var ri=1;ri<det.length;ri++){ if(det[ri]>det[ri-1]){ riseSum+=(det[ri]-det[ri-1]); riseN++; } }
+  var avgRise= riseN? riseSum/riseN : 0;
+  // 증가지수 근사 (0~40 범위로 정규화)
+  var ai = ampRange>0 ? Math.min(40, Math.max(0, (avgRise/ampRange)*100)) : 15;
+  // FULI 학술 기반 식: SBP ≈ 100 + 0.5*AI + 1.2*(BPM-70)
+  var validBpm=(bpm>=45&&bpm<=180)?bpm:75;
+  var sbp=Math.round(100 + 0.5*ai + 1.2*(validBpm-70));
+  var dbp=Math.round(sbp*0.65);
+  sbp=Math.max(85,Math.min(175,sbp));
+  dbp=Math.max(55,Math.min(115,dbp));
+
+  return {bpm:(bpm>=45&&bpm<=180)?bpm:0, hrv:hrv, quality:peaks.length, sbp:sbp, dbp:dbp};
 }
 
 function frppgFinish(){
@@ -8884,19 +8944,29 @@ function frppgFinish(){
 
   if(!r || r.bpm===0){
     resEl.style.display='block';
-    resEl.innerHTML='<div style="padding:12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:10px;font-size:12px;color:#b91c1c;line-height:1.6;">⚠️ 측정 실패 — 얼굴이 잘 안 잡혔어요. 밝은 곳에서 얼굴을 원 안에 맞추고 다시 시도해주세요.</div>';
+    resEl.innerHTML='<div style="padding:12px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.3);border-radius:10px;font-size:12px;color:#b91c1c;line-height:1.6;">⚠️ 측정 실패 — 얼굴이 잘 안 잡혔어요. 밝은 곳에서 얼굴을 사각형 안에 맞추고 다시 시도해주세요.</div>';
     return;
   }
 
   // 식전/식후 판정 (이전 측정 있으면 식후로 비교)
   var prev=window._frppgPre;
-  var now={bpm:r.bpm, hrv:r.hrv, ts:Date.now()};
+  var now={bpm:r.bpm, hrv:r.hrv, sbp:r.sbp, dbp:r.dbp, ts:Date.now()};
   var isPost = prev && (now.ts - prev.ts < 3*3600*1000); // 3시간 이내면 식후로
 
   // 음식 분석 엔진에 측정값 연동 (가짜 점수 방지 → 실측 반영)
   window.BS = window.BS || {};
-  window.BS.bpm=r.bpm; window.BS.hrv=r.hrv; window.BS.fci=Math.min(95,50+Math.round(r.quality)); 
+  window.BS.bpm=r.bpm; window.BS.hrv=r.hrv; window.BS.fci=Math.min(95,50+Math.round(r.quality));
+  window.BS.sbp=r.sbp; window.BS.dbp=r.dbp;
   window._baiScanned=true;
+
+  // ★ 박입 195 — 혈압란이 비어있으면 추정값 자동 입력
+  var bpField=document.getElementById('fp-bp');
+  var bpAutoFilled=false;
+  if(bpField && !bpField.value.trim()){
+    bpField.value = r.sbp+'/'+r.dbp;
+    bpField.style.borderColor='rgba(52,211,153,.6)';
+    bpAutoFilled=true;
+  }
 
   var html='';
   if(!isPost){
@@ -8904,9 +8974,11 @@ function frppgFinish(){
     window._frppgPre=now;
     html='<div style="padding:14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.3);border-radius:12px;">'
       +'<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:10px;">✅ 식전 측정 완료</div>'
-      +'<div style="display:flex;gap:10px;margin-bottom:10px;">'
-      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.5);border-radius:10px;"><div style="font-size:22px;font-weight:900;color:#059669;font-family:\'Orbitron\',monospace;">'+r.bpm+'</div><div style="font-size:10px;color:#5b7a7a;">심박 BPM</div></div>'
-      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.5);border-radius:10px;"><div style="font-size:22px;font-weight:900;color:#0284c7;font-family:\'Orbitron\',monospace;">'+r.hrv+'</div><div style="font-size:10px;color:#5b7a7a;">HRV(참고)</div></div></div>'
+      +'<div style="display:flex;gap:8px;margin-bottom:10px;">'
+      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.6);border-radius:10px;"><div style="font-size:20px;font-weight:900;color:#059669;font-family:\'Orbitron\',monospace;">'+r.bpm+'</div><div style="font-size:9px;color:#5b7a7a;">심박 BPM</div></div>'
+      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.6);border-radius:10px;"><div style="font-size:20px;font-weight:900;color:#0284c7;font-family:\'Orbitron\',monospace;">'+r.hrv+'</div><div style="font-size:9px;color:#5b7a7a;">HRV(참고)</div></div>'
+      +'<div style="flex:1;text-align:center;padding:10px;background:rgba(255,255,255,.6);border-radius:10px;"><div style="font-size:18px;font-weight:900;color:#dc2626;font-family:\'Orbitron\',monospace;">'+r.sbp+'/'+r.dbp+'</div><div style="font-size:9px;color:#5b7a7a;">혈압(추정)</div></div></div>'
+      +(bpAutoFilled?'<div style="font-size:11px;color:#059669;line-height:1.5;padding:7px 10px;background:rgba(52,211,153,.1);border-radius:8px;margin-bottom:8px;">💉 혈압을 모르셔서 추정값 <b>'+r.sbp+'/'+r.dbp+'</b>을 진료 차트에 자동 입력했습니다. (실제 혈압계 값이 있으면 직접 수정하세요)</div>':'')
       +'<div style="font-size:11px;color:#3a5a5a;line-height:1.5;padding:8px 10px;background:rgba(56,189,248,.08);border-radius:8px;">🍽️ 이제 음식을 드신 후 <b>30분 뒤 다시 측정</b>하면, 이 음식이 내 몸에 준 변화를 비교해 드립니다.</div></div>';
   } else {
     // 식후 측정 → 비교
