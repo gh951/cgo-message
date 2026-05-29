@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj223-music-truth" name="c41-version"/>
+<meta content="2026-05-26-c44-inj225-health-skin-pop" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -30857,8 +30857,10 @@ if(typeof window.cgoCameraCheck !== 'function'){
   // 세션 1번 표시 플래그
   var _introShownThisSession = false;
 
-  // goScreen 후크 — scrHealth 진입 시 자동 표시
-  if(typeof window.goScreen === 'function'){
+  // ★ 박입 225 — 옛 goScreen 후크 무효화 (박입 225 즉시 표시 패턴으로 통일)
+  // 옛 후크: setTimeout 200ms 지연 + _introShownThisSession 세션 1회 제한 → 깜빡임 + 매번 안 뜸
+  // 새 패턴: inj47 wrapper에서 즉시 표시 (박입 224 통일)
+  if(false && typeof window.goScreen === 'function'){
     var _origGoScreen = window.goScreen;
     window.goScreen = function(target){
       _origGoScreen(target);
@@ -37853,63 +37855,59 @@ setTimeout(function(){
         }
         // ★ 박입 151 — 두피 자동 팝업 (진짜 마지막 후크에 박입 · 매번 박입)
         if(screenId === 'scrScalp'){
-          setTimeout(function(){
-            var sp151 = document.getElementById('scalp-intro-pop');
-            if(sp151) sp151.style.display = 'block';
-          }, 50);
+          var sp151 = document.getElementById('scalp-intro-pop');
+          if(sp151) sp151.style.display = 'block';
         }
         // ★ 박입 155 — 치매 자동 팝업 (매번 박입)
         if(screenId === 'scrDementia'){
-          setTimeout(function(){
-            var dp155 = document.getElementById('dementia-intro-pop');
-            if(dp155) dp155.style.display = 'block';
-          }, 50);
+          var dp155 = document.getElementById('dementia-intro-pop');
+          if(dp155) dp155.style.display = 'block';
         }
         // ★ 박입 157 — IQ 자동 팝업 (매번 박입)
         if(screenId === 'scrIQ'){
-          setTimeout(function(){
-            var iq157 = document.getElementById('iq-intro-pop');
-            if(iq157) iq157.style.display = 'block';
-          }, 50);
+          var iq157 = document.getElementById('iq-intro-pop');
+          if(iq157) iq157.style.display = 'block';
         }
         // ★ 박입 165 — 눈 건강 자동 팝업 (매번 박입)
         if(screenId === 'scrEyeHealth'){
-          setTimeout(function(){
-            var eye165 = document.getElementById('eye-intro-pop');
-            if(eye165) eye165.style.display = 'block';
-          }, 50);
+          var eye165 = document.getElementById('eye-intro-pop');
+          if(eye165) eye165.style.display = 'block';
         }
         // ★ 박입 169 — AR 메이크업 자동 팝업 (매번 박입)
         if(screenId === 'scrMakeup'){
-          setTimeout(function(){
-            var mk169 = document.getElementById('makeup-intro-pop');
-            if(mk169) mk169.style.display = 'block';
-          }, 50);
+          var mk169 = document.getElementById('makeup-intro-pop');
+          if(mk169) mk169.style.display = 'block';
         }
         // ★ 박입 179 — 주파수 음악 자동 팝업 (매번 박입)
         if(screenId === 'scrMusic'){
-          setTimeout(function(){
-            var mu179 = document.getElementById('music-intro-pop');
-            if(mu179) mu179.style.display = 'block';
-          }, 50);
+          var mu179 = document.getElementById('music-intro-pop');
+          if(mu179) mu179.style.display = 'block';
         }
         // ★ 박입 185 — 음식 궁합 자동 팝업 (매번 박입)
         if(screenId === 'scrFood'){
-          setTimeout(function(){
-            var fd185 = document.getElementById('food-intro-pop');
-            if(fd185) fd185.style.display = 'block';
-            // ★ 박입 189 — 저장된 진료 차트 자동 로드 (본인 폰 localStorage)
-            if(typeof foodLoadProfile === 'function'){ try{ foodLoadProfile(); }catch(e){} }
-          }, 50);
+          var fd185 = document.getElementById('food-intro-pop');
+          if(fd185) fd185.style.display = 'block';
+          // ★ 박입 189 — 저장된 진료 차트 자동 로드 (본인 폰 localStorage)
+          if(typeof foodLoadProfile === 'function'){ try{ foodLoadProfile(); }catch(e){} }
         }
         // ★ 박입 219 — 커플 궁합 자동 팝업
         if(screenId === 'scrCouple'){
-          setTimeout(function(){
-            var cp219 = document.getElementById('couple-intro-pop');
-            if(cp219) cp219.style.display = 'block';
-          }, 50);
+          var cp219 = document.getElementById('couple-intro-pop');
+          if(cp219) cp219.style.display = 'block';
+        }
+        // ★ 박입 225 — 건강·피부 자동 팝업 (빠진 거 추가)
+        if(screenId === 'scrHealth'){
+          var hl225 = document.getElementById('cgo-health-intro-pop');
+          if(hl225) hl225.style.display = 'block';
+        }
+        if(screenId === 'scrSkinage'){
+          var sk225 = document.getElementById('skinage-intro-pop');
+          if(sk225) sk225.style.display = 'block';
         }
       } catch(e){}
+      // ★ 박입 224 — 본페이지 잠깐 노출 방지: goScreen 호출 직전에 팝업 z-index 보장
+      // (setTimeout 제거된 위 블록이 origGoScreen.apply 전에 실행되므로
+      //  팝업이 본페이지보다 먼저 화면에 그려짐 → 본페이지 깜빡임 0)
       return origGoScreen47.apply(this, arguments);
     };
     window._inj47GoScreenWrapped = true;
