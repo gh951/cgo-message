@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj221-couple-white" name="c41-version"/>
+<meta content="2026-05-26-c44-inj223-music-truth" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -15171,19 +15171,11 @@ window.pmGroqFullMusic = pmGroqFullMusic;
 <!-- 섹션: 추천 음악 -->
 <div class="mfu-sec">
 <div class="mfu-sec-head">
-<h2 class="mfu-sec-title">오늘의 추천 음악<span class="mfu-acc-text">✦ CGO-FULI 실시간 + 기본 풀</span></h2>
+<h2 class="mfu-sec-title">오늘의 추천 음악<span class="mfu-acc-text">✦ 검증된 DB 기반</span></h2>
 </div>
-<!-- ★ AI 실시간 추천 (시진·계절·오행·생체 → 매번 다른 곡) -->
+<!-- ★ 박입 223 — LLM 실시간 추천 제거 (제목·가수 환각으로 신뢰성 저하)  -->
+<!-- ★ 박입 223 — "오행/시진/계절" 표면 표시 제거 (앱 철학: 사주·오행 0%) -->
 <div class="mfu-ai-block">
-<div class="mfu-ai-head">
-<span class="mfu-ai-dot">●</span>
-<span class="mfu-ai-title">YouTube 실시간 CGO-FULI 추천</span>
-<span class="mfu-ai-live">LIVE</span>
-</div>
-<div class="mfu-ai-meta" id="mfu-ai-meta">시진·계절·오행·생체 융합 — 매번 다른 추천</div>
-<div class="mfu-ai-list" id="mfu-yt-live"><div class="mfu-ai-loading">🎵 CGO-FULI 분석 중...</div></div>
-</div>
-<div class="mfu-ai-block" style="margin-top:10px">
 <div class="mfu-ai-head">
 <span class="mfu-ai-dot" style="color:#38bdf8">✦</span>
 <span class="mfu-ai-title" style="color:#38bdf8">CGO-FULI 맞춤 음악 — 한국·해외·주파수</span>
@@ -15196,7 +15188,7 @@ window.pmGroqFullMusic = pmGroqFullMusic;
 <button class="mfu-tab-btn" data-cat="ww" onclick="window.mfuSetCat &amp;&amp; window.mfuSetCat(this,'ww')">🌍 외국 5</button>
 <button class="mfu-tab-btn" data-cat="sol" onclick="window.mfuSetCat &amp;&amp; window.mfuSetCat(this,'sol')">✨ 솔페지오 6</button>
 </div>
-<div class="mfu-tab-note">📌 기본 풀 — 오행별 고정 추천 (실시간 추천 실패 시 폴백)</div>
+<div class="mfu-tab-note">📌 검증된 DB — 제목·가수 100% 정확</div>
 <div class="mfu-tracks" id="mfu-tracks"></div>
 </div>
 <!-- 정직 안내 -->
@@ -15612,25 +15604,12 @@ window.pmGroqFullMusic = pmGroqFullMusic;
         return m>=3&&m<=5?'봄':m>=6&&m<=8?'여름':m>=9&&m<=11?'가을':'겨울';
       })();
       
-      // 메타 정보 갱신
-      var meta = document.getElementById('mfu-ai-meta');
-      if(meta){
-        meta.innerHTML = '<b style="color:#d4a843">'+oh+'(오행)</b> × <b style="color:#38bdf8">'+
-          ['자시','축시','인시','묘시','진시','사시','오시','미시','신시','유시','술시','해시'][sjIdx%12]+
-          '(시진)</b> × <b style="color:#34d399">'+season+'(계절)</b> 융합';
-      }
+      // ★ 박입 223 — 오행/시진/계절 표면 표시 + 실시간 LLM 호출 제거
+      // (사주·오행은 앱 표면에 노출 X / LLM 실시간 추천은 제목·가수 환각으로 신뢰성 저하)
+      // 메타 정보·YouTube 실시간 호출 부분 제거 — 내부 변수(oh/sjIdx/season)는
+      // 검증된 DB 기반 큐레이션(② Groq 맞춤 음악)에서 약한 참고로만 사용
       
-      // ── ① YouTube 실시간 AI 추천 ──
-      try{
-        if(typeof window.pmYtFetch === 'function'){
-          window.pmYtFetch(oh, sjIdx, bs.eng||70, 'mfu-yt-live');
-        } else {
-          var el1 = document.getElementById('mfu-yt-live');
-          if(el1) el1.innerHTML = '<div class="mfu-ai-loading">⚠️ 실시간 추천 로딩 중...</div>';
-        }
-      }catch(e){}
-      
-      // ── ② Groq 맞춤 음악 ──
+      // ── ② Groq 맞춤 음악 (검증된 DB 기반) ──
       try{
         if(typeof window.pmGroqFullMusic === 'function'){
           window.pmGroqFullMusic(oh, sjIdx, season, bs.eng||70, bs.bpm||72, bs.hrv||45, 'mfu-groq-music');
@@ -37785,21 +37764,78 @@ setTimeout(function(){
     var origGoScreen47 = window.goScreen;
     window.goScreen = function(screenId){
       try {
-        // ★ 박입 206 — 페이지 떠날 때 진행 중인 카메라/측정 정리 (나갔다 오면 초기화)
+        // ★ 박입 222 — 모든 카드 페이지 떠날 때 범용 초기화 (나갔다 오면 새로 시작)
         try{
-          // 음식 rPPG 정리
-          if(typeof frppgStop==='function' && window._frppgStream){ frppgStop(); }
-          if(typeof frppgStopPalm==='function' && window._frppgPalmStream){ frppgStopPalm(); }
-          // ★ 박입 214 — 커플 영상통화 정리 (새 _cpl2 엔진)
-          if(screenId !== 'scrCouple' && typeof cplExitRoom==='function' && window._cpl2 && window._cpl2.active){
-            try{ cplExitRoom(true); }catch(_ec){}
+          var prevScreen = null;
+          var allScreens = document.querySelectorAll('.screen');
+          for(var si=0; si<allScreens.length; si++){
+            if(allScreens[si].style.display !== 'none' && allScreens[si].offsetParent !== null){
+              prevScreen = allScreens[si].id; break;
+            }
           }
-          // 음식 카메라 정리
-          if(typeof foodStopCamera==='function' && window._foodStream){ foodStopCamera(); }
-          // 음식 결과 초기화
-          if(screenId !== 'scrFood'){
-            var fr=document.getElementById('frppg-result'); if(fr){ fr.style.display='none'; fr.innerHTML=''; }
-            window._frppgFaceData=null;
+          // 화면이 실제로 바뀌는 경우만 초기화 (같은 화면 재호출 시 X)
+          if(prevScreen && prevScreen !== screenId){
+            // ① 모든 video 태그 카메라 스트림 강제 정지
+            var allVideos = document.querySelectorAll('video');
+            for(var vi=0; vi<allVideos.length; vi++){
+              try{
+                var v = allVideos[vi];
+                if(v.srcObject && v.srcObject.getTracks){
+                  v.srcObject.getTracks().forEach(function(t){ try{ t.stop(); }catch(_e){} });
+                  v.srcObject = null;
+                }
+                v.pause(); v.currentTime = 0;
+              }catch(_ve){}
+            }
+            // ② window 객체에 등록된 모든 MediaStream 강제 정지
+            var streamVars = ['_frppgStream','_frppgPalmStream','_foodStream','_cplStream',
+                              '_iqStream','_demStream','_eyeStream','_scalpStream','_healthStream',
+                              '_skinageStream','_makeupStream','_c14Stream','_c44Stream'];
+            for(var sv=0; sv<streamVars.length; sv++){
+              try{
+                var st = window[streamVars[sv]];
+                if(st && st.getTracks){
+                  st.getTracks().forEach(function(t){ try{ t.stop(); }catch(_e){} });
+                  window[streamVars[sv]] = null;
+                }
+              }catch(_se){}
+            }
+            // ③ 명시적 정리 함수 호출 (있는 것만)
+            var stopFns = ['frppgStop','frppgStopPalm','foodStopCamera','cplStopCam',
+                           'stopBreathMic','stopBreath','stopAndSendRecording','stopRingtone'];
+            for(var fn=0; fn<stopFns.length; fn++){
+              try{ if(typeof window[stopFns[fn]]==='function') window[stopFns[fn]](); }catch(_fe){}
+            }
+            // ④ 커플 영상통화 정리 (새 _cpl2 엔진)
+            if(typeof cplExitRoom==='function' && window._cpl2 && window._cpl2.active){
+              try{ cplExitRoom(true); }catch(_ec){}
+            }
+            // ⑤ 모든 결과 영역 + 진행 중 카드 초기화 (각 페이지별)
+            var resultIds = [
+              'frppg-result','cpl-result','cpl-stats-result','cpl-final-section','cpl-final-result',
+              'iq-result','dem-result','eye-result','scalp-result','health-result',
+              'skinage-result','makeup-result','c14-result',
+              // 진행 중 UI 상태 초기화
+              'food-analysis-result','food-bio-card','cpl-room-code-display'
+            ];
+            for(var ri=0; ri<resultIds.length; ri++){
+              var el = document.getElementById(resultIds[ri]);
+              if(el){ el.style.display='none'; el.innerHTML=''; }
+            }
+            // ⑥ window 측정 데이터 초기화
+            var dataVars = ['_frppgFaceData','_frppgPalmData','_cplMeasure','_foodAnalysis',
+                            '_iqResult','_demResult','_eyeResult','_scalpResult','_healthResult'];
+            for(var dv=0; dv<dataVars.length; dv++){
+              try{ window[dataVars[dv]] = null; }catch(_de){}
+            }
+            // ⑦ 인트로 팝업들 자동 닫기 (페이지 떠날 때)
+            var popups = ['food-intro-pop','music-intro-pop','makeup-intro-pop','iq-intro-pop',
+                          'dem-intro-pop','eye-intro-pop','scalp-intro-pop','health-intro-pop',
+                          'skinage-intro-pop','couple-intro-pop','c14-intro-pop'];
+            for(var pp=0; pp<popups.length; pp++){
+              var pe = document.getElementById(popups[pp]);
+              if(pe && pe.style.display !== 'none'){ pe.style.display='none'; }
+            }
           }
         }catch(_ce){}
         if(screenId === 'scrSkinage'){
