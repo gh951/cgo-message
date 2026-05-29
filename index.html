@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj219-couple-popup" name="c41-version"/>
+<meta content="2026-05-26-c44-inj220-couple-design" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -11455,7 +11455,7 @@ function foodAskAI(userText) {
 <button onclick="cplExitRoom();goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(167,139,250,.15));border:2px solid rgba(56,189,248,.75);border-radius:22px;color:#7dd3fc;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(56,189,248,.35);white-space:nowrap;font-family:inherit;">🏠 나가기</button>
 
 <!-- ① 입장 전 화면 (cpl-lobby) — 5단계 구조 -->
-<div id="cpl-lobby" style="min-height:100vh;color:#fff;padding-bottom:100px;">
+<div id="cpl-lobby" style="min-height:100vh;color:#fff;padding-bottom:140px;background:radial-gradient(ellipse at top,#0d3a4a 0%,#0a1a2a 60%,#050d18 100%);">
 <!-- ★ 박입 217 — CGO-9 히어로 (PC 끝과 끝, 모서리 없음) -->
 <div style="position:relative;width:100%;height:0;padding-bottom:56.25%;overflow:hidden;background:linear-gradient(135deg,#0d3a4a,#1a2a4a);margin-bottom:18px;">
 <img src="CGO-9.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
@@ -11466,33 +11466,33 @@ function foodAskAI(userText) {
 <div style="font-size:13px;color:#fff;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.8);line-height:1.5;">통계학 + 영상통화 무의식 측정</div>
 </div>
 </div>
-<div style="padding:0 16px;">
-<div style="max-width:680px;margin:0 auto;">
+<div style="padding:0 20px;">
+<div style="max-width:880px;margin:0 auto;padding-top:24px;">
 
 <!-- ① 사용법 보기 -->
-<div onclick="cplToggleManual()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;margin-bottom:14px;background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(167,139,250,.12));border:2px solid rgba(56,189,248,.5);border-radius:12px;cursor:pointer;">
-<span style="font-size:22px;">📖</span>
-<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#7dd3fc;">① 사용법 보기</div><div style="font-size:11px;color:#94a3b8;margin-top:2px;">5단계 진행 안내</div></div>
+<div onclick="cplToggleManual()" style="display:flex;align-items:center;gap:14px;padding:18px 22px;margin-bottom:18px;background:linear-gradient(135deg,rgba(56,189,248,.25) 0%,rgba(167,139,250,.18) 50%,rgba(56,189,248,.15) 100%);border:2px solid rgba(56,189,248,.65);border-radius:16px;cursor:pointer;box-shadow:0 8px 32px rgba(56,189,248,.25),inset 0 1px 0 rgba(255,255,255,.15);">
+<span style="font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));">📖</span>
+<div style="flex:1;"><div style="font-size:16px;font-weight:900;color:#bae6fd;letter-spacing:-.01em;">① 사용법 보기</div><div style="font-size:12px;color:#cbd5e1;margin-top:3px;">5단계 진행 안내</div></div>
 <span id="cpl-manual-arrow" style="font-size:14px;color:#7dd3fc;font-weight:900;">▼</span>
 </div>
-<div id="cpl-manual" style="display:none;margin-bottom:14px;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(56,189,248,.25);border-radius:12px;">
+<div id="cpl-manual" style="display:none;margin-bottom:18px;padding:20px 22px;background:linear-gradient(135deg,rgba(255,255,255,.08),rgba(56,189,248,.05));border:1px solid rgba(56,189,248,.35);border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.2);">
 <div style="font-size:13px;font-weight:900;color:#7dd3fc;margin-bottom:10px;">📖 커플 궁합 5단계</div>
 <div style="display:flex;flex-direction:column;gap:9px;">
-<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">① 사용법 보기</b> — 지금 화면</div>
-<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">② 두 사람 정보</b> — 이름·성별·출생연도·고향·사는 곳 입력</div>
-<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">③ 통계 분석</b> — 입력값으로 1차 종합 분석 (영상통화 안 켜도 가능)</div>
-<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">④ 방 만들기 / 코드 입장</b> — 영상통화 시작 (큰 화면=상대, 작은=나, 옆 세로 바=상대 진짜 마음, 나만 봄)</div>
-<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">⑤ 최종 분석</b> — 통화 끝나면 통화 중 데이터 + 통계 합쳐 최종 리포트</div>
+<div style="font-size:13px;color:#f8fafc;line-height:1.7;"><b style="color:#7dd3fc;font-size:13px;">① 사용법 보기</b> — 지금 화면</div>
+<div style="font-size:13px;color:#f8fafc;line-height:1.7;"><b style="color:#7dd3fc;font-size:13px;">② 두 사람 정보</b> — 이름·성별·출생연도·고향·사는 곳 입력</div>
+<div style="font-size:13px;color:#f8fafc;line-height:1.7;"><b style="color:#7dd3fc;font-size:13px;">③ 통계 분석</b> — 입력값으로 1차 종합 분석 (영상통화 안 켜도 가능)</div>
+<div style="font-size:13px;color:#f8fafc;line-height:1.7;"><b style="color:#7dd3fc;font-size:13px;">④ 방 만들기 / 코드 입장</b> — 영상통화 시작 (큰 화면=상대, 작은=나, 옆 세로 바=상대 진짜 마음, 나만 봄)</div>
+<div style="font-size:13px;color:#f8fafc;line-height:1.7;"><b style="color:#7dd3fc;font-size:13px;">⑤ 최종 분석</b> — 통화 끝나면 통화 중 데이터 + 통계 합쳐 최종 리포트</div>
 </div>
 <div style="margin-top:10px;padding:9px 11px;background:rgba(167,139,250,.12);border-radius:8px;font-size:11px;color:#c4b5fd;line-height:1.6;">🔬 <b>100% 온디바이스</b> — 영상 P2P 직접 연결(서버 X). 감정은 각자 폰에서 처리 후 숫자만 전송. 번역 없음(비용 0).</div>
 </div>
 
 <!-- ② 두 사람 정보 -->
-<div style="margin-bottom:14px;padding:16px;background:rgba(255,255,255,.05);border:1px solid rgba(167,139,250,.3);border-radius:14px;">
-<div style="font-size:14px;font-weight:900;color:#c4b5fd;margin-bottom:12px;">② 두 사람 정보</div>
+<div style="margin-bottom:18px;padding:22px;background:linear-gradient(135deg,rgba(167,139,250,.18) 0%,rgba(244,114,182,.12) 100%);border:1.5px solid rgba(167,139,250,.45);border-radius:18px;box-shadow:0 8px 32px rgba(167,139,250,.18),inset 0 1px 0 rgba(255,255,255,.1);">
+<div style="font-size:18px;font-weight:900;color:#ddd6fe;margin-bottom:16px;letter-spacing:-.01em;text-shadow:0 2px 8px rgba(167,139,250,.4);">② 두 사람 정보</div>
 <div style="display:flex;gap:10px;">
 <div style="flex:1;">
-<div style="font-size:11px;font-weight:700;color:#7dd3fc;margin-bottom:6px;">👤 나 (A)</div>
+<div style="font-size:13px;font-weight:900;color:#bae6fd;margin-bottom:10px;letter-spacing:-.01em;">👤 나 (A)</div>
 <input id="cpl-a-name" placeholder="이름" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:8px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-a-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1990)" min="1920" max="2020" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#fff;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-a-home" placeholder="고향 (예: 서울)" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#fff;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
@@ -11500,7 +11500,7 @@ function foodAskAI(userText) {
 <div style="display:flex;gap:5px;"><button id="cpl-a-m" onclick="cplSetGender('a','m')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#7dd3fc;font-size:11px;cursor:pointer;font-family:inherit;">♂ 남</button><button id="cpl-a-f" onclick="cplSetGender('a','f')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.06);color:#f9a8d4;font-size:11px;cursor:pointer;font-family:inherit;">♀ 여</button></div>
 </div>
 <div style="flex:1;">
-<div style="font-size:11px;font-weight:700;color:#f9a8d4;margin-bottom:6px;">👤 상대방 (B)</div>
+<div style="font-size:13px;font-weight:900;color:#fbcfe8;margin-bottom:10px;letter-spacing:-.01em;">👤 상대방 (B)</div>
 <input id="cpl-b-name" placeholder="이름" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:8px 10px;color:#fff;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-b-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1992)" min="1920" max="2020" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#fff;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
 <input id="cpl-b-home" placeholder="고향 (예: 광주)" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#fff;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
@@ -11511,17 +11511,17 @@ function foodAskAI(userText) {
 </div>
 
 <!-- ③ 통계 분석 -->
-<div style="margin-bottom:14px;padding:16px;background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(167,139,250,.06));border:1px solid rgba(34,197,94,.3);border-radius:14px;">
-<div style="font-size:14px;font-weight:900;color:#86efac;margin-bottom:6px;">③ 통계학 분석 (1차)</div>
-<div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">입력값으로 나이차·거리 통계 + AI 종합 분석. 영상통화 없이도 가능합니다.</div>
+<div style="margin-bottom:18px;padding:22px;background:linear-gradient(135deg,rgba(34,197,94,.18) 0%,rgba(167,139,250,.1) 100%);border:1.5px solid rgba(34,197,94,.45);border-radius:18px;box-shadow:0 8px 32px rgba(34,197,94,.18),inset 0 1px 0 rgba(255,255,255,.1);">
+<div style="font-size:18px;font-weight:900;color:#bbf7d0;margin-bottom:8px;letter-spacing:-.01em;text-shadow:0 2px 8px rgba(34,197,94,.4);">③ 통계학 분석 (1차)</div>
+<div style="font-size:12.5px;color:#cbd5e1;margin-bottom:14px;line-height:1.6;">입력값으로 나이차·거리 통계 + AI 종합 분석. 영상통화 없이도 가능합니다.</div>
 <button onclick="cplStatsAnalysis()" style="width:100%;padding:12px;background:linear-gradient(135deg,#22c55e,#16a34a);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">📊 통계 분석 보기</button>
 <div id="cpl-stats-result" style="display:none;margin-top:12px;"></div>
 </div>
 
 <!-- ④ 방 만들기 / 코드 입장 -->
-<div style="margin-bottom:14px;padding:16px;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.06));border:1px solid rgba(167,139,250,.35);border-radius:14px;">
-<div style="font-size:14px;font-weight:900;color:#c4b5fd;margin-bottom:6px;">④ 방 만들기 / 코드 입장</div>
-<div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">영상통화로 서로 보며 무의식 측정. 옆 세로 바 = 상대방 진짜 마음 (나만 봄).</div>
+<div style="margin-bottom:18px;padding:22px;background:linear-gradient(135deg,rgba(167,139,250,.22) 0%,rgba(56,189,248,.12) 100%);border:1.5px solid rgba(167,139,250,.5);border-radius:18px;box-shadow:0 8px 32px rgba(167,139,250,.22),inset 0 1px 0 rgba(255,255,255,.12);">
+<div style="font-size:18px;font-weight:900;color:#ddd6fe;margin-bottom:8px;letter-spacing:-.01em;text-shadow:0 2px 8px rgba(167,139,250,.45);">④ 방 만들기 / 코드 입장</div>
+<div style="font-size:12.5px;color:#cbd5e1;margin-bottom:14px;line-height:1.6;">영상통화로 서로 보며 무의식 측정. 옆 세로 바 = 상대방 진짜 마음 (나만 봄).</div>
 <button onclick="cplCreateRoom()" style="width:100%;padding:12px;background:linear-gradient(135deg,#a78bfa,#7c3aed);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;margin-bottom:10px;">🔑 방 만들기 (일회용 코드)</button>
 <div id="cpl-room-code-display" style="display:none;margin-bottom:10px;padding:11px;background:rgba(0,0,0,.3);border:1px dashed rgba(167,139,250,.5);border-radius:9px;text-align:center;">
 <div style="font-size:10px;color:#c4b5fd;margin-bottom:4px;">방 코드 (상대에게 알려주세요)</div>
@@ -11536,12 +11536,12 @@ function foodAskAI(userText) {
 </div>
 
 <!-- ⑤ 최종 분석 (통화 후) -->
-<div id="cpl-final-section" style="display:none;margin-bottom:14px;padding:16px;background:linear-gradient(135deg,rgba(251,191,36,.12),rgba(244,114,182,.06));border:1px solid rgba(251,191,36,.4);border-radius:14px;">
-<div style="font-size:14px;font-weight:900;color:#fbbf24;margin-bottom:10px;">⑤ 최종 종합 분석</div>
+<div id="cpl-final-section" style="display:none;margin-bottom:18px;padding:22px;background:linear-gradient(135deg,rgba(251,191,36,.22) 0%,rgba(244,114,182,.12) 100%);border:1.5px solid rgba(251,191,36,.55);border-radius:18px;box-shadow:0 8px 32px rgba(251,191,36,.25),inset 0 1px 0 rgba(255,255,255,.15);">
+<div style="font-size:18px;font-weight:900;color:#fde68a;margin-bottom:14px;letter-spacing:-.01em;text-shadow:0 2px 8px rgba(251,191,36,.5);">⑤ 최종 종합 분석</div>
 <div id="cpl-final-result"></div>
 </div>
 
-<div style="padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;font-size:11px;color:#fcd34d;line-height:1.6;">⚠️ 측정값은 현재 생체 리듬 기준 참고용입니다. 미래를 예언하지 않으며, 관계는 두 사람의 노력으로 만들어갑니다.</div>
+<div style="margin-top:8px;margin-bottom:60px;padding:16px 18px;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(251,191,36,.06));border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:12.5px;color:#fde68a;line-height:1.7;box-shadow:0 4px 16px rgba(251,191,36,.1);">⚠️ <b style="color:#fef3c7;">측정값은 현재 생체 리듬 기준 참고용입니다.</b><br/>미래를 예언하지 않으며, 관계는 두 사람의 노력으로 만들어갑니다.</div>
 
 </div>
 </div>
