@@ -6,7 +6,7 @@
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
 <meta content="0" http-equiv="Expires"/>
-<meta content="2026-05-26-c44-inj210-peer-emotion" name="c41-version"/>
+<meta content="2026-05-26-c44-inj212-music-fix" name="c41-version"/>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
@@ -9126,252 +9126,332 @@ window.frppgStartPalm=frppgStartPalm;
 window.frppgSkipPalm=frppgSkipPalm;
 </script>
 <script>
-/* ★ 박입 202 — 새 커플 생체 동조 엔진 (역학 제거, rPPG 감정바 + 가트맨 통계) */
-var _cplGender={a:'',b:''}, _cplStream=null, _cplRAF=null, _cplTimer=null;
-var _cplSignal=[], _cplT0=0, _cplNoFace=0, _cplEmotionData=null;
+/* ★ 박입 211 — 커플 영상통화 엔진 (메신저와 완전 독립, 번역 빼고, rPPG+참웃음 추가) */
+var _cpl2 = {
+  peer:null, localStream:null, remoteStream:null,
+  roomCode:null, role:null, signalRef:null, fbRef:null,
+  active:false, startTs:0, timerInterval:null,
+  // rPPG 측정 신호 (자체)
+  emoSignal:[], eyeSig:[], mouthSig:[], emoT0:0,
+  emoCanvas:null, emoRAF:null, faceBox:null, faceDet:null, faceFrame:0,
+  myMuted:false
+};
+
+function _cpl2DB(){
+  try{
+    if(window.firebase && firebase.apps && firebase.apps.length) return firebase.database();
+  }catch(e){}
+  return null;
+}
 
 function cplToggleManual(){
   var m=document.getElementById('cpl-manual'), a=document.getElementById('cpl-manual-arrow');
+  if(!m) return;
   var open=m.style.display==='none'||!m.style.display;
   m.style.display=open?'block':'none'; if(a)a.textContent=open?'▲':'▼';
 }
-function cplSetGender(who,g){
-  _cplGender[who]=g;
-  ['m','f'].forEach(function(x){
-    var b=document.getElementById('cpl-'+who+'-'+x);
-    if(b){ b.style.opacity=(x===g)?'1':'0.45'; b.style.fontWeight=(x===g)?'900':'400'; }
+
+function cplCreateRoom(){
+  var code='C'+Math.random().toString(36).substr(2,4).toUpperCase()+'-'+Math.random().toString(36).substr(2,4).toUpperCase();
+  _cpl2.roomCode=code; _cpl2.role='host';
+  var disp=document.getElementById('cpl-room-code-display');
+  var txt=document.getElementById('cpl-room-code-txt');
+  if(disp) disp.style.display='block';
+  if(txt) txt.textContent=code;
+  var db=_cpl2DB();
+  if(db){
+    _cpl2.fbRef=db.ref('cgo_cpl/'+code);
+    _cpl2.fbRef.set({createdAt:Date.now(), host:'waiting'});
+    // 상대 입장 감지
+    _cpl2.fbRef.child('guest').on('value', function(snap){
+      if(snap.val()==='joined' && !_cpl2.active){
+        cplEnterCall();
+      }
+    });
+  } else {
+    alert('Firebase 연결 실패 — 잠시 후 다시 시도');
+  }
+}
+
+function cplCopyRoomCode(){
+  var txt=(document.getElementById('cpl-room-code-txt')||{}).textContent||'';
+  try{ navigator.clipboard.writeText(txt); alert('코드 복사됨: '+txt); }catch(e){}
+}
+
+function cplJoinRoom(){
+  var code=(document.getElementById('cpl-join-code')||{}).value.trim().toUpperCase();
+  if(!code){ alert('코드를 입력하세요'); return; }
+  _cpl2.roomCode=code; _cpl2.role='guest';
+  var db=_cpl2DB();
+  if(!db){ alert('Firebase 연결 실패'); return; }
+  _cpl2.fbRef=db.ref('cgo_cpl/'+code);
+  _cpl2.fbRef.once('value', function(snap){
+    if(!snap.val()){
+      // 방 없으면 친구 코드일 수 있으니 → 메신저 친구 시스템 검색
+      // 일단 안내
+      alert('방을 찾을 수 없습니다. 코드를 다시 확인하세요.\n(친구 코드인 경우 메신저에서 영상통화로 연결됩니다)');
+      return;
+    }
+    _cpl2.fbRef.update({guest:'joined'});
+    cplEnterCall();
   });
 }
-function cplToggleCam(){
-  if(_cplStream){ cplStopCam(); return; }
-  var video=document.getElementById('cpl-video');
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false})
+
+function cplEnterCall(){
+  _cpl2.active=true;
+  // UI 전환: lobby → call screen
+  var lobby=document.getElementById('cpl-lobby');
+  var call=document.getElementById('cpl-call-screen');
+  if(lobby) lobby.style.display='none';
+  if(call) call.style.display='flex';
+  // 대기 화면 코드 표시
+  var wc=document.getElementById('cpl-waiting-code');
+  if(wc) wc.textContent='코드: '+_cpl2.roomCode;
+  // 로컬 카메라
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:true})
     .then(function(stream){
-      _cplStream=stream; video.srcObject=stream; video.style.display='block';
-      document.getElementById('cpl-overlay').style.display='block';
-      document.getElementById('cpl-idle').style.display='none';
-      document.getElementById('cpl-emotion-live').style.display='block';
-      var btn=document.getElementById('cpl-cam-btn');
-      btn.textContent='⏹ 측정 중단'; btn.style.background='linear-gradient(135deg,#f87171,#dc2626)';
-      _cplSignal=[]; _cplT0=Date.now(); _cplFaceOK=false;
-      cplSampleLoop(video); cplCountdown(30);
-    }).catch(function(){ alert('카메라 권한을 허용해주세요.'); });
+      _cpl2.localStream=stream;
+      var lv=document.getElementById('cpl-local-video');
+      if(lv) lv.srcObject=stream;
+      // WebRTC 연결
+      cplSetupWebRTC();
+      // 자체 rPPG 측정 시작
+      cplStartSelfMeasure();
+      // 통화 타이머
+      _cpl2.startTs=Date.now();
+      _cpl2.timerInterval=setInterval(cplUpdateTimer,1000);
+    })
+    .catch(function(){ alert('카메라/마이크 권한을 허용해주세요.'); cplExitRoom(); });
 }
-function cplStopCam(){
-  if(_cplStream){ _cplStream.getTracks().forEach(function(t){t.stop();}); _cplStream=null; }
-  if(_cplRAF) cancelAnimationFrame(_cplRAF);
-  if(_cplTimer) clearInterval(_cplTimer);
-  var video=document.getElementById('cpl-video');
-  if(video) video.style.display='none';
-  document.getElementById('cpl-overlay').style.display='none';
-  document.getElementById('cpl-idle').style.display='block';
-  var btn=document.getElementById('cpl-cam-btn');
-  if(btn){ btn.textContent='💓 30초 감정 측정 시작'; btn.style.background='linear-gradient(135deg,#7c3aed,#0284c7)'; }
+
+function cplUpdateTimer(){
+  if(!_cpl2.active) return;
+  var s=Math.floor((Date.now()-_cpl2.startTs)/1000);
+  var mm=Math.floor(s/60).toString().padStart(2,'0');
+  var ss=(s%60).toString().padStart(2,'0');
+  var el=document.getElementById('cpl-call-timer');
+  if(el) el.textContent=mm+':'+ss;
 }
-var _cplFaceOK=false;
-function cplSampleLoop(video){
-  var canvas=document.getElementById('cpl-canvas');
-  var ctx=canvas.getContext('2d',{willReadFrequently:true});
-  function loop(){
-    if(!_cplStream) return;
-    if(video.videoWidth>0){
-      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
-      ctx.drawImage(video,0,0);
-      var cx=Math.floor(canvas.width*0.28), cy=Math.floor(canvas.height*0.12);
-      var w=Math.floor(canvas.width*0.44), h=Math.floor(canvas.height*0.5);
-      try{
-        var d=ctx.getImageData(cx,cy,w,h).data;
-        var rSum=0,gSum=0,bSum=0,n=0;
-        for(var i=0;i<d.length;i+=16){ rSum+=d[i];gSum+=d[i+1];bSum+=d[i+2];n++; }
-        var rAvg=rSum/n,gAvg=gSum/n,bAvg=bSum/n,bright=(rAvg+gAvg+bAvg)/3;
-        var isSkin=(rAvg>=gAvg)&&(rAvg>50)&&(bright>35)&&(bright<250);
-        var hint=document.getElementById('cpl-facehint');
-        if(isSkin){
-          _cplNoFace=0; _cplFaceOK=true;
-          if(hint)hint.style.display='none';
-          _cplSignal.push({t:Date.now()-_cplT0,v:gAvg});
-          // ★ 박입 209 — 눈가·입 픽셀 신호 (참웃음 판정용)
-          try{
-            var ced=ctx.getImageData(Math.floor(canvas.width*0.25),Math.floor(canvas.height*0.3),Math.floor(canvas.width*0.5),Math.floor(canvas.height*0.15)).data;
-            var ceSum=0,cen=0;
-            for(var ce=0;ce<ced.length;ce+=16){ ceSum+=(ced[ce]+ced[ce+1]+ced[ce+2])/3; cen++; }
-            _cplEyeSig.push(ceSum/cen); if(_cplEyeSig.length>60)_cplEyeSig.shift();
-            var cmd=ctx.getImageData(Math.floor(canvas.width*0.3),Math.floor(canvas.height*0.62),Math.floor(canvas.width*0.4),Math.floor(canvas.height*0.2)).data;
-            var cmSum=0,cmn=0;
-            for(var cm=0;cm<cmd.length;cm+=16){ cmSum+=(cmd[cm]+cmd[cm+1]+cmd[cm+2])/3; cmn++; }
-            _cplMouthSig.push(cmSum/cmn); if(_cplMouthSig.length>60)_cplMouthSig.shift();
-          }catch(_se){}
-          cplUpdateEmotionBar();
-        } else {
-          _cplNoFace++; _cplFaceOK=false;
-          if(hint)hint.style.display='block';
+
+function cplSetupWebRTC(){
+  var ICE={iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:stun1.l.google.com:19302'}
+  ]};
+  _cpl2.peer=new RTCPeerConnection(ICE);
+  // 로컬 트랙 추가
+  _cpl2.localStream.getTracks().forEach(function(t){ _cpl2.peer.addTrack(t,_cpl2.localStream); });
+  // 원격 트랙 수신
+  _cpl2.peer.ontrack=function(ev){
+    _cpl2.remoteStream=ev.streams[0];
+    var rv=document.getElementById('cpl-remote-video');
+    if(rv) rv.srcObject=_cpl2.remoteStream;
+    var w=document.getElementById('cpl-waiting');
+    if(w) w.style.display='none';
+    // 감정 바 표시 시작
+    var vb=document.getElementById('cpl-emotion-vbar');
+    if(vb) vb.style.display='flex';
+  };
+  // ICE candidate
+  _cpl2.peer.onicecandidate=function(ev){
+    if(ev.candidate && _cpl2.fbRef){
+      _cpl2.fbRef.child('ice_'+_cpl2.role).push(ev.candidate.toJSON());
+    }
+  };
+  // 시그널링 listen
+  _cpl2.fbRef.child('offer').on('value', async function(snap){
+    var offer=snap.val();
+    if(offer && _cpl2.role==='guest' && !_cpl2.peer.remoteDescription){
+      await _cpl2.peer.setRemoteDescription(new RTCSessionDescription(offer));
+      var answer=await _cpl2.peer.createAnswer();
+      await _cpl2.peer.setLocalDescription(answer);
+      _cpl2.fbRef.child('answer').set({type:answer.type,sdp:answer.sdp});
+    }
+  });
+  _cpl2.fbRef.child('answer').on('value', async function(snap){
+    var ans=snap.val();
+    if(ans && _cpl2.role==='host' && _cpl2.peer.remoteDescription===null){
+      await _cpl2.peer.setRemoteDescription(new RTCSessionDescription(ans));
+    }
+  });
+  var iceKey = _cpl2.role==='host' ? 'ice_guest' : 'ice_host';
+  _cpl2.fbRef.child(iceKey).on('child_added', function(snap){
+    var c=snap.val(); if(c){ try{ _cpl2.peer.addIceCandidate(new RTCIceCandidate(c)); }catch(e){} }
+  });
+  // 상대 감정 데이터 listen
+  _cpl2.fbRef.child('emotion').on('value', function(snap){
+    var d=snap.val(); if(!d) return;
+    // 내가 보낸 건 무시 (role 다른 것만)
+    if(d.from && d.from !== _cpl2.role){ cplRenderPeerEmotion(d); }
+  });
+  // 방 종료 감지
+  _cpl2.fbRef.child('ended').on('value', function(snap){
+    if(snap.val() && _cpl2.active){ cplExitRoom(true); }
+  });
+  // host면 offer 생성
+  if(_cpl2.role==='host'){
+    setTimeout(async function(){
+      var offer=await _cpl2.peer.createOffer();
+      await _cpl2.peer.setLocalDescription(offer);
+      _cpl2.fbRef.child('offer').set({type:offer.type,sdp:offer.sdp});
+    }, 500);
+  }
+}
+
+// 자체 rPPG·참웃음 측정 (로컬 비디오 픽셀)
+function cplStartSelfMeasure(){
+  var lv=document.getElementById('cpl-local-video');
+  if(!lv) return;
+  _cpl2.emoSignal=[]; _cpl2.eyeSig=[]; _cpl2.mouthSig=[]; _cpl2.emoT0=Date.now();
+  _cpl2.emoCanvas=document.createElement('canvas');
+  var ctx=_cpl2.emoCanvas.getContext('2d',{willReadFrequently:true});
+  // 얼굴 좌표 추적 (가볍게 5프레임마다)
+  try{
+    if(typeof FaceDetection !== 'undefined' && !_cpl2.faceDet){
+      _cpl2.faceDet=new FaceDetection({locateFile:function(f){return 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/'+f;}});
+      _cpl2.faceDet.setOptions({model:'short',minDetectionConfidence:0.5});
+      _cpl2.faceDet.onResults(function(res){
+        if(res.detections && res.detections.length>0){
+          var bb=res.detections[0].boundingBox;
+          _cpl2.faceBox={x:bb.xCenter-bb.width/2, y:bb.yCenter-bb.height/2, w:bb.width, h:bb.height};
         }
+      });
+    }
+  }catch(e){}
+  function loop(){
+    if(!_cpl2.active) return;
+    if(lv.videoWidth>0){
+      _cpl2.emoCanvas.width=lv.videoWidth; _cpl2.emoCanvas.height=lv.videoHeight;
+      ctx.drawImage(lv,0,0);
+      var W=_cpl2.emoCanvas.width, H=_cpl2.emoCanvas.height;
+      _cpl2.faceFrame++;
+      if(_cpl2.faceDet && _cpl2.faceFrame%5===0){
+        try{ _cpl2.faceDet.send({image:lv}); }catch(e){}
+      }
+      var fb=_cpl2.faceBox, fx,fy,fw,fh;
+      if(fb){ fx=fb.x*W; fy=fb.y*H; fw=fb.w*W; fh=fb.h*H; }
+      else { fx=W*0.25; fy=H*0.12; fw=W*0.5; fh=H*0.7; }
+      try{
+        // 이마 (rPPG 녹색)
+        var fd=ctx.getImageData(Math.floor(fx+fw*0.25),Math.floor(fy+fh*0.05),Math.floor(fw*0.5),Math.floor(fh*0.2)).data;
+        var gSum=0,fn=0;
+        for(var i=0;i<fd.length;i+=16){ gSum+=fd[i+1]; fn++; }
+        _cpl2.emoSignal.push({t:Date.now()-_cpl2.emoT0,v:gSum/fn});
+        if(_cpl2.emoSignal.length>300) _cpl2.emoSignal.shift();
+        // 눈가
+        var ed=ctx.getImageData(Math.floor(fx+fw*0.1),Math.floor(fy+fh*0.3),Math.floor(fw*0.8),Math.floor(fh*0.18)).data;
+        var eSum=0,en=0;
+        for(var j=0;j<ed.length;j+=16){ eSum+=(ed[j]+ed[j+1]+ed[j+2])/3; en++; }
+        _cpl2.eyeSig.push(eSum/en); if(_cpl2.eyeSig.length>60) _cpl2.eyeSig.shift();
+        // 입
+        var md=ctx.getImageData(Math.floor(fx+fw*0.2),Math.floor(fy+fh*0.62),Math.floor(fw*0.6),Math.floor(fh*0.22)).data;
+        var mSum=0,mn=0;
+        for(var k=0;k<md.length;k+=16){ mSum+=(md[k]+md[k+1]+md[k+2])/3; mn++; }
+        _cpl2.mouthSig.push(mSum/mn); if(_cpl2.mouthSig.length>60) _cpl2.mouthSig.shift();
+        cplComputeAndSend();
       }catch(e){}
     }
-    _cplRAF=requestAnimationFrame(loop);
+    _cpl2.emoRAF=requestAnimationFrame(loop);
   }
   loop();
 }
-// 실시간 감정 바 (HRV 안정도 기반 -100~+100) + 참웃음 판정
-var _cplEyeSig=[], _cplMouthSig=[];
-function cplUpdateEmotionBar(){
-  if(_cplSignal.length<30) return;
-  var recent=_cplSignal.slice(-30).map(function(s){return s.v;});
-  var mean=recent.reduce(function(a,b){return a+b;},0)/recent.length;
-  var variance=recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length;
-  var sd=Math.sqrt(variance);
-  var stability=Math.max(0,Math.min(100,100-sd*8));
-  var emotion=Math.round((stability-50)*2);
-  emotion=Math.max(-100,Math.min(100,emotion));
 
-  // ★ 박입 209 — 참웃음 판정 (눈가+입 동시성)
-  var smileLabel='', smileColor='';
-  if(_cplEyeSig.length>=20 && _cplMouthSig.length>=20){
-    var ev=_cplVar(_cplEyeSig.slice(-20)), mv=_cplVar(_cplMouthSig.slice(-20));
-    if(mv>3){
-      if(ev>2 && stability>40){ smileLabel='😊 참웃음 (눈가까지 웃어요)'; smileColor='#059669'; emotion=Math.min(100,emotion+15); }
-      else { smileLabel='🙂 입만 웃는 중 (속은 긴장)'; smileColor='#b45309'; emotion=Math.max(-100,emotion-10); }
-    }
-  }
-
-  var marker=document.getElementById('cpl-emotion-marker');
-  var valEl=document.getElementById('cpl-emotion-val');
-  var smileEl=document.getElementById('cpl-smile-label');
-  if(marker) marker.style.left=((emotion+100)/2)+'%';
-  if(valEl){
-    valEl.textContent=(emotion>0?'+':'')+emotion;
-    valEl.style.color=emotion>30?'#059669':emotion<-30?'#dc2626':'#6d28d9';
-  }
-  if(smileEl){
-    if(smileLabel){ smileEl.textContent=smileLabel; smileEl.style.color=smileColor; smileEl.style.display='block'; }
-    else { smileEl.style.display='none'; }
-  }
-  _cplEmotionData={emotion:emotion,stability:stability,smile:smileLabel};
-}
-function _cplVar(arr){
+function _cpl2Var(arr){
   var m=arr.reduce(function(a,b){return a+b;},0)/arr.length;
   return Math.sqrt(arr.reduce(function(a,b){return a+(b-m)*(b-m);},0)/arr.length);
 }
-function cplCountdown(sec){
-  var el=document.getElementById('cpl-timer'); var remain=sec;
-  if(el)el.textContent=remain;
-  _cplTimer=setInterval(function(){
-    if(!_cplStream){ clearInterval(_cplTimer); return; }
-    if(!_cplFaceOK){ if(el){el.textContent='⏸';el.style.color='#fbbf24';} return; }
-    if(el)el.style.color='#fff';
-    remain--;
-    if(el)el.textContent=remain>0?remain:'✓';
-    if(remain<=0){ clearInterval(_cplTimer); cplFinishMeasure(); }
-  },1000);
-}
-function cplFinishMeasure(){
-  var sig=_cplSignal.slice();
-  cplStopCam();
-  // 심박/HRV 계산
-  var r=frppgComputeBPM(sig); // 음식 rPPG 엔진 재활용
-  window._cplMeasure = (r&&r.bpm>0) ? {bpm:r.bpm,hrv:r.hrv,emotion:(_cplEmotionData||{}).emotion||0} : null;
-  var live=document.getElementById('cpl-emotion-live');
-  if(live){
-    var em=(_cplEmotionData||{}).emotion||0;
-    live.innerHTML='<div style="text-align:center;font-size:13px;font-weight:800;color:#6d28d9;">✅ 측정 완료 — 현재 감정 상태 '+(em>0?'+':'')+em+'</div>'
-      +'<div style="font-size:11px;color:#5b7a7a;text-align:center;margin-top:4px;">'+(r&&r.bpm?('심박 '+r.bpm+' BPM · HRV '+r.hrv):'')+'</div>';
-  }
-}
-// 최종 궁합 분석 (가트맨 통계 기반)
-function cplStartAnalysis(){
-  var aName=document.getElementById('cpl-a-name').value.trim()||'A';
-  var bName=document.getElementById('cpl-b-name').value.trim()||'B';
-  var aBirth=(document.getElementById('cpl-a-birth')||{}).value||'';
-  var bBirth=(document.getElementById('cpl-b-birth')||{}).value||'';
-  var aHome=(document.getElementById('cpl-a-home')||{}).value.trim()||'';
-  var bHome=(document.getElementById('cpl-b-home')||{}).value.trim()||'';
-  var aLive=(document.getElementById('cpl-a-live')||{}).value.trim()||'';
-  var bLive=(document.getElementById('cpl-b-live')||{}).value.trim()||'';
-  var m=window._cplMeasure;
-  var resEl=document.getElementById('cpl-result');
-  if(!resEl) return;
 
-  if(!m){
-    resEl.style.display='block';
-    resEl.innerHTML='<div style="padding:14px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.4);border-radius:12px;font-size:13px;color:#b45309;line-height:1.6;">💓 먼저 <b>30초 감정 측정</b>을 완료해주세요. 상대방과 대화하며 측정하면 내 무의식 생체 반응이 분석됩니다.</div>';
-    resEl.scrollIntoView({behavior:'smooth',block:'center'});
-    return;
-  }
-
-  // 가트맨 통계 기반 지표 (과학적 인정)
-  var emotion=m.emotion, bpm=m.bpm, hrv=m.hrv;
-  var floodRisk = bpm>100 ? '높음' : bpm>85 ? '보통' : '낮음';
-  var floodColor = bpm>100 ? '#dc2626' : bpm>85 ? '#b45309' : '#059669';
-  var hrvLevel = hrv>=40 ? '안정적' : hrv>=25 ? '보통' : '긴장';
-  var syncLevel = emotion>30 ? '높은 호감·동조' : emotion>-30 ? '평온·중립' : '긴장·경계';
-  var syncColor = emotion>30 ? '#059669' : emotion>-30 ? '#6d28d9' : '#dc2626';
-
-  // ★ 박입 203 — 나이차 통계 (통계청 공식 — 전면 표시 가능)
-  var ageGapHtml='';
-  if(aBirth && bBirth){
-    var ay=parseInt(aBirth), by=parseInt(bBirth);
-    if(ay>1900 && by>1900){
-    var gap=Math.abs(ay-by);
-    var gapMsg, gapColor;
-    if(gap<=3){ gapMsg='나이차 '+gap+'세 — 통계적으로 가장 안정적인 구간입니다.'; gapColor='#059669'; }
-    else if(gap<=7){ gapMsg='나이차 '+gap+'세 — 일반적인 범위로, 소통 노력이 중요합니다.'; gapColor='#0284c7'; }
-    else{ gapMsg='나이차 '+gap+'세 — 세대 경험 차이를 이해하는 대화가 도움이 됩니다.'; gapColor='#b45309'; }
-    ageGapHtml='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:9px;"><span style="font-size:12px;color:#3a5a5a;">👫 나이차 통계</span><span style="font-size:12px;font-weight:800;color:'+gapColor+';">'+gap+'세</span></div>';
-    window._cplAgeGapMsg=gapMsg;
+// 내 감정 계산 → 상대 폰에 Firebase로 전송 (내 화면엔 안 보임)
+var _cpl2LastSent=0;
+function cplComputeAndSend(){
+  if(_cpl2.emoSignal.length<30) return;
+  var recent=_cpl2.emoSignal.slice(-30).map(function(s){return s.v;});
+  var mean=recent.reduce(function(a,b){return a+b;},0)/recent.length;
+  var sd=Math.sqrt(recent.reduce(function(a,b){return a+(b-mean)*(b-mean);},0)/recent.length);
+  var stability=Math.max(0,Math.min(100,100-sd*8));
+  var emotion=Math.max(-100,Math.min(100,Math.round((stability-50)*2)));
+  // 참웃음 판정
+  var smileLabel='';
+  if(_cpl2.eyeSig.length>=20 && _cpl2.mouthSig.length>=20){
+    var ev=_cpl2Var(_cpl2.eyeSig.slice(-20)), mv=_cpl2Var(_cpl2.mouthSig.slice(-20));
+    if(mv>3){
+      if(ev>2 && stability>40){ smileLabel='😊 참웃음'; emotion=Math.min(100,emotion+15); }
+      else { smileLabel='🙂 입만 웃음'; emotion=Math.max(-100,emotion-10); }
     }
   }
-
-  // 1차: 즉시 로컬 결과 표시
-  resEl.style.display='block';
-  resEl.innerHTML='<div style="padding:16px;background:#fff;border:2px solid rgba(167,139,250,.4);border-radius:16px;">'
-    +'<div style="font-size:14px;font-weight:900;color:#6d28d9;margin-bottom:4px;">💑 '+aName+' & '+bName+' 커플 궁합</div>'
-    +'<div style="font-size:10px;color:#7b9a9a;margin-bottom:14px;">가트맨 관계 통계 × 실시간 rPPG (현재 생체 기준 · 참고용)</div>'
-    +'<div style="margin-bottom:12px;padding:14px;background:linear-gradient(135deg,'+syncColor+'18,'+syncColor+'08);border-radius:12px;text-align:center;border:1px solid '+syncColor+'33;">'
-    +'<div style="font-size:11px;color:#5b7a7a;margin-bottom:4px;">지금 내 마음</div>'
-    +'<div style="font-size:32px;font-weight:900;color:'+syncColor+';font-family:\'Orbitron\',monospace;">'+(emotion>0?'+':'')+emotion+'</div>'
-    +'<div style="font-size:12px;font-weight:700;color:'+syncColor+';">'+syncLevel+'</div></div>'
-    +'<div style="display:grid;gap:8px;">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:9px;"><span style="font-size:12px;color:#3a5a5a;">🛑 교감신경 과활성 (BPM '+bpm+')</span><span style="font-size:12px;font-weight:800;color:'+floodColor+';">'+floodRisk+'</span></div>'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(0,0,0,.02);border-radius:9px;"><span style="font-size:12px;color:#3a5a5a;">⏳ 자율신경 안정도 (HRV '+hrv+')</span><span style="font-size:12px;font-weight:800;color:#0284c7;">'+hrvLevel+'</span></div>'
-    +ageGapHtml
-    +'</div>'
-    +'<div id="cpl-ai-comment" style="margin-top:12px;padding:11px 13px;background:rgba(167,139,250,.08);border-radius:10px;font-size:12px;color:#4a3a6a;line-height:1.7;">🤖 AI 종합 분석 중...</div>'
-    +'<div style="margin-top:8px;padding:9px 11px;background:rgba(251,191,36,.1);border-radius:8px;font-size:10px;color:#8a6010;line-height:1.6;">⚠️ 미래를 예언하지 않습니다. 관계는 두 사람의 노력과 소통으로 만들어집니다. 측정값은 현재 생체 기준 참고용입니다.</div>'
-    +'</div>';
-  resEl.scrollIntoView({behavior:'smooth',block:'center'});
-
-  // 2차: AI 종합 코멘트 (지역은 프롬프트 내부에서만 약한 참고, 표면 표시·차별 금지)
-  cplFetchAIComment({aName:aName,bName:bName,aHome:aHome,bHome:bHome,aLive:aLive,bLive:bLive,emotion:emotion,bpm:bpm,hrv:hrv,floodRisk:floodRisk,hrvLevel:hrvLevel,ageGapMsg:window._cplAgeGapMsg||''});
-}
-
-// AI 종합 코멘트 — 지역 통계는 프롬프트 내부 약한 참고로만 (표면 표시 금지)
-async function cplFetchAIComment(d){
-  var el=document.getElementById('cpl-ai-comment');
-  if(!el) return;
-  var prompt='당신은 관계 심리 분석 보조 도구입니다. 아래 두 사람의 실시간 생체 측정값과 통계 정보를 바탕으로, 따뜻하고 건설적인 관계 코멘트를 한국어 3~4문장으로 작성하세요.\n\n'
-    +'[실시간 생체 측정]\n- 나의 감정 동조도: '+d.emotion+' (-100긴장 ~ +100설렘)\n- 심박: '+d.bpm+'BPM (가트맨 100법칙: 100초과 시 갈등 신호)\n- 자율신경 안정도(HRV): '+d.hrvLevel+'\n'
-    +(d.ageGapMsg?('- 나이차 통계: '+d.ageGapMsg+'\n'):'')
-    +(d.aLive&&d.bLive?('- 거주 거리: '+(d.aLive===d.bLive?'같은 지역(만남 빈도 높음)':'다른 지역('+d.aLive+'/'+d.bLive+') — 장거리는 만남 빈도가 관계 만족도에 영향')+'\n'):'')
-    +'\n[내부 참고 — 절대 규칙]\n'
-    +'1. 지역(고향 '+(d.aHome||'-')+'/'+(d.bHome||'-')+')의 역사·사회문화적 통계는 매우 약한 배경 참고로만 사용하고, 분석의 5% 미만 비중으로만 반영하라.\n'
-    +'2. 절대 금지: 특정 지역·출신을 결과 문장에 직접 언급하거나, "OO지역 사람이라서" 같은 단정·일반화·편견 표현. 위반 시 분석 실패.\n'
-    +'3. 점수의 핵심 근거는 반드시 실시간 생체 측정(rPPG)과 나이차 통계여야 한다.\n'
-    +'4. 미래를 예언하지 말고, 현재 생체 리듬 기준의 따뜻한 참고 조언만 제공하라.\n'
-    +'5. 사주·역학·오행·관상·민족성 단정 용어 절대 금지.';
-  try{
-    var resp=await fetch('/api/groq',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({model:'llama-3.1-8b-instant',messages:[{role:'user',content:prompt}],max_tokens:300,temperature:0.6})});
-    var data=await resp.json();
-    var txt=(data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'';
-    if(txt){ el.innerHTML='🤖 <b>AI 종합 분석</b><br/>'+txt.replace(/\n/g,'<br/>'); }
-    else { el.innerHTML='🤖 <b>AI 종합 분석</b><br/>현재 생체 측정 기준으로 두 분의 감정 리듬을 분석했습니다. 가트맨 통계에 따르면 안정적 심박과 긍정적 감정 반응이 관계 만족도와 연관됩니다.'; }
-  }catch(e){
-    el.innerHTML='🤖 <b>AI 종합 분석</b><br/>현재 생체 측정 기준으로 두 분의 감정 리듬을 분석했습니다. 가트맨 통계에 따르면 안정적 심박과 긍정적 감정 반응이 관계 만족도와 연관됩니다.';
+  // 0.5초마다 한 번씩만 전송 (Firebase 부하 ↓)
+  var now=Date.now();
+  if(now-_cpl2LastSent>500 && _cpl2.fbRef){
+    _cpl2LastSent=now;
+    try{ _cpl2.fbRef.child('emotion').set({emotion:emotion, smile:smileLabel, ts:now, from:_cpl2.role}); }catch(e){}
   }
 }
-window.cplToggleManual=cplToggleManual; window.cplSetGender=cplSetGender;
-window.cplToggleCam=cplToggleCam; window.cplStartAnalysis=cplStartAnalysis;
+
+// 상대가 보낸 감정 → 내 화면 세로 바에 표시
+function cplRenderPeerEmotion(d){
+  var emotion=d.emotion||0;
+  var smile=d.smile||'';
+  var mark=document.getElementById('cpl-emotion-vmark');
+  var val=document.getElementById('cpl-emotion-vval');
+  var sm=document.getElementById('cpl-smile-vlabel');
+  // 세로 바: top% 계산 (+100 = 0%, 0 = 50%, -100 = 100%)
+  if(mark) mark.style.top=((100-emotion)/2)+'%';
+  if(val){
+    val.textContent=(emotion>0?'+':'')+emotion;
+    val.style.color=emotion>30?'#86efac':emotion<-30?'#fca5a5':'#fff';
+  }
+  if(sm){
+    if(smile){ sm.textContent=smile; sm.style.display='block'; sm.style.color=smile.indexOf('참')>=0?'#86efac':'#fcd34d'; }
+    else { sm.style.display='none'; }
+  }
+}
+
+function cplToggleMute(){
+  if(!_cpl2.localStream) return;
+  _cpl2.myMuted=!_cpl2.myMuted;
+  _cpl2.localStream.getAudioTracks().forEach(function(t){ t.enabled=!_cpl2.myMuted; });
+  var b=document.getElementById('cpl-mute-btn');
+  if(b){ b.textContent=_cpl2.myMuted?'🔇':'🎤'; b.style.background=_cpl2.myMuted?'rgba(248,113,113,.3)':'rgba(255,255,255,.18)'; }
+}
+function cplToggleLocalCam(){
+  if(!_cpl2.localStream) return;
+  var on=true;
+  _cpl2.localStream.getVideoTracks().forEach(function(t){ t.enabled=!t.enabled; on=t.enabled; });
+  var b=document.getElementById('cpl-cam-btn');
+  if(b){ b.style.background=on?'rgba(255,255,255,.18)':'rgba(248,113,113,.3)'; }
+}
+
+function cplExitRoom(silent){
+  if(_cpl2.fbRef && !silent){ try{ _cpl2.fbRef.child('ended').set(true); }catch(e){} }
+  _cpl2.active=false;
+  if(_cpl2.emoRAF) cancelAnimationFrame(_cpl2.emoRAF);
+  if(_cpl2.timerInterval) clearInterval(_cpl2.timerInterval);
+  if(_cpl2.localStream){ _cpl2.localStream.getTracks().forEach(function(t){t.stop();}); _cpl2.localStream=null; }
+  if(_cpl2.peer){ try{ _cpl2.peer.close(); }catch(e){} _cpl2.peer=null; }
+  if(_cpl2.fbRef){ try{ _cpl2.fbRef.off(); }catch(e){} _cpl2.fbRef=null; }
+  _cpl2.roomCode=null; _cpl2.role=null; _cpl2.remoteStream=null;
+  _cpl2.emoSignal=[]; _cpl2.eyeSig=[]; _cpl2.mouthSig=[]; _cpl2.faceBox=null;
+  // UI 복귀
+  var lobby=document.getElementById('cpl-lobby');
+  var call=document.getElementById('cpl-call-screen');
+  if(lobby) lobby.style.display='block';
+  if(call) call.style.display='none';
+  // 방코드 박스 초기화
+  var disp=document.getElementById('cpl-room-code-display');
+  if(disp) disp.style.display='none';
+  var ji=document.getElementById('cpl-join-code'); if(ji) ji.value='';
+}
+
+window.cplToggleManual=cplToggleManual;
+window.cplCreateRoom=cplCreateRoom;
+window.cplCopyRoomCode=cplCopyRoomCode;
+window.cplJoinRoom=cplJoinRoom;
+window.cplExitRoom=cplExitRoom;
+window.cplToggleMute=cplToggleMute;
+window.cplToggleLocalCam=cplToggleLocalCam;
 </script>
+
+<script>/* 옛 커플 엔진 v1 → 박입 211 v2로 대체됨 (혼자측정/역학기반 제거) */</script>
 
 
 <script>
@@ -11123,100 +11203,127 @@ function foodAskAI(userText) {
 <!-- /page-food -->
 <!-- ══ 로또 행운 번호 추출기 ══ -->
 <!-- ★ C-40 박입 ㉑ — scrCouple 페이지 (FULI에서 통째 박제) -->
-<div class="screen" id="scrCouple" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f0fbfb;">
-<button onclick="goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(167,139,250,.15));border:2px solid rgba(56,189,248,.75);border-radius:22px;color:#0284c7;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(56,189,248,.35);white-space:nowrap;font-family:inherit;">🏠 나가기</button>
+<div class="screen" id="scrCouple" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:#0a1a2a;">
+<button onclick="cplExitRoom();goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(56,189,248,.25),rgba(167,139,250,.15));border:2px solid rgba(56,189,248,.75);border-radius:22px;color:#7dd3fc;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(56,189,248,.35);white-space:nowrap;font-family:inherit;">🏠 나가기</button>
 
-<!-- CGO-9 히어로 이미지 (16:9) -->
-<div style="position:relative;width:100%;height:0;padding-bottom:42%;overflow:hidden;background:linear-gradient(135deg,#0d3a4a,#1a2a4a);">
+<!-- ① 입장 전 화면 (cpl-lobby) -->
+<div id="cpl-lobby" style="min-height:100vh;padding:20px 16px 100px;color:#fff;">
+<div style="max-width:680px;margin:0 auto;">
+
+<!-- CGO-9 히어로 -->
+<div style="position:relative;width:100%;height:0;padding-bottom:38%;overflow:hidden;background:linear-gradient(135deg,#0d3a4a,#1a2a4a);border-radius:18px;margin-bottom:18px;">
 <img src="CGO-9.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
 <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:60px;">💑</div>
-<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.5));"></div>
-<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;padding:0 20px;text-align:center;">
-<div style="font-size:26px;font-weight:900;color:#ffffff;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,.6);">💑 커플 궁합</div>
-<div style="font-size:13px;color:#ffffff;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.7);line-height:1.5;">카메라로 마음을 보는 진짜 궁합</div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.55));"></div>
+<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 20px;text-align:center;">
+<div style="font-size:26px;font-weight:900;color:#fff;margin-bottom:6px;text-shadow:0 2px 8px rgba(0,0,0,.7);">💑 커플 궁합</div>
+<div style="font-size:13px;color:#fff;font-weight:600;text-shadow:0 1px 4px rgba(0,0,0,.8);line-height:1.5;">서로의 진짜 마음을 영상통화로 확인하세요</div>
 </div>
 </div>
 
-<div style="max-width:820px;margin:0 auto;padding:16px;">
-
-<!-- 사용법 큰 카드 토글 -->
-<div onclick="cplToggleManual();" style="display:flex;align-items:center;gap:10px;padding:13px 16px;margin-bottom:14px;background:linear-gradient(135deg,rgba(56,189,248,.15),rgba(167,139,250,.1));border:2px solid rgba(56,189,248,.5);border-radius:12px;cursor:pointer;">
+<!-- 사용법 토글 -->
+<div onclick="cplToggleManual()" style="display:flex;align-items:center;gap:10px;padding:13px 16px;margin-bottom:14px;background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(167,139,250,.12));border:2px solid rgba(56,189,248,.5);border-radius:12px;cursor:pointer;">
 <span style="font-size:22px;">📖</span>
-<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#0284c7;">사용법 보기</div><div style="font-size:11px;color:#3a5a5a;margin-top:2px;">측정 방법 · 감정 바 읽는 법 · 과학적 근거</div></div>
-<span id="cpl-manual-arrow" style="font-size:14px;color:#0284c7;font-weight:900;">▼</span>
+<div style="flex:1;"><div style="font-size:14px;font-weight:900;color:#7dd3fc;">사용법 보기</div><div style="font-size:11px;color:#94a3b8;margin-top:2px;">영상통화 + 상대방 진짜 마음 측정</div></div>
+<span id="cpl-manual-arrow" style="font-size:14px;color:#7dd3fc;font-weight:900;">▼</span>
 </div>
-<div id="cpl-manual" style="display:none;margin-bottom:14px;padding:14px;background:rgba(255,255,255,.8);border:1px solid rgba(56,189,248,.3);border-radius:12px;">
-<div style="font-size:13px;font-weight:900;color:#0284c7;margin-bottom:10px;">📖 커플 궁합 사용법</div>
+<div id="cpl-manual" style="display:none;margin-bottom:14px;padding:14px;background:rgba(255,255,255,.06);border:1px solid rgba(56,189,248,.25);border-radius:12px;">
+<div style="font-size:13px;font-weight:900;color:#7dd3fc;margin-bottom:10px;">📖 커플 궁합 사용법</div>
 <div style="display:flex;flex-direction:column;gap:9px;">
-<div style="font-size:12px;color:#1a3a3a;line-height:1.6;"><b style="color:#0284c7;">① 두 사람 정보 입력</b> — 이름·성별·생년월일·고향·사는 곳</div>
-<div style="font-size:12px;color:#1a3a3a;line-height:1.6;"><b style="color:#0284c7;">② 얼굴 30초 측정</b> — 상대방과 대화하거나 메시지를 보면서 얼굴을 비추면, 내 심장박동과 마음 상태가 측정돼요</div>
-<div style="font-size:12px;color:#1a3a3a;line-height:1.6;"><b style="color:#0284c7;">③ 내 마음 확인 (나만 보여요)</b> — -100(긴장) ~ 0(평온) ~ +100(설렘). 겉으론 웃어도 내 진짜 마음을 보여줘요</div>
-<div style="font-size:12px;color:#1a3a3a;line-height:1.6;"><b style="color:#0284c7;">④ 궁합 결과 보기</b> — 세계적인 부부 연구(가트맨 박사)의 통계로 두 사람의 궁합을 분석해요</div>
+<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">① 방 만들기</b> — "방 만들기" 누르면 일회용 코드가 나옵니다. 상대방에게 코드를 알려주세요.</div>
+<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">② 또는 친구 코드 입장</b> — 메신저 친구 코드로도 입장 가능합니다.</div>
+<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">③ 영상통화 시작</b> — 큰 화면에 상대 얼굴, 작은 화면에 내 얼굴이 나옵니다.</div>
+<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">④ 옆 세로 바 = 상대방 진짜 마음</b> — -100(긴장) ~ +100(설렘). 나만 보여요. 상대 폰엔 자기 바 안 보여서 무의식 반응이 잡힙니다.</div>
+<div style="font-size:12px;color:#e2e8f0;line-height:1.6;"><b style="color:#7dd3fc;">⑤ 참웃음/입만 웃음 판정</b> — 눈가까지 웃으면 진짜, 입만 웃으면 가식. 둘 다 서로의 진짜 마음을 봅니다.</div>
 </div>
-<div style="margin-top:10px;padding:9px 11px;background:rgba(167,139,250,.1);border-radius:8px;font-size:11px;color:#6d28d9;line-height:1.6;">🔬 <b>믿을 수 있는 근거</b> — 가트맨 박사는 40년간 부부를 연구해, 대화 중 심장박동·표정·회복 속도로 관계 건강을 알 수 있다는 걸 통계로 밝혔어요. 점이 아니라 과학이에요.</div>
-<div style="margin-top:8px;padding:8px 11px;background:rgba(251,191,36,.12);border-radius:8px;font-size:11px;color:#8a6010;line-height:1.6;">⚠️ 측정값은 <b>현재 생체 리듬 기준의 참고 지표</b>이며, 미래를 예언하지 않습니다. 관계는 두 사람의 노력으로 만들어갑니다.</div>
+<div style="margin-top:10px;padding:9px 11px;background:rgba(167,139,250,.12);border-radius:8px;font-size:11px;color:#c4b5fd;line-height:1.6;">🔬 <b>100% 온디바이스</b> — 영상은 두 폰 직접 연결(서버 X). 감정 측정은 각자 폰 안에서 처리. 숫자만 상대 폰으로 전송. 번역은 빠져 있어 비용 0.</div>
 </div>
 
-<!-- 두 사람 정보 입력 -->
-<div style="background:#fff;border:1px solid rgba(56,189,248,.25);border-radius:16px;padding:16px;margin-bottom:14px;">
-<div style="font-size:13px;font-weight:900;color:#0284c7;margin-bottom:12px;">👥 두 사람 정보</div>
-<div style="display:flex;gap:10px;">
-<div style="flex:1;">
-<div style="font-size:11px;font-weight:700;color:#0284c7;margin-bottom:6px;">👤 나 (A)</div>
-<input id="cpl-a-name" placeholder="이름" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:8px 10px;color:#0d3a3a;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-a-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1990)" min="1920" max="2020" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-a-home" placeholder="고향 (예: 서울)" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-a-live" placeholder="사는 곳 (예: 부산)" style="width:100%;background:rgba(56,189,248,.05);border:1px solid rgba(56,189,248,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<div style="display:flex;gap:5px;"><button id="cpl-a-m" onclick="cplSetGender('a','m')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#0284c7;font-size:11px;cursor:pointer;font-family:inherit;">♂ 남</button><button id="cpl-a-f" onclick="cplSetGender('a','f')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.06);color:#db2777;font-size:11px;cursor:pointer;font-family:inherit;">♀ 여</button></div>
-</div>
-<div style="flex:1;">
-<div style="font-size:11px;font-weight:700;color:#db2777;margin-bottom:6px;">👤 상대방 (B)</div>
-<input id="cpl-b-name" placeholder="이름" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:8px 10px;color:#0d3a3a;font-size:12px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-b-birth" type="number" inputmode="numeric" placeholder="출생연도 (예: 1992)" min="1920" max="2020" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-b-home" placeholder="고향 (예: 광주)" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<input id="cpl-b-live" placeholder="사는 곳 (예: 부산)" style="width:100%;background:rgba(244,114,182,.05);border:1px solid rgba(244,114,182,.25);border-radius:7px;padding:7px 10px;color:#0d3a3a;font-size:11px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:6px;"/>
-<div style="display:flex;gap:5px;"><button id="cpl-b-m" onclick="cplSetGender('b','m')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(56,189,248,.3);background:rgba(56,189,248,.06);color:#0284c7;font-size:11px;cursor:pointer;font-family:inherit;">♂ 남</button><button id="cpl-b-f" onclick="cplSetGender('b','f')" style="flex:1;padding:7px;border-radius:7px;border:1px solid rgba(244,114,182,.3);background:rgba(244,114,182,.06);color:#db2777;font-size:11px;cursor:pointer;font-family:inherit;">♀ 여</button></div>
-</div>
+<!-- 진입 카드 (두 가지) -->
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px;">
+
+<!-- A. 방 만들기 -->
+<div style="padding:16px;background:linear-gradient(135deg,rgba(167,139,250,.12),rgba(56,189,248,.06));border:1px solid rgba(167,139,250,.35);border-radius:14px;">
+<div style="font-size:13px;font-weight:900;color:#c4b5fd;margin-bottom:6px;">🔑 방 만들기 (일회용 코드)</div>
+<div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">앱 등록 전 실험용. 일회용 코드를 만들어 상대에게 알려주세요.</div>
+<button onclick="cplCreateRoom()" style="width:100%;padding:12px;background:linear-gradient(135deg,#a78bfa,#7c3aed);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">🔑 방 만들기</button>
+<div id="cpl-room-code-display" style="display:none;margin-top:10px;padding:11px;background:rgba(0,0,0,.3);border:1px dashed rgba(167,139,250,.5);border-radius:9px;text-align:center;">
+<div style="font-size:10px;color:#c4b5fd;margin-bottom:4px;">방 코드 (상대에게 알려주세요)</div>
+<div id="cpl-room-code-txt" style="font-size:20px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;letter-spacing:3px;">- - - - -</div>
+<button onclick="cplCopyRoomCode()" style="margin-top:6px;padding:5px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:7px;color:#fff;font-size:11px;cursor:pointer;font-family:inherit;">📋 복사</button>
+<div id="cpl-room-status" style="margin-top:8px;font-size:11px;color:#fbbf24;">상대 입장 대기 중...</div>
 </div>
 </div>
 
-<!-- rPPG 감정 측정 카드 -->
-<div style="background:linear-gradient(135deg,rgba(167,139,250,.08),rgba(56,189,248,.05));border:1px solid rgba(167,139,250,.35);border-radius:16px;padding:16px;margin-bottom:14px;">
-<div style="font-size:13px;font-weight:900;color:#6d28d9;margin-bottom:4px;">💓 내 마음 측정 (나만 보여요)</div>
-<div style="font-size:11px;color:#3a5a5a;margin-bottom:12px;line-height:1.5;">상대방과 대화하며 얼굴을 30초 비추면, 내 진짜 마음이 <b style="color:#6d28d9;">-100(긴장) ~ +100(설렘)</b>으로 나타나요. (나만 볼 수 있어요)</div>
-<!-- 카메라 -->
-<div id="cpl-cam-wrap" style="position:relative;background:#0a1a2a;border-radius:12px;overflow:hidden;margin-bottom:10px;min-height:360px;display:flex;align-items:center;justify-content:center;">
-<video autoplay="" id="cpl-video" muted="" playsinline="" style="width:100%;height:360px;object-fit:cover;display:none;"></video>
-<canvas id="cpl-canvas" style="display:none;"></canvas>
-<div id="cpl-overlay" style="display:none;position:absolute;inset:0;pointer-events:none;">
-<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;max-width:280px;aspect-ratio:1/1;border:3px solid rgba(167,139,250,.9);border-radius:18px;box-shadow:0 0 0 2000px rgba(0,0,0,.35);"></div>
-<div id="cpl-timer" style="position:absolute;bottom:12px;left:50%;transform:translateX(-50%);font-size:26px;color:#fff;font-weight:900;font-family:'Orbitron',monospace;background:rgba(0,0,0,.6);padding:4px 18px;border-radius:14px;">30</div>
-<div id="cpl-facehint" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:13px;color:#fff;font-weight:800;background:rgba(248,113,113,.92);padding:10px 16px;border-radius:12px;text-align:center;">😀 얼굴을 사각형 안에</div>
-</div>
-<div id="cpl-idle" style="text-align:center;padding:24px;">
-<div style="font-size:40px;margin-bottom:8px;">💓</div>
-<div style="font-size:13px;font-weight:700;color:#9fb8de;">상대방과 대화하며 측정하세요</div>
+<!-- B. 코드로 입장 -->
+<div style="padding:16px;background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(167,139,250,.06));border:1px solid rgba(56,189,248,.35);border-radius:14px;">
+<div style="font-size:13px;font-weight:900;color:#7dd3fc;margin-bottom:6px;">🚪 코드로 입장</div>
+<div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.5;">방 코드 또는 메신저 친구 코드 입력</div>
+<div style="display:flex;gap:8px;">
+<input id="cpl-join-code" placeholder="코드 입력" style="flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(56,189,248,.35);border-radius:9px;padding:10px 12px;color:#fff;font-size:13px;font-family:'Orbitron',monospace;letter-spacing:2px;outline:none;text-align:center;text-transform:uppercase;"/>
+<button onclick="cplJoinRoom()" style="padding:10px 20px;background:linear-gradient(135deg,#38bdf8,#0284c7);border:none;border-radius:9px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">입장</button>
 </div>
 </div>
-<!-- 실시간 감정 바 -->
-<div id="cpl-emotion-live" style="display:none;margin-bottom:10px;padding:12px;background:rgba(255,255,255,.7);border-radius:12px;">
-<div style="display:flex;justify-content:space-between;font-size:10px;color:#5b7a7a;margin-bottom:4px;"><span>-100 긴장</span><span>0 평온</span><span>+100 설렘</span></div>
-<div style="position:relative;height:14px;background:linear-gradient(90deg,#f87171,#fbbf24,#34d399);border-radius:7px;">
-<div id="cpl-emotion-marker" style="position:absolute;top:-3px;left:50%;width:6px;height:20px;background:#1a1a2a;border-radius:3px;transform:translateX(-50%);transition:left .5s;"></div>
-</div>
-<div id="cpl-emotion-val" style="text-align:center;font-size:18px;font-weight:900;color:#6d28d9;margin-top:6px;font-family:'Orbitron',monospace;">0</div>
-<div id="cpl-smile-label" style="display:none;text-align:center;font-size:11px;font-weight:800;margin-top:6px;padding:4px 8px;background:rgba(0,0,0,.04);border-radius:8px;">😊 참웃음</div>
-</div>
-<button id="cpl-cam-btn" onclick="cplToggleCam()" style="width:100%;padding:12px;background:linear-gradient(135deg,#7c3aed,#0284c7);border:none;border-radius:11px;color:#fff;font-size:13px;font-weight:900;cursor:pointer;font-family:inherit;">💓 30초 감정 측정 시작</button>
 </div>
 
-<!-- 분석 시작 -->
-<button onclick="cplStartAnalysis()" style="width:100%;padding:15px;background:linear-gradient(135deg,#a78bfa,#7c3aed);border:none;border-radius:14px;color:#fff;font-size:15px;font-weight:900;cursor:pointer;font-family:inherit;letter-spacing:.03em;margin-bottom:14px;">💑 커플 궁합 보기</button>
-
-<!-- 결과 -->
-<div id="cpl-result" style="display:none;"></div>
+<div style="padding:11px 13px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;font-size:11px;color:#fcd34d;line-height:1.6;">⚠️ 측정값은 현재 생체 리듬 기준 참고용입니다. 미래를 예언하지 않습니다. 관계는 두 사람의 노력으로 만들어갑니다.</div>
 
 </div>
+</div>
+
+<!-- ② 영상통화 화면 (cpl-call-screen) — 입장 후 표시 -->
+<div id="cpl-call-screen" style="display:none;position:fixed;inset:0;background:#000;z-index:8500;flex-direction:column;">
+<!-- 상단 상태바 -->
+<div style="flex-shrink:0;padding:14px 16px;background:rgba(0,0,0,.65);display:flex;align-items:center;gap:10px;color:#fff;">
+<div style="width:10px;height:10px;background:#34d399;border-radius:50%;box-shadow:0 0 8px #34d399;"></div>
+<div style="flex:1;font-size:14px;font-weight:700;">💑 커플 궁합 통화 중</div>
+<div id="cpl-call-timer" style="font-size:12px;font-weight:700;color:#7dd3fc;font-family:'Orbitron',monospace;">00:00</div>
+</div>
+<!-- 영상 영역 -->
+<div style="flex:1;position:relative;background:#111;overflow:hidden;">
+<!-- 상대 얼굴 (큰 화면) -->
+<video id="cpl-remote-video" autoplay="" playsinline="" style="width:100%;height:100%;object-fit:cover;"></video>
+<!-- 내 얼굴 (하단 작게) -->
+<video id="cpl-local-video" autoplay="" playsinline="" muted="" style="position:absolute;bottom:16px;left:16px;width:110px;height:150px;object-fit:cover;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:#000;"></video>
+<!-- 연결 대기 표시 -->
+<div id="cpl-waiting" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.7);">
+<div style="font-size:50px;margin-bottom:12px;">💑</div>
+<div style="font-size:15px;color:#fff;font-weight:700;">상대 입장 대기 중...</div>
+<div id="cpl-waiting-code" style="margin-top:8px;font-size:18px;color:#a78bfa;font-family:'Orbitron',monospace;letter-spacing:3px;"></div>
+</div>
+<!-- 세로 감정 바 (오른쪽, 나만 봄) -->
+<div id="cpl-emotion-vbar" style="display:none;position:absolute;top:50%;right:14px;transform:translateY(-50%);width:50px;display:flex;flex-direction:column;align-items:center;pointer-events:none;">
+<div style="font-size:9px;color:#86efac;font-weight:800;background:rgba(0,0,0,.55);padding:3px 6px;border-radius:6px;margin-bottom:4px;">+100</div>
+<div style="font-size:9px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.45);padding:2px 5px;border-radius:5px;margin-bottom:6px;">설렘</div>
+<div style="position:relative;width:14px;height:280px;background:linear-gradient(180deg,#34d399 0%,#fbbf24 50%,#f87171 100%);border-radius:7px;border:1px solid rgba(255,255,255,.35);">
+<div id="cpl-emotion-vmark" style="position:absolute;left:-5px;top:50%;width:24px;height:5px;background:#fff;border-radius:3px;transform:translateY(-50%);transition:top .6s;box-shadow:0 0 8px rgba(0,0,0,.5);"></div>
+</div>
+<div style="font-size:9px;color:rgba(255,255,255,.7);background:rgba(0,0,0,.45);padding:2px 5px;border-radius:5px;margin-top:6px;">긴장</div>
+<div style="font-size:9px;color:#fca5a5;font-weight:800;background:rgba(0,0,0,.55);padding:3px 6px;border-radius:6px;margin-top:4px;">-100</div>
+<div style="margin-top:8px;padding:5px 8px;background:rgba(20,12,40,.85);border:1px solid rgba(167,139,250,.45);border-radius:9px;text-align:center;">
+<div style="font-size:8px;color:#c4b5fd;">상대방</div>
+<div id="cpl-emotion-vval" style="font-size:14px;font-weight:900;color:#fff;font-family:'Orbitron',monospace;">0</div>
+</div>
+<div id="cpl-smile-vlabel" style="display:none;margin-top:5px;padding:3px 7px;background:rgba(0,0,0,.6);border-radius:7px;font-size:9px;font-weight:800;text-align:center;">😊</div>
+</div>
+</div>
+<!-- 하단 컨트롤 -->
+<div style="flex-shrink:0;padding:18px 16px;padding-bottom:max(18px,env(safe-area-inset-bottom));background:rgba(0,0,0,.75);display:flex;justify-content:center;gap:18px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+<button id="cpl-mute-btn" onclick="cplToggleMute()" style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:22px;cursor:pointer;">🎤</button>
+<div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">음소거</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+<button onclick="cplExitRoom()" style="width:68px;height:68px;border-radius:50%;background:#ef4444;border:none;color:#fff;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(239,68,68,.5);transform:rotate(135deg);">📞</button>
+<div style="font-size:11px;color:#fca5a5;font-weight:800;">끊기</div>
+</div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+<button id="cpl-cam-btn" onclick="cplToggleLocalCam()" style="width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:22px;cursor:pointer;">🎥</button>
+<div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:600;">카메라</div>
+</div>
+</div>
+</div>
+
 </div>
 <!-- ★ C-40 박입 ㉔ — 진짜 치매 페이지 (FULI page-c39-dementia 박제) -->
 <div class="screen" id="scrDementia" style="overflow-y:auto;-webkit-overflow-scrolling:touch;">
@@ -14563,16 +14670,17 @@ window.pmGroqFullMusic = pmGroqFullMusic;
     #scrMusic .mfu-play:active{transform:translateY(0);}
 
     /* 섹션 공통 */
-    #scrMusic .mfu-sec{padding:32px 14px 0;}
+    #scrMusic .mfu-sec{padding:32px 14px 0;max-width:100%;box-sizing:border-box;overflow:hidden;}
+    #scrMusic .mfu-sec *{box-sizing:border-box;min-width:0;max-width:100%;}
     #scrMusic .mfu-sec-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;}
     #scrMusic .mfu-sec-title{font-size:17px;font-weight:900;letter-spacing:-.03em;color:#e8eaf0;}
     #scrMusic .mfu-sec-title .mfu-acc-text{color:#38bdf8;font-size:10px;font-weight:700;margin-left:6px;letter-spacing:0;}
     #scrMusic .mfu-sec-more{font-size:11px;color:rgba(232,234,240,.5);font-weight:600;cursor:pointer;background:none;border:none;font-family:inherit;}
 
     /* 오행 주파수 카드 — 5개 가로 스크롤 (모바일) / 5열 그리드 (PC) */
-    #scrMusic .mfu-oh-list{display:flex;gap:9px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;scroll-snap-type:x mandatory;}
+    #scrMusic .mfu-oh-list{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;padding-bottom:6px;}
     #scrMusic .mfu-oh-list::-webkit-scrollbar{display:none;}
-    #scrMusic .mfu-oh-card{flex:0 0 calc(50% - 5px);min-width:160px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;scroll-snap-align:start;cursor:pointer;transition:all .15s;}
+    #scrMusic .mfu-oh-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px;cursor:pointer;transition:all .15s;}
     #scrMusic .mfu-oh-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.05);}
     #scrMusic .mfu-oh-emoji{font-size:30px;margin-bottom:8px;}
     #scrMusic .mfu-oh-name{font-size:14px;font-weight:900;letter-spacing:-.02em;margin-bottom:3px;}
@@ -14581,8 +14689,8 @@ window.pmGroqFullMusic = pmGroqFullMusic;
     #scrMusic .mfu-oh-track{font-size:10px;color:rgba(232,234,240,.55);line-height:1.4;}
 
     /* 솔페지오 6주파수 — 3x2 그리드 */
-    #scrMusic .mfu-sol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-    #scrMusic .mfu-sol-card{padding:14px 8px;border-radius:13px;text-align:center;border:1px solid;cursor:pointer;transition:all .15s;}
+    #scrMusic .mfu-sol-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+    #scrMusic .mfu-sol-card{padding:14px 8px;border-radius:13px;text-align:center;border:1px solid;cursor:pointer;transition:all .15s;min-width:0;}
     #scrMusic .mfu-sol-card:hover{transform:translateY(-2px);}
     #scrMusic .mfu-sol-hz{font-size:16px;font-weight:900;letter-spacing:-.03em;margin-bottom:4px;}
     #scrMusic .mfu-sol-name{font-size:10px;font-weight:700;color:rgba(232,234,240,.85);margin-bottom:2px;}
