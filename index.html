@@ -26559,7 +26559,7 @@ function cgoShowWelcome(){
 <div id="hfu-intro-pop">
 <div class="hfu-intro-wrap">
 <div class="hfu-intro-top">
-<button class="hfu-intro-x" onclick="document.getElementById('hfu-intro-pop').style.display='none';">✕</button>
+<button class="hfu-intro-x" onclick="document.getElementById('hfu-intro-pop').style.display='none';document.body.style.overflow='';">✕</button>
 </div>
 <div class="hfu-intro-hero">
 <div class="hfu-intro-icon">🩺</div>
@@ -26601,7 +26601,7 @@ function cgoShowWelcome(){
           "스마트폰으로 할 수 있는<br/>최대치에 근접한 앱"
         </div>
 </div>
-<button class="hfu-intro-cta" onclick="document.getElementById('hfu-intro-pop').style.display='none';">✅ 검사 시작하기</button>
+<button class="hfu-intro-cta" onclick="document.getElementById('hfu-intro-pop').style.display='none';document.body.style.overflow='';">✅ 검사 시작하기</button>
 <div class="hfu-intro-credit">나의 건강 예측 · CGO-FULI · 특허 10-2026-0060113</div>
 </div>
 </div>
@@ -27825,6 +27825,7 @@ document.addEventListener('DOMContentLoaded', function(){
       btn.onclick = function(){
         const pop = document.getElementById('hfu-intro-pop');
         if(pop) pop.style.display = 'none';
+        document.body.style.overflow = '';
         if(typeof cgoLaunchRppg === 'function'){
           cgoLaunchRppg();
         } else {
@@ -38020,9 +38021,13 @@ setTimeout(function(){
           if(cp219) cp219.style.display = 'block';
         }
         // ★ 박입 225 — 건강·피부 자동 팝업 (빠진 거 추가)
+        // ★ C-44 수정 — 실재하는 hfu-intro-pop 으로 교체 (cgo-health-intro-pop 은 동적 미생성 상태라 null 이었음)
         if(screenId === 'scrHealth'){
-          var hl225 = document.getElementById('cgo-health-intro-pop');
-          if(hl225) hl225.style.display = 'block';
+          var hl225 = document.getElementById('hfu-intro-pop');
+          if(hl225){
+            hl225.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+          }
         }
         if(screenId === 'scrSkinage'){
           var sk225 = document.getElementById('skinage-intro-pop');
