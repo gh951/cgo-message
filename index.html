@@ -4369,11 +4369,12 @@ html body #scrSkinage .svi-c41-hero button {
   #scrTravel .tv-top-btn{padding:6px 12px;border:1px solid rgba(29,158,117,.5);border-radius:8px;background:rgba(29,158,117,.08);color:#0f6e56;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;}
   #scrTravel .tv-live{padding:18px 14px 0;}
   #scrTravel .tv-live-card{background:#0d1f2d;border-radius:18px;overflow:hidden;box-shadow:0 12px 36px rgba(15,93,71,.18);}
-  #scrTravel .tv-live-head{display:flex;align-items:center;justify-content:center;padding:10px;background:rgba(255,255,255,0.06);cursor:pointer;position:relative;}
-  #scrTravel .tv-live-card.tv-full{position:fixed;inset:0;z-index:9500;border-radius:0;display:flex;flex-direction:column;box-shadow:none;}
-  #scrTravel .tv-live-card.tv-full .tv-cam{flex:1;max-height:none;aspect-ratio:auto;}
-  #scrTravel .tv-live-card.tv-full .tv-sub{min-height:auto;}
-  #scrTravel .tv-langmenu{position:absolute;top:42px;left:50%;transform:translateX(-50%);z-index:60;background:#0d1f2d;border:1px solid rgba(93,202,165,.35);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(2,1fr);gap:6px;width:240px;box-shadow:0 8px 28px rgba(0,0,0,.4);}
+  #scrTravel .tv-live-head{display:flex;align-items:center;justify-content:center;padding:10px;background:rgba(255,255,255,0.06);cursor:pointer;position:relative;z-index:80;flex-shrink:0;}
+  #scrTravel .tv-live-card.tv-full{position:fixed;inset:0;z-index:9500;border-radius:0;display:flex;flex-direction:column;box-shadow:none;background:#0d1f2d;}
+  #scrTravel .tv-live-card.tv-full .tv-cam{flex:1 1 auto;min-height:0;max-height:none;aspect-ratio:auto;}
+  #scrTravel .tv-live-card.tv-full .tv-sub{flex-shrink:0;min-height:auto;}
+  #scrTravel .tv-live-card.tv-full .tv-btns{flex-shrink:0;padding-bottom:max(12px,env(safe-area-inset-bottom));}
+  #scrTravel .tv-langmenu{position:absolute;top:44px;left:50%;transform:translateX(-50%);z-index:90;background:#0d1f2d;border:1px solid rgba(93,202,165,.35);border-radius:12px;padding:8px;display:none;grid-template-columns:repeat(2,1fr);gap:6px;width:240px;box-shadow:0 8px 28px rgba(0,0,0,.4);}
   #scrTravel .tv-langmenu.open{display:grid;}
   #scrTravel .tv-langitem{font-size:12px;font-weight:700;color:#9fe1cb;background:rgba(93,202,165,.1);border:1px solid rgba(93,202,165,.2);border-radius:8px;padding:7px 8px;cursor:pointer;text-align:center;}
   #scrTravel .tv-langitem:hover{background:rgba(93,202,165,.22);}
@@ -4420,8 +4421,8 @@ html body #scrSkinage .svi-c41-hero button {
 <!-- 실시간 번역 카드 -->
 <div class="tv-live">
 <div class="tv-live-card" id="tv-live-card">
-<div class="tv-live-head" onclick="tvToggleLangMenu()">
-<span style="font-size:13px;color:#9fe1cb;font-weight:700;">🌐 <span id="tv-lang-label">한국어 → English</span> ▾</span>
+<div class="tv-live-head">
+<button type="button" onclick="tvToggleLangMenu()" style="background:rgba(93,202,165,0.15);border:1px solid rgba(93,202,165,0.4);border-radius:10px;padding:7px 16px;font-size:13px;color:#9fe1cb;font-weight:700;cursor:pointer;font-family:inherit;">🌐 <span id="tv-lang-label">한국어 → English</span> ▾</button>
 <div class="tv-langmenu" id="tv-langmenu" onclick="event.stopPropagation();"></div>
 </div>
 <div class="tv-cam" id="travel-cam">
@@ -4573,6 +4574,7 @@ function tvSetFull(on){
 }
 
 
+
 function tvStartCam(){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
     alert('이 브라우저는 카메라를 지원하지 않습니다.');
@@ -4718,6 +4720,20 @@ function travelAnalyze(){
     +'<div onclick="travelAnalyze()" style="text-align:center;padding:8px 0;background:rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.7);">✕ 닫고 번역으로</div>';
   box.style.display = 'flex';
 }
+
+// 전역 등록 (인라인 onclick 에서 확실히 접근 — 모든 정의 이후)
+try{
+  window.tvToggleLangMenu = tvToggleLangMenu;
+  window.tvPickLang = tvPickLang;
+  window.tvUpdateLangLabel = tvUpdateLangLabel;
+  window.tvSetFull = tvSetFull;
+  window.tvStartCam = tvStartCam;
+  window.tvStopCam = tvStopCam;
+  window.tvToggleSpeak = tvToggleSpeak;
+  window.tvStopSpeak = tvStopSpeak;
+  window.tvSpeakOut = tvSpeakOut;
+  window.travelAnalyze = travelAnalyze;
+}catch(e){ console.warn('[여행 전역등록]', e); }
 </script>
 
 
