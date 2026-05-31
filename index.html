@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ C-46 번역 VERSION 18 — 마이크 충돌해결 + 인앱브라우저 감지 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ C-48 번역 VERSION 20 — 마이크 권한 1회(재진입 재요청X) · 크롬강제 없음 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4467,7 +4467,6 @@ html body #scrSkinage .svi-c41-hero button {
 <div class="tv-sub">
 <div class="tv-sub-src" id="tv-sub-src">🎤 말하기를 눌러 시작하세요</div>
 <div class="tv-sub-dst" id="tv-sub-dst">Tap the mic to start</div>
-<button type="button" id="tv-open-ext" onclick="tvOpenExternal()" style="display:none;margin-top:10px;width:100%;padding:11px;background:linear-gradient(135deg,#1d9e75,#0f6e56);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🌐 크롬(외부 브라우저)으로 열기</button>
 </div>
 
 <!-- 버튼들 -->
@@ -4532,39 +4531,6 @@ html body #scrSkinage .svi-c41-hero button {
 <script>
 // ★ C-44 — CGO 번역 (v9 재구성: 카메라 전면/후면 + 오디오 1회 + 페이지 초기화)
 var _tv = { recog:null, listening:false, paused:false, fatal:false, abortCount:0, micStream:null, micGranted:false, fromLang:'ko-KR', toLang:'en-US', lastDst:'', camStream:null, facing:'environment' };
-// ── C-46 박입 — 인앱 브라우저(카카오톡/네이버/라인/인스타 등) 감지 ──
-//   인앱 WebView 에서는 webkitSpeechRecognition 이 마이크 권한을 줘도
-//   service-not-allowed / not-allowed 로 즉시 실패함 → 외부 크롬으로 유도
-function tvIsInAppBrowser(){
-  var ua = (navigator.userAgent||'').toLowerCase();
-  return /kakaotalk|naver|line\/|instagram|fban|fbav|fb_iab|daumapps|everytimeapp|whale|snapchat|musical_ly|tiktok|wechat|micromessenger/.test(ua);
-}
-// ── C-46 박입 — 외부 브라우저로 강제 오픈 (카카오톡 우선) ──
-function tvOpenExternal(){
-  var url = location.href;
-  var ua = (navigator.userAgent||'').toLowerCase();
-  try{
-    if(ua.indexOf('kakaotalk')>-1){
-      location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(url);
-      return;
-    }
-    if(ua.indexOf('line/')>-1){
-      location.href = (url.indexOf('?')>-1 ? url+'&' : url+'?') + 'openExternalBrowser=1';
-      return;
-    }
-    // 안드로이드 일반 인앱 → 크롬 인텐트
-    if(/android/.test(ua)){
-      var noScheme = url.replace(/^https?:\/\//,'');
-      location.href = 'intent://' + noScheme + '#Intent;scheme=https;package=com.android.chrome;end';
-      return;
-    }
-    // 기타 → 주소 복사 안내
-    if(navigator.clipboard){ navigator.clipboard.writeText(url).then(function(){ alert('주소를 복사했어요.\n크롬 등 다른 브라우저에 붙여넣어 열어 주세요.'); }); }
-    else { alert('아래 주소를 크롬 브라우저에 붙여넣어 열어 주세요.\n\n'+url); }
-  }catch(e){
-    alert('아래 주소를 크롬 브라우저에서 열어 주세요.\n\n'+url);
-  }
-}
 
 var TV_LANGS = [
   {code:'en-US', label:'English', flag:'🇺🇸'},
@@ -4667,22 +4633,10 @@ function tvBuildRecog(){
   _tv.recog.onerror=function(e){
     if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
       _tv.fatal=true; _tv.listening=false;
-      // ★ C-46 — 인앱 브라우저(카카오톡 등)에서는 권한을 줘도 음성서비스가 막힘
-      if(tvIsInAppBrowser()){
-        tvSetSub('🚫 카카오톡·인앱 브라우저에서는 음성인식이 막혀요','오른쪽 위 ⋮ → \"다른 브라우저로 열기\"(크롬) 후 사용하세요');
-        tvShowOpenExternal();
-      } else if(e.error==='service-not-allowed'){
-        tvSetSub('🚫 음성인식 서비스에 연결할 수 없어요','크롬 브라우저로 열고 인터넷 연결을 확인해 주세요');
-      } else if(e.error==='audio-capture'){
-        tvSetSub('🚫 마이크를 사용할 수 없어요','다른 앱이 마이크를 쓰고 있는지 확인 후 다시 시도하세요');
-      } else {
-        tvSetSub('🚫 마이크 권한을 허용해 주세요','말하기를 누르면 허용 창이 나옵니다');
-      }
+      tvSetSub('🚫 마이크 권한을 허용해 주세요','말하기를 누르면 허용 창이 나옵니다');
       tvSetSpeakBtn(false);
     } else if(e.error==='aborted'){
       _tv.abortCount=(_tv.abortCount||0)+1;
-    } else if(e.error==='no-speech'){
-      // 말이 없어서 끊긴 것 — onend 에서 자동 재시작됨 (치명적 아님)
     }
   };
   _tv.recog.onend=function(){
@@ -4692,20 +4646,9 @@ function tvBuildRecog(){
   };
 }
 
-// ── C-46 — 외부 브라우저 열기 버튼 표시/숨김 ──
-function tvShowOpenExternal(){ var b=document.getElementById('tv-open-ext'); if(b) b.style.display='block'; }
-function tvHideOpenExternal(){ var b=document.getElementById('tv-open-ext'); if(b) b.style.display='none'; }
-
 function tvToggleSpeak(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ tvSetSub('⚠️ 이 브라우저는 음성인식을 지원하지 않습니다','크롬 브라우저로 열어 주세요'); tvShowOpenExternal(); return; }
-  // ★ C-46 — 인앱 브라우저(카카오톡 등)면 시작 전에 차단 + 외부 열기 안내
-  //   (권한을 허용해도 인앱 WebView 는 음성서비스가 막혀 계속 실패함)
-  if(tvIsInAppBrowser() && !_tv.micGranted){
-    tvSetSub('🚫 카카오톡·인앱 브라우저에서는 음성인식이 안 돼요','아래 버튼으로 크롬에서 열어 사용하세요');
-    tvShowOpenExternal();
-    return;
-  }
+  if(!SR){ tvSetSub('⚠️ 이 브라우저는 음성인식을 지원하지 않습니다','크롬 브라우저로 열어 주세요'); return; }
   // 이미 듣는 중이면 → 일시정지 (마이크 계속 유지)
   if(_tv.listening){
     _tv.paused = !_tv.paused;
@@ -4714,47 +4657,50 @@ function tvToggleSpeak(){
              _tv.paused ? 'Paused' : 'Listening…');
     return;
   }
-  // recog 객체가 이미 있고 권한도 받았으면 그대로 재개 (권한 재요청 없음)
-  if(_tv.recog && _tv.micGranted){
+  // ★ 권한 한 번만 — 이미 마이크를 확보한 세션이면 getUserMedia 재호출 없이 바로 재개 (팝업 안 뜸)
+  if(_tv.micGranted){
     _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; tvSetSpeakBtn(true);
-    tvHideOpenExternal();
-    try{ _tv.recog.start(); }catch(e){}
+    try{ if(!_tv.recog) tvBuildRecog(); _tv.recog.start(); }
+    catch(e){ setTimeout(function(){ try{ if(!_tv.recog) tvBuildRecog(); _tv.recog.start(); }catch(x){} }, 150); }
     return;
   }
-  // 처음 — getUserMedia로 권한 한 번 받고 → ★ 즉시 해제 ★ → SpeechRecognition이 마이크를 직접 잡게 함
-  //   (스트림을 계속 잡고 있으면 음성인식이 마이크를 못 잡아 not-allowed/audio-capture 발생)
+  // 처음 1회 — 마이크 권한 확보 (이후로는 다시 묻지 않음)
   _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; tvSetSpeakBtn(true);
   tvSetSub('🎤 마이크 준비 중…','Preparing…');
   function go(){
+    _tv.micGranted=true;  // ★ 한 번 확보하면 세션 내 재요청 없음
     try{ tvBuildRecog(); _tv.recog.start(); }
     catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
   }
-  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-    navigator.mediaDevices.getUserMedia({audio:true})
-      .then(function(stream){
-        // ★ C-46 핵심 — 권한 확인 직후 스트림 즉시 해제 (마이크 점유 충돌 방지)
-        try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){}
-        _tv.micStream=null; _tv.micGranted=true; tvHideOpenExternal();
-        go();
-      })
-      .catch(function(err){
-        console.warn('[여행 마이크]',err);
-        _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
-        if(err && (err.name==='NotAllowedError' || err.name==='SecurityError')){
-          if(tvIsInAppBrowser()){
-            tvSetSub('🚫 인앱 브라우저라 마이크가 막혔어요','아래 버튼으로 크롬에서 열어 주세요');
-            tvShowOpenExternal();
+  function ask(){
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+      // ★ 스트림은 계속 보유 (닫으면 음성인식이 마이크를 못 잡아 번역이 끊김)
+      navigator.mediaDevices.getUserMedia({audio:true})
+        .then(function(stream){ _tv.micStream=stream; go(); })
+        .catch(function(err){
+          console.warn('[여행 마이크]',err);
+          _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
+          if(err && err.name==='NotAllowedError'){
+            tvSetSub('🚫 마이크가 차단돼 있어요','주소창 왼쪽 자물쇠 → 마이크 → 허용 후 다시 눌러 주세요');
           } else {
-            tvSetSub('🚫 마이크 권한이 거부됐어요','주소창 왼쪽 자물쇠 → 마이크 → 허용 후 다시 시도');
+            tvSetSub('🚫 마이크 권한이 필요합니다','말하기를 눌러 허용해 주세요');
           }
-        } else if(err && err.name==='NotFoundError'){
-          tvSetSub('🚫 마이크를 찾을 수 없어요','기기에 마이크가 연결돼 있는지 확인해 주세요');
-        } else {
-          tvSetSub('🚫 마이크를 시작할 수 없어요','크롬 브라우저로 열고 다시 시도해 주세요');
-          if(tvIsInAppBrowser()) tvShowOpenExternal();
+        });
+    } else { go(); }
+  }
+  // ★ Permissions API — 이미 허용된 상태면 권한창을 띄우지 않고 통과 (중복 팝업/깜빡임 방지)
+  if(navigator.permissions && navigator.permissions.query){
+    navigator.permissions.query({name:'microphone'})
+      .then(function(st){
+        if(st.state==='denied'){
+          _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
+          tvSetSub('🚫 마이크가 차단돼 있어요','주소창 왼쪽 자물쇠 → 마이크 → 허용으로 바꿔 주세요');
+          return;
         }
-      });
-  } else { go(); }
+        ask();  // granted → 팝업 없이 통과 / prompt → 이번 한 번만 팝업
+      })
+      .catch(function(){ ask(); });
+  } else { ask(); }
 }
 function tvStopSpeak(){
   // 완전 정지 (나가기 등에서만 사용)
@@ -4784,16 +4730,15 @@ function travelAnalyze(){
   box.style.display='flex';
 }
 
-// ── 나가기 = 전체 초기화 ──
+// ── 나가기 = 화면 초기화 (단, 마이크 권한/스트림은 유지 → 재진입 시 다시 안 물어봄) ──
 function tvExit(){
-  // 페이지 나갈 때만 음성인식 완전 종료
-  _tv.listening=false; _tv.fatal=true;
-  if(_tv.recog){ try{_tv.recog.stop();}catch(e){} try{_tv.recog.abort();}catch(e){} _tv.recog=null; }
+  // 음성인식만 멈춤 (마이크 스트림은 세션 동안 보유 — 권한 한 번만 묻기 위함)
+  _tv.listening=false; _tv.paused=false; _tv.fatal=true;
+  if(_tv.recog){ try{_tv.recog.stop();}catch(e){} try{_tv.recog.abort();}catch(e){} }
   tvSetSpeakBtn(false);
   tvStopCam();
   try{ speechSynthesis.cancel(); }catch(e){}
-  if(_tv.micStream){ try{ _tv.micStream.getTracks().forEach(function(t){t.stop();}); }catch(e){} _tv.micStream=null; }
-  _tv.micGranted=false; tvHideOpenExternal();
+  // ★ _tv.micStream / _tv.micGranted 는 일부러 유지 (재진입 시 getUserMedia 재호출 → 팝업 재등장 방지)
   _tv.lastDst=''; _tv.fatal=false; _tv.abortCount=0;
   _tv.facing='environment';
   tvSetSub('🎤 말하기를 눌러 시작하세요','Tap the mic to start');
@@ -4801,13 +4746,17 @@ function tvExit(){
   var m=document.getElementById('tv-langmenu'); if(m) m.classList.remove('open');
   goScreen('scrHome');
 }
+// ★ 페이지를 완전히 닫을 때만 마이크 실제 해제 (브라우저 떠날 때 누수 방지)
+window.addEventListener('pagehide', function(){
+  try{ if(_tv.recog){ _tv.recog.abort(); } }catch(e){}
+  try{ if(_tv.micStream){ _tv.micStream.getTracks().forEach(function(t){t.stop();}); _tv.micStream=null; } }catch(e){}
+});
 
 // 전역 등록
 window.tvToggleLangMenu=tvToggleLangMenu; window.tvPickLang=tvPickLang; window.tvUpdateLangLabel=tvUpdateLangLabel;
 window.tvStartCam=tvStartCam; window.tvFlipCam=tvFlipCam; window.tvStopCam=tvStopCam;
 window.tvToggleSpeak=tvToggleSpeak; window.tvStopSpeak=tvStopSpeak; window.tvSpeakOut=tvSpeakOut;
 window.travelAnalyze=travelAnalyze; window.tvExit=tvExit;
-window.tvOpenExternal=tvOpenExternal; window.tvIsInAppBrowser=tvIsInAppBrowser;
 </script>
 
 
