@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ CGO 번역 VERSION 15 로드됨 — scrTravel 재구성 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ C-45 번역 VERSION 16 — C-45 페이지 박입 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4165,7 +4165,7 @@ html body #scrSkinage .svi-c41-hero button {
 <div onclick="cgoTransShowIntro()" style="margin:0 16px 16px;background:linear-gradient(135deg,#5dcaa5,#1d9e75);border-radius:20px;padding:20px 22px;color:white;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 20px rgba(29,158,117,0.3);">
 <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🌐</div>
 <div style="flex:1;">
-<div style="font-size:15px;font-weight:900;margin-bottom:3px;">🌐 CGO 번역</div>
+<div style="font-size:15px;font-weight:900;margin-bottom:3px;">🌐 C-45 번역</div>
 <div style="font-size:11px;opacity:0.9;">여행 실시간 번역 · 표정 분석</div>
 </div>
 <div style="font-size:24px;opacity:0.6;color:white;">›</div>
@@ -4262,7 +4262,7 @@ html body #scrSkinage .svi-c41-hero button {
 <div style="text-align:center;margin-bottom:24px;">
 <div style="display:inline-block;padding:5px 14px;background:rgba(15,110,86,0.15);border:1px solid rgba(15,110,86,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#0f6e56;letter-spacing:.12em;margin-bottom:14px;">C-44 · 2026</div>
 <div style="font-size:54px;margin-bottom:8px;">🌐</div>
-<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">CGO 번역</h1>
+<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">C-45 번역</h1>
 <div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">
         0ms seed 사전 + AI 폴백 번역<br/>
         여행 현장 표정 5점 좌표 분석
@@ -4360,6 +4360,9 @@ html body #scrSkinage .svi-c41-hero button {
   /* 최상단 16:9 이미지 — 양쪽 끝단까지 full-width */
   #scrTravel .tv-hero{width:100%;aspect-ratio:16/9;max-height:340px;background:linear-gradient(135deg,#062e22,#0a3d2f,#0f5d47);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
   #scrTravel .tv-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  #scrTravel .tv-hero-overlay{position:absolute;left:0;right:0;bottom:0;padding:18px 18px 14px;background:linear-gradient(to top,rgba(6,46,34,0.85),rgba(6,46,34,0));display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;}
+  #scrTravel .tv-hero-title{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 10px rgba(0,0,0,0.5);}
+  #scrTravel .tv-hero-feat{font-size:11px;font-weight:700;color:#9fe1cb;text-shadow:0 1px 6px rgba(0,0,0,0.6);}
   #scrTravel .tv-hero-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;}
   /* 본문 래퍼 — PC에서 넓게 */
   #scrTravel .tv-wrap{max-width:900px;margin:0 auto;padding:16px 16px 120px;}
@@ -4419,11 +4422,16 @@ html body #scrSkinage .svi-c41-hero button {
 
 <!-- 1. 최상단 16:9 이미지 (full-width, 양끝단) -->
 <div class="tv-hero">
-<img src="cgo-trans-hero.jpg" alt="CGO 번역" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+<img src="CGO-15.jpeg" alt="C-45 번역" onerror="this.onerror=null;this.src='CGO-15.jpg';this.onerror=function(){this.style.display='none';this.nextElementSibling.style.display='flex';};"/>
 <div class="tv-hero-fallback" style="display:none;">
 <div style="font-size:52px;margin-bottom:6px;">🌐</div>
-<div style="font-size:26px;font-weight:900;letter-spacing:-.02em;">CGO 번역</div>
-<div style="font-size:12px;opacity:.8;margin-top:6px;">cgo-trans-hero.jpg · 16:9 이미지 자리</div>
+<div style="font-size:26px;font-weight:900;letter-spacing:-.02em;">C-45 번역</div>
+<div style="font-size:11px;opacity:.85;margin-top:6px;">rPPG + 좌표 분석 · 0ms seed 번역</div>
+<div style="font-size:10px;opacity:.6;margin-top:4px;">CGO-15.jpeg · 16:9 이미지 자리</div>
+</div>
+<div class="tv-hero-overlay">
+<div class="tv-hero-title">C-45 번역</div>
+<div class="tv-hero-feat">🎤 0ms seed 번역 &nbsp;·&nbsp; 📷 rPPG + 좌표 분석</div>
 </div>
 </div>
 
