@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ CGO 번역 VERSION 10 로드됨 — scrTravel 재구성 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ CGO 번역 VERSION 12 로드됨 — scrTravel 재구성 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4522,7 +4522,7 @@ html body #scrSkinage .svi-c41-hero button {
 </div>
 <script>
 // ★ C-44 — CGO 번역 (v9 재구성: 카메라 전면/후면 + 오디오 1회 + 페이지 초기화)
-var _tv = { recog:null, listening:false, fromLang:'ko-KR', toLang:'en-US', lastDst:'', camStream:null, facing:'environment' };
+var _tv = { recog:null, listening:false, fatal:false, fromLang:'ko-KR', toLang:'en-US', lastDst:'', camStream:null, facing:'environment' };
 
 var TV_LANGS = [
   {code:'en-US', label:'English', flag:'🇺🇸'},
@@ -4605,11 +4605,13 @@ function tvSetSpeakBtn(on){
 function tvToggleSpeak(){
   if(_tv.listening){ tvStopSpeak(); return; }
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){ tvSetSub('⚠️ 음성인식 미지원','Speech recognition not supported'); return; }
+  if(!SR){ tvSetSub('⚠️ 이 브라우저는 음성인식을 지원하지 않습니다','크롬 브라우저로 열어 주세요'); return; }
+  _tv.fatal=false;
   try{
     _tv.recog=new SR();
     _tv.recog.lang=_tv.fromLang||'ko-KR';
     _tv.recog.interimResults=true; _tv.recog.continuous=true;
+    _tv.recog.onstart=function(){ tvSetSub('🎤 듣고 있어요… 말씀하세요','Listening…'); };
     _tv.recog.onresult=function(evt){
       for(var i=evt.resultIndex;i<evt.results.length;i++){
         var txt=evt.results[i][0].transcript.trim(); if(!txt) continue;
@@ -4623,14 +4625,35 @@ function tvToggleSpeak(){
         })();
       }
     };
-    _tv.recog.onerror=function(e){ console.warn('[여행STT]',e.error); };
-    _tv.recog.onend=function(){ if(_tv.listening&&_tv.recog){ try{_tv.recog.start();}catch(e){} } };
+    _tv.recog.onerror=function(e){
+      console.warn('[여행STT]',e.error);
+      // 치명적 에러 → 완전 중단 (재시작 금지)
+      if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
+        _tv.fatal=true; _tv.listening=false;
+        if(_tv.recog){ try{_tv.recog.stop();}catch(x){} }
+        tvSetSub('🚫 마이크를 사용할 수 없습니다','주소창 🔒 → 사이트 설정 → 마이크 허용 후 새로고침');
+        tvSetSpeakBtn(false);
+      } else if(e.error==='no-speech'){
+        tvSetSub('🎤 말하기를 눌렀어요. 천천히 말씀해 주세요','(소리 대기 중)');
+      }
+      // aborted, network 등 그 외 에러는 무시 (onend가 알아서 처리)
+    };
+    _tv.recog.onend=function(){
+      // 치명적 에러거나 사용자가 멈췄으면 재시작 안 함
+      if(_tv.fatal || !_tv.listening){ return; }
+      // 정상 종료면 한 번만 재시작 (약간의 텀을 둬서 무한루프 방지)
+      setTimeout(function(){
+        if(_tv.listening && _tv.recog && !_tv.fatal){
+          try{ _tv.recog.start(); }catch(e){ console.warn('[STT 재시작]',e); }
+        }
+      }, 300);
+    };
     _tv.recog.start(); _tv.listening=true; tvSetSpeakBtn(true);
-  }catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크 시작 불가','Cannot start mic'); }
+  }catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
 }
 function tvStopSpeak(){
-  _tv.listening=false;
-  if(_tv.recog){ try{_tv.recog.stop();}catch(e){} _tv.recog=null; }
+  _tv.listening=false; _tv.fatal=true;
+  if(_tv.recog){ try{_tv.recog.stop();}catch(e){} try{_tv.recog.abort();}catch(e){} _tv.recog=null; }
   tvSetSpeakBtn(false);
 }
 function tvSpeakOut(){
