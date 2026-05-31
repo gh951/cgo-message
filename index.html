@@ -4353,10 +4353,11 @@ html body #scrSkinage .svi-c41-hero button {
 </div>
 
 <!-- ★ C-44 박입 — CGO 번역 본 페이지 (scrTravel · 건강예측 페이지 구조 차용) -->
-<div class="screen" id="scrTravel" style="overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f0fdf9;color:#0f172a;">
-<div style="background:#dc2626;color:#fff;text-align:center;padding:8px;font-size:14px;font-weight:900;letter-spacing:.05em;">★ VERSION 7 · 2026-05-31 ★ 이 띠가 보이면 최신 파일</div>
+<div class="screen" id="scrTravel" style="display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;background:#f0fdf9;color:#0f172a;align-items:stretch;justify-content:flex-start;">
+<div style="background:#dc2626;color:#fff;text-align:center;padding:8px;font-size:14px;font-weight:900;letter-spacing:.05em;">★ VERSION 8 · 2026-05-31 ★ 이 띠가 보이면 최신 파일</div>
 <button onclick="try{tvStopSpeak();tvStopCam();}catch(e){} goScreen('scrHome')" style="position:fixed;bottom:24px;right:16px;z-index:9000;min-width:88px;height:42px;padding:0 18px;background:linear-gradient(135deg,rgba(29,158,117,.25),rgba(56,189,248,.15));border:2px solid rgba(29,158,117,.75);border-radius:22px;color:#0f6e56;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;box-shadow:0 0 14px rgba(29,158,117,.35);white-space:nowrap;font-family:inherit;">🏠 나가기</button>
 <style>
+  #scrTravel.screen.active{display:block;}
   #scrTravel *{box-sizing:border-box;}
   #scrTravel .tv-wrap{max-width:560px;margin:0 auto;padding:0 0 100px;font-family:inherit;color:#0f172a;}
   #scrTravel .tv-c41-hero{position:relative;min-height:280px;background:linear-gradient(160deg,#062e22,#0a3d2f,#0f5d47);display:flex;align-items:center;justify-content:center;border-radius:0 0 32px 32px;overflow:hidden;padding:36px 18px;}
