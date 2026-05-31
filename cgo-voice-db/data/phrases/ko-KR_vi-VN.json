@@ -3,14 +3,15 @@
   "from": "ko-KR",
   "to": "vi-VN",
   "count": 6002,
-  "seed_version": "v1.0-vi-array",
+  "seed_version": "v1.1-vi-array-gemini-reviewed",
   "created_by": "Claude C-45",
   "created_at": "2026-05-31",
   "description": "CGO MESSAGE 영상통화 실시간 번역 자막 seed - 배열 구조 [{id,ko,vi}] (역조회 0ms 최적화)",
   "structure": "array of {id, ko, vi}",
   "lookup_note": "id 인덱싱 + ko/타깃 양방향 해시 구축용",
   "patent_ref": "10-2026-0060113 #43",
-  "source_app": "cgo-message"
+  "source_app": "cgo-message",
+  "review_note": "Gemini 검수 반영: 호칭/뉘앙스 12건 정정 + 연인대화(701-733) 성별중립 병기 33건"
  },
  "entries": [
   {
@@ -76,7 +77,7 @@
   {
    "id": 13,
    "ko": "반갑습니다",
-   "vi": "Rất vui được gặp"
+   "vi": "Rất vui được làm quen"
   },
   {
    "id": 14,
@@ -91,7 +92,7 @@
   {
    "id": 16,
    "ko": "처음 뵙겠습니다",
-   "vi": "Lần đầu được gặp"
+   "vi": "Rất vui được gặp anh/chị lần đầu"
   },
   {
    "id": 17,
@@ -136,7 +137,7 @@
   {
    "id": 25,
    "ko": "반가워",
-   "vi": "Vui ghê"
+   "vi": "Gặp bạn vui quá"
   },
   {
    "id": 26,
@@ -171,7 +172,7 @@
   {
    "id": 32,
    "ko": "별일 없으시죠?",
-   "vi": "Không có chuyện gì chứ?"
+   "vi": "Mọi chuyện vẫn tốt đẹp chứ?"
   },
   {
    "id": 33,
@@ -201,7 +202,7 @@
   {
    "id": 38,
    "ko": "뭐 하고 지내?",
-   "vi": "Dạo này làm gì?"
+   "vi": "Dạo này đang làm gì đấy?"
   },
   {
    "id": 39,
@@ -556,7 +557,7 @@
   {
    "id": 109,
    "ko": "감사할 따름입니다",
-   "vi": "Thật biết ơn vô cùng"
+   "vi": "Không biết nói gì ngoài lời cảm ơn"
   },
   {
    "id": 110,
@@ -1336,7 +1337,7 @@
   {
    "id": 265,
    "ko": "꽃길만 걸으세요",
-   "vi": "Chúc anh/chị toàn gặp may mắn"
+   "vi": "Chúc anh/chị luôn đi trên con đường đầy hoa"
   },
   {
    "id": 266,
@@ -1441,7 +1442,7 @@
   {
    "id": 286,
    "ko": "처음 뵐 때 인사드려요",
-   "vi": "Lần đầu gặp xin chào ạ"
+   "vi": "Rất vui được gặp anh/chị lần đầu"
   },
   {
    "id": 287,
@@ -1531,7 +1532,7 @@
   {
    "id": 304,
    "ko": "이제 예순이 넘었어요",
-   "vi": "Tôi đã hơn sáu mươi rồi"
+   "vi": "Tôi đã hơn sáu mươi tuổi rồi"
   },
   {
    "id": 305,
@@ -2751,7 +2752,7 @@
   {
    "id": 548,
    "ko": "기분이 째져요",
-   "vi": "Sướng rơn"
+   "vi": "Sướng điên người"
   },
   {
    "id": 549,
@@ -3121,7 +3122,7 @@
   {
    "id": 622,
    "ko": "뚜껑 열려요",
-   "vi": "Bốc hỏa lên đầu"
+   "vi": "Tức lộn ruột"
   },
   {
    "id": 623,
@@ -3401,7 +3402,7 @@
   {
    "id": 678,
    "ko": "놀랄 노자예요",
-   "vi": "Đáng kinh ngạc luôn"
+   "vi": "Quá là ngỡ ngàng luôn"
   },
   {
    "id": 679,
@@ -3516,112 +3517,112 @@
   {
    "id": 701,
    "ko": "사랑해요",
-   "vi": "Em yêu anh"
+   "vi": "Anh yêu em / Em yêu anh"
   },
   {
    "id": 702,
    "ko": "너무 사랑해요",
-   "vi": "Yêu anh nhiều lắm"
+   "vi": "Yêu nhiều lắm"
   },
   {
    "id": 703,
    "ko": "사랑해",
-   "vi": "Yêu anh"
+   "vi": "Yêu nhiều"
   },
   {
    "id": 704,
    "ko": "너무너무 사랑해",
-   "vi": "Yêu anh nhiều lắm lắm"
+   "vi": "Yêu nhiều lắm lắm"
   },
   {
    "id": 705,
    "ko": "많이 사랑해",
-   "vi": "Yêu anh nhiều"
+   "vi": "Yêu nhiều"
   },
   {
    "id": 706,
    "ko": "진심으로 사랑해요",
-   "vi": "Yêu anh thật lòng"
+   "vi": "Yêu thật lòng"
   },
   {
    "id": 707,
    "ko": "영원히 사랑할게요",
-   "vi": "Sẽ yêu anh mãi mãi"
+   "vi": "Sẽ yêu mãi mãi"
   },
   {
    "id": 708,
    "ko": "평생 사랑할게요",
-   "vi": "Sẽ yêu anh trọn đời"
+   "vi": "Sẽ yêu trọn đời"
   },
   {
    "id": 709,
    "ko": "좋아해요",
-   "vi": "Em thích anh"
+   "vi": "Anh thích em / Em thích anh"
   },
   {
    "id": 710,
    "ko": "너무 좋아해요",
-   "vi": "Thích anh nhiều lắm"
+   "vi": "Thích nhiều lắm"
   },
   {
    "id": 711,
    "ko": "진짜 좋아해",
-   "vi": "Thích anh thật đấy"
+   "vi": "Thích thật đấy"
   },
   {
    "id": 712,
    "ko": "많이 좋아해",
-   "vi": "Thích anh nhiều"
+   "vi": "Thích nhiều"
   },
   {
    "id": 713,
    "ko": "당신을 좋아해요",
-   "vi": "Em thích anh"
+   "vi": "Anh thích em / Em thích anh"
   },
   {
    "id": 714,
    "ko": "당신이 좋아요",
-   "vi": "Em thích anh"
+   "vi": "Anh thích em / Em thích anh"
   },
   {
    "id": 715,
    "ko": "당신만 좋아해요",
-   "vi": "Chỉ thích mình anh"
+   "vi": "Chỉ thích mình em / Chỉ thích mình anh"
   },
   {
    "id": 716,
    "ko": "당신이 최고예요",
-   "vi": "Anh là nhất"
+   "vi": "Em là nhất / Anh là nhất"
   },
   {
    "id": 717,
    "ko": "보고 싶어요",
-   "vi": "Em nhớ anh"
+   "vi": "Anh nhớ em / Em nhớ anh"
   },
   {
    "id": 718,
    "ko": "너무 보고 싶어",
-   "vi": "Nhớ anh quá"
+   "vi": "Nhớ quá"
   },
   {
    "id": 719,
    "ko": "많이 보고 싶어",
-   "vi": "Nhớ anh nhiều"
+   "vi": "Nhớ nhiều"
   },
   {
    "id": 720,
    "ko": "진짜 보고 싶어",
-   "vi": "Nhớ anh thật sự"
+   "vi": "Nhớ thật sự"
   },
   {
    "id": 721,
    "ko": "매일 보고 싶어",
-   "vi": "Ngày nào cũng nhớ anh"
+   "vi": "Ngày nào cũng nhớ"
   },
   {
    "id": 722,
    "ko": "그리워요",
-   "vi": "Em nhớ lắm"
+   "vi": "Nhớ lắm"
   },
   {
    "id": 723,
@@ -3631,52 +3632,52 @@
   {
    "id": 724,
    "ko": "그립습니다",
-   "vi": "Tôi nhớ lắm"
+   "vi": "Nhớ lắm"
   },
   {
    "id": 725,
    "ko": "당신이 그리워요",
-   "vi": "Em nhớ anh"
+   "vi": "Anh nhớ em / Em nhớ anh"
   },
   {
    "id": 726,
    "ko": "당신 없으면 안 돼요",
-   "vi": "Không thể thiếu anh"
+   "vi": "Không thể thiếu em / Không thể thiếu anh"
   },
   {
    "id": 727,
    "ko": "당신이 필요해요",
-   "vi": "Em cần anh"
+   "vi": "Anh cần em / Em cần anh"
   },
   {
    "id": 728,
    "ko": "당신뿐이에요",
-   "vi": "Chỉ có mình anh thôi"
+   "vi": "Chỉ có mình em thôi / Chỉ có mình anh thôi"
   },
   {
    "id": 729,
    "ko": "당신이 전부예요",
-   "vi": "Anh là tất cả"
+   "vi": "Em là tất cả / Anh là tất cả"
   },
   {
    "id": 730,
    "ko": "당신은 제 전부예요",
-   "vi": "Anh là tất cả của em"
+   "vi": "Em là tất cả của anh / Anh là tất cả của em"
   },
   {
    "id": 731,
    "ko": "당신 없인 못 살아요",
-   "vi": "Không có anh em không sống nổi"
+   "vi": "Không có em anh không sống nổi / Không có anh em không sống nổi"
   },
   {
    "id": 732,
    "ko": "당신만 있으면 돼요",
-   "vi": "Chỉ cần có anh là đủ"
+   "vi": "Chỉ cần có em là đủ / Chỉ cần có anh là đủ"
   },
   {
    "id": 733,
    "ko": "당신이 곁에 있어서 행복해요",
-   "vi": "Có anh bên cạnh em hạnh phúc"
+   "vi": "Có em bên cạnh anh hạnh phúc / Có anh bên cạnh em hạnh phúc"
   },
   {
    "id": 734,
