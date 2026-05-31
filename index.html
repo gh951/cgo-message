@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ C-45 번역 VERSION 16 — C-45 페이지 박입 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ C-45 번역 VERSION 17 — 마이크 권한 1회 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4165,7 +4165,7 @@ html body #scrSkinage .svi-c41-hero button {
 <div onclick="cgoTransShowIntro()" style="margin:0 16px 16px;background:linear-gradient(135deg,#5dcaa5,#1d9e75);border-radius:20px;padding:20px 22px;color:white;display:flex;align-items:center;gap:14px;cursor:pointer;box-shadow:0 6px 20px rgba(29,158,117,0.3);">
 <div style="width:48px;height:48px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;">🌐</div>
 <div style="flex:1;">
-<div style="font-size:15px;font-weight:900;margin-bottom:3px;">🌐 C-45 번역</div>
+<div style="font-size:15px;font-weight:900;margin-bottom:3px;">🌐 CGO 번역</div>
 <div style="font-size:11px;opacity:0.9;">여행 실시간 번역 · 표정 분석</div>
 </div>
 <div style="font-size:24px;opacity:0.6;color:white;">›</div>
@@ -4262,7 +4262,7 @@ html body #scrSkinage .svi-c41-hero button {
 <div style="text-align:center;margin-bottom:24px;">
 <div style="display:inline-block;padding:5px 14px;background:rgba(15,110,86,0.15);border:1px solid rgba(15,110,86,0.4);border-radius:100px;font-size:11px;font-weight:900;color:#0f6e56;letter-spacing:.12em;margin-bottom:14px;">C-44 · 2026</div>
 <div style="font-size:54px;margin-bottom:8px;">🌐</div>
-<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">C-45 번역</h1>
+<h1 style="font-size:28px;font-weight:900;color:#0d3a3a;margin:0 0 8px 0;letter-spacing:-.02em;">CGO 번역</h1>
 <div style="font-size:13px;color:rgba(13,58,58,0.75);font-weight:600;line-height:1.6;">
         0ms seed 사전 + AI 폴백 번역<br/>
         여행 현장 표정 5점 좌표 분석
@@ -4357,9 +4357,9 @@ html body #scrSkinage .svi-c41-hero button {
 <style>
   #scrTravel.screen.active{display:block;}
   #scrTravel *{box-sizing:border-box;}
-  /* 최상단 16:9 이미지 — 양쪽 끝단까지 full-width */
-  #scrTravel .tv-hero{width:100%;aspect-ratio:16/9;max-height:340px;background:linear-gradient(135deg,#062e22,#0a3d2f,#0f5d47);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
-  #scrTravel .tv-hero img{width:100%;height:100%;object-fit:cover;display:block;}
+  /* 최상단 16:9 이미지 — 양쪽 끝단까지 full-width, 이미지 전체 표시(안 잘림) */
+  #scrTravel .tv-hero{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#062e22,#0a3d2f,#0f5d47);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  #scrTravel .tv-hero img{width:100%;height:100%;object-fit:contain;display:block;}
   #scrTravel .tv-hero-overlay{position:absolute;left:0;right:0;bottom:0;padding:18px 18px 14px;background:linear-gradient(to top,rgba(6,46,34,0.85),rgba(6,46,34,0));display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;}
   #scrTravel .tv-hero-title{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.02em;text-shadow:0 2px 10px rgba(0,0,0,0.5);}
   #scrTravel .tv-hero-feat{font-size:11px;font-weight:700;color:#9fe1cb;text-shadow:0 1px 6px rgba(0,0,0,0.6);}
@@ -4610,10 +4610,46 @@ function tvSetSpeakBtn(on){
     ? '<div class="ic">⏹️</div><div class="lb" style="color:#fca5a5;">멈춤</div>'
     : '<div class="ic">🎤</div><div class="lb" style="color:#9fe1cb;">말하기</div>';
 }
+function tvBuildRecog(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  _tv.recog=new SR();
+  _tv.recog.lang=_tv.fromLang||'ko-KR';
+  _tv.recog.interimResults=true; _tv.recog.continuous=true;
+  _tv.recog.onstart=function(){ _tv.abortCount=0; if(!_tv.paused) tvSetSub('🎤 듣고 있어요… 말씀하세요','Listening…'); };
+  _tv.recog.onresult=function(evt){
+    if(_tv.paused) return;
+    for(var i=evt.resultIndex;i<evt.results.length;i++){
+      var txt=evt.results[i][0].transcript.trim(); if(!txt) continue;
+      if(!evt.results[i].isFinal){ tvSetSub(txt+' …', _tv.lastDst||'…'); continue; }
+      tvSetSub(txt,'… 번역 중 …');
+      (async function(){
+        var tr=txt;
+        try{ if(typeof translateForCall==='function' && _tv.fromLang!==_tv.toLang){ tr=await translateForCall(txt,_tv.fromLang,_tv.toLang); } }
+        catch(e){ console.warn('[여행번역]',e); tr=txt; }
+        _tv.lastDst=tr; if(!_tv.paused) tvSetSub(txt,tr);
+      })();
+    }
+  };
+  _tv.recog.onerror=function(e){
+    if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
+      _tv.fatal=true; _tv.listening=false;
+      tvSetSub('🚫 마이크 권한을 허용해 주세요','말하기를 누르면 허용 창이 나옵니다');
+      tvSetSpeakBtn(false);
+    } else if(e.error==='aborted'){
+      _tv.abortCount=(_tv.abortCount||0)+1;
+    }
+  };
+  _tv.recog.onend=function(){
+    if(_tv.fatal || !_tv.listening){ return; }
+    if(_tv.abortCount>=8){ _tv.listening=false; tvSetSpeakBtn(false); tvSetSub('🎤 말하기를 다시 눌러 주세요','(중지됨)'); return; }
+    try{ _tv.recog.start(); }catch(e){ setTimeout(function(){ if(_tv.listening&&!_tv.fatal&&_tv.recog){ try{_tv.recog.start();}catch(x){} } }, 200); }
+  };
+}
+
 function tvToggleSpeak(){
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){ tvSetSub('⚠️ 이 브라우저는 음성인식을 지원하지 않습니다','크롬 브라우저로 열어 주세요'); return; }
-  // 이미 듣는 중이면 → 일시정지(마이크는 계속 켜둠, 화면 표시만 멈춤)
+  // 이미 듣는 중이면 → 일시정지 (마이크 계속 유지)
   if(_tv.listening){
     _tv.paused = !_tv.paused;
     tvSetSpeakBtn(!_tv.paused);
@@ -4621,48 +4657,28 @@ function tvToggleSpeak(){
              _tv.paused ? 'Paused' : 'Listening…');
     return;
   }
-  // 처음 시작 — 마이크 권한 1회
-  _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; tvSetSpeakBtn(true);
-  if(_tv.recog){
+  // recog 객체가 이미 있으면 그대로 재개 (권한 재요청 없음)
+  if(_tv.recog && _tv.micStream){
+    _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; tvSetSpeakBtn(true);
     try{ _tv.recog.start(); }catch(e){}
     return;
   }
-  try{
-    _tv.recog=new SR();
-    _tv.recog.lang=_tv.fromLang||'ko-KR';
-    _tv.recog.interimResults=true; _tv.recog.continuous=true;
-    _tv.recog.onstart=function(){ _tv.abortCount=0; if(!_tv.paused) tvSetSub('🎤 듣고 있어요… 말씀하세요','Listening…'); };
-    _tv.recog.onresult=function(evt){
-      if(_tv.paused) return;  // 일시정지 중엔 화면 갱신 안 함 (마이크는 계속 켜짐)
-      for(var i=evt.resultIndex;i<evt.results.length;i++){
-        var txt=evt.results[i][0].transcript.trim(); if(!txt) continue;
-        if(!evt.results[i].isFinal){ tvSetSub(txt+' …', _tv.lastDst||'…'); continue; }
-        tvSetSub(txt,'… 번역 중 …');
-        (async function(){
-          var tr=txt;
-          try{ if(typeof translateForCall==='function' && _tv.fromLang!==_tv.toLang){ tr=await translateForCall(txt,_tv.fromLang,_tv.toLang); } }
-          catch(e){ console.warn('[여행번역]',e); tr=txt; }
-          _tv.lastDst=tr; if(!_tv.paused) tvSetSub(txt,tr);
-        })();
-      }
-    };
-    _tv.recog.onerror=function(e){
-      if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
-        _tv.fatal=true; _tv.listening=false;
-        tvSetSub('🚫 마이크 권한을 허용해 주세요','말하기를 누르면 허용 창이 나옵니다');
-        tvSetSpeakBtn(false);
-      } else if(e.error==='aborted'){
-        _tv.abortCount=(_tv.abortCount||0)+1;
-      }
-    };
-    _tv.recog.onend=function(){
-      // 사용자가 나가지 않는 한 항상 다시 시작 → 마이크 계속 유지
-      if(_tv.fatal || !_tv.listening){ return; }
-      if(_tv.abortCount>=8){ _tv.listening=false; tvSetSpeakBtn(false); tvSetSub('🎤 말하기를 다시 눌러 주세요','(중지됨)'); return; }
-      try{ _tv.recog.start(); }catch(e){ setTimeout(function(){ if(_tv.listening&&!_tv.fatal&&_tv.recog){ try{_tv.recog.start();}catch(x){} } }, 200); }
-    };
-    _tv.recog.start();
-  }catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
+  // 처음 — getUserMedia로 마이크 권한을 한 번 받고 계속 보유 → 이후 권한 재요청 없음
+  _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; tvSetSpeakBtn(true);
+  tvSetSub('🎤 마이크 준비 중…','Preparing…');
+  function go(){
+    try{ tvBuildRecog(); _tv.recog.start(); }
+    catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
+  }
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true})
+      .then(function(stream){ _tv.micStream=stream; go(); })
+      .catch(function(err){
+        console.warn('[여행 마이크]',err);
+        _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
+        tvSetSub('🚫 마이크 권한이 필요합니다','허용을 눌러 주세요');
+      });
+  } else { go(); }
 }
 function tvStopSpeak(){
   // 완전 정지 (나가기 등에서만 사용)
