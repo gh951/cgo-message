@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ C-45 번역 VERSION 22 — 지원언어 제거 + 정면/후면 카드 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ C-45 번역 VERSION 23 — 마이크 안내모달 제거 + 차단시 재시도 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4652,8 +4652,8 @@ function tvBuildRecog(){
   _tv.recog.onerror=function(e){
     console.warn('[여행STT]',e.error);
     if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
-      _tv.fatal=true; _tv.listening=false; _tv.shouldRestart=false;
-      tvSetSub('🚫 마이크 권한을 허용해 주세요','말하기를 누르면 허용 창이 나옵니다');
+      _tv.fatal=false; _tv.listening=false; _tv.shouldRestart=false; _tv.recognizing=false;
+      tvSetSub('🎤 마이크를 켜고 다시 눌러 주세요','Tap again to start');
       tvSetSpeakBtn(false);
     } else if(e.error==='aborted'){
       // ★ aborted 시 재시작 금지 (Android Chrome 권한 반복 루프 차단)
@@ -4697,22 +4697,11 @@ function tvToggleSpeak(){
   // Permissions API로 차단 상태만 미리 확인 (denied면 안내)
   function startRecog(){
     try{ tvBuildRecog(); if(!_tv.recognizing){ _tv.recog.start(); } }
-    catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
+    catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('🎤 다시 한 번 눌러 주세요','Tap again'); _tv.listening=false; _tv.fatal=false; tvSetSpeakBtn(false); }
   }
-  if(navigator.permissions && navigator.permissions.query){
-    navigator.permissions.query({name:'microphone'})
-      .then(function(st){
-        if(st.state==='denied'){
-          _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
-          tvSetSub('🚫 마이크가 차단됨','주소창 🔒 → 마이크 → 허용 후 새로고침');
-          return;
-        }
-        startRecog(); // granted/prompt 모두 진행
-      })
-      .catch(function(){ startRecog(); });
-  } else {
-    startRecog();
-  }
+  // Permissions 상태와 무관하게 항상 시도 — SpeechRecognition이 알아서 권한창을 띄움
+  // (denied여도 시도해야 브라우저가 다시 물어볼 기회를 줌. 막아버리면 영영 못 씀)
+  startRecog();
 }
 function tvStopSpeak(){
   // 완전 정지 — 재시작 금지 플래그
