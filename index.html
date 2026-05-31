@@ -2,7 +2,7 @@
 
 <html lang="ko">
 <head>
-<script>console.log('%c★★★ C-45 번역 VERSION 20 — seed 실제구조 연동 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
+<script>console.log('%c★★★ C-45 번역 VERSION 22 — 지원언어 제거 + 정면/후면 카드 ★★★','color:#fff;background:#dc2626;font-size:16px;padding:4px;');</script>
 <!-- ════ C-41 박입 ⓪ — 캐시 무효화 (옛 파일 강제 폐기) ════ -->
 <meta content="no-cache, no-store, must-revalidate" http-equiv="Cache-Control"/>
 <meta content="no-cache" http-equiv="Pragma"/>
@@ -4373,7 +4373,7 @@ html body #scrSkinage .svi-c41-hero button {
   /* 메인 카드 */
   #scrTravel .tv-card{background:#0d1f2d;border-radius:18px;overflow:hidden;box-shadow:0 12px 36px rgba(15,93,71,.16);}
   /* 카메라 — 언어바 위 */
-  #scrTravel .tv-cam{width:100%;aspect-ratio:16/10;background:#16303f;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+  #scrTravel .tv-cam{width:100%;aspect-ratio:3/4;max-height:60vh;background:#16303f;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
   #scrTravel .tv-cam video{width:100%;height:100%;object-fit:cover;display:none;}
   #scrTravel .tv-cam-ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;}
   #scrTravel .tv-cam-btn{padding:10px 18px;background:rgba(93,202,165,0.22);border:1px solid rgba(93,202,165,0.5);border-radius:10px;color:#9fe1cb;font-size:13px;font-weight:700;cursor:pointer;}
@@ -4403,6 +4403,15 @@ html body #scrSkinage .svi-c41-hero button {
   #scrTravel .tv-sec{background:#fff;border-radius:16px;margin-top:14px;padding:18px 20px;border:1px solid rgba(29,158,117,.15);box-shadow:0 4px 14px rgba(15,93,71,.06);}
   #scrTravel .tv-sec-t{font-size:15px;font-weight:900;color:#0f6e56;margin:0 0 4px;letter-spacing:-.02em;}
   #scrTravel .tv-sec-acc{font-size:11px;font-weight:700;color:#0284c7;margin-left:6px;}
+  #scrTravel .tv-camsel{display:flex;gap:12px;margin-top:10px;}
+  #scrTravel .tv-camcard{flex:1;padding:16px 12px;background:#f6fbf9;border:2px solid rgba(29,158,117,.18);border-radius:14px;cursor:pointer;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  #scrTravel .tv-camcard:active{transform:scale(.97);}
+  #scrTravel .tv-camcard.active{background:linear-gradient(135deg,#0f6e56,#13a37c);border-color:#0f6e56;box-shadow:0 6px 18px rgba(15,110,86,.28);}
+  #scrTravel .tv-camcard-ic{font-size:30px;line-height:1;}
+  #scrTravel .tv-camcard-t{font-size:15px;font-weight:900;color:#0f6e56;}
+  #scrTravel .tv-camcard.active .tv-camcard-t{color:#fff;}
+  #scrTravel .tv-camcard-d{font-size:11px;font-weight:600;color:#64748b;}
+  #scrTravel .tv-camcard.active .tv-camcard-d{color:rgba(255,255,255,.85);}
   #scrTravel .tv-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
   #scrTravel .tv-chip{font-size:12px;font-weight:700;color:#0f6e56;background:rgba(29,158,117,.08);border:1px solid rgba(29,158,117,.2);border-radius:100px;padding:6px 13px;}
   #scrTravel .tv-flow{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(13,58,58,0.07);}
@@ -4476,18 +4485,18 @@ html body #scrSkinage .svi-c41-hero button {
 
 <!-- 하단 섹션 프레임 (복구) -->
 <div class="tv-sec">
-<h2 class="tv-sec-t">지원 언어<span class="tv-sec-acc">✦ 14개국 · seed 0ms</span></h2>
-<div class="tv-chips">
-<span class="tv-chip">🇰🇷 한국어</span>
-<span class="tv-chip">🇺🇸 English</span>
-<span class="tv-chip">🇯🇵 日本語</span>
-<span class="tv-chip">🇨🇳 中文</span>
-<span class="tv-chip">🇪🇸 Español</span>
-<span class="tv-chip">🇫🇷 Français</span>
-<span class="tv-chip">🇩🇪 Deutsch</span>
-<span class="tv-chip">🇷🇺 Русский</span>
-<span class="tv-chip">🇮🇳 हिन्दी</span>
-<span class="tv-chip" style="color:#64748b;background:rgba(13,58,58,.05);border-color:rgba(13,58,58,.12);">+5개</span>
+<h2 class="tv-sec-t">카메라 방향<span class="tv-sec-acc">✦ rPPG 얼굴 분석</span></h2>
+<div class="tv-camsel">
+<button class="tv-camcard active" id="tv-camcard-user" onclick="tvSetCam('user')">
+<div class="tv-camcard-ic">🤳</div>
+<div class="tv-camcard-t">정면</div>
+<div class="tv-camcard-d">내 얼굴 · 셀카</div>
+</button>
+<button class="tv-camcard" id="tv-camcard-env" onclick="tvSetCam('environment')">
+<div class="tv-camcard-ic">📷</div>
+<div class="tv-camcard-t">후면</div>
+<div class="tv-camcard-d">상대 얼굴 · 풍경</div>
+</button>
 </div>
 </div>
 
@@ -4526,7 +4535,7 @@ html body #scrSkinage .svi-c41-hero button {
 </div>
 <script>
 // ★ C-44 — CGO 번역 (v9 재구성: 카메라 전면/후면 + 오디오 1회 + 페이지 초기화)
-var _tv = { recog:null, listening:false, paused:false, fatal:false, recognizing:false, shouldRestart:false, abortCount:0, micStream:null, fromLang:'ko-KR', toLang:'en-US', lastDst:'', camStream:null, facing:'environment' };
+var _tv = { recog:null, listening:false, paused:false, fatal:false, recognizing:false, shouldRestart:false, abortCount:0, micStream:null, fromLang:'ko-KR', toLang:'en-US', lastDst:'', camStream:null, facing:'user' };
 
 var TV_LANGS = [
   {code:'en-US', label:'English', flag:'🇺🇸'},
@@ -4569,11 +4578,12 @@ function tvPickLang(code){
 // ── 카메라 (전면/후면 전환) ──
 function tvStartCam(facing){
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ alert('이 브라우저는 카메라를 지원하지 않습니다.'); return; }
-  _tv.facing = facing || _tv.facing || 'environment';
+  _tv.facing = facing || _tv.facing || 'user';
   // 기존 스트림 정지
   if(_tv.camStream){ try{ _tv.camStream.getTracks().forEach(function(t){t.stop();}); }catch(e){} _tv.camStream=null; }
   var v=document.getElementById('tv-video'), ph=document.getElementById('tv-cam-ph'), flip=document.getElementById('tv-flip');
-  navigator.mediaDevices.getUserMedia({ video:{ facingMode:_tv.facing }, audio:false })
+  // 백서 권장: rPPG용 HD(1280x720) + 전면 카메라
+  navigator.mediaDevices.getUserMedia({ video:{ facingMode:_tv.facing, width:{ideal:1280}, height:{ideal:720} }, audio:false })
     .then(function(stream){
       _tv.camStream=stream;
       if(v){ v.srcObject=stream; v.muted=true; v.playsInline=true; v.style.display='block'; v.play().catch(function(){}); }
@@ -4588,6 +4598,19 @@ function tvStartCam(facing){
 function tvFlipCam(){
   _tv.facing = (_tv.facing==='environment') ? 'user' : 'environment';
   tvStartCam(_tv.facing);
+  tvSyncCamCards();
+}
+// 카드(정면/후면)로 카메라 방향 선택
+function tvSetCam(dir){
+  _tv.facing = dir;
+  tvSyncCamCards();
+  // 카메라가 이미 켜져 있으면 즉시 전환, 아니면 바로 켬
+  tvStartCam(dir);
+}
+function tvSyncCamCards(){
+  var u=document.getElementById('tv-camcard-user'), e=document.getElementById('tv-camcard-env');
+  if(u) u.classList.toggle('active', _tv.facing==='user');
+  if(e) e.classList.toggle('active', _tv.facing==='environment');
 }
 function tvStopCam(){
   if(_tv.camStream){ try{ _tv.camStream.getTracks().forEach(function(t){t.stop();}); }catch(e){} _tv.camStream=null; }
@@ -4662,49 +4685,34 @@ function tvToggleSpeak(){
     return;
   }
   // recog 객체가 이미 있으면 그대로 재개 (이미 실행 중이면 start 안 함)
-  if(_tv.recog && _tv.micStream){
+  if(_tv.recog){
     _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; _tv.shouldRestart=true; tvSetSpeakBtn(true);
     if(!_tv.recognizing){ try{ _tv.recog.start(); }catch(e){} }
     return;
   }
-  // 처음 — Permissions API로 먼저 상태 확인 후 마이크 1회 확보 (백서 권장)
+  // 처음 — SpeechRecognition은 자체적으로 마이크 권한을 1회 요청함
+  // (getUserMedia를 따로 부르면 권한창이 2번 떠서 제거함 — 모바일 Chrome 권한 반복 해결)
   _tv.fatal=false; _tv.abortCount=0; _tv.paused=false; _tv.listening=true; _tv.shouldRestart=true; tvSetSpeakBtn(true);
   tvSetSub('🎤 마이크 준비 중…','Preparing…');
-  function go(){
+  // Permissions API로 차단 상태만 미리 확인 (denied면 안내)
+  function startRecog(){
     try{ tvBuildRecog(); if(!_tv.recognizing){ _tv.recog.start(); } }
     catch(e){ console.warn('[여행STT 시작]',e); tvSetSub('⚠️ 마이크를 시작할 수 없습니다','권한을 확인해 주세요'); _tv.listening=false; tvSetSpeakBtn(false); }
   }
-  var AUDIO_OPT = { echoCancellation:true, noiseSuppression:true, autoGainControl:true };
-  function acquireMic(){
-    navigator.mediaDevices.getUserMedia({audio:AUDIO_OPT})
-      .then(function(stream){ _tv.micStream=stream; go(); })
-      .catch(function(err){
-        console.warn('[여행 마이크]',err);
-        _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
-        if(err && err.name==='NotAllowedError'){
+  if(navigator.permissions && navigator.permissions.query){
+    navigator.permissions.query({name:'microphone'})
+      .then(function(st){
+        if(st.state==='denied'){
+          _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
           tvSetSub('🚫 마이크가 차단됨','주소창 🔒 → 마이크 → 허용 후 새로고침');
-        } else {
-          tvSetSub('🚫 마이크 권한이 필요합니다','허용을 눌러 주세요');
+          return;
         }
-      });
+        startRecog(); // granted/prompt 모두 진행
+      })
+      .catch(function(){ startRecog(); });
+  } else {
+    startRecog();
   }
-  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
-    // Permissions API로 먼저 상태 확인 → 이미 허용이면 권한창 안 깜빡임
-    if(navigator.permissions && navigator.permissions.query){
-      navigator.permissions.query({name:'microphone'})
-        .then(function(st){
-          if(st.state==='denied'){
-            _tv.fatal=true; _tv.listening=false; tvSetSpeakBtn(false);
-            tvSetSub('🚫 마이크가 차단됨','주소창 🔒 → 마이크 → 허용 후 새로고침');
-            return;
-          }
-          acquireMic(); // granted/prompt 모두 진행 (granted면 창 안 뜸)
-        })
-        .catch(function(){ acquireMic(); }); // 일부 브라우저(permissions 미지원) 폴백
-    } else {
-      acquireMic();
-    }
-  } else { go(); }
 }
 function tvStopSpeak(){
   // 완전 정지 — 재시작 금지 플래그
