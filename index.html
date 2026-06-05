@@ -39875,139 +39875,106 @@ window.addEventListener('load', function(){
 });
 </script>
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- ════ 박입 234 — CGO 번역 "말하기" → 녹음(Whisper) 방식 전환 ════ -->
-<!--   원인: 번역 화면이 브라우저 음성인식(webkitSpeechRecognition)을 사용 →      -->
-<!--         무음으로 끊길 때마다 1초 뒤 자동 재시작 → 모바일에서 마이크 권한      -->
-<!--         팝업이 반복적으로 다시 뜸("계속 뜹니다" 증상의 진짜 원인).            -->
-<!--   해결: 메신저(C-19)와 동일한 MediaRecorder → /api/groq-whisper 녹음 방식.    -->
-<!--         마이크 1회만 허용 → 탭하면 녹음 시작 / 다시 탭하면 멈춤+자동 번역.    -->
-<!--         아이폰·안드로이드·앱 내장 브라우저 모두 동일하게 동작.               -->
-<!--   되돌리기: 이 스크립트 블록만 삭제하면 기존 음성인식 방식으로 복귀.          -->
+<!-- ════ 박입 234 — CGO 번역 말하기: 즉시 번역 유지 + 권한 팝업 반복 해결 ════ -->
+<!--   목표: "누르고 말하면 바로 번역"되는 즉시성(구글보다 빠른 강점) 그대로 유지. -->
+<!--   원인: 기존 코드가 마이크를 두 번 잡음 — getUserMedia 1회 + 음성인식 엔진   -->
+<!--         1회 → 모바일에서 권한 팝업이 중복/반복 발생("계속 뜹니다").          -->
+<!--   해결: getUserMedia 제거 → 음성인식 엔진이 마이크를 직접·딱 1회만 요청.     -->
+<!--         인식 객체 1개만 재사용하고, 끊기면 같은 객체로 즉시 재개             -->
+<!--         (마이크 재요청 없음 → 추가 팝업 없음).                               -->
+<!--   되돌리기: 이 스크립트 블록만 삭제하면 기존 방식으로 복귀.                   -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <script>
 (function(){
   'use strict';
-  var rec = { stream:null, mr:null, chunks:[], recording:false, busy:false, mime:'', ext:'webm' };
-
-  function pickMime(){
-    if(typeof MediaRecorder==='undefined') return null;
-    var cands = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/aac','audio/ogg'];
-    for(var i=0;i<cands.length;i++){
-      try{ if(MediaRecorder.isTypeSupported(cands[i])) return cands[i]; }catch(e){}
-    }
-    return ''; // 지원 목록 못 찾으면 브라우저 기본값 사용
-  }
-  function extOf(mime){
-    if(!mime) return 'm4a';
-    if(mime.indexOf('webm')>=0) return 'webm';
-    if(mime.indexOf('mp4')>=0 || mime.indexOf('aac')>=0) return 'm4a';
-    if(mime.indexOf('ogg')>=0) return 'ogg';
-    return 'm4a';
-  }
-  function shortLang(code){ return (code||'ko-KR').split('-')[0]; }
-
-  // 음성→글자 (메신저 _c19_whisperSTT 와 완전히 동일한 서버 포맷)
-  function whisper(blob, lang){
-    var fd = new FormData();
-    fd.append('file', blob, 'audio.'+rec.ext);
-    fd.append('model','whisper-large-v3-turbo');
-    if(lang) fd.append('language', lang);
-    fd.append('temperature','0');
-    return fetch('/api/groq-whisper',{method:'POST',body:fd})
-      .then(function(r){ return r.json(); })
-      .then(function(d){ if(d && d.text) return String(d.text).trim(); throw new Error((d&&d.error)||'STT 실패'); });
-  }
-
   function setSub(s,d){ if(typeof tvSetSub==='function') tvSetSub(s,d); }
   function setBtn(on){
     var b=document.getElementById('tv-btn-speak'); if(!b) return;
-    b.style.background = on?'rgba(239,68,68,0.28)':'rgba(93,202,165,0.18)';
+    b.style.background = on?'rgba(239,68,68,0.25)':'rgba(93,202,165,0.18)';
     b.innerHTML = on
       ? '<div class="ic">⏹️</div><div class="lb" style="color:#fca5a5;">멈춤</div>'
       : '<div class="ic">🎤</div><div class="lb" style="color:#9fe1cb;">말하기</div>';
   }
 
-  // 마이크 스트림 1회 확보 후 계속 유지 → 재요청(팝업 반복) 차단
-  function ensureStream(){
-    if(rec.stream && rec.stream.active) return Promise.resolve(rec.stream);
-    if(typeof _tv==='object' && _tv.micStream && _tv.micStream.active){ rec.stream=_tv.micStream; return Promise.resolve(rec.stream); }
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)
-      return Promise.reject(new Error('이 브라우저는 녹음을 지원하지 않습니다'));
-    return navigator.mediaDevices.getUserMedia({audio:true}).then(function(st){
-      rec.stream=st; if(typeof _tv==='object') _tv.micStream=st;
-      return st;
-    });
+  // 음성인식 객체 생성 (단 1개만 만들어 계속 재사용)
+  function build(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    var r=new SR();
+    r.lang=(typeof _tv==='object' && _tv.fromLang)||'ko-KR';
+    r.interimResults=true;   // 말하는 중에도 실시간 자막
+    r.continuous=true;       // 계속 듣기
+
+    r.onstart=function(){ _tv.recognizing=true; if(!_tv.paused) setSub('🎤 듣고 있어요… 말씀하세요','Listening…'); };
+
+    r.onresult=function(evt){
+      if(_tv.paused) return;
+      for(var i=evt.resultIndex;i<evt.results.length;i++){
+        var txt=evt.results[i][0].transcript.trim(); if(!txt) continue;
+        if(!evt.results[i].isFinal){ setSub(txt+' …', _tv.lastDst||'…'); continue; } // 중간 결과 = 즉시 표시
+        setSub(txt,'… 번역 중 …');
+        (function(t){
+          (async function(){
+            var tr=t;
+            try{ if(typeof translateForCall==='function' && _tv.fromLang!==_tv.toLang){ tr=await translateForCall(t,_tv.fromLang,_tv.toLang); } }
+            catch(e){ tr=t; }
+            _tv.lastDst=tr; if(!_tv.paused) setSub(t,tr);
+          })();
+        })(txt);
+      }
+    };
+
+    r.onerror=function(e){
+      // 권한 거부만 진짜 정지. no-speech / aborted / network 는 onend 가 즉시 재개.
+      if(e.error==='not-allowed' || e.error==='service-not-allowed'){
+        _tv.listening=false; _tv.recognizing=false;
+        setSub('🎤 마이크 권한을 허용한 뒤 다시 눌러 주세요','Allow microphone, then tap again');
+        setBtn(false);
+      }
+    };
+
+    r.onend=function(){
+      _tv.recognizing=false;
+      if(!_tv.listening){ return; }            // 사용자가 멈춘 경우만 종료
+      // 끊기면 같은 객체로 즉시 재개 → 마이크 재요청이 없어 팝업이 안 뜸
+      try{ r.start(); }
+      catch(e){ setTimeout(function(){ if(_tv.listening && !_tv.recognizing){ try{ r.start(); }catch(_e){} } }, 300); }
+    };
+
+    return r;
   }
 
-  function startRec(){
-    var m = pickMime(); rec.mime=m; rec.ext=extOf(m);
-    setSub('🎤 마이크 준비 중…','Preparing…');
-    ensureStream().then(function(stream){
-      try{
-        rec.chunks=[];
-        rec.mr = m ? new MediaRecorder(stream,{mimeType:m}) : new MediaRecorder(stream);
-      }catch(e){ rec.mr = new MediaRecorder(stream); }
-      rec.mr.ondataavailable=function(ev){ if(ev.data && ev.data.size>0) rec.chunks.push(ev.data); };
-      rec.mr.onstop=function(){ handleStop(); };
-      rec.mr.start();
-      rec.recording=true; setBtn(true);
-      setSub('🔴 녹음 중… 끝나면 다시 누르세요','Recording… tap again to stop');
-    }).catch(function(err){
-      console.warn('[박입234 녹음]',err);
-      rec.recording=false; setBtn(false);
-      setSub('🎤 마이크 권한을 허용하고 다시 눌러 주세요','Allow microphone, then tap again');
-    });
-  }
+  // ★ 말하기 버튼 (inline onclick → window.tvToggleSpeak)
+  window.tvToggleSpeak=function(){
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){ setSub('⚠️ 이 브라우저는 음성인식을 지원하지 않습니다','크롬 브라우저로 열어 주세요'); return; }
 
-  function stopRec(){
-    rec.recording=false; setBtn(false);
-    try{ if(rec.mr && rec.mr.state!=='inactive') rec.mr.stop(); }catch(e){ handleStop(); }
-  }
+    // 듣는 중 → 일시정지/재개 (마이크는 계속 유지, 팝업 없음)
+    if(_tv.listening){
+      _tv.paused=!_tv.paused; setBtn(!_tv.paused);
+      setSub(_tv.paused?'⏸️ 일시정지 (다시 누르면 계속)':'🎤 듣고 있어요… 말씀하세요', _tv.paused?'Paused':'Listening…');
+      return;
+    }
 
-  function handleStop(){
-    if(rec.busy) return;
-    var blob;
-    try{ blob=new Blob(rec.chunks,{type: rec.mime||'audio/webm'}); }catch(e){ blob=new Blob(rec.chunks); }
-    rec.chunks=[];
-    if(!blob || blob.size<800){ setSub('🎤 다시 한 번 눌러 말씀해 주세요','Tap and speak again'); return; }
-    rec.busy=true;
-    setSub('👂 인식 중…','Transcribing…');
-    whisper(blob, shortLang(typeof _tv==='object' ? _tv.fromLang : 'ko-KR'))
-      .then(function(text){
-        if(!text){ setSub('🎤 잘 안 들렸어요. 다시 눌러 주세요','Could not hear, tap again'); return null; }
-        setSub(text,'… 번역 중 …');
-        if(typeof translateForCall==='function' && typeof _tv==='object' && _tv.fromLang!==_tv.toLang){
-          return translateForCall(text,_tv.fromLang,_tv.toLang).then(function(tr){ return {src:text,dst:tr||text}; });
-        }
-        return {src:text,dst:text};
-      })
-      .then(function(res){
-        if(res){ if(typeof _tv==='object') _tv.lastDst=res.dst; setSub(res.src,res.dst); }
-      })
-      .catch(function(err){
-        console.warn('[박입234 STT/번역]',err);
-        setSub('⚠️ 인식/번역 오류 — 잠시 후 다시 시도','Error, please try again');
-      })
-      .then(function(){ rec.busy=false; });
-  }
-
-  // ★ 기존 음성인식 토글을 녹음 방식으로 완전 교체 (inline onclick → window.tvToggleSpeak 호출)
-  window.tvToggleSpeak = function(){
-    if(rec.busy){ return; }            // 인식/번역 처리 중 중복 탭 무시
-    if(rec.recording){ stopRec(); }    // 녹음 중 → 멈춤 + 자동 번역
-    else { startRec(); }               // 대기 중 → 녹음 시작
+    // 처음 → 즉시 듣기 시작 (마이크 1회 요청은 음성인식 엔진이 직접 처리)
+    _tv.paused=false; _tv.listening=true; setBtn(true);
+    if(!_tv.recog){
+      try{ _tv.recog=build(); }
+      catch(e){ _tv.listening=false; setBtn(false); setSub('🎤 다시 한 번 눌러 주세요','Tap again'); return; }
+    }
+    if(!_tv.recognizing){ try{ _tv.recog.start(); }catch(e){} }
   };
 
-  // 나가기 정리 — 기존 tvExit 동작 유지 + 녹음기 정리
-  var _origExit = window.tvExit;
-  window.tvExit = function(){
-    try{ if(rec.mr && rec.mr.state!=='inactive') rec.mr.stop(); }catch(e){}
-    rec.recording=false; rec.busy=false; rec.chunks=[];
-    if(typeof _origExit==='function'){ try{ _origExit(); }catch(e){} } // 기존 tvExit 가 micStream 정지
-    rec.stream=null;
+  // 나가기 → 완전 정지 (기존 정리 동작 유지)
+  var _origExit=window.tvExit;
+  window.tvExit=function(){
+    if(typeof _tv==='object'){
+      _tv.listening=false; _tv.paused=false; _tv.recognizing=false;
+      if(_tv.recog){ try{_tv.recog.stop();}catch(e){} try{_tv.recog.abort();}catch(e){} _tv.recog=null; }
+    }
+    if(typeof _origExit==='function'){ try{ _origExit(); }catch(e){} }
   };
 
-  console.log('%c[박입 234] 번역 말하기 → Whisper 녹음 방식 적용 완료','color:#0f6e56;font-weight:bold;');
+  console.log('%c[박입 234] 번역 말하기 — 즉시 번역 유지 + 마이크 1회 요청(팝업 반복 해결)','color:#0f6e56;font-weight:bold;');
 })();
 </script>
 
