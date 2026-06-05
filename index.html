@@ -37376,7 +37376,6 @@ setTimeout(function(){
   }
 
   // ★ 박입 236-A — 50ms 무한폴링 폐기: 광대/rPPG 효과 플래그를 영구 false 로 잠금.
-  //   다른 코드가 다시 켜려 해도 setter 가 무시 → 흰점 영구 차단 + 타이머 제거(배터리 절약).
   killCheekDrawing();
   (function lockCheekFlags(){
     var falseKeys = ['_cheekHighlightEnabled','_cheekColorFixedEnabled','_cheekFinalEnabled','_rppgGlowEnabled'];
@@ -39914,12 +39913,13 @@ window.addEventListener('load', function(){
 });
 </script>
 <!-- ════════════════════════════════════════════════════════════════ -->
-<!-- ════ 박입 234 — CGO 번역 말하기: 손 안 대고 자동 번역 (녹음+침묵감지) ════ -->
+<!-- ════ 박입 234 — CGO 번역 말하기: 손 안 대고 자동 번역 (녹음+적응형 침묵감지) ════ -->
 <!--   방식: MediaRecorder 로 계속 녹음 + Web Audio 로 말소리/침묵 감지(VAD).      -->
-<!--         말이 끝나 잠깐(약 0.8초) 쉬면 그 구간을 잘라 /api/groq-whisper 로     -->
-<!--         인식 → translateForCall 로 번역 → 자막 표시. 곧바로 다음 구간 녹음.   -->
-<!--   장점: 안드로이드 "삑" 듣기시작음 없음, 버튼 한 번만, 모든 폰 동일 동작.     -->
-<!--   감도조절: 콘솔에서 tvSetMicSensitivity(0.02) 처럼 호출(클수록 둔감).         -->
+<!--         말이 끝나 잠깐 쉬면 그 구간을 /api/groq-whisper 인식 → 번역 → 표시.  -->
+<!--   ★ 적응형 감도: 주변 소음 바닥을 스스로 측정해 기준을 자동 조정 →           -->
+<!--     조용한 곳에서는 작은 소리도 잘 잡음(예전 구글 음성인식급 민감도).         -->
+<!--   장점: 안드로이드 "삑" 소리 없음, 버튼 한 번만, 모든 폰 동일 동작.           -->
+<!--   감도조절: 콘솔에서 tvSetMicSensitivity(0.004) (작을수록 더 작은 소리도 잡음). -->
 <!--   되돌리기: 이 스크립트 블록만 삭제.                                          -->
 <!-- ════════════════════════════════════════════════════════════════ -->
 <script>
@@ -39927,13 +39927,15 @@ window.addEventListener('load', function(){
   'use strict';
   var S = { stream:null, ctx:null, analyser:null, data:null, mr:null, chunks:[],
             mime:'', ext:'webm', on:false, rafId:null,
-            speaking:false, speechMs:0, silenceMs:0, lastT:0, segStartT:0 };
-  var SPEECH_THRESH = 0.018;  // 말소리 감지 임계값(RMS) — 너무 자주 끊기면 키우고, 잘 안 끊기면 줄임
-  var MIN_SPEECH_MS = 350;    // 최소 발화 길이
-  var SILENCE_MS    = 800;    // 발화 후 이만큼 조용하면 "한 문장 끝"으로 판단
-  var MAX_SEG_MS    = 12000;  // 한 구간 최대 길이(강제 컷)
+            speaking:false, speechMs:0, silenceMs:0, lastT:0, segStartT:0, noiseFloor:0.01 };
+  var THRESH_MIN  = 0.006;  // 말소리 최소 감도(작을수록 작은 소리도 잡음 / 너무 작으면 잡음에 반응)
+  var THRESH_MULT = 3;      // 잡음 바닥의 몇 배를 "말소리"로 볼지
+  var THRESH_MAX  = 0.06;   // 시끄러운 곳에서의 상한
+  var MIN_SPEECH_MS = 250;  // 최소 발화 길이
+  var SILENCE_MS    = 800;  // 발화 후 이만큼 조용하면 "한 문장 끝"
+  var MAX_SEG_MS    = 12000;// 한 구간 최대 길이(강제 컷)
 
-  window.tvSetMicSensitivity = function(v){ if(typeof v==='number'){ SPEECH_THRESH=v; console.log('[박입234] 감도 =', v); } };
+  window.tvSetMicSensitivity = function(v){ if(typeof v==='number'){ THRESH_MIN=v; console.log('[박입234] 최소감도 =', v); } };
 
   function setSub(s,d){ if(typeof tvSetSub==='function') tvSetSub(s,d); }
   function setBtn(on){
@@ -39963,9 +39965,8 @@ window.addEventListener('load', function(){
       .then(function(d){ if(d&&d.text) return String(d.text).trim(); return ''; });
   }
 
-  // 한 구간(blob) 인식→번역→표시 (비동기 · 녹음은 계속됨)
   function processSegment(blob){
-    if(!blob || blob.size<1200) return;   // 너무 짧으면 잡음으로 보고 무시
+    if(!blob || blob.size<1000) return;
     whisper(blob).then(function(text){
       if(!text) return;
       setSub(text,'… 번역 중 …');
@@ -39989,8 +39990,8 @@ window.addEventListener('load', function(){
     S.mr.onstop=function(){
       var blob; try{ blob=new Blob(S.chunks,{type:S.mime||'audio/webm'}); }catch(e){ blob=new Blob(S.chunks); }
       S.chunks=[];
-      if(S.on) startSegment();     // 다음 구간 즉시 시작(계속 듣기)
-      processSegment(blob);        // 직전 구간 비동기 처리
+      if(S.on) startSegment();
+      processSegment(blob);
     };
     try{ S.mr.start(); }catch(e){ return; }
     S.speaking=false; S.speechMs=0; S.silenceMs=0; S.segStartT=performance.now();
@@ -40009,8 +40010,20 @@ window.addEventListener('load', function(){
       var sum=0, n=S.data.length;
       for(var i=0;i<n;i++){ var v=(S.data[i]-128)/128; sum+=v*v; }
       var rms=Math.sqrt(sum/n);
-      if(rms > SPEECH_THRESH){ S.speaking=true; S.speechMs+=dt; S.silenceMs=0; }
-      else { if(S.speaking) S.silenceMs+=dt; }
+
+      // ★ 적응형 기준: 잡음 바닥 × 배수 (조용한 곳 → 기준 낮아짐 → 작은 소리도 잡음)
+      var thr = S.noiseFloor*THRESH_MULT;
+      if(thr < THRESH_MIN) thr = THRESH_MIN;
+      if(thr > THRESH_MAX) thr = THRESH_MAX;
+
+      if(rms > thr){
+        S.speaking=true; S.speechMs+=dt; S.silenceMs=0;
+      } else {
+        if(S.speaking) S.silenceMs+=dt;
+        // 침묵일 때만 잡음 바닥 천천히 추적 (말소리가 바닥을 올리지 않게)
+        S.noiseFloor = S.noiseFloor*0.95 + rms*0.05;
+        if(S.noiseFloor < 0.002) S.noiseFloor = 0.002;
+      }
       var segMs = now - (S.segStartT||now);
       if(S.speaking && S.speechMs>MIN_SPEECH_MS && S.silenceMs>SILENCE_MS){ cutSegment(); }
       else if(segMs>MAX_SEG_MS && S.speechMs>MIN_SPEECH_MS){ cutSegment(); }
@@ -40037,8 +40050,8 @@ window.addEventListener('load', function(){
       S.analyser = S.ctx.createAnalyser();
       S.analyser.fftSize = 1024;
       S.data = new Uint8Array(S.analyser.fftSize);
-      src.connect(S.analyser);   // destination 에는 연결 안 함 → 스피커로 소리 안 남
-      S.on=true; S.lastT=0;
+      src.connect(S.analyser);
+      S.on=true; S.lastT=0; S.noiseFloor=0.01;
       setSub('🎤 말씀하세요… 끝나면 자동 번역','Speak — auto-translates when you pause');
       startSegment();
       S.rafId=requestAnimationFrame(vadLoop);
@@ -40064,10 +40077,10 @@ window.addEventListener('load', function(){
   var _origExit=window.tvExit;
   window.tvExit=function(){
     stopListening(); S.stream=null;
-    if(typeof _origExit==='function'){ try{ _origExit(); }catch(e){} } // 기존 tvExit 가 micStream 정지
+    if(typeof _origExit==='function'){ try{ _origExit(); }catch(e){} }
   };
 
-  console.log('%c[박입 234] 번역 말하기 — 손 안 대고 자동 번역(녹음+침묵감지) · 삑소리 없음','color:#0f6e56;font-weight:bold;');
+  console.log('%c[박입 234] 번역 말하기 — 적응형 감도(작은 소리도 잡음) + 자동 번역 · 삑소리 없음','color:#0f6e56;font-weight:bold;');
 })();
 </script>
 
