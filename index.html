@@ -18051,9 +18051,13 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
     };
   }
 
-  // 즉시 + 매 100ms 강제 (옛 wrap 가 살아나도 차단)
+  // ★ 박입 236-B — 메이크업/피부 화면이 켜져 있을 때만 100ms 실행 (그 외엔 쉼 → 배터리 절약)
   injectCleanCategoryAndApply();
-  setInterval(injectCleanCategoryAndApply, 1500);  /* 박입236 성능: 100ms→1500ms (함수 재정의 상태는 안 바뀌므로 동일 효과, CPU 15배 절감) */
+  setInterval(function(){
+    var m=document.getElementById('scrMakeup'), s=document.getElementById('scrSkinage');
+    var on=(m&&m.classList.contains('active'))||(s&&s.classList.contains('active'));
+    if(on) injectCleanCategoryAndApply();
+  }, 100);
 
   window._inj42Control = {
     info: function(){
@@ -37371,11 +37375,15 @@ setTimeout(function(){
     }
   }
 
-  // setInterval 보다 더 빠른 차단 — 매 50ms
-  setInterval(killCheekDrawing, 1500);  /* 박입236 성능: 50ms→1500ms (끄기 상태는 안 바뀌므로 동일 효과, CPU 30배 절감) */
-
-  // 즉시 한 번
+  // ★ 박입 236-A — 50ms 무한폴링 폐기: 광대/rPPG 효과 플래그를 영구 false 로 잠금.
+  //   다른 코드가 다시 켜려 해도 setter 가 무시 → 흰점 영구 차단 + 타이머 제거(배터리 절약).
   killCheekDrawing();
+  (function lockCheekFlags(){
+    var falseKeys = ['_cheekHighlightEnabled','_cheekColorFixedEnabled','_cheekFinalEnabled','_rppgGlowEnabled'];
+    var zeroKeys  = ['_cheekHighlightAlpha','_cheekHighlightRadius'];
+    falseKeys.forEach(function(k){ try{ Object.defineProperty(window,k,{configurable:true,get:function(){return false;},set:function(){}}); }catch(e){} });
+    zeroKeys.forEach(function(k){ try{ Object.defineProperty(window,k,{configurable:true,get:function(){return 0;},set:function(){}}); }catch(e){} });
+  })();
 
   // ② 박입 29 Lerp DAMP 강화 0.8 → 0.92 (더 부드러움)
   //    + 코 영역 Lerp 가 박입 27 의 face bounding box 에도 영향
