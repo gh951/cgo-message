@@ -18053,7 +18053,7 @@ ModiFace / Perfect Corp 의 시각적 자연도와 동급 도달<br/>
 
   // 즉시 + 매 100ms 강제 (옛 wrap 가 살아나도 차단)
   injectCleanCategoryAndApply();
-  setInterval(injectCleanCategoryAndApply, 100);
+  setInterval(injectCleanCategoryAndApply, 1500);  /* 박입236 성능: 100ms→1500ms (함수 재정의 상태는 안 바뀌므로 동일 효과, CPU 15배 절감) */
 
   window._inj42Control = {
     info: function(){
@@ -37372,7 +37372,7 @@ setTimeout(function(){
   }
 
   // setInterval 보다 더 빠른 차단 — 매 50ms
-  setInterval(killCheekDrawing, 50);
+  setInterval(killCheekDrawing, 1500);  /* 박입236 성능: 50ms→1500ms (끄기 상태는 안 바뀌므로 동일 효과, CPU 30배 절감) */
 
   // 즉시 한 번
   killCheekDrawing();
