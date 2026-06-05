@@ -22591,7 +22591,7 @@ async function startRecording(){
   try {
     // 마이크 권한 요청
     _audioStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation:true, noiseSuppression:true }
+      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:true }  /* ★ 박입237 — 원음에 가깝게: 소음/에코 제거 끔(목소리 보존) */
     });
 
     // MediaRecorder 설정 (브라우저 호환성 고려)
@@ -26515,7 +26515,7 @@ window.addEventListener('appinstalled', function(){
       return;
     }
     _c19_selectedLang = targetLang;
-    navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:true}}).then(function(stream){  /* ★ 박입237 — 원음에 가깝게 */
       _c19_recChunks = [];
       try {
         _c19_mediaRec = new MediaRecorder(stream);
