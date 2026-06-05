@@ -9,6 +9,37 @@
 <meta content="0" http-equiv="Expires"/>
 <meta content="2026-05-26-c44-inj233-real-numbers" name="c41-version"/>
 <meta charset="utf-8"/>
+<!-- ════ 박입 235 — 카톡/인앱 브라우저 자동 탈출 (배너 없이 기본 브라우저로) ════ -->
+<!--   카톡 등 인앱 브라우저(WebView)에서는 마이크 권한이 반복되거나 음성이 막힘.  -->
+<!--   페이지가 뜨는 즉시, 화면 표시 없이 기기 기본 브라우저(크롬/삼성인터넷 등)로  -->
+<!--   한 번 빠져나간다. 진짜 브라우저에서는 아무 동작도 하지 않음. 루프 방지 포함.  -->
+<script>
+(function(){
+  try{
+    var ua = navigator.userAgent || '';
+    var isKakao = /KAKAOTALK/i.test(ua);
+    var isAndroid = /Android/i.test(ua);
+    // 인앱 브라우저(WebView) 감지 — 명시된 앱만 (진짜 브라우저는 제외)
+    var isInApp = isKakao || /NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|Line\/|DaumApps|; ?BAND/i.test(ua);
+    if(!isInApp) return;                       // 일반 크롬/사파리/삼성인터넷 → 그대로
+    try{ if(sessionStorage.getItem('cgo_ext')==='1') return; sessionStorage.setItem('cgo_ext','1'); }catch(e){}
+
+    var href = location.href;
+    if(isKakao){
+      // 카톡 전용: 기기 기본 브라우저로 즉시 열기
+      location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(href);
+      return;
+    }
+    if(isAndroid){
+      // 그 외 안드로이드 인앱: intent 로 기본 브라우저 열기 (특정 앱 강제 X)
+      location.href = 'intent://' + href.replace(/^https?:\/\//,'') + '#Intent;scheme=https;end';
+      return;
+    }
+    // iOS 의 카톡 외 인앱은 자동 탈출 수단이 없어 그대로 둠
+  }catch(e){}
+})();
+</script>
+
 <meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
