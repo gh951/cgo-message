@@ -22591,7 +22591,7 @@ async function startRecording(){
   try {
     // 마이크 권한 요청
     _audioStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:true }  /* ★ 박입237 — 원음에 가깝게: 소음/에코 제거 끔(목소리 보존) */
+      audio: { echoCancellation:false, noiseSuppression:false, autoGainControl:true }  /* ★ 박입237 — 원음에 가깝게: 소음/에코 제거 끔 */
     });
 
     // MediaRecorder 설정 (브라우저 호환성 고려)
@@ -40081,6 +40081,93 @@ window.addEventListener('load', function(){
   };
 
   console.log('%c[박입 234] 번역 말하기 — 적응형 감도(작은 소리도 잡음) + 자동 번역 · 삑소리 없음','color:#0f6e56;font-weight:bold;');
+})();
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
+<!-- ════ 박입 238 — 20초 자동 폭파 완성 (모든 방 로컬 + Firebase 실제 삭제) ════ -->
+<!--   문제: 기존 삭제가 ① 열려있는 방만 청소 ② Firebase 삭제 함수(_c19_firebasePurge) -->
+<!--         미구현 → 메시지가 화면/서버에 남고 Firebase 에 영영 쌓여 비용 발생.   -->
+<!--   해결: 모든 방의 만료(생성 후 20초) 메시지를 로컬에서 제거 + Firebase 에서 삭제.-->
+<!--         💎 영구보관(유료) 메시지는 그대로 둠.                                  -->
+<!--   되돌리기: 이 스크립트 블록만 삭제.                                          -->
+<!-- ════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  'use strict';
+  var TTL = 20000; // 20초
+
+  function fbRef(path){
+    try{ if(typeof dbRef==='function') return dbRef(path); }catch(e){}
+    try{ if(typeof _cgoFb!=='undefined' && _cgoFb) return _cgoFb.ref(path); }catch(e){}
+    return null;
+  }
+  function expiryOf(m){
+    if(m && m.expiresAt) return m.expiresAt;
+    if(m && m.t) return m.t + TTL;
+    return 0;
+  }
+  function isKept(m){ return !!(m && (m.precious || m.preservedAt)); } // 💎 유료 보관
+
+  // 1) 로컬: 모든 방의 만료 메시지 제거 (열린 방이 아니어도)
+  function purgeLocal(){
+    if(typeof _rooms==='undefined' || !_rooms) return;
+    var now=Date.now(), anyChanged=false, changedCurrent=false;
+    Object.keys(_rooms).forEach(function(code){
+      var room=_rooms[code]; if(!room || !room.msgs || !room.msgs.length) return;
+      var before=room.msgs.length;
+      room.msgs = room.msgs.filter(function(m){
+        if(isKept(m)) return true;
+        var exp=expiryOf(m);
+        if(!exp) return true;          // 만료시각 모르면 안전하게 보존
+        return now <= exp;
+      });
+      if(room.msgs.length!==before){
+        anyChanged=true;
+        if(typeof _currentRoom!=='undefined' && _currentRoom===code) changedCurrent=true;
+      }
+    });
+    if(anyChanged){ try{ if(typeof saveRooms==='function') saveRooms(); }catch(e){} }
+    if(changedCurrent){ try{ if(typeof renderMessages==='function') renderMessages(); }catch(e){} }
+  }
+
+  // 2) Firebase: 실제 방들의 만료 메시지 삭제 (서버 누적 → 비용 방지)
+  function purgeFirebase(){
+    if(typeof _rooms==='undefined' || !_rooms) return;
+    if(typeof _myCode==='undefined' || !_myCode) return;
+    var now=Date.now();
+    var practice = (typeof XY_PRACTICE_CODE!=='undefined') ? XY_PRACTICE_CODE : 'XY00000';
+    Object.keys(_rooms).forEach(function(code){
+      var room=_rooms[code];
+      if(!room || room.isPractice || code===practice) return;
+      var roomId=[_myCode, code].sort().join('_');
+      var ref=fbRef('cgm2/chats/'+roomId+'/msgs'); if(!ref) return;
+      try{
+        ref.once('value').then(function(snap){
+          snap.forEach(function(child){
+            var v=child.val()||{};
+            if(v.precious) return false;            // 💎 보관은 건드리지 않음
+            var t = v.t || 0;
+            if(t && (now - t) > TTL){
+              try{ child.ref.remove(); }catch(e){}
+            }
+            return false;                            // 계속 순회
+          });
+        }).catch(function(){});
+      }catch(e){}
+    });
+  }
+
+  // 로컬은 자주(3초), Firebase 는 덜 자주(20초)로 비용 최소화
+  setInterval(purgeLocal, 3000);
+  setInterval(purgeFirebase, 20000);
+  // 로그인/로드 직후 한 번 (Auth 준비 시간 고려해 지연 실행)
+  setTimeout(function(){ purgeLocal(); purgeFirebase(); }, 6000);
+
+  // 수동 실행용 (콘솔에서 cgoPurgeExpired())
+  window.cgoPurgeExpired = function(){ purgeLocal(); purgeFirebase(); };
+
+  console.log('%c[박입 238] 20초 자동 폭파 완성 — 모든 방 로컬+Firebase 만료 삭제(💎 보관 제외)','color:#0f6e56;font-weight:bold;');
 })();
 </script>
 
