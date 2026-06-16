@@ -40040,7 +40040,7 @@ window.addEventListener('load', function(){
     setBtn(true); setSub('🎤 마이크 준비 중…','Preparing…');
     var p = (typeof _tv==='object' && _tv.micStream && _tv.micStream.active)
       ? Promise.resolve(_tv.micStream)
-      : navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}}); /* 박입: 옆사람·배경음 억제 (음성번역 전용) · 되돌리기: {audio:true} 로 복귀 */
+      : navigator.mediaDevices.getUserMedia({audio:true});
     p.then(function(stream){
       S.stream=stream; if(typeof _tv==='object') _tv.micStream=stream;
       var AC = window.AudioContext||window.webkitAudioContext;
